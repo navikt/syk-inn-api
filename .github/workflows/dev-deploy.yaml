@@ -2,19 +2,61 @@ name: Build and deploy
 on:
   push:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
-  build_and_deploy:
-    name: Build, push and deploy
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: kotlin
+      - name: Build gradle artifacts
+        run: |
+          ./gradlew bootJar -x test
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        id: setup-java
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+      - run: ./gradlew test
+
+  build-push:
+    if: github.actor != 'dependabot[bot]'
+    name: Build and push
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -32,6 +74,35 @@ jobs:
           team: tsm
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+
+  dependabot-build:
+    if: github.actor == 'dependabot[bot]'
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+      - name: build artifact
+        run: ./gradlew bootJar
+
+  deploy:
+    if: github.actor != 'dependabot[bot]'
+    name: Build, push and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    needs: [ test, build-push ]
+    steps:
+      - uses: actions/checkout@v4
       - name: Deploy to NAIS
         uses: nais/deploy/actions/deploy@v2
         env:
