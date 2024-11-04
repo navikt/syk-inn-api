@@ -28,4 +28,11 @@ spec:
     requests:
       cpu: 50m
       memory: 128Mi
-
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syk-inn

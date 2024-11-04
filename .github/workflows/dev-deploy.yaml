@@ -54,8 +54,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    outputs:
-      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -76,6 +74,8 @@ jobs:
           team: tsm
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+    outputs:
+      image: "${{ steps.docker-build-push.outputs.image }}"
 
   dependabot-build:
     if: github.actor == 'dependabot[bot]'
@@ -110,4 +110,4 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/nais-dev.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build-push.outputs.image }}
