@@ -25,13 +25,14 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.springframework.kafka:spring-kafka")
     implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

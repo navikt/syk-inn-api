@@ -6,10 +6,6 @@ server:
             enabled: false
 
 spring:
-    main:
-        banner-mode: 'off'
-    profiles:
-        active: default
     application:
         name: "syk-inn-api"
 
@@ -19,8 +15,11 @@ management:
         health.probes.enabled: true
         health.show-details: always
     endpoints.web:
-        base-path: /internal
+        base-path: "/internal"
         exposure.include: health,prometheus
+    health:
+        livenessstate.enabled: true
+        readinessState.enabled: true
 
 logging.config: "classpath:logback.xml"
 
