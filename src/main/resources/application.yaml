@@ -1,0 +1,30 @@
+server:
+    port: 8080
+    shutdown: graceful
+    error:
+        whitelabel:
+            enabled: false
+
+spring:
+    main:
+        banner-mode: 'off'
+    profiles:
+        active: default
+    application:
+        name: "syk-inn-api"
+
+management:
+    endpoint:
+        prometheus.enabled: true
+        health.probes.enabled: true
+        health.show-details: always
+    endpoints.web:
+        base-path: /internal
+        exposure.include: health,prometheus
+
+logging.config: "classpath:logback.xml"
+
+logging:
+    level:
+        org.springframework.boot.context.properties: DEBUG
+
