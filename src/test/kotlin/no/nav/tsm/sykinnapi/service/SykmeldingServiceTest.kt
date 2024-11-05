@@ -2,7 +2,6 @@ package no.nav.tsm.sykinnapi.service
 
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.Aktivitet
-import no.nav.tsm.sykinnapi.modell.AktivitetType
 import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
@@ -36,9 +35,10 @@ class SykmeldingServiceTest {
                                 code = "S017",
                             ),
                         aktivitet =
-                            Aktivitet(
-                                type = AktivitetType.AKTIVITET_IKKE_MULIG,
-                            ),
+                            Aktivitet.AktivitetIkkeMulig(
+                                fom = "2020-01-01",
+                                tom = "2020-01-02",
+                            )
                     ),
             )
 

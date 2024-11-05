@@ -8,15 +8,10 @@ data class SykInnApiNySykmeldingPayload(
 
 data class Sykmelding(val hoveddiagnose: Hoveddiagnose, val aktivitet: Aktivitet)
 
-data class Aktivitet(val type: AktivitetType)
+sealed class Aktivitet {
+    data class AktivitetIkkeMulig(val fom: String, val tom: String) : Aktivitet()
 
-data class AktivitetIkkeMulig(val fom: String, val tom: String)
-
-data class Gradert(val grad: Int, val fom: String, val tom: String)
-
-enum class AktivitetType {
-    AKTIVITET_IKKE_MULIG,
-    GRADERT
+    data class Gradert(val grad: Int, val fom: String, val tom: String) : Aktivitet()
 }
 
 enum class DiagnoseSystem {
