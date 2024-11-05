@@ -2,6 +2,7 @@ package no.nav.tsm.sykinnapi.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.tsm.sykinnapi.modell.Aktivitet
+import no.nav.tsm.sykinnapi.modell.AktivitetIkkeMulig
 import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
@@ -44,8 +45,7 @@ class SykmeldingApiControllerTest {
                         system = DiagnoseSystem.ICD10,
                         code = "S017",
                     ),
-                    aktivitet =
-                    Aktivitet.AktivitetIkkeMulig(
+                    aktivitet = AktivitetIkkeMulig(
                         fom = "2020-01-01",
                         tom = "2020-01-02",
                     ),
