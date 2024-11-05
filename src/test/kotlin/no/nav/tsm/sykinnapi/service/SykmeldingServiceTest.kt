@@ -7,40 +7,40 @@ import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.Sykmelding
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.any
-import org.mockito.InjectMocks
 import org.mockito.Mockito.`when`
-import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 
-@ExtendWith(MockitoExtension::class)
+@SpringBootTest
 class SykmeldingServiceTest {
 
-    @InjectMocks lateinit var sykmeldingService: SykmeldingService
+    @MockBean
+    lateinit var sykmeldingService: SykmeldingService
 
     @Test
-    internal fun `Should return correct`() {
-
-        `when`(sykmeldingService.create(any())).thenReturn(true)
+    internal fun `Should return isCreated true`() {
 
         val sykInnApiNySykmeldingPayload =
             SykInnApiNySykmeldingPayload(
                 pasientFnr = "12345",
                 sykmelderHpr = "123123",
                 sykmelding =
-                    Sykmelding(
+                Sykmelding(
                         hoveddiagnose =
-                            Hoveddiagnose(
+                        Hoveddiagnose(
                                 system = DiagnoseSystem.ICD10,
                                 code = "S017",
-                            ),
+                        ),
                         aktivitet =
-                            Aktivitet.AktivitetIkkeMulig(
+                        Aktivitet.AktivitetIkkeMulig(
                                 fom = "2020-01-01",
                                 tom = "2020-01-02",
-                            )
-                    ),
+                        ),
+                ),
             )
+
+        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(true)
+
 
         val isCreated = sykmeldingService.create(sykInnApiNySykmeldingPayload)
         assertEquals(true, isCreated)

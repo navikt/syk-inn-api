@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class SykmeldingApiController(private val sykmeldingService: SykmeldingService) {
+class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
 
     private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
 
@@ -17,6 +17,7 @@ class SykmeldingApiController(private val sykmeldingService: SykmeldingService) 
     fun createSykmelding(
         @RequestBody sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
     ): String {
+
         logger.info(
             "sykInnApiNySykmeldingPayload is: ${
                 ObjectMapper().writeValueAsString(
@@ -24,11 +25,14 @@ class SykmeldingApiController(private val sykmeldingService: SykmeldingService) 
                 )
             }",
         )
+
         val isCreated = sykmeldingService.create(sykInnApiNySykmeldingPayload)
+
         return if (isCreated) {
             "ok"
         } else {
             "error"
         }
+
     }
 }
