@@ -7,18 +7,16 @@ import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.Sykmelding
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 
 @SpringBootTest
 class SykmeldingServiceTest {
 
-    @MockBean
-    lateinit var sykmeldingService: SykmeldingService
+
+    val sykmeldingService: SykmeldingService = SykmeldingService()
 
     @Test
-    internal fun `Should return isCreated true`() {
+    internal fun `Should return isCreated true when valid payload`() {
 
         val sykInnApiNySykmeldingPayload =
             SykInnApiNySykmeldingPayload(
@@ -37,9 +35,6 @@ class SykmeldingServiceTest {
                         ),
                 ),
             )
-
-        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(true)
-
 
         val isCreated = sykmeldingService.create(sykInnApiNySykmeldingPayload)
         assertEquals(true, isCreated)
