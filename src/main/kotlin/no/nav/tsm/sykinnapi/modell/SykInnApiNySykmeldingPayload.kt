@@ -1,7 +1,7 @@
 package no.nav.tsm.sykinnapi.modell
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import java.io.Serializable
 
 data class SykInnApiNySykmeldingPayload(
     val pasientFnr: String,
@@ -11,13 +11,16 @@ data class SykInnApiNySykmeldingPayload(
 
 data class Sykmelding(val hoveddiagnose: Hoveddiagnose, val aktivitet: Aktivitet)
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME) sealed interface Aktivitet : Serializable
+@JsonSubTypes(
+    JsonSubTypes.Type(Aktivitet.AktivitetIkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
+    JsonSubTypes.Type(Aktivitet.Gradert::class, name = "GRADERT"),
+)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed interface Aktivitet {
+    data class AktivitetIkkeMulig(val fom: String, val tom: String) : Aktivitet
 
-sealed class AktivitetType : Aktivitet
-
-data class AktivitetIkkeMulig(val fom: String, val tom: String) : AktivitetType()
-
-data class Gradert(val grad: Int, val fom: String, val tom: String) : AktivitetType()
+    data class Gradert(val grad: Int, val fom: String, val tom: String) : Aktivitet
+}
 
 enum class DiagnoseSystem {
     ICD10,

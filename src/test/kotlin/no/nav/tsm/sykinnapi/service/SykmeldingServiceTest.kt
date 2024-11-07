@@ -3,7 +3,7 @@ package no.nav.tsm.sykinnapi.service
 import kotlin.test.assertEquals
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import no.nav.tsm.sykinnapi.modell.AktivitetIkkeMulig
+import no.nav.tsm.sykinnapi.modell.Aktivitet
 import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
@@ -33,7 +33,7 @@ class SykmeldingServiceTest {
                                 code = "S017",
                             ),
                         aktivitet =
-                            AktivitetIkkeMulig(
+                            Aktivitet.AktivitetIkkeMulig(
                                 fom = "2020-01-01",
                                 tom = "2020-01-02",
                             ),
