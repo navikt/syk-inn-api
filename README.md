@@ -44,10 +44,14 @@ docker build -t syk-inn-api .
 > [!NOTE]  
 > Remember to build the application before,you create a docker image, see [Building the application](#building-the-application)
 
+### Running the mock-oauth2-server from docker compose
+``` bash
+docker-compose -p authserver-compose up -d
+```
 
 #### Running a docker image
 ``` bash
-docker run -d --rm -it -p 8080:8080 syk-inn-api
+docker run -d --rm -it -p 8080:8080 -e "AZURE_APP_WELL_KNOWN_URL=http://host.docker.internal:6969/azuread/.well-known/openid-configuration, AZURE_APP_CLIENT_ID=syk-inn-api-client-id" syk-inn-apo
 ```
 
 ### Upgrading the gradle wrapper

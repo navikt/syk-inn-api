@@ -72,6 +72,8 @@ class SykmeldingApiControllerTest {
                     )
             )
 
+        println("Bearer ${jwt.serialize()}")
+
         mockMvc
             .perform(
                 MockMvcRequestBuilders.post("/api/v1/sykmelding/create")
