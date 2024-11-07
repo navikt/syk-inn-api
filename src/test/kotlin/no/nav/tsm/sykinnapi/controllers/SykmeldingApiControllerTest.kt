@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlin.test.assertEquals
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.tsm.sykinnapi.modell.Aktivitet
 import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
@@ -28,6 +29,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @EnableMockOAuth2Server
 @WebMvcTest(SykmeldingApiController::class)
 class SykmeldingApiControllerTest {
+
+    @Autowired lateinit var mockOAuth2Server: MockOAuth2Server
 
     @Autowired lateinit var mockMvc: MockMvc
 
@@ -57,10 +60,25 @@ class SykmeldingApiControllerTest {
 
         `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(true)
 
-        // TODO add i auth in request header
+        val jwt =
+            mockOAuth2Server.issueToken(
+                issuerId = "azuread",
+                audience = "syk-inn-api-client-id",
+                subject = "testuser",
+                claims =
+                    mapOf(
+                        "azp" to "consumerClientId",
+                        "appid" to "consumerClientId",
+                    )
+            )
+
         mockMvc
             .perform(
                 MockMvcRequestBuilders.post("/api/v1/sykmelding/create")
+                    .header(
+                        "Authorization",
+                        "Bearer ${jwt.serialize()}",
+                    )
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(ObjectMapper().writeValueAsString(sykInnApiNySykmeldingPayload)),
             )
