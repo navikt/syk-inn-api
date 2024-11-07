@@ -11,10 +11,12 @@ data class SykInnApiNySykmeldingPayload(
 
 data class Sykmelding(val hoveddiagnose: Hoveddiagnose, val aktivitet: Aktivitet)
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-sealed interface Aktivitet: Serializable
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME) sealed interface Aktivitet : Serializable
+
 sealed class AktivitetType : Aktivitet
+
 data class AktivitetIkkeMulig(val fom: String, val tom: String) : AktivitetType()
+
 data class Gradert(val grad: Int, val fom: String, val tom: String) : AktivitetType()
 
 enum class DiagnoseSystem {
@@ -26,4 +28,3 @@ data class Hoveddiagnose(
     val system: DiagnoseSystem,
     val code: String,
 )
-
