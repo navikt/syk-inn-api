@@ -6,16 +6,23 @@
 * Gradle
 
 ### Prerequisites
+#### Java
 Make sure you have the Java JDK 21 installed
 You can check which version you have installed using this command:
 ``` bash
 java -version
 ```
-
+#### Docker
 Make sure you have the Docker installed
 You can check which version you have installed using this command:
 ``` bash
 docker --version
+```
+#### Docker compose
+Make sure you have the Docker-compose installed
+You can check which version you have installed using this command:
+``` bash
+docker-compose --version
 ```
 
 ### Building the application
@@ -28,6 +35,9 @@ or on windows
 
 ### Running the application locally
 #### With bootRun
+> [!NOTE]  
+> Remember to run the external services the application needs to be able to run, see [Running the mock-oauth2-server from docker compose](#running-the-mock-oauth2-server-from-docker-compose)
+
 run this command
 ``` bash
 ./gradlew bootRun
@@ -35,7 +45,7 @@ run this command
 or on windows
 `gradlew.bat bootRun`
 
-#### Docker
+#### With docker
 ##### Creating a docker image
 Creating a docker image should be as simple as
 ``` bash
