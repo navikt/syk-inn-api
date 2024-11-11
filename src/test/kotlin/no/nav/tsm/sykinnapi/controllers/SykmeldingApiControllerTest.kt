@@ -39,6 +39,8 @@ class SykmeldingApiControllerTest {
     @Test
     internal fun `Should return HttpStatus OK and body text ok`() {
 
+        val sykmeldingsId = "123213-2323-213123123"
+
         val sykInnApiNySykmeldingPayload =
             SykInnApiNySykmeldingPayload(
                 pasientFnr = "12345",
@@ -58,7 +60,7 @@ class SykmeldingApiControllerTest {
                     ),
             )
 
-        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(true)
+        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(sykmeldingsId)
 
         val jwt =
             mockOAuth2Server.issueToken(
@@ -85,7 +87,7 @@ class SykmeldingApiControllerTest {
                     .content(ObjectMapper().writeValueAsString(sykInnApiNySykmeldingPayload)),
             )
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("ok")))
+            .andExpect(content().string(containsString(sykmeldingsId)))
     }
 
     // TODO: Temporary test

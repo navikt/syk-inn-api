@@ -1,6 +1,6 @@
 package no.nav.tsm.sykinnapi.service
 
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.tsm.sykinnapi.modell.Aktivitet
@@ -19,7 +19,7 @@ class SykmeldingServiceTest {
     val sykmeldingService: SykmeldingService = SykmeldingService()
 
     @Test
-    internal fun `Should return isCreated true when valid payload`() {
+    internal fun `Should return sykmeldingId true when valid payload`() {
 
         val sykInnApiNySykmeldingPayload =
             SykInnApiNySykmeldingPayload(
@@ -40,7 +40,8 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        val isCreated = sykmeldingService.create(sykInnApiNySykmeldingPayload)
-        assertEquals(true, isCreated)
+        val sykmeldingId = sykmeldingService.create(sykInnApiNySykmeldingPayload)
+
+        assertTrue(sykmeldingId.isNotBlank())
     }
 }

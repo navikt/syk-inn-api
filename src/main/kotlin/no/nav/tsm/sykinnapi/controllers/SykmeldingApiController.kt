@@ -28,12 +28,8 @@ class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
             }",
         )
 
-        val isCreated = sykmeldingService.create(sykInnApiNySykmeldingPayload)
+        val sykmeldingid = sykmeldingService.create(sykInnApiNySykmeldingPayload)
 
-        return if (isCreated) {
-            "ok"
-        } else {
-            "error"
-        }
+        return sykmeldingid
     }
 }
