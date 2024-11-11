@@ -4,7 +4,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 
 val logstashLogbackEncoderVersion = "8.0"
-val tokenSupportVersion = "5.0.1"
+val tokenSupportVersion = "5.0.11"
 
 val javaVersion = JvmTarget.JVM_21
 val ktfmtVersion = "0.44"
