@@ -7,6 +7,8 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import no.nav.tsm.sykinnapi.modell.Aktivitet
+import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
+import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Adresse
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Arbeidsgiver
@@ -38,13 +40,7 @@ class SykmeldingService {
                 medisinskVurdering =
                     MedisinskVurdering(
                         hovedDiagnose =
-                            Diagnose(
-                                system =
-                                    sykInnApiNySykmeldingPayload.sykmelding.hoveddiagnose.system
-                                        .toString(),
-                                kode = sykInnApiNySykmeldingPayload.sykmelding.hoveddiagnose.code,
-                                tekst = null
-                            ),
+                            sykInnApiNySykmeldingPayload.sykmelding.hoveddiagnose.toDiagnose(),
                         biDiagnoser = emptyList(),
                         svangerskap = false,
                         yrkesskade = false,
@@ -116,6 +112,18 @@ class SykmeldingService {
 
         return receivedSykmelding.sykmelding.id
     }
+}
+
+private fun Hoveddiagnose.toDiagnose(): Diagnose {
+    return Diagnose(
+        system =
+            when (system) {
+                DiagnoseSystem.ICD10 -> "2.16.578.1.12.4.1.1.7110"
+                DiagnoseSystem.ICPC2 -> "2.16.578.1.12.4.1.1.7170"
+            },
+        kode = code,
+        tekst = ""
+    )
 }
 
 private fun toLocalDate(dateString: String): LocalDate {
