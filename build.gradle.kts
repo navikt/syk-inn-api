@@ -5,7 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
-val tokenSupportVersion = "5.0.1"
+val tokenSupportVersion = "5.0.11"
 
 val ktfmtVersion = "0.44"
 val openapiVersion = "2.6.0"
@@ -14,7 +14,7 @@ val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 
-val diagnosekoderVersion = "1.2024.0"
+val diagnosekoderVersion = "1.2024.1"
 
 group = "no.nav.tsm"
 version = "1.0.0"
