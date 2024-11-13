@@ -219,7 +219,7 @@ fun tilBehandler(sykmelderHpr: String): HelseOpplysningerArbeidsuforhet.Behandle
                     typeId =
                         CV().apply {
                             dn = "HPR-nummer"
-                            s = "6.87.654.3.21.9.8.7.6543.2198"
+                            s = "2.16.578.1.12.4.1.1.8116"
                             v = "HPR"
                         }
                 },
