@@ -50,7 +50,7 @@ fun receivedSykmeldingWithValidationMapper(
                     annenFraversArsak = null,
                 ),
             skjermesForPasient = false,
-            arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.INGEN_ARBEIDSGIVER, null, null, null),
+            arbeidsgiver = Arbeidsgiver(HarArbeidsgiver.EN_ARBEIDSGIVER, "", "", null),
             perioder = toPerioder(aktivitet = sykInnApiNySykmeldingPayload.sykmelding.aktivitet),
             prognose = null,
             utdypendeOpplysninger = mapOf(),

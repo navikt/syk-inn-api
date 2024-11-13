@@ -81,15 +81,6 @@ fun mapToFellesformat(
                                                                     v = "HPR"
                                                                 }
                                                         },
-                                                        XMLIdent().apply {
-                                                            id = sykmelderHpr
-                                                            typeId =
-                                                                XMLCV().apply {
-                                                                    dn = "Fødselsnummer"
-                                                                    s = "2.16.578.1.12.4.1.1.8116"
-                                                                    v = "FNR"
-                                                                }
-                                                        },
                                                     ),
                                                 )
                                             }
@@ -303,13 +294,13 @@ fun tilArbeidsgiver(): HelseOpplysningerArbeidsuforhet.Arbeidsgiver =
     HelseOpplysningerArbeidsuforhet.Arbeidsgiver().apply {
         harArbeidsgiver =
             CS().apply {
-                dn = "Ein arbeidsgiver"
+                dn = "Én arbeidsgiver"
                 v = "1"
             }
 
         navnArbeidsgiver = ""
         yrkesbetegnelse = ""
-        stillingsprosent = 0
+        stillingsprosent = null
     }
 
 fun tilMedisinskVurdering(
@@ -319,12 +310,7 @@ fun tilMedisinskVurdering(
     return HelseOpplysningerArbeidsuforhet.MedisinskVurdering().apply {
         hovedDiagnose =
             HelseOpplysningerArbeidsuforhet.MedisinskVurdering.HovedDiagnose().apply {
-                diagnosekode =
-                    toMedisinskVurderingDiagnose(
-                        hoveddiagnose.code,
-                        hoveddiagnose.system.toString(),
-                        hoveddiagnose.code,
-                    )
+                diagnosekode = toMedisinskVurderingDiagnose(hoveddiagnose)
             }
 
         isSkjermesForPasient = false
@@ -335,83 +321,42 @@ fun tilMedisinskVurdering(
     }
 }
 
-fun identifiserDiagnoseKodeverk(diagnoseKode: String, system: String?, diagnose: String?): String {
-    val sanitisertSystem = system?.replace(".", "")?.replace(" ", "")?.replace("-", "")?.uppercase()
-    val sanitisertKode = diagnoseKode.replace(".", "").replace(" ", "").uppercase()
-
-    return if (sanitisertSystem == "ICD10") {
-        Diagnosekoder.ICD10_CODE
-    } else if (sanitisertSystem == "ICPC2") {
-        Diagnosekoder.ICPC2_CODE
-    } else if (
-        Diagnosekoder.icd10.containsKey(sanitisertKode) &&
-            Diagnosekoder.icd10[sanitisertKode]?.text == diagnose
-    ) {
-        Diagnosekoder.ICD10_CODE
-    } else if (
-        Diagnosekoder.icpc2.containsKey(sanitisertKode) &&
-            Diagnosekoder.icpc2[sanitisertKode]?.text == diagnose
-    ) {
-        Diagnosekoder.ICPC2_CODE
-    } else {
-        ""
+fun toMedisinskVurderingDiagnose(hoveddiagnose: Hoveddiagnose): CV =
+    CV().apply {
+        s = toDiagnoseKithSystem(hoveddiagnose.system.toString())
+        v = hoveddiagnose.code
+        dn = getTextFromDiagnose(hoveddiagnose.code, hoveddiagnose.system.toString())
     }
-}
 
-fun toMedisinskVurderingDiagnose(
-    originalDiagnosekode: String,
-    originalSystem: String?,
-    diagnose: String?,
-): CV {
-    val diagnosekode =
-        if (originalDiagnosekode.contains(".")) {
-            originalDiagnosekode.replace(".", "").uppercase().replace(" ", "")
-        } else {
-            originalDiagnosekode.uppercase().replace(" ", "")
+fun getTextFromDiagnose(
+    kode: String,
+    diagnoseSystem: String,
+): String {
+    return when (diagnoseSystem) {
+        "ICD10" -> {
+            Diagnosekoder.icd10[kode]!!.text
         }
-
-    val identifisertKodeverk =
-        identifiserDiagnoseKodeverk(originalDiagnosekode, originalSystem, diagnose)
-
-    when {
-        identifisertKodeverk == Diagnosekoder.ICD10_CODE &&
-            Diagnosekoder.icd10.containsKey(diagnosekode) -> {
-            return CV().apply {
-                s = Diagnosekoder.ICD10_CODE
-                v = diagnosekode
-                dn = Diagnosekoder.icd10[diagnosekode]?.text ?: ""
-            }
-        }
-        identifisertKodeverk == Diagnosekoder.ICPC2_CODE &&
-            Diagnosekoder.icpc2.containsKey(diagnosekode) -> {
-            return CV().apply {
-                s = Diagnosekoder.ICPC2_CODE
-                v = diagnosekode
-                dn = Diagnosekoder.icpc2[diagnosekode]?.text ?: ""
-            }
-        }
-        identifisertKodeverk.isEmpty() &&
-            Diagnosekoder.icd10.containsKey(diagnosekode) &&
-            !Diagnosekoder.icpc2.containsKey(diagnosekode) -> {
-            return CV().apply {
-                s = Diagnosekoder.ICD10_CODE
-                v = diagnosekode
-                dn = Diagnosekoder.icd10[diagnosekode]?.text ?: ""
-            }
-        }
-        identifisertKodeverk.isEmpty() &&
-            Diagnosekoder.icpc2.containsKey(diagnosekode) &&
-            !Diagnosekoder.icd10.containsKey(diagnosekode) -> {
-            return CV().apply {
-                s = Diagnosekoder.ICPC2_CODE
-                v = diagnosekode
-                dn = Diagnosekoder.icpc2[diagnosekode]?.text ?: ""
-            }
+        "ICPC2" -> {
+            Diagnosekoder.icpc2[kode]!!.text
         }
         else -> {
-            throw IllegalStateException(
-                "Diagnosekode $originalDiagnosekode tilhører ingen kjente kodeverk",
-            )
+            throw MappingException("Ukjent diagnose kode")
         }
     }
 }
+
+fun toDiagnoseKithSystem(diagnoseSystem: String): String {
+    return when (diagnoseSystem) {
+        "ICD10" -> {
+            "2.16.578.1.12.4.1.1.7110"
+        }
+        "ICPC2" -> {
+            "2.16.578.1.12.4.1.1.7170"
+        }
+        else -> {
+            throw MappingException("Ukjent diagnose system")
+        }
+    }
+}
+
+class MappingException(override val message: String) : Exception(message)
