@@ -77,6 +77,43 @@ jobs:
     outputs:
       image: "${{ steps.docker-build-push.outputs.image }}"
 
+  trivy-docker:
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: "write"
+      id-token: "write"
+      security-events: "write"
+    name: Trivy docker
+    runs-on: ubuntu-latest
+    needs: [ build-push ]
+    steps:
+      - run: touch me
+      - uses: nais/login@v0
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: tsm
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db"
+          TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
+        with:
+          image-ref: ${{ needs.build-push.outputs.image }}
+          ignore-unfixed: true
+          vuln-type: 'os'
+          severity: 'CRITICAL,HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          scanners: 'vuln'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
   dependabot-build:
     if: github.actor == 'dependabot[bot]'
     name: Build
@@ -95,9 +132,9 @@ jobs:
       - name: build artifact
         run: ./gradlew bootJar
 
-  deploy:
+  deploy-dev:
     if: github.actor != 'dependabot[bot]'
-    name: Build, push and deploy
+    name: Deploy to dev
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -110,4 +147,20 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/nais-dev.yaml
+          VAR: image=${{ needs.build-push.outputs.image }}
+  deploy-prod:
+    if: github.ref_name == 'main'
+    name: Deploy to prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    needs: [ test, build-push, deploy-dev ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to NAIS
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/nais-prod.yaml
           VAR: image=${{ needs.build-push.outputs.image }}

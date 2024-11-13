@@ -1,0 +1,42 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: syk-inn-api
+  namespace: tsm
+  labels:
+    team: tsm
+spec:
+  image: {{ image }}
+  replicas:
+    min: 2
+    max: 6
+    cpuThresholdPercentage: 90
+  port: 8080
+  liveness:
+    path: /internal/health
+  readiness:
+    path: /internal/health
+  startup:
+    path: /internal/health
+    initialDelay: 60
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: syk-inn
+  ingresses:
+    - "https://syk-inn-api.intern.nav.no"
+  secureLogs:
+    enabled: true
