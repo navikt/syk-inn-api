@@ -2,13 +2,19 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
+val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
 val tokenSupportVersion = "5.0.1"
 
-val javaVersion = JvmTarget.JVM_21
 val ktfmtVersion = "0.44"
 val openapiVersion = "2.6.0"
+val syfoXmlCodegenVersion = "2.0.1"
+val jaxbApiVersion = "2.3.1"
+val jaxbVersion = "2.4.0-b180830.0438"
+val javaxActivationVersion = "1.1.1"
+
+val diagnosekoderVersion = "1.2024.0"
 
 group = "no.nav.tsm"
 version = "1.0.0"
@@ -46,6 +52,16 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
+
+    implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegenVersion")
+    implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegenVersion")
+    implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegenVersion")
+
+    implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
+    implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
+    implementation("javax.activation:activation:$javaxActivationVersion")
+
+    implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
