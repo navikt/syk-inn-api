@@ -38,3 +38,5 @@ spec:
         - application: syk-inn
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
+  secureLogs:
+    enabled: true

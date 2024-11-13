@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
 
-    private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
+    private val securelog = LoggerFactory.getLogger("securelog")
 
     @PostMapping("/api/v1/sykmelding/create")
     fun createSykmelding(
         @RequestBody sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
     ): String {
 
-        logger.info(
+        securelog.info(
             "sykInnApiNySykmeldingPayload is: ${
                 ObjectMapper().writeValueAsString(
                     sykInnApiNySykmeldingPayload,
