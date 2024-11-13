@@ -59,6 +59,12 @@ docker build -t syk-inn-api .
 docker-compose up -d
 ```
 
+#### Api doc
+Locally
+http://localhost:8080/v3/api-docs
+or on
+http://syk-inn-api.intern.dev.nav.no:8080/v3/api-docs
+
 ### Upgrading the gradle wrapper
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
 

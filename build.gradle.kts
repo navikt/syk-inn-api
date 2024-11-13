@@ -8,6 +8,7 @@ val tokenSupportVersion = "5.0.1"
 
 val javaVersion = JvmTarget.JVM_21
 val ktfmtVersion = "0.44"
+val openapiVersion = "2.6.0"
 
 group = "no.nav.tsm"
 version = "1.0.0"
@@ -32,6 +33,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openapiVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
