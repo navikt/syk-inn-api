@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
 
     private val securelog = LoggerFactory.getLogger("securelog")
+    private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
 
     @PostMapping("/api/v1/sykmelding/create")
     fun createSykmelding(
@@ -28,7 +29,19 @@ class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
             }",
         )
 
+        logger.info(
+            "sykInnApiNySykmeldingPayload is: ${
+            ObjectMapper().writeValueAsString(
+                sykInnApiNySykmeldingPayload,
+            )
+        }",
+        )
+
         val sykmeldingid = sykmeldingService.create(sykInnApiNySykmeldingPayload)
+
+        logger.info(
+            "sykmeldingid with id $sykmeldingid is created",
+        )
 
         return sykmeldingid
     }

@@ -13,7 +13,6 @@ val syfoXmlCodegenVersion = "2.0.1"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
-
 val diagnosekoderVersion = "1.2024.1"
 
 group = "no.nav.tsm"
