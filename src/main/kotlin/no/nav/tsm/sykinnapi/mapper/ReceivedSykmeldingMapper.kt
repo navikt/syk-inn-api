@@ -19,12 +19,10 @@ import no.nav.tsm.sykinnapi.modell.receivedSykmelding.HarArbeidsgiver
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.KontaktMedPasient
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.MedisinskVurdering
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Periode
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Sykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.util.fellesformatMarshaller
 import no.nav.tsm.sykinnapi.util.toString
 
@@ -93,8 +91,8 @@ fun receivedSykmeldingWithValidationMapper(
             now = now,
         )
 
-    val receivedSykmelding =
-        ReceivedSykmelding(
+    val receivedSykmeldingWithValidation =
+        ReceivedSykmeldingWithValidation(
             sykmelding = sykmelding,
             personNrPasient = sykInnApiNySykmeldingPayload.pasientFnr,
             tlfPasient = null,
@@ -115,11 +113,10 @@ fun receivedSykmeldingWithValidationMapper(
             partnerreferanse = null,
             vedlegg = emptyList(),
             utenlandskSykmelding = null,
+            validationResult = ValidationResult(Status.OK, emptyList())
         )
 
-    return receivedSykmelding.toReceivedSykmeldingWithValidation(
-        ValidationResult(Status.OK, emptyList()),
-    )
+    return receivedSykmeldingWithValidation
 }
 
 private fun Hoveddiagnose.toDiagnose(): Diagnose {
