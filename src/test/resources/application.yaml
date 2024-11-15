@@ -29,6 +29,6 @@ logging:
 
 no.nav.security.jwt:
     issuer:
-        azureator:
+        azuread:
             discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
             accepted_audience: syk-inn-api-client-id

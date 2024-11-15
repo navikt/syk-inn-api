@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
-@ProtectedWithClaims(issuer = "azureator")
+@ProtectedWithClaims(issuer = "azuread")
 @RestController
 class SykmeldingApiController(val sykmeldingService: SykmeldingService) {
 
