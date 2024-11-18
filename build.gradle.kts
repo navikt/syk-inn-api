@@ -51,6 +51,7 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
+    implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
 
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegenVersion")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegenVersion")

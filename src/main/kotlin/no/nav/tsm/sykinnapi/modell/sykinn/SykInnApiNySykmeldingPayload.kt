@@ -1,4 +1,4 @@
-package no.nav.tsm.sykinnapi.modell
+package no.nav.tsm.sykinnapi.modell.sykinn
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo

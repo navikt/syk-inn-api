@@ -27,8 +27,22 @@ logging:
     level:
         org.springframework.boot.context.properties: DEBUG
 
+syfohelsenettproxy:
+    url: http://syfohelsenettproxy.teamsykmelding
+
+
 no.nav.security.jwt:
     issuer:
         azuread:
             discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
             accepted_audience: syk-inn-api-client-id
+    client:
+        registration:
+            syfohelsenettproxy-m2m:
+                token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azuread/token
+                grant-type: client_credentials
+                scope: syfohelsenettproxyscope
+                authentication:
+                    client-id: client-id
+                    client-secret: secretzz
+                    client-auth-method: client_secret_basic

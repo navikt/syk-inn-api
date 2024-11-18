@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.helse.eiFellesformat.XMLEIFellesformat
 import no.nav.helse.msgHead.XMLCS
@@ -26,8 +25,8 @@ import no.nav.helse.sm2013.Ident
 import no.nav.helse.sm2013.NavnType
 import no.nav.helse.sm2013.TeleCom
 import no.nav.helse.sm2013.URL
-import no.nav.tsm.sykinnapi.modell.Aktivitet as SykInAktivitet
-import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
+import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet as SykInAktivitet
+import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 
 fun mapToFellesformat(
     sykmelderHpr: String,

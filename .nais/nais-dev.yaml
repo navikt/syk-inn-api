@@ -36,7 +36,14 @@ spec:
     inbound:
       rules:
         - application: syk-inn
+    outbound:
+      rules:
+        - application: syfohelsenettproxy
+          namespace: teamsykmelding
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
   secureLogs:
     enabled: true
+  env:
+    - name: SYFOHELSENETTPROXY_SCOPE
+      value: api://dev-gcp.teamsykmelding.syfohelsenettproxy/.default

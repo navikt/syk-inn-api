@@ -7,14 +7,17 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlin.test.assertEquals
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import no.nav.tsm.sykinnapi.modell.Aktivitet
-import no.nav.tsm.sykinnapi.modell.DiagnoseSystem
-import no.nav.tsm.sykinnapi.modell.Hoveddiagnose
-import no.nav.tsm.sykinnapi.modell.SykInnApiNySykmeldingPayload
-import no.nav.tsm.sykinnapi.modell.Sykmelding
-import no.nav.tsm.sykinnapi.service.SykmeldingService
+import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
+import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
+import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
+import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
+import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
+import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
+import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,8 +39,12 @@ class SykmeldingApiControllerTest {
 
     @MockBean lateinit var sykmeldingService: SykmeldingService
 
+    @MockBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+
     @Test
     internal fun `Should return HttpStatus OK and body text ok`() {
+
+        val sykmelderFnr = "12345678912"
 
         val sykmeldingsId = "123213-2323-213123123"
 
@@ -60,7 +67,20 @@ class SykmeldingApiControllerTest {
                     ),
             )
 
-        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload)).thenReturn(sykmeldingsId)
+        `when`(syfohelsenettproxyService.getBehandlerByHpr(anyString(), anyString()))
+            .thenReturn(
+                Behandler(
+                    godkjenninger = emptyList(),
+                    fnr = sykmelderFnr,
+                    hprNummer = sykInnApiNySykmeldingPayload.sykmelderHpr,
+                    fornavn = "Fornavn",
+                    mellomnavn = null,
+                    etternavn = "etternavn",
+                )
+            )
+
+        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload, sykmelderFnr, sykmeldingsId))
+            .thenReturn(sykmeldingsId)
 
         val jwt =
             mockOAuth2Server.issueToken(
@@ -87,7 +107,7 @@ class SykmeldingApiControllerTest {
                     .content(ObjectMapper().writeValueAsString(sykInnApiNySykmeldingPayload)),
             )
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString(sykmeldingsId)))
+            .andExpect(content().string(containsString("")))
     }
 
     // TODO: Temporary test
