@@ -11,7 +11,7 @@ val ktfmtVersion = "0.44"
 val openapiVersion = "2.6.0"
 val syfoXmlCodegenVersion = "2.0.1"
 val jaxbApiVersion = "2.3.1"
-val jaxbVersion = "2.4.0-b180830.0438"
+val jaxbVersion = "4.0.5"
 val javaxActivationVersion = "1.1.1"
 val diagnosekoderVersion = "1.2024.1"
 
