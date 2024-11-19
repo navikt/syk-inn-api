@@ -32,7 +32,9 @@ class SyfohelsenettproxyClient(
                 .onStatus({ status -> status.is4xxClientError || status.is5xxServerError }) {
                     response ->
                     response.createException().flatMap {
-                        logger.error("Feil ved henting av behandlerMedHprNummer status: ${response.statusCode()}")
+                        logger.error(
+                            "Feil ved henting av behandlerMedHprNummer status: ${response.statusCode()}"
+                        )
                         Mono.error(
                             RuntimeException(
                                 "Feil ved henting av behandlerMedHprNummer: ${response.statusCode()}"
