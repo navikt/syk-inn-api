@@ -6,7 +6,6 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
 val tokenSupportVersion = "5.0.11"
-
 val ktfmtVersion = "0.44"
 val openapiVersion = "2.6.0"
 val syfoXmlCodegenVersion = "2.0.1"
@@ -66,6 +65,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("io.projectreactor:reactor-test")
+    testImplementation("com.squareup.okhttp3:mockwebserver")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

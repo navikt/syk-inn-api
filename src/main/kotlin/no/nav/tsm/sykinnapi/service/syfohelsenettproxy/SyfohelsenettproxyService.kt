@@ -12,13 +12,6 @@ class SyfohelsenettproxyService(private val syfohelsenettproxyClient: Syfohelsen
         val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)
 
         // Replace with client call, behandler
-        return Behandler(
-            godkjenninger = emptyList(),
-            fnr = "12345678912",
-            hprNummer = behandlerHpr,
-            fornavn = "Fornavn",
-            mellomnavn = null,
-            etternavn = "etternavn",
-        )
+        return behandler
     }
 }
