@@ -1,6 +1,7 @@
 package no.nav.tsm.sykinnapi.client
 
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -13,6 +14,8 @@ class SyfohelsenettproxyClient(
     syfohelsenettproxyM2mWebBuilder: WebClient.Builder,
     @Value("\${syfohelsenettproxy.url}") private var syfohelsenettproxyBaseUrl: String,
 ) {
+    private val logger = LoggerFactory.getLogger(SyfohelsenettproxyClient::class.java)
+
     private val webClient =
         syfohelsenettproxyM2mWebBuilder.baseUrl(syfohelsenettproxyBaseUrl).build()
 
@@ -29,6 +32,7 @@ class SyfohelsenettproxyClient(
                 .onStatus({ status -> status.is4xxClientError || status.is5xxServerError }) {
                     response ->
                     response.createException().flatMap {
+                        logger.error("Feil ved henting av behandlerMedHprNummer status: ${response.statusCode()}")
                         Mono.error(
                             RuntimeException(
                                 "Feil ved henting av behandlerMedHprNummer: ${response.statusCode()}"
