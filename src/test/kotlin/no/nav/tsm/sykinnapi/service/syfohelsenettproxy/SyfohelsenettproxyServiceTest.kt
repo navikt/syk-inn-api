@@ -5,6 +5,7 @@ import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.tsm.sykinnapi.client.SyfohelsenettproxyClient
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
@@ -18,8 +19,12 @@ class SyfohelsenettproxyServiceTest {
 
     @MockBean lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
-    val syfohelsenettproxyService: SyfohelsenettproxyService =
-        SyfohelsenettproxyService(syfohelsenettproxyClient)
+    lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+
+    @BeforeEach
+    fun setup() {
+        syfohelsenettproxyService = SyfohelsenettproxyService(syfohelsenettproxyClient)
+    }
 
     @Test
     internal fun `Should return correct hprNummer`() {
