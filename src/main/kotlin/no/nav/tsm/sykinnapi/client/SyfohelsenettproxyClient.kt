@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class SyfohelsenettproxyClient(
-    private val syfohelsenettproxyM2mWebBuilder: WebClient.Builder,
+    syfohelsenettproxyM2mWebBuilder: WebClient.Builder,
     @Value("\${syfohelsenettproxy.url}") private var syfohelsenettproxyBaseUrl: String,
 ) {
     private val webClient =

@@ -17,9 +17,6 @@ class SykmeldingApiController(
     val sykmeldingService: SykmeldingService,
     val syfohelsenettproxyService: SyfohelsenettproxyService
 ) {
-    // TODO ta in syfohelsenettproxy og finne fnr for sykmelder
-    // TODO hente legens fnr, fra syfohelsenettproxy, eller direkte fra HPR registeret?
-
     private val securelog = LoggerFactory.getLogger("securelog")
     private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
 
