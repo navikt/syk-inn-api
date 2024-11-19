@@ -2,7 +2,6 @@ package no.nav.tsm.sykinnapi.client
 
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -12,12 +11,10 @@ import reactor.core.publisher.Mono
 @Component
 class SyfohelsenettproxyClient(
     syfohelsenettproxyM2mWebBuilder: WebClient.Builder,
-    @Value("\${syfohelsenettproxy.url}") private var syfohelsenettproxyBaseUrl: String,
 ) {
     private val logger = LoggerFactory.getLogger(SyfohelsenettproxyClient::class.java)
 
-    private val webClient =
-        syfohelsenettproxyM2mWebBuilder.baseUrl(syfohelsenettproxyBaseUrl).build()
+    private val webClient = syfohelsenettproxyM2mWebBuilder.build()
 
     fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler {
 

@@ -20,7 +20,6 @@ class SyfohelsenettproxyClientTest {
         SyfohelsenettproxyClient(
             syfohelsenettproxyM2mWebBuilder =
                 WebClient.builder().baseUrl(System.getProperty("syfohelsenettproxy.url")),
-            syfohelsenettproxyBaseUrl = System.getProperty("syfohelsenettproxy.url"),
         )
 
     @AfterEach
