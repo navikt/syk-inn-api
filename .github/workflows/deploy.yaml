@@ -95,7 +95,7 @@ jobs:
           team: tsm
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.29.0
         env:
           TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db"
           TRIVY_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-db"
