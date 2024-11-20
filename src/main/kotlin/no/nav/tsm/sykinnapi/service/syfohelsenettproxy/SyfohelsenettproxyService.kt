@@ -11,7 +11,6 @@ class SyfohelsenettproxyService(private val syfohelsenettproxyClient: Syfohelsen
 
         val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)
 
-        // Replace with client call, behandler
         return behandler
     }
 }
