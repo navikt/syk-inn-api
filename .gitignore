@@ -36,3 +36,6 @@ out/
 # Gradle files
 build/
 .gradle/
+
+# Securelogs
+secure.log

@@ -40,7 +40,7 @@ or on windows
 
 run this command
 ``` bash
-./gradlew bootRun
+SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 ./gradlew bootRun
 ```
 or on windows
 `gradlew.bat bootRun`
