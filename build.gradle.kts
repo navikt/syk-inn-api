@@ -7,7 +7,7 @@ val javaVersion = JvmTarget.JVM_21
 val logstashLogbackEncoderVersion = "8.0"
 val tokenSupportVersion = "5.0.11"
 val ktfmtVersion = "0.44"
-val openapiVersion = "2.6.0"
+val openapiVersion = "2.7.0"
 val syfoXmlCodegenVersion = "2.0.1"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
@@ -20,7 +20,7 @@ version = "1.0.0"
 plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.spring") version "2.0.21"
-    id("org.springframework.boot") version "3.3.5"
+    id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.diffplug.spotless") version "6.25.0"
 }
