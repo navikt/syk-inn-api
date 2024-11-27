@@ -60,7 +60,6 @@ class AivenKafkaConfig(
             SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
             SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword,
         )
-
 }
 
 const val OK_SYKMLEDING_TOPIC = "teamsykmelding.ok-sykmelding"

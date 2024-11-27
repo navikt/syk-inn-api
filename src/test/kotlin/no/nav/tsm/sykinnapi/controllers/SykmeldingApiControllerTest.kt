@@ -22,8 +22,8 @@ import org.mockito.Mockito.`when`
 import org.skyscreamer.jsonassert.JSONAssert
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -37,9 +37,9 @@ class SykmeldingApiControllerTest {
 
     @Autowired lateinit var mockMvc: MockMvc
 
-    @MockBean lateinit var sykmeldingService: SykmeldingService
+    @MockitoBean lateinit var sykmeldingService: SykmeldingService
 
-    @MockBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+    @MockitoBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
     @Test
     internal fun `Should return HttpStatus OK and body text ok`() {

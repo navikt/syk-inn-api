@@ -41,13 +41,15 @@ class SykmeldingService(
 
         // TODO put receivedSykmeldingWithValidationResult on kafka topic
         try {
-           sykmeldingOKProducer.send(
+            sykmeldingOKProducer
+                .send(
                     ProducerRecord(
                         OK_SYKMLEDING_TOPIC,
                         receivedSykmeldingWithValidation.sykmelding.id,
                         receivedSykmeldingWithValidation
                     ),
-                ).get()
+                )
+                .get()
 
             logger.info(
                 "Sykmelding sendt to kafka topic {} sykmelding id {}",

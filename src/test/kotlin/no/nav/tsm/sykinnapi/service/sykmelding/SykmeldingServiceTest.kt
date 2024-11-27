@@ -1,10 +1,9 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
+import java.util.concurrent.Future
 import kotlin.test.assertTrue
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import no.nav.tsm.sykinnapi.config.kafka.OK_SYKMLEDING_TOPIC
-import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingWithValidationMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
@@ -16,20 +15,19 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-
-import java.util.concurrent.Future
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import kotlin.String
 
 @EnableJwtTokenValidation
 @EnableMockOAuth2Server
 @SpringBootTest
 class SykmeldingServiceTest {
 
-
-    @MockBean lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
+    @MockitoBean lateinit var sykmeldingOKProducer: KafkaProducer<String, ReceivedSykmelding>
 
     lateinit var sykmeldingService: SykmeldingService
 
@@ -37,7 +35,6 @@ class SykmeldingServiceTest {
     fun setup() {
         sykmeldingService = SykmeldingService(sykmeldingOKProducer)
     }
-
 
     @Test
     internal fun `Should return sykmeldingId true when valid payload`() {
@@ -65,23 +62,20 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        val receivedSykmeldingWithValidation =
-            receivedSykmeldingWithValidationMapper(
-                sykInnApiNySykmeldingPayload,
-                sykmelderFnr,
-                sykmeldingsId
-            )
+        val producerRecord = mock<ProducerRecord<String, ReceivedSykmelding>>()
 
         val futureRecordMetadata = mock<Future<RecordMetadata>>()
+        val captor = captor<ProducerRecord<String, ReceivedSykmelding>>()
 
         `when`(futureRecordMetadata.get()).thenReturn(mock<RecordMetadata>())
+        `when`(sykmeldingOKProducer.send(captor.capture())).thenReturn(futureRecordMetadata)
 
-        `when`(sykmeldingOKProducer.send(
-            ProducerRecord(
-                OK_SYKMLEDING_TOPIC,
-                receivedSykmeldingWithValidation.sykmelding.id,
-                receivedSykmeldingWithValidation
-            ))).thenReturn(futureRecordMetadata)
+        `when`(
+                sykmeldingOKProducer.send(
+                    producerRecord
+                )
+            )
+            .thenReturn(futureRecordMetadata)
 
         val sykmeldingId =
             sykmeldingService.create(sykInnApiNySykmeldingPayload, sykmelderFnr, sykmeldingsId)

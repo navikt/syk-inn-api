@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.reactive.function.client.WebClient
 
 class SyfohelsenettproxyClientTest {
@@ -22,7 +22,7 @@ class SyfohelsenettproxyClientTest {
             .also { it.start() }
             .also { System.setProperty("syfohelsenettproxy.url", "http://localhost:${it.port}") }
 
-    @MockBean private lateinit var m2mTokenService: M2MTokenService
+    @MockitoBean private lateinit var m2mTokenService: M2MTokenService
 
     private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
