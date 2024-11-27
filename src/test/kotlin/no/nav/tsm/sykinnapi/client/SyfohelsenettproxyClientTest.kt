@@ -2,19 +2,24 @@ package no.nav.tsm.sykinnapi.client
 
 import kotlin.test.assertEquals
 import no.nav.security.mock.oauth2.http.objectMapper
+import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.tsm.sykinnapi.config.token.M2MTokenService
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.reactive.function.client.WebClient
 
+@EnableJwtTokenValidation
+@EnableMockOAuth2Server
+@SpringBootTest
 class SyfohelsenettproxyClientTest {
 
     private val syfohelsenettproxyMockWebServer: MockWebServer =
@@ -42,8 +47,7 @@ class SyfohelsenettproxyClientTest {
     internal fun tearDown() {
         syfohelsenettproxyMockWebServer.shutdown()
     }
-    // TODO figure out how to use: M2MTokenService in unit tests
-    @Disabled
+
     @Test
     internal fun `Should return behandler`() {
         val behandlerFnr = "23123131"

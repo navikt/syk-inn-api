@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @EnableJwtTokenValidation
 @EnableMockOAuth2Server
 @SpringBootTest
 class SyfohelsenettproxyServiceTest {
 
-    @MockBean lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
+    @MockitoBean lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
     lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
