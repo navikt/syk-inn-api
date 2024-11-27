@@ -2,7 +2,7 @@ package no.nav.tsm.sykinnapi.client
 
 import kotlin.test.assertEquals
 import no.nav.security.mock.oauth2.http.objectMapper
-import no.nav.tsm.sykinnapi.config.M2MTokenService
+import no.nav.tsm.sykinnapi.config.token.M2MTokenService
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

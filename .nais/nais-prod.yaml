@@ -32,6 +32,8 @@ spec:
     application:
       enabled: true
       tenant: nav.no
+  kafka:
+    pool: nav-prod
   accessPolicy:
     inbound:
       rules:

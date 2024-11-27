@@ -2,7 +2,7 @@ package no.nav.tsm.sykinnapi.modell.receivedSykmelding
 
 import java.time.LocalDateTime
 
-data class ReceivedSykmeldingWithValidation(
+data class ReceivedSykmelding(
     val sykmelding: Sykmelding,
     val personNrPasient: String,
     val tlfPasient: String?,

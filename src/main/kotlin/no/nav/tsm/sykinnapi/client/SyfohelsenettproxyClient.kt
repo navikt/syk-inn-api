@@ -1,6 +1,6 @@
 package no.nav.tsm.sykinnapi.client
 
-import no.nav.tsm.sykinnapi.config.M2MTokenService
+import no.nav.tsm.sykinnapi.config.token.M2MTokenService
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

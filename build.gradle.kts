@@ -62,7 +62,10 @@ dependencies {
 
     implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
 
+    implementation("org.springframework.kafka:spring-kafka")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("com.squareup.okhttp3:mockwebserver")

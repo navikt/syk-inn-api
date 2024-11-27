@@ -2,7 +2,7 @@ package no.nav.tsm.sykinnapi.mapper
 
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidation
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
@@ -13,7 +13,7 @@ fun receivedSykmeldingWithValidationMapper(
     sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
     sykmelderFnr: String,
     sykmeldingId: String
-): ReceivedSykmeldingWithValidation {
+): ReceivedSykmelding {
     val now = LocalDateTime.now(ZoneOffset.UTC)
 
     val fellesformat =
@@ -35,8 +35,8 @@ fun receivedSykmeldingWithValidationMapper(
                 signaturDato = now,
             )
 
-    val receivedSykmeldingWithValidation =
-        ReceivedSykmeldingWithValidation(
+    val receivedSykmelding =
+        ReceivedSykmelding(
             sykmelding = sykmelding,
             personNrPasient = sykInnApiNySykmeldingPayload.pasientFnr,
             tlfPasient = null,
@@ -60,5 +60,5 @@ fun receivedSykmeldingWithValidationMapper(
             validationResult = ValidationResult(Status.OK, emptyList())
         )
 
-    return receivedSykmeldingWithValidation
+    return receivedSykmelding
 }

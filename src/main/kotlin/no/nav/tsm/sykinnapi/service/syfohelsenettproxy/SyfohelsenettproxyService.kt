@@ -5,7 +5,9 @@ import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.springframework.stereotype.Service
 
 @Service
-class SyfohelsenettproxyService(private val syfohelsenettproxyClient: SyfohelsenettproxyClient) {
+class SyfohelsenettproxyService(
+    private val syfohelsenettproxyClient: SyfohelsenettproxyClient,
+) {
 
     fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler {
 

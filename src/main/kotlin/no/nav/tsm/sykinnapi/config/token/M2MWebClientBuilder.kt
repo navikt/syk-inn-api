@@ -1,4 +1,4 @@
-package no.nav.tsm.sykinnapi.config
+package no.nav.tsm.sykinnapi.config.token
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
