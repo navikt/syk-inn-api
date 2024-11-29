@@ -3,13 +3,11 @@ package no.nav.tsm.sykinnapi.mapper
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.util.fellesformatMarshaller
 import no.nav.tsm.sykinnapi.util.toString
 
-fun receivedSykmeldingWithValidationMapper(
+fun receivedSykmeldingMapper(
     sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
     sykmelderFnr: String,
     sykmeldingId: String
@@ -57,7 +55,6 @@ fun receivedSykmeldingWithValidationMapper(
             partnerreferanse = null,
             vedlegg = emptyList(),
             utenlandskSykmelding = null,
-            validationResult = ValidationResult(Status.OK, emptyList())
         )
 
     return receivedSykmelding

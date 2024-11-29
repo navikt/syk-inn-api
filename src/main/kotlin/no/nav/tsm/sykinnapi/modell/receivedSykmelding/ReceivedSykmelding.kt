@@ -28,5 +28,32 @@ data class ReceivedSykmelding(
     val fellesformat: String,
     /** TSS-ident, this is only used for infotrygd compat and should be removed in thefuture */
     val tssid: String?,
-    val validationResult: ValidationResult,
 )
+
+fun ReceivedSykmelding.toReceivedSykmeldingWithValidation(
+    validationResult: ValidationResult
+): ReceivedSykmeldingWithValidationResult {
+    return ReceivedSykmeldingWithValidationResult(
+        sykmelding = this.sykmelding,
+        personNrPasient = this.personNrPasient,
+        tlfPasient = this.tlfPasient,
+        personNrLege = this.personNrLege,
+        legeHelsepersonellkategori = this.legeHelsepersonellkategori,
+        legeHprNr = this.legeHprNr,
+        navLogId = this.navLogId,
+        msgId = this.msgId,
+        legekontorOrgNr = this.legekontorOrgNr,
+        legekontorHerId = this.legekontorHerId,
+        legekontorReshId = this.legekontorReshId,
+        legekontorOrgName = this.legekontorOrgName,
+        mottattDato = this.mottattDato,
+        rulesetVersion = this.rulesetVersion,
+        merknader = this.merknader,
+        partnerreferanse = this.partnerreferanse,
+        vedlegg = this.vedlegg,
+        utenlandskSykmelding = this.utenlandskSykmelding,
+        fellesformat = this.fellesformat,
+        tssid = this.tssid,
+        validationResult = validationResult,
+    )
+}

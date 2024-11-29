@@ -41,10 +41,10 @@ or on windows
 
 run this command
 ``` bash
-SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' ./gradlew bootRun
+SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' SYFOSMREGLER_SCOPE=syfosmreglerscope ./gradlew bootRun
 ```
 or on windows
-`SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' gradlew.bat bootRun`
+`SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' SYFOSMREGLER_SCOPE=syfosmreglerscope gradlew.bat bootRun`
 
 #### With docker
 ##### Creating a docker image

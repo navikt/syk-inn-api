@@ -12,4 +12,9 @@ class M2MWebClientBuilder(
     fun syfohelsenettproxyM2mWebBuilder(): WebClient {
         return webClientBuilder.build()
     }
+
+    @Bean
+    fun syfosmreglerM2mWebBuilder(): WebClient {
+        return webClientBuilder.build()
+    }
 }

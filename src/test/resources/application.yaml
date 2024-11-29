@@ -30,6 +30,8 @@ logging:
 syfohelsenettproxy:
     url: http://syfohelsenettproxy.teamsykmelding
 
+syfosmregler:
+    url: http://syfosmregler.teamsykmelding
 
 no.nav.security.jwt:
     issuer:
@@ -42,6 +44,14 @@ no.nav.security.jwt:
                 token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azuread/token
                 grant-type: client_credentials
                 scope: syfohelsenettproxyscope
+                authentication:
+                    client-id: client-id
+                    client-secret: secretzz
+                    client-auth-method: client_secret_basic
+            syfosmregler-m2m:
+                token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azuread/token
+                grant-type: client_credentials
+                scope: syfosmreglerscope
                 authentication:
                     client-id: client-id
                     client-secret: secretzz

@@ -50,3 +50,5 @@ spec:
   env:
     - name: SYFOHELSENETTPROXY_SCOPE
       value: api://dev-gcp.teamsykmelding.syfohelsenettproxy/.default
+    - name: SYFOSMREGLER_SCOPE
+      value: api://dev-gcp.teamsykmelding.syfosmregler/.default

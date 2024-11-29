@@ -3,13 +3,19 @@ package no.nav.tsm.sykinnapi.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
+import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
+import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Test
@@ -34,8 +40,13 @@ class SykmeldingApiControllerTest {
 
     @MockitoBean lateinit var sykmeldingService: SykmeldingService
 
+    @MockitoBean lateinit var syfosmreglerService: SyfosmreglerService
+
+    @MockitoBean lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
+
     @MockitoBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
+    //TODO fix the non-null is null
     @Test
     internal fun `Should return HttpStatus OK and body text ok`() {
 
@@ -62,6 +73,38 @@ class SykmeldingApiControllerTest {
                     ),
             )
 
+        val receivedSykmelding =
+            receivedSykmeldingMapper(
+                sykInnApiNySykmeldingPayload,
+                sykmelderFnr,
+                sykmeldingsId,
+            )
+
+        `when`(
+                receivedSykmeldingMapper.mapToReceivedSykmelding(
+                    sykInnApiNySykmeldingPayload,
+                    sykmelderFnr,
+                    sykmeldingsId,
+                )
+            )
+            .thenReturn(receivedSykmelding)
+
+        `when`(syfosmreglerService.validate(receivedSykmelding))
+            .thenReturn(
+                ValidationResult(
+                    Status.OK,
+                    emptyList(),
+                ),
+            )
+
+        val receivedSykmeldingWithValidation =
+            receivedSykmelding.toReceivedSykmeldingWithValidation(
+                ValidationResult(
+                    Status.OK,
+                    emptyList(),
+                )
+            )
+
         `when`(syfohelsenettproxyService.getBehandlerByHpr(anyString(), anyString()))
             .thenReturn(
                 Behandler(
@@ -71,10 +114,10 @@ class SykmeldingApiControllerTest {
                     fornavn = "Fornavn",
                     mellomnavn = null,
                     etternavn = "etternavn",
-                )
+                ),
             )
 
-        `when`(sykmeldingService.create(sykInnApiNySykmeldingPayload, sykmelderFnr, sykmeldingsId))
+        `when`(sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidation))
             .thenReturn(sykmeldingsId)
 
         val jwt =
@@ -86,7 +129,7 @@ class SykmeldingApiControllerTest {
                     mapOf(
                         "azp" to "consumerClientId",
                         "appid" to "consumerClientId",
-                    )
+                    ),
             )
 
         println("Bearer ${jwt.serialize()}")
