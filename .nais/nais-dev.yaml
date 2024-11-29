@@ -43,6 +43,9 @@ spec:
         - application: syfohelsenettproxy
           namespace: teamsykmelding
           cluster: dev-gcp
+        - application: syfosmregler
+          namespace: teamsykmelding
+          cluster: dev-gcp
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
   secureLogs:
