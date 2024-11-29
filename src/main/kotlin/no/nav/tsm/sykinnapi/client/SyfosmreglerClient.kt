@@ -31,7 +31,7 @@ class SyfosmreglerClient(
                 .header("Nav-CallId", receivedSykmelding.sykmelding.id)
                 .header(
                     HttpHeaders.AUTHORIZATION,
-                    "Bearer ${m2mTokenService.getM2MToken("syfohelsenettproxy-m2m")}"
+                    "Bearer ${m2mTokenService.getM2MToken("syfosmregler-m2m")}"
                 )
                 .bodyValue(receivedSykmelding)
                 .retrieve()
