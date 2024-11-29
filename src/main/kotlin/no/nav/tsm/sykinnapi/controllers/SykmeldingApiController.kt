@@ -3,7 +3,6 @@ package no.nav.tsm.sykinnapi.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.UUID
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
@@ -60,7 +59,10 @@ class SykmeldingApiController(
             val validationResult = syfosmreglerService.validate(receivedSykmelding)
 
             val receivedSykmeldingWithValidationResult =
-                receivedSykmelding.toReceivedSykmeldingWithValidation(validationResult)
+                receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
+                    receivedSykmelding,
+                    validationResult
+                )
 
             val sykmeldingid =
                 sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)

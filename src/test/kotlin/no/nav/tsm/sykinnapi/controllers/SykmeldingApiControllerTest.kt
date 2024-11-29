@@ -46,7 +46,6 @@ class SykmeldingApiControllerTest {
 
     @MockitoBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
-    //TODO fix the non-null is null
     @Test
     internal fun `Should return HttpStatus OK and body text ok`() {
 
@@ -79,15 +78,7 @@ class SykmeldingApiControllerTest {
                 sykmelderFnr,
                 sykmeldingsId,
             )
-
-        `when`(
-                receivedSykmeldingMapper.mapToReceivedSykmelding(
-                    sykInnApiNySykmeldingPayload,
-                    sykmelderFnr,
-                    sykmeldingsId,
-                )
-            )
-            .thenReturn(receivedSykmelding)
+        println("Hello its me: ${receivedSykmelding.msgId}")
 
         `when`(syfosmreglerService.validate(receivedSykmelding))
             .thenReturn(
@@ -102,8 +93,28 @@ class SykmeldingApiControllerTest {
                 ValidationResult(
                     Status.OK,
                     emptyList(),
+                ),
+            )
+
+        `when`(
+                receivedSykmeldingMapper.mapToReceivedSykmelding(
+                    sykInnApiNySykmeldingPayload,
+                    sykmelderFnr,
+                    sykmeldingsId,
                 )
             )
+            .thenReturn(receivedSykmelding)
+
+        `when`(
+                receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
+                    receivedSykmelding,
+                    ValidationResult(
+                        Status.OK,
+                        emptyList(),
+                    )
+                )
+            )
+            .thenReturn(receivedSykmeldingWithValidation)
 
         `when`(syfohelsenettproxyService.getBehandlerByHpr(anyString(), anyString()))
             .thenReturn(
