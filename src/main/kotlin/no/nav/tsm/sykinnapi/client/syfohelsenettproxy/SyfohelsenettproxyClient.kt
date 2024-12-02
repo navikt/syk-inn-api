@@ -21,7 +21,7 @@ class SyfohelsenettproxyClient(
     private val webClient =
         syfohelsenettproxyM2mWebBuilder.baseUrl(syfohelsenettproxyBaseUrl).build()
 
-    fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler {
+    fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler? {
 
         val responseBehandler =
             webClient

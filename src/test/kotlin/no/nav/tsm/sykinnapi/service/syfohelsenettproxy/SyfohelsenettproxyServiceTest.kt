@@ -46,6 +46,6 @@ class SyfohelsenettproxyServiceTest {
 
         val behandler = syfohelsenettproxyService.getBehandlerByHpr(sykmelderHpr, sykmeldingsId)
 
-        assertEquals(sykmelderHpr, behandler.hprNummer)
+        assertEquals(sykmelderHpr, behandler?.hprNummer)
     }
 }

@@ -45,7 +45,7 @@ class SykmeldingApiController(
                 sykmeldingId,
             )
 
-        if (sykmelderBehandler.fnr == null) {
+        if (sykmelderBehandler?.fnr == null) {
             throw MissingDataException("sykmelder mangler fnr!")
         } else {
 

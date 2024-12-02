@@ -21,7 +21,7 @@ class SyfosmreglerClient(
 
     private val webClient = syfosmreglerM2mWebBuilder.baseUrl(syfosmreglerBaseUrl).build()
 
-    fun validate(receivedSykmelding: ReceivedSykmelding): ValidationResult {
+    fun validate(receivedSykmelding: ReceivedSykmelding): ValidationResult? {
 
         val responseValidationResult =
             webClient
