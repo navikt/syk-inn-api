@@ -1,8 +1,6 @@
 package no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
@@ -49,16 +47,14 @@ class ReceivedSykmeldingMapperTest {
             receivedSykmeldingMapper.mapToReceivedSykmelding(
                 sykInnApiNySykmeldingPayload,
                 sykmelderFnr,
-                sykmeldingsId
+                sykmeldingsId,
             )
 
-        println(
-            ObjectMapper()
-                .apply {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                }
-                .writeValueAsString(receivedSykmelding)
+        assertEquals(sykmeldingsId, receivedSykmelding.msgId)
+        assertEquals(sykmeldingsId, receivedSykmelding.sykmelding.id)
+        assertEquals(
+            sykInnApiNySykmeldingPayload.sykmelding.hoveddiagnose.code,
+            receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose?.kode,
         )
     }
 }

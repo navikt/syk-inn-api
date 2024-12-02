@@ -78,7 +78,6 @@ class SykmeldingApiControllerTest {
                 sykmelderFnr,
                 sykmeldingsId,
             )
-        println("Hello its me: ${receivedSykmelding.msgId}")
 
         `when`(syfosmreglerService.validate(receivedSykmelding))
             .thenReturn(
@@ -142,8 +141,6 @@ class SykmeldingApiControllerTest {
                         "appid" to "consumerClientId",
                     ),
             )
-
-        println("Bearer ${jwt.serialize()}")
 
         mockMvc
             .perform(

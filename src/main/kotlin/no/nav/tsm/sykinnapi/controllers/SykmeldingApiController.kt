@@ -68,7 +68,7 @@ class SykmeldingApiController(
                 sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
 
             logger.info(
-                "sykmeldingid with id $sykmeldingid is created",
+                "sykmeldingid with id $sykmeldingid is created and forwarded to the internal systems",
             )
 
             return sykmeldingid

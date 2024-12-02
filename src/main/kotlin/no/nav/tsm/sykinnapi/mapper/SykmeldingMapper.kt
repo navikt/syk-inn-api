@@ -39,7 +39,7 @@ fun HelseOpplysningerArbeidsuforhet.toSykmelding(
         msgId = msgId,
         pasientAktoerId = pasientAktoerId,
         medisinskVurdering = medisinskVurdering.toMedisinskVurdering(),
-        skjermesForPasient = medisinskVurdering?.isSkjermesForPasient ?: false,
+        skjermesForPasient = medisinskVurdering?.isSkjermesForPasient == true,
         arbeidsgiver = arbeidsgiver.toArbeidsgiver(),
         perioder =
             aktivitet.periode.map(HelseOpplysningerArbeidsuforhet.Aktivitet.Periode::toPeriode),
