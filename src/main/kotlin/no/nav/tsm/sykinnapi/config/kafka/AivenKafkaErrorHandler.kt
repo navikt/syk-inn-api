@@ -30,7 +30,7 @@ class AivenKafkaErrorHandler :
             )
         }
         if (records.isEmpty()) {
-            logger.error("Error in lists without any records", thrownException)
+            logger.error("Error in listener without any records", thrownException)
         }
 
         super.handleRemaining(thrownException, records, consumer, container)
@@ -50,7 +50,7 @@ class AivenKafkaErrorHandler :
             )
         }
         if (data.isEmpty) {
-            logger.error("Error in lists without any records", thrownException)
+            logger.error("Error in listener without any records", thrownException)
         }
         super.handleBatch(thrownException, data, consumer, container, invokeListener)
     }
