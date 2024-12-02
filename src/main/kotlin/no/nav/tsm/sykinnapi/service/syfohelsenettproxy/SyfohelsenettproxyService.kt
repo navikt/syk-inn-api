@@ -1,6 +1,6 @@
 package no.nav.tsm.sykinnapi.service.syfohelsenettproxy
 
-import no.nav.tsm.sykinnapi.client.SyfohelsenettproxyClient
+import no.nav.tsm.sykinnapi.client.syfohelsenettproxy.SyfohelsenettproxyClient
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

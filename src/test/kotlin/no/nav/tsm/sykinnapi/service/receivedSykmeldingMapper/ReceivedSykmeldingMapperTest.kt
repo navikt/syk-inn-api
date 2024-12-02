@@ -50,6 +50,7 @@ class ReceivedSykmeldingMapperTest {
                 sykmeldingsId,
             )
 
+        // TODO we need more asserts to be sure that it is correct
         assertEquals(sykmeldingsId, receivedSykmelding.msgId)
         assertEquals(sykmeldingsId, receivedSykmelding.sykmelding.id)
         assertEquals(

@@ -1,6 +1,5 @@
-package no.nav.tsm.sykinnapi.client
+package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 
-import kotlin.test.assertEquals
 import no.nav.security.mock.oauth2.http.objectMapper
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -11,11 +10,12 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.`when`
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.reactive.function.client.WebClient
+import kotlin.test.assertEquals
 
 @EnableJwtTokenValidation
 @EnableMockOAuth2Server
@@ -27,13 +27,14 @@ class SyfohelsenettproxyClientTest {
             .also { it.start() }
             .also { System.setProperty("syfohelsenettproxy.url", "http://localhost:${it.port}") }
 
-    @MockitoBean private lateinit var m2mTokenService: M2MTokenService
+    @MockitoBean
+    private lateinit var m2mTokenService: M2MTokenService
 
     private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
     @BeforeEach
     fun setup() {
-        `when`(m2mTokenService.getM2MToken(anyString())).thenReturn("token")
+        Mockito.`when`(m2mTokenService.getM2MToken(ArgumentMatchers.anyString())).thenReturn("token")
 
         syfohelsenettproxyClient =
             SyfohelsenettproxyClient(

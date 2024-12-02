@@ -1,7 +1,7 @@
 package no.nav.tsm.sykinnapi.service.syfosmregler
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.tsm.sykinnapi.client.SyfosmreglerClient
+import no.nav.tsm.sykinnapi.client.syfosmregler.SyfosmreglerClient
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult

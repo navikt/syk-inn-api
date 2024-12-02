@@ -3,7 +3,7 @@ package no.nav.tsm.sykinnapi.service.syfohelsenettproxy
 import kotlin.test.assertEquals
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import no.nav.tsm.sykinnapi.client.SyfohelsenettproxyClient
+import no.nav.tsm.sykinnapi.client.syfohelsenettproxy.SyfohelsenettproxyClient
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

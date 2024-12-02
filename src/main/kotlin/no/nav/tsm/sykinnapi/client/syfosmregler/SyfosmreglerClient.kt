@@ -1,4 +1,4 @@
-package no.nav.tsm.sykinnapi.client
+package no.nav.tsm.sykinnapi.client.syfosmregler
 
 import no.nav.tsm.sykinnapi.config.token.M2MTokenService
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
