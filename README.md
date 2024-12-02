@@ -1,4 +1,4 @@
-# syk-inn-apo
+# syk-inn-api
 
 ## Technologies used
 * Kotlin
