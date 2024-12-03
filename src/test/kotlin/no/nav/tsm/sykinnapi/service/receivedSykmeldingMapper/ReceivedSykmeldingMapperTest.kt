@@ -6,6 +6,7 @@ import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
+import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -57,5 +58,12 @@ class ReceivedSykmeldingMapperTest {
             sykInnApiNySykmeldingPayload.sykmelding.hoveddiagnose.code,
             receivedSykmelding.sykmelding.medisinskVurdering.hovedDiagnose?.kode,
         )
+        assertEquals("12345", receivedSykmelding.personNrPasient)
+        assertEquals(null, receivedSykmelding.tssid)
+        assertEquals(null, receivedSykmelding.legekontorOrgNr)
+        assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
+        assertNotNull(receivedSykmelding.sykmelding.medisinskVurdering)
+        assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
+
     }
 }
