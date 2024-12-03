@@ -1,5 +1,7 @@
 package no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper
 
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.AvsenderSystem
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.KontaktMedPasient
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
@@ -9,6 +11,9 @@ import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import org.hibernate.validator.internal.util.Contracts.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 class ReceivedSykmeldingMapperTest {
     lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
@@ -51,7 +56,6 @@ class ReceivedSykmeldingMapperTest {
                 sykmeldingsId,
             )
 
-        // TODO we need more asserts to be sure that it is correct
         assertEquals(sykmeldingsId, receivedSykmelding.msgId)
         assertEquals(sykmeldingsId, receivedSykmelding.sykmelding.id)
         assertEquals(
@@ -64,6 +68,27 @@ class ReceivedSykmeldingMapperTest {
         assertEquals("", receivedSykmelding.sykmelding.pasientAktoerId)
         assertNotNull(receivedSykmelding.sykmelding.medisinskVurdering)
         assertEquals(false, receivedSykmelding.sykmelding.skjermesForPasient)
+        assertNotNull(receivedSykmelding.sykmelding.arbeidsgiver)
+        assertEquals(1, receivedSykmelding.sykmelding.perioder.size)
+        assertEquals(null, receivedSykmelding.sykmelding.prognose)
+        assertEquals(emptyMap(), receivedSykmelding.sykmelding.utdypendeOpplysninger)
+        assertEquals(null, receivedSykmelding.sykmelding.tiltakArbeidsplassen)
+        assertEquals(null, receivedSykmelding.sykmelding.tiltakNAV)
+        assertEquals(null, receivedSykmelding.sykmelding.andreTiltak)
+        assertEquals(null, receivedSykmelding.sykmelding.meldingTilNAV?.bistandUmiddelbart)
+        assertEquals(null, receivedSykmelding.sykmelding.meldingTilArbeidsgiver)
+        assertEquals(KontaktMedPasient(null, null), receivedSykmelding.sykmelding.kontaktMedPasient)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).year, receivedSykmelding.sykmelding.behandletTidspunkt.year)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).month, receivedSykmelding.sykmelding.behandletTidspunkt.month)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).dayOfMonth, receivedSykmelding.sykmelding.behandletTidspunkt.dayOfMonth)
+        assertNotNull(receivedSykmelding.sykmelding.behandler)
+        assertEquals(AvsenderSystem("syk-inn", "1.0.0"), receivedSykmelding.sykmelding.avsenderSystem)
+        assertEquals(LocalDate.now(), receivedSykmelding.sykmelding.syketilfelleStartDato)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).year, receivedSykmelding.sykmelding.signaturDato.year)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).month, receivedSykmelding.sykmelding.signaturDato.month)
+        assertEquals(LocalDateTime.of(LocalDate.now(), LocalTime.NOON).dayOfMonth, receivedSykmelding.sykmelding.signaturDato.dayOfMonth)
+        assertEquals(null, receivedSykmelding.sykmelding.navnFastlege)
+        assertEquals(null, receivedSykmelding.legeHelsepersonellkategori)
 
     }
 }
