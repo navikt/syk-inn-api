@@ -12,7 +12,7 @@ class SyfohelsenettproxyService(
 
     private val logger = LoggerFactory.getLogger(SyfohelsenettproxyService::class.java)
 
-    fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler? {
+    fun getBehandlerByHpr(behandlerHpr: String, sykmeldingId: String): Behandler {
         logger.info("Trying to fetch behandler for hpr=$behandlerHpr, sykmeldingId=$sykmeldingId")
 
         val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)

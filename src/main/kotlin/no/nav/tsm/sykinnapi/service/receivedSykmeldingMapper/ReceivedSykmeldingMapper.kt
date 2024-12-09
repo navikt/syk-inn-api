@@ -1,8 +1,6 @@
 package no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
@@ -13,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class ReceivedSykmeldingMapper {
+class ReceivedSykmeldingMapper(private val objectMapper: ObjectMapper) {
 
     private val securelog = LoggerFactory.getLogger("securelog")
 
@@ -32,10 +30,7 @@ class ReceivedSykmeldingMapper {
 
         securelog.info(
             "Successfully created receivedSykmelding: ${
-                ObjectMapper().apply {
-                    registerKotlinModule()
-                    registerModule(JavaTimeModule())
-                }.writeValueAsString(receivedSykmelding)
+                objectMapper.writeValueAsString(receivedSykmelding)
             }",
         )
 
