@@ -34,7 +34,7 @@ class SyfohelsenettproxyClientTest {
                 ),
             )
 
-        mockRestServiceServer.expect()
+        // mockRestServiceServer.expect()
         /*
         mockRestServiceServer.expect() . .enqueue(
             MockResponse()
