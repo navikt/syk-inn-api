@@ -3,22 +3,34 @@ package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
+import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpStatus.*
+import org.springframework.http.MediaType.*
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.*
+import org.springframework.test.web.client.response.MockRestResponseCreators
+import java.net.URI
 
 @RestClientTest(SyfohelsenettproxyClient::class)
-class SyfohelsenettproxyClientTest {
+class SyfohelsenettproxyClientTest( @Value("\${syfohelsenettproxy.url}") private val baseUrl: String) {
 
-    @Autowired private lateinit var mockRestServiceServer: MockRestServiceServer
+    @Autowired
+    private lateinit var mockRestServiceServer: MockRestServiceServer
 
-    @Autowired private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
+    @Autowired
+    private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
-    @Autowired private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    internal fun `Should return behandler`() {
+    @DisplayName("Should return behandler")
+    internal fun behandler() {
         val behandlerFnr = "23123131"
         val behandlerHpr = "123123"
         val sykmeldingId = "21322-223-21333-22"
@@ -33,18 +45,15 @@ class SyfohelsenettproxyClientTest {
                     etternavn = "etternavn",
                 ),
             )
-
-        // mockRestServiceServer.expect()
-        /*
-        mockRestServiceServer.expect() . .enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .addHeader("Content-Type", "application/json")
-                .setBody(objectMapper.writeValueAsString(response))
-        )*/
+        mockRestServiceServer
+            .expect(requestTo(URI("$baseUrl/api/v2/behandlerMedHprNummer")))
+            .andExpect(method(GET))
+            .andRespond(MockRestResponseCreators.withStatus(OK)
+                .contentType(APPLICATION_JSON)
+                .body(response))
 
         val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)
-
         assertEquals(behandlerFnr, behandler.fnr)
+
     }
 }
