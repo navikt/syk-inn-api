@@ -3,14 +3,11 @@ package no.nav.tsm.sykinnapi.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
-import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet.AktivitetIkkeMulig
-import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem.*
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
@@ -22,50 +19,22 @@ import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.*
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.invoke
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
-@Import(OAuth2ClientAutoConfiguration::class)
 class SykmeldingApiControllerTest {
 
     @TestConfiguration
     class TestConfig {
-
-       // @Bean
-        fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-            http {
-                oauth2ResourceServer {
-                    jwt {
-                    }
-                }
-                oauth2Client {
-                }
-                authorizeHttpRequests {
-                    authorize("/internal/health/**", permitAll)
-                    authorize(anyRequest, authenticated)
-                }
-            }
-            return http.build()
-        }
         @Bean
         fun sykmeldingInnsending(
             sykmelding: SykmeldingService,
@@ -118,11 +87,10 @@ class SykmeldingApiControllerTest {
     @Test
     @DisplayName("Should return HttpStatus OK and body text ok")
     internal fun ok() {
-
         mockMvc
             .perform(
                 post("/api/v1/sykmelding/create")
-                    .with(SecurityMockMvcRequestPostProcessors.jwt())
+                    .with(jwt())
             .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(payload)),
             ).andExpect(status().isOk)
@@ -130,7 +98,7 @@ class SykmeldingApiControllerTest {
 
     @Test
     @DisplayName("Should fail if no token")
-    internal fun fail() {
+    internal fun forbidden() {
         mockMvc
             .perform(
                 post("/api/v1/sykmelding/create")
