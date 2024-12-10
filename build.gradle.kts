@@ -37,21 +37,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openapiVersion")
-
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-
     implementation("io.micrometer:micrometer-registry-prometheus")
-
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-
     implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegenVersion")
     implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegenVersion")
     implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegenVersion")
-
     implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
     implementation("javax.activation:activation:$javaxActivationVersion")
@@ -59,7 +55,7 @@ dependencies {
     implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
 
     implementation("org.springframework.kafka:spring-kafka")
-
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

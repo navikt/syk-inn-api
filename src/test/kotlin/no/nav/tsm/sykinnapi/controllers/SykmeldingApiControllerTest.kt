@@ -25,11 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.*
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
 @ExtendWith(MockKExtension::class)
@@ -43,104 +44,73 @@ class SykmeldingApiControllerTest {
             regler: SyfosmreglerService,
             mapper: ReceivedSykmeldingMapper,
             proxy: SyfohelsenettproxyService,
-            objectMapper: ObjectMapper
-        ) = SykmeldingInnsending(sykmelding, proxy, regler, mapper, objectMapper)
+            objectMapper: ObjectMapper) =
+            SykmeldingInnsending(sykmelding, proxy, regler, mapper,objectMapper)
     }
 
-    @Autowired lateinit var mockMvc: MockMvc
+    @Autowired
+    lateinit var mockMvc: MockMvc
 
-    @Autowired lateinit var objectMapper: ObjectMapper
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
-    @MockkBean lateinit var sykmelding: SykmeldingService
+    @MockkBean
+    lateinit var sykmelding: SykmeldingService
 
-    @MockkBean lateinit var regler: SyfosmreglerService
+    @MockkBean
+    lateinit var regler: SyfosmreglerService
 
-    @MockkBean lateinit var mapper: ReceivedSykmeldingMapper
+    @MockkBean
+    lateinit var mapper: ReceivedSykmeldingMapper
 
-    @MockkBean lateinit var proxy: SyfohelsenettproxyService
+    @MockkBean
+    lateinit var proxy: SyfohelsenettproxyService
 
-    @Autowired lateinit var innsender: SykmeldingInnsending
+    @Autowired
+    lateinit var innsender: SykmeldingInnsending
 
-    @Test
-    @DisplayName("Should return HttpStatus Forbidden")
-    internal fun forbidden() {
+    val payload = SykInnApiNySykmeldingPayload("12345", "123123", Sykmelding(Hoveddiagnose(ICD10, "S017"), AktivitetIkkeMulig("2020-01-01", "2020-01-02" )))
 
-        //val client = MockMvcWebTestClient.bindToController(SykmeldingApiController::class).build()
 
+    @BeforeTest
+    fun setup() {
         val sykmelderFnr = "12345678912"
         val sykmeldingsId = "123213-2323-213123123"
-        val payload =
-            SykInnApiNySykmeldingPayload(
-                "12345",
-                "123123",
-                Sykmelding(
-                    Hoveddiagnose(ICD10, "S017"),
-                    AktivitetIkkeMulig("2020-01-01", "2020-01-02")
-                )
-            )
 
         val receivedSykmelding = receivedSykmeldingMapper(payload, sykmelderFnr, sykmeldingsId)
-        val receivedSykmeldingWithValidation =
-            receivedSykmelding.toReceivedSykmeldingWithValidation(ValidationResult.OK)
+        val receivedSykmeldingWithValidation = receivedSykmelding.toReceivedSykmeldingWithValidation(ValidationResult.OK)
 
         every { regler.validate(receivedSykmelding) } returns ValidationResult.OK
-        every {
-            mapper.mapToReceivedSykmeldingWithValidationResult(
-                receivedSykmelding,
-                ValidationResult.OK
-            )
-        } returns receivedSykmeldingWithValidation
-        every { proxy.getBehandlerByHpr(any(), any()) } returns
-            Behandler(emptyList(), sykmelderFnr, payload.sykmelderHpr, "Fornavn", null, "etternavn")
-        every { sykmelding.sendToOkTopic(receivedSykmeldingWithValidation) } returns sykmeldingsId
-
-        mockMvc
-            .perform(
-                post("/api/v1/sykmelding/create")
-                    .contentType(APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(payload)),
-            )
-            .andExpect(status().isForbidden())
+        every { mapper.mapToReceivedSykmelding(any(),any(),any()) } returns receivedSykmelding
+        every { mapper.mapToReceivedSykmeldingWithValidationResult(receivedSykmelding, ValidationResult.OK) } returns receivedSykmeldingWithValidation
+        every {proxy.getBehandlerByHpr(any(), any())  } returns Behandler(emptyList(), sykmelderFnr, payload.sykmelderHpr, "Fornavn", null, "etternavn")
+        every {sykmelding.sendToOkTopic(receivedSykmeldingWithValidation)} returns sykmeldingsId
     }
+    
 
     @Test
     @DisplayName("Should return HttpStatus OK and body text ok")
     internal fun ok() {
+        mockMvc
+            .perform(
+                post("/api/v1/sykmelding/create")
+                    .with(jwt())
+            .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            ).andExpect(status().isOk)
+    }
 
-        val sykmelderFnr = "12345678912"
-        val sykmeldingsId = "123213-2323-213123123"
-        val payload =
-            SykInnApiNySykmeldingPayload(
-                "12345",
-                "123123",
-                Sykmelding(
-                    Hoveddiagnose(ICD10, "S017"),
-                    AktivitetIkkeMulig("2020-01-01", "2020-01-02")
-                )
-            )
-
-        val receivedSykmelding = receivedSykmeldingMapper(payload, sykmelderFnr, sykmeldingsId)
-        val receivedSykmeldingWithValidation =
-            receivedSykmelding.toReceivedSykmeldingWithValidation(ValidationResult.OK)
-
-        every { regler.validate(receivedSykmelding) } returns ValidationResult.OK
-        every {
-            mapper.mapToReceivedSykmeldingWithValidationResult(
-                receivedSykmelding,
-                ValidationResult.OK
-            )
-        } returns receivedSykmeldingWithValidation
-        every { proxy.getBehandlerByHpr(any(), any()) } returns
-            Behandler(emptyList(), sykmelderFnr, payload.sykmelderHpr, "Fornavn", null, "etternavn")
-        every { sykmelding.sendToOkTopic(receivedSykmeldingWithValidation) } returns sykmeldingsId
-
+    @Test
+    @DisplayName("Should fail if no token")
+    internal fun forbidden() {
         mockMvc
             .perform(
                 post("/api/v1/sykmelding/create")
                     .contentType(APPLICATION_JSON)
-                    .header(AUTHORIZATION, "Bearer supersecrettoken")
                     .content(objectMapper.writeValueAsString(payload)),
-            )
-            .andExpect(status().isOk())
+            ).andExpect(status().isForbidden)
+
     }
 }
+
+

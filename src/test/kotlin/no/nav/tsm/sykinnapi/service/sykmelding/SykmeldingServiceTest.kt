@@ -29,11 +29,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 @SpringBootTest
 class SykmeldingServiceTest {
 
-    @MockitoBean lateinit var sykmeldingOKProducer: SykmeldingOKProducer
+    @MockitoBean
+    lateinit var sykmeldingOKProducer: SykmeldingOKProducer
 
     lateinit var sykmeldingService: SykmeldingService
 
-    @Autowired private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var mapper: ObjectMapper
 
     @BeforeEach
     fun setup() {
@@ -77,7 +79,7 @@ class SykmeldingServiceTest {
         // `when`(sykmeldingOKProducer.send(producerRecord)).thenReturn(futureRecordMetadata)
 
         val receivedSykmeldingWithValidation =
-            ReceivedSykmeldingMapper(objectMapper)
+            ReceivedSykmeldingMapper(mapper)
                 .mapToReceivedSykmelding(sykInnApiNySykmeldingPayload, sykmelderFnr, sykmeldingsId)
                 .toReceivedSykmeldingWithValidation(
                     ValidationResult(

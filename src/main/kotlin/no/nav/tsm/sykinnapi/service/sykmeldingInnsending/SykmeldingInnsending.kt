@@ -41,12 +41,13 @@ class SykmeldingInnsending(
                 sykmeldingId,
             )
 
-        val receivedSykmelding =
-            receivedSykmeldingMapper.mapToReceivedSykmelding(
-                sykInnApiNySykmeldingPayload,
-                sykmelderBehandler.fnr,
-                sykmeldingId,
-            )
+            val receivedSykmelding =
+                receivedSykmeldingMapper.mapToReceivedSykmelding(
+                    sykInnApiNySykmeldingPayload,
+                    sykmelderBehandler.fnr,
+                    sykmeldingId,
+                )
+
 
         val validationResult = syfosmreglerService.validate(receivedSykmelding)
 
@@ -61,7 +62,7 @@ class SykmeldingInnsending(
         logger.info(
             "sykmeldingid with id $sykmeldingid is created and forwarded to the internal systems",
         )
+            return sykmeldingid
+        }
 
-        return sykmeldingid
-    }
 }

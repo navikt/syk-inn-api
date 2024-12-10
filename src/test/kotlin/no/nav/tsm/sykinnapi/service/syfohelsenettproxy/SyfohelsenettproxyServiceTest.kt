@@ -13,7 +13,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 @SpringBootTest
 class SyfohelsenettproxyServiceTest {
 
-    @MockitoBean lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
+    @MockitoBean
+    lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
     lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 

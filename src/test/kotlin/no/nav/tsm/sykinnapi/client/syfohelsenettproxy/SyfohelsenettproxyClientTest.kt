@@ -1,7 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.DisplayName
@@ -15,17 +14,21 @@ import org.springframework.http.MediaType.*
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.*
+import java.net.URI
 
 @RestClientTest(SyfohelsenettproxyClient::class)
 class SyfohelsenettproxyClientTest(
     @Value("\${syfohelsenettproxy.url}") private val baseUrl: String
 ) {
 
-    @Autowired private lateinit var mockRestServiceServer: MockRestServiceServer
+    @Autowired
+    private lateinit var server: MockRestServiceServer
 
-    @Autowired private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
+    @Autowired
+    private lateinit var client: SyfohelsenettproxyClient
 
-    @Autowired private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var mapper: ObjectMapper
 
     @Test
     @DisplayName("Should return behandler")
@@ -34,7 +37,7 @@ class SyfohelsenettproxyClientTest(
         val behandlerHpr = "123123"
         val sykmeldingId = "21322-223-21333-22"
         val response =
-            objectMapper.writeValueAsString(
+            mapper.writeValueAsString(
                 Behandler(
                     godkjenninger = emptyList(),
                     fnr = behandlerFnr,
@@ -44,11 +47,14 @@ class SyfohelsenettproxyClientTest(
                     etternavn = "etternavn",
                 ),
             )
-        mockRestServiceServer
+        server
             .expect(requestTo(URI("$baseUrl/api/v2/behandlerMedHprNummer")))
             .andExpect(method(GET))
-            .andRespond(withStatus(OK).contentType(APPLICATION_JSON).body(response))
-        val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)
+            .andRespond(
+                withStatus(OK)
+                .contentType(APPLICATION_JSON)
+                .body(response))
+        val behandler = client.getBehandlerByHpr(behandlerHpr, sykmeldingId)
         assertEquals(behandlerFnr, behandler.fnr)
     }
 }
