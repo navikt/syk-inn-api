@@ -2,10 +2,8 @@ package no.nav.tsm.sykinnapi.service.sykmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.concurrent.Future
-import kotlin.String
 import kotlin.test.assertTrue
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
-import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
@@ -15,11 +13,9 @@ import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,13 +25,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 @SpringBootTest
 class SykmeldingServiceTest {
 
-    @MockitoBean
-    lateinit var sykmeldingOKProducer: SykmeldingOKProducer
+    @MockitoBean lateinit var sykmeldingOKProducer: SykmeldingOKProducer
 
     lateinit var sykmeldingService: SykmeldingService
 
-    @Autowired
-    private lateinit var mapper: ObjectMapper
+    @Autowired private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {
@@ -68,18 +62,12 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        val producerRecord = mock<ProducerRecord<String, ReceivedSykmeldingWithValidationResult>>()
-
         val futureRecordMetadata = mock<Future<RecordMetadata>>()
-        val captor = captor<ProducerRecord<String, ReceivedSykmeldingWithValidationResult>>()
 
         `when`(futureRecordMetadata.get()).thenReturn(mock<RecordMetadata>())
-        // `when`(sykmeldingOKProducer.send(captor.capture())).thenReturn(futureRecordMetadata)
-
-        // `when`(sykmeldingOKProducer.send(producerRecord)).thenReturn(futureRecordMetadata)
 
         val receivedSykmeldingWithValidation =
-            ReceivedSykmeldingMapper(mapper)
+            ReceivedSykmeldingMapper(objectMapper)
                 .mapToReceivedSykmelding(sykInnApiNySykmeldingPayload, sykmelderFnr, sykmeldingsId)
                 .toReceivedSykmeldingWithValidation(
                     ValidationResult(

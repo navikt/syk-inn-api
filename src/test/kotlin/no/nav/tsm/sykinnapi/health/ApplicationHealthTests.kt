@@ -5,24 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-
 import org.springframework.http.MediaType.*
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ApplicationHealthTests(@Value("\${management.endpoints.web.base-path}") private val basePath: String) {
+class ApplicationHealthTests(
+    @Value("\${management.endpoints.web.base-path}") private val basePath: String
+) {
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
+    @Autowired private lateinit var mockMvc: MockMvc
+
     @Test
     internal fun `Should return HttpStatus OK when calling endpoint internal health`() {
-            mockMvc.perform(get("$basePath/health").accept(APPLICATION_JSON))
-                .andExpect(status().isOk)
-                .andExpect(content().contentType(APPLICATION_JSON))
+        mockMvc
+            .perform(get("$basePath/health").accept(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(APPLICATION_JSON))
     }
 }
