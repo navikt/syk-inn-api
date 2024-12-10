@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.AvsenderSystem
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.KontaktMedPasient
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
@@ -15,11 +16,14 @@ import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 class ReceivedSykmeldingMapperTest {
     lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
-    private lateinit var objectMapper: ObjectMapper
+    @Autowired private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {

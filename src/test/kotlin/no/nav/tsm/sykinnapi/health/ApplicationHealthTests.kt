@@ -1,23 +1,29 @@
 package no.nav.tsm.sykinnapi.health
 
-import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestClient
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RestClientTest
-@AutoConfigureWebClient(registerRestTemplate = true)
-class ApplicationHealthTests {
+@SpringBootTest
+@AutoConfigureMockMvc
+class ApplicationHealthTests(
+    @Value("\${management.endpoints.web.base-path}") private val basePath: String
+) {
+
+    @Autowired private lateinit var mockMvc: MockMvc
 
     @Test
-    internal fun `Should return HttpStatus OK when calling endpoint internal health`(
-        @Autowired restClient: RestClient
-    ) {
-        val entity = restClient.get().uri("/internal/health").retrieve().toBodilessEntity()
-        assertEquals(HttpStatus.OK, entity.statusCode)
+    internal fun `Should return HttpStatus OK when calling endpoint internal health`() {
+        mockMvc
+            .perform(get("$basePath/health").accept(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(APPLICATION_JSON))
     }
 }
