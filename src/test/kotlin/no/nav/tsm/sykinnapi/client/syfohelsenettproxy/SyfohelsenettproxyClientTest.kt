@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.*
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.*
-import org.springframework.test.web.client.response.MockRestResponseCreators
+import org.springframework.test.web.client.response.MockRestResponseCreators.*
 import java.net.URI
 
 @RestClientTest(SyfohelsenettproxyClient::class)
@@ -48,10 +48,10 @@ class SyfohelsenettproxyClientTest( @Value("\${syfohelsenettproxy.url}") private
         mockRestServiceServer
             .expect(requestTo(URI("$baseUrl/api/v2/behandlerMedHprNummer")))
             .andExpect(method(GET))
-            .andRespond(MockRestResponseCreators.withStatus(OK)
+            .andRespond(
+                withStatus(OK)
                 .contentType(APPLICATION_JSON)
                 .body(response))
-
         val behandler = syfohelsenettproxyClient.getBehandlerByHpr(behandlerHpr, sykmeldingId)
         assertEquals(behandlerFnr, behandler.fnr)
 

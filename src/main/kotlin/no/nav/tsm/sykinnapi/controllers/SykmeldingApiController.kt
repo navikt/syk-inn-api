@@ -9,12 +9,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class SykmeldingApiController(val sykmeldingInnsending: SykmeldingInnsending) {
     @PostMapping("/api/v1/sykmelding/create")
-    fun createSykmelding(
-        @RequestBody sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
-    ): String {
-
-        return sykmeldingInnsending.send(sykInnApiNySykmeldingPayload)
-    }
+    fun createSykmelding(@RequestBody sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload) =
+        sykmeldingInnsending.send(sykInnApiNySykmeldingPayload)
 }
-
-class MissingDataException(override val message: String) : Exception(message)

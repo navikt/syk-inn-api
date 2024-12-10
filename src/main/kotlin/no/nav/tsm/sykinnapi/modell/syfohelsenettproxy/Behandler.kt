@@ -2,7 +2,7 @@ package no.nav.tsm.sykinnapi.modell.syfohelsenettproxy
 
 data class Behandler(
     val godkjenninger: List<Godkjenning> = emptyList(),
-    val fnr: String?,
+    val fnr: String,
     val hprNummer: String?,
     val fornavn: String?,
     val mellomnavn: String?,
