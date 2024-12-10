@@ -3,6 +3,7 @@ package no.nav.tsm.sykinnapi.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
@@ -19,6 +20,7 @@ import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -31,6 +33,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
+@ExtendWith(MockKExtension::class)
 class SykmeldingApiControllerTest {
 
     @TestConfiguration
@@ -83,6 +86,7 @@ class SykmeldingApiControllerTest {
         every {proxy.getBehandlerByHpr(any(), any())  } returns Behandler(emptyList(), sykmelderFnr, payload.sykmelderHpr, "Fornavn", null, "etternavn")
         every {sykmelding.sendToOkTopic(receivedSykmeldingWithValidation)} returns sykmeldingsId
     }
+    
 
     @Test
     @DisplayName("Should return HttpStatus OK and body text ok")
@@ -105,6 +109,7 @@ class SykmeldingApiControllerTest {
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(payload)),
             ).andExpect(status().isForbidden)
+
     }
 }
 

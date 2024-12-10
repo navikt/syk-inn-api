@@ -1,6 +1,7 @@
 package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.net.URI
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.DisplayName
@@ -17,7 +18,9 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.*
 import java.net.URI
 
 @RestClientTest(SyfohelsenettproxyClient::class)
-class SyfohelsenettproxyClientTest( @Value("\${syfohelsenettproxy.url}") private val baseUrl: String) {
+class SyfohelsenettproxyClientTest(
+    @Value("\${syfohelsenettproxy.url}") private val baseUrl: String
+) {
 
     @Autowired
     private lateinit var server: MockRestServiceServer
@@ -54,6 +57,5 @@ class SyfohelsenettproxyClientTest( @Value("\${syfohelsenettproxy.url}") private
                 .body(response))
         val behandler = client.getBehandlerByHpr(behandlerHpr, sykmeldingId)
         assertEquals(behandlerFnr, behandler.fnr)
-
     }
 }

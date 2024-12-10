@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.AvsenderSystem
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.KontaktMedPasient
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet.*
@@ -20,8 +21,9 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest
 import kotlin.test.assertNull
 
 @JsonTest
-class ReceivedSykmeldingMapperTest {
+import org.springframework.boot.test.context.SpringBootTest
 
+class ReceivedSykmeldingMapperTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
