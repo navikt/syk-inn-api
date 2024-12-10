@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 
 import org.springframework.http.MediaType.*
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -23,7 +22,6 @@ class ApplicationHealthTests(@Value("\${management.endpoints.web.base-path}") pr
     private lateinit var mockMvc: MockMvc
     @Test
     internal fun `Should return HttpStatus OK when calling endpoint internal health`() {
-        println("basePath: $basePath")
             mockMvc.perform(get("$basePath/health").accept(APPLICATION_JSON))
                 .andExpect(status().isOk)
                 .andExpect(content().contentType(APPLICATION_JSON))
