@@ -15,13 +15,19 @@ import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.json.JsonTest
+import kotlin.test.BeforeTest
 
+@JsonTest
 class ReceivedSykmeldingMapperTest {
+
     lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
+    @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         receivedSykmeldingMapper = ReceivedSykmeldingMapper(objectMapper)
     }
