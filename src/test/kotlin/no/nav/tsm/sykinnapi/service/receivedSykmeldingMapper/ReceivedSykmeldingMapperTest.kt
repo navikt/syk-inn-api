@@ -21,8 +21,6 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest
 import kotlin.test.assertNull
 
 @JsonTest
-import org.springframework.boot.test.context.SpringBootTest
-
 class ReceivedSykmeldingMapperTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper

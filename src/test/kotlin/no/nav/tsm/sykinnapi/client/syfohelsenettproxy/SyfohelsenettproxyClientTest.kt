@@ -1,7 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.DisplayName
