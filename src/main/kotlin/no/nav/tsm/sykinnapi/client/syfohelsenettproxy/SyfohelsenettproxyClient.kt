@@ -3,8 +3,8 @@ package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 import no.nav.tsm.sykinnapi.client.RestClientConfiguration.LoggingErrorHandler
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
+import org.springframework.http.HttpHeaders.*
+import org.springframework.http.MediaType.*
 import org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -24,7 +24,7 @@ class SyfohelsenettproxyClient(
             .get()
             .uri { uriBuilder -> uriBuilder.path("/api/v2/behandlerMedHprNummer").build() }
             .attributes(clientRegistrationId("syfohelsenettproxy-m2m"))
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .header("Nav-CallId", sykmeldingId)
             .header("hprNummer", behandlerHpr)
             .retrieve()

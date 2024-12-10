@@ -2,7 +2,6 @@ package no.nav.tsm.sykinnapi.service.sykmeldingInnsending
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.UUID
-import no.nav.tsm.sykinnapi.controllers.MissingDataException
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
@@ -42,10 +41,6 @@ class SykmeldingInnsending(
                 sykmeldingId,
             )
 
-        if (sykmelderBehandler.fnr == null) {
-            throw MissingDataException("sykmelder mangler fnr!")
-        } else {
-
             val receivedSykmelding =
                 receivedSykmeldingMapper.mapToReceivedSykmelding(
                     sykInnApiNySykmeldingPayload,
@@ -70,5 +65,4 @@ class SykmeldingInnsending(
 
             return sykmeldingid
         }
-    }
 }
