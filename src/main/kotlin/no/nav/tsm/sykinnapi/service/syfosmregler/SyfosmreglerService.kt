@@ -15,13 +15,13 @@ class SyfosmreglerService(
     fun validate(receivedSykmelding: ReceivedSykmelding): ValidationResult {
 
         val validationResult = syfosmreglerClient.validate(receivedSykmelding)
-        if (validationResult?.status == Status.OK) {
+        if (validationResult.status == Status.OK) {
             return validationResult
         }
 
         throw ValidationResultException(
-            "validationResult status is :${validationResult?.status} " +
-                "rules are: ${jacksonObjectMapper().writeValueAsString(validationResult?.ruleHits)}"
+            "validationResult status is :${validationResult.status} " +
+                "rules are: ${jacksonObjectMapper().writeValueAsString(validationResult.ruleHits)}"
         )
     }
 }
