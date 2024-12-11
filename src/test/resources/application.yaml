@@ -8,30 +8,7 @@ server:
 spring:
     application:
         name: "syk-inn-api"
-    security:
-        oauth2:
-            client:
-                registration:
-                    syfohelsenettproxy-m2m:
-                        authorization-grant-type: client_credentials
-                        client-authentication-method: client_secret_basic
-                        client-id: client-id
-                        client-secret: secretzz
-                        provider: aad
-                        scope:
-                            - syfohelsenettproxyscope
 
-                    syfosmregler-m2m:
-                        authorization-grant-type: client_credentials
-                        client-authentication-method: client_secret_basic
-                        client-id: client-id
-                        client-secret: secretzz
-                        provider: aad
-                        scope:
-                            - syfosmreglerscope
-                provider:
-                    aad:
-                        issuer-uri: 'http://localhost:${mock-oauth2-server.port}/azuread'
 management:
     endpoint:
         health.probes.enabled: true
