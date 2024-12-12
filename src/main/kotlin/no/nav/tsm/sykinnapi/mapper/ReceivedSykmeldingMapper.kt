@@ -4,8 +4,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
-import no.nav.tsm.sykinnapi.util.fellesformatMarshaller
-import no.nav.tsm.sykinnapi.util.toString
 
 fun receivedSykmeldingMapper(
     sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,

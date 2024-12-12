@@ -1,4 +1,4 @@
-package no.nav.tsm.sykinnapi.util
+package no.nav.tsm.sykinnapi.mapper
 
 import java.io.StringWriter
 import javax.xml.bind.JAXBContext

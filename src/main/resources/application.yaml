@@ -8,6 +8,10 @@ server:
 spring:
     security:
         oauth2:
+            resourceserver:
+                jwt:
+                    audiences: ${azure.app.client.id}
+                    issuer-uri: ${azure.openid.config.issuer}
             client:
                 registration:
                     syfohelsenettproxy-m2m:
