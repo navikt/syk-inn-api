@@ -1,6 +1,8 @@
 package no.nav.tsm.sykinnapi.client.syfosmregler
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.net.URI
+import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
@@ -23,8 +25,6 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestClient
-import java.net.URI
-import kotlin.test.assertEquals
 
 @RestClientTest(SyfosmreglerClient::class)
 class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") val baseUrl: String) {

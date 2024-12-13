@@ -27,9 +27,7 @@ class SyfosmreglerClient(
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header("Nav-CallId", receivedSykmelding.sykmelding.id)
             .retrieve()
-            .onStatus({ it.isError }) { req, res ->
-                onStatusError(res)
-            }
+            .onStatus({ it.isError }) { req, res -> onStatusError(res) }
             .body<ValidationResult>()
             ?: throw RuntimeException("Body is not ValidationResult")
 

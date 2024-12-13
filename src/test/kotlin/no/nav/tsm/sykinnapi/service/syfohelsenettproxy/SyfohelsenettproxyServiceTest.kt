@@ -2,14 +2,15 @@ package no.nav.tsm.sykinnapi.service.syfohelsenettproxy
 
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.client.syfohelsenettproxy.SyfohelsenettproxyClient
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import org.junit.jupiter.api.extension.ExtendWith
 
-@SpringBootTest
+@ExtendWith(MockKExtension::class)
 class SyfohelsenettproxyServiceTest {
 
     @MockK lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
