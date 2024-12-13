@@ -1,8 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfosmregler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
-import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
@@ -15,15 +13,30 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
-import org.springframework.http.HttpMethod.*
-import org.springframework.http.HttpStatus.*
-import org.springframework.http.MediaType.*
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpStatus.OK
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers.*
-import org.springframework.test.web.client.response.MockRestResponseCreators.*
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.web.client.RestClient
+import java.net.URI
+import kotlin.test.assertEquals
 
 @RestClientTest(SyfosmreglerClient::class)
-class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") private val baseUrl: String) {
+class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") val baseUrl: String) {
+
+    @TestConfiguration
+    class TestConfig(@Value("\${syfosmregler.url}") val baseUrl: String) {
+        @Bean("syfosmreglerClient")
+        fun syfosmreglerClient(builder: RestClient.Builder): RestClient {
+            return builder.baseUrl(baseUrl).build()
+        }
+    }
+
     @Autowired private lateinit var mockRestServiceServer: MockRestServiceServer
 
     @Autowired private lateinit var syfosmreglerClient: SyfosmreglerClient
@@ -42,8 +55,8 @@ class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") private val baseUrl:
                 "123123",
                 Sykmelding(
                     Hoveddiagnose(ICD10, "S017"),
-                    AktivitetIkkeMulig("2020-01-01", "2020-01-02")
-                )
+                    AktivitetIkkeMulig("2020-01-01", "2020-01-02"),
+                ),
             )
 
         val receivedSykmelding =

@@ -1,11 +1,12 @@
 package no.nav.tsm.sykinnapi.client.syfosmregler
 
-import no.nav.tsm.sykinnapi.client.RestClientConfiguration.LoggingErrorHandler
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
-import org.springframework.beans.factory.annotation.Value
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.client.ClientHttpResponse
 import org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -13,9 +14,7 @@ import org.springframework.web.client.body
 
 @Component
 class SyfosmreglerClient(
-    syfosmreglerM2mRestClientBuilder: RestClient.Builder,
-    @Value("\${syfosmregler.url}") syfosmreglerBaseUrl: String,
-    private val handler: RestClient.ResponseSpec.ErrorHandler = LoggingErrorHandler()
+    @Qualifier("syfosmreglerClient") private val syfosmreglerClient: RestClient,
 ) {
     private val restClient = syfosmreglerM2mRestClientBuilder.baseUrl(syfosmreglerBaseUrl).build()
 
@@ -27,7 +26,15 @@ class SyfosmreglerClient(
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header("Nav-CallId", receivedSykmelding.sykmelding.id)
             .retrieve()
-            .onStatus({ it.isError }) { req, res -> handler.handle(req, res) }
+            .onStatus({ it.isError }) { req, res ->
+                onStatusError(res)
+            }
             .body<ValidationResult>()
-            ?: throw RuntimeException("Strange Error")
+            ?: throw RuntimeException("Body is not ValidationResult")
+
+    private fun onStatusError(res: ClientHttpResponse) {
+        throw RuntimeException("Error got statuscode: ${res.statusCode}").also {
+            logger.error(it.message, it)
+        }
+    }
 }

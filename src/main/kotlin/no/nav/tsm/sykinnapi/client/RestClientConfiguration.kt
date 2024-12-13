@@ -1,16 +1,14 @@
 package no.nav.tsm.sykinnapi.client
 
-import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpRequest
-import org.springframework.http.client.ClientHttpResponse
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor
-import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
+import org.springframework.web.client.RestClient
 
 @Import(OAuth2ClientAutoConfiguration::class)
 class RestClientConfiguration {
