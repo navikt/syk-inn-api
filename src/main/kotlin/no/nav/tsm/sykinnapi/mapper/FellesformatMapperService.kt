@@ -339,7 +339,7 @@ fun getTextFromDiagnose(
             Diagnosekoder.icpc2[kode]!!.text
         }
         else -> {
-            throw MappingException("Ukjent diagnose kode")
+            throw MappingException("Unknown diagnose kode")
         }
     }
 }
@@ -353,7 +353,7 @@ fun toDiagnoseKithSystem(diagnoseSystem: String): String {
             "2.16.578.1.12.4.1.1.7170"
         }
         else -> {
-            throw MappingException("Ukjent diagnose system")
+            throw MappingException("Unknown diagnose system")
         }
     }
 }

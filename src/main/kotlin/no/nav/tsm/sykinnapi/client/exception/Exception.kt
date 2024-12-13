@@ -45,6 +45,6 @@ class IrrecoverableIntegrationException(
 class RecoverableIntegrationException(
     status: HttpStatusCode,
     uri: URI,
-    detail: String? = "Fikk respons $status",
+    detail: String? = "Got response $status",
     cause: Throwable? = null
 ) : IntegrationException(status, uri, detail, cause)

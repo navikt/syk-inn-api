@@ -20,10 +20,9 @@ class RestClientConfiguration {
         private val logger = LoggerFactory.getLogger(LoggingErrorHandler::class.java)
 
         override fun handle(request: HttpRequest, response: ClientHttpResponse) {
-            throw RuntimeException(
-                    "Feil ved henting av behandlerMedHprNummer: ${response.statusCode}"
-                )
-                .also { logger.error(it.message, it) }
+            throw RuntimeException("Error got statuscode: ${response.statusCode}").also {
+                logger.error(it.message, it)
+            }
         }
     }
 
