@@ -16,10 +16,11 @@ import org.springframework.web.client.body
 class SyfosmreglerClient(
     @Qualifier("syfosmreglerClient") private val syfosmreglerClient: RestClient,
 ) {
-    private val restClient = syfosmreglerM2mRestClientBuilder.baseUrl(syfosmreglerBaseUrl).build()
+
+    private val logger = LoggerFactory.getLogger(SyfosmreglerClient::class.java)
 
     fun validate(receivedSykmelding: ReceivedSykmelding): ValidationResult =
-        restClient
+        syfosmreglerClient
             .post()
             .uri { uriBuilder -> uriBuilder.path("/v1/rules/validate").build() }
             .attributes(clientRegistrationId("syfosmregler-m2m"))

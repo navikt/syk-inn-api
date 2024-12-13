@@ -10,18 +10,24 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 
+@Configuration
 @Import(OAuth2ClientAutoConfiguration::class)
 class RestClientConfiguration {
 
-    @Component
-    class LoggingErrorHandler : ErrorHandler {
-        private val logger = LoggerFactory.getLogger(LoggingErrorHandler::class.java)
+    @Bean("syfosmreglerClient")
+    fun syfosmreglerClient(
+        @Value("\${syfosmregler.url}") syfosmreglerBaseUrl: String,
+        syfosmreglerM2mRestClientBuilder: RestClient.Builder
+    ): RestClient {
+        return syfosmreglerM2mRestClientBuilder.baseUrl(syfosmreglerBaseUrl).build()
+    }
 
-        override fun handle(request: HttpRequest, response: ClientHttpResponse) {
-            throw RuntimeException("Error got statuscode: ${response.statusCode}").also {
-                logger.error(it.message, it)
-            }
-        }
+    @Bean("syfohelsenettproxyClient")
+    fun syfosmhelsenetproxyClient(
+        @Value("\${syfohelsenettproxy.url}") syfohelsenettproxyBaseUrl: String,
+        syfohelsenettproxyM2mRestClientBuilder: RestClient.Builder
+    ): RestClient {
+        return syfohelsenettproxyM2mRestClientBuilder.baseUrl(syfohelsenettproxyBaseUrl).build()
     }
 
     @Bean
