@@ -1,5 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfosmregler
 
+import no.nav.tsm.sykinnapi.client.RestClientConfiguration.LoggingErrorHandler
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import org.springframework.beans.factory.annotation.Value
@@ -14,7 +15,7 @@ import org.springframework.web.client.body
 class SyfosmreglerClient(
     syfosmreglerM2mRestClientBuilder: RestClient.Builder,
     @Value("\${syfosmregler.url}") syfosmreglerBaseUrl: String,
-    private val handler: RestClient.ResponseSpec.ErrorHandler
+    private val handler: RestClient.ResponseSpec.ErrorHandler = LoggingErrorHandler()
 ) {
     private val restClient = syfosmreglerM2mRestClientBuilder.baseUrl(syfosmreglerBaseUrl).build()
 

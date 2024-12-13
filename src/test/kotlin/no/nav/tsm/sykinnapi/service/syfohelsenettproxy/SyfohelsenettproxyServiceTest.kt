@@ -1,19 +1,18 @@
 package no.nav.tsm.sykinnapi.service.syfohelsenettproxy
 
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.client.syfohelsenettproxy.SyfohelsenettproxyClient
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.`when`
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 class SyfohelsenettproxyServiceTest {
 
-    @MockitoBean lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
+    @MockK lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
     lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
@@ -28,16 +27,14 @@ class SyfohelsenettproxyServiceTest {
         val sykmelderHpr = "1344333"
         val sykmeldingsId = "123213-2323-213123123"
 
-        `when`(syfohelsenettproxyClient.getBehandlerByHpr(anyString(), anyString()))
-            .thenReturn(
-                Behandler(
-                    godkjenninger = emptyList(),
-                    fnr = sykmelderFnr,
-                    hprNummer = sykmelderHpr,
-                    fornavn = "Fornavn",
-                    mellomnavn = null,
-                    etternavn = "etternavn",
-                )
+        every { syfohelsenettproxyClient.getBehandlerByHpr(sykmelderHpr, sykmeldingsId) } returns
+            Behandler(
+                godkjenninger = emptyList(),
+                fnr = sykmelderFnr,
+                hprNummer = sykmelderHpr,
+                fornavn = "Fornavn",
+                mellomnavn = null,
+                etternavn = "etternavn",
             )
 
         val behandler = syfohelsenettproxyService.getBehandlerByHpr(sykmelderHpr, sykmeldingsId)

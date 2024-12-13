@@ -1,7 +1,8 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.util.concurrent.Future
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import kotlin.test.assertTrue
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
@@ -13,19 +14,15 @@ import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
-import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest
 class SykmeldingServiceTest {
 
-    @MockitoBean lateinit var sykmeldingOKProducer: SykmeldingOKProducer
+    @MockK lateinit var sykmeldingOKProducer: SykmeldingOKProducer
 
     lateinit var sykmeldingService: SykmeldingService
 
@@ -62,9 +59,7 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        val futureRecordMetadata = mock<Future<RecordMetadata>>()
-
-        `when`(futureRecordMetadata.get()).thenReturn(mock<RecordMetadata>())
+        every { sykmeldingOKProducer.send(any()) } returns Unit
 
         val receivedSykmeldingWithValidation =
             ReceivedSykmeldingMapper(objectMapper)

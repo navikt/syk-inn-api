@@ -24,7 +24,7 @@ class SyfohelsenettproxyClientTest(
 
     @Autowired private lateinit var syfohelsenettproxyClient: SyfohelsenettproxyClient
 
-    @Autowired private lateinit var mapper: ObjectMapper
+    @Autowired private lateinit var objectMapper: ObjectMapper
 
     @Test
     internal fun `Should return behandler`() {
@@ -32,7 +32,7 @@ class SyfohelsenettproxyClientTest(
         val behandlerHpr = "123123"
         val sykmeldingId = "21322-223-21333-22"
         val response =
-            mapper.writeValueAsString(
+            objectMapper.writeValueAsString(
                 Behandler(
                     godkjenninger = emptyList(),
                     fnr = behandlerFnr,
