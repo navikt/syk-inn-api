@@ -27,13 +27,13 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.client.RestClient
 
 @RestClientTest(SyfosmreglerClient::class)
-class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") val baseUrl: String) {
+class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") val syfosmreglerBaseUrl: String) {
 
     @TestConfiguration
-    class TestConfig(@Value("\${syfosmregler.url}") val baseUrl: String) {
+    class TestConfig(@Value("\${syfosmregler.url}") val syfosmreglerBaseUrl: String) {
         @Bean("syfosmreglerClient")
-        fun syfosmreglerClient(builder: RestClient.Builder): RestClient {
-            return builder.baseUrl(baseUrl).build()
+        fun syfosmreglerClient(builder: RestClient.Builder): SyfosmreglerClient {
+            return SyfosmreglerClient(builder.baseUrl(syfosmreglerBaseUrl).build())
         }
     }
 
@@ -71,7 +71,7 @@ class SyfosmreglerClientTest(@Value("\${syfosmregler.url}") val baseUrl: String)
             )
 
         mockRestServiceServer
-            .expect(requestTo(URI("$baseUrl/v1/rules/validate")))
+            .expect(requestTo(URI("$syfosmreglerBaseUrl/v1/rules/validate")))
             .andExpect(method(POST))
             .andRespond(withStatus(OK).contentType(APPLICATION_JSON).body(response))
 

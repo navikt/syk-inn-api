@@ -23,7 +23,7 @@ class RestClientConfiguration {
     }
 
     @Bean("syfohelsenettproxyClient")
-    fun syfosmhelsenetproxyClient(
+    fun syfohelsenettproxyClient(
         @Value("\${syfohelsenettproxy.url}") syfohelsenettproxyBaseUrl: String,
         syfohelsenettproxyM2mRestClientBuilder: RestClient.Builder
     ): RestClient {

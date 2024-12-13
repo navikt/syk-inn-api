@@ -1,8 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfohelsenettproxy
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
-import kotlin.test.assertEquals
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,17 +16,19 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestClient
+import java.net.URI
+import kotlin.test.assertEquals
 
 @RestClientTest(SyfohelsenettproxyClient::class)
 class SyfohelsenettproxyClientTest(
-    @Value("\${syfohelsenettproxy.url}") private val baseUrl: String
+    @Value("\${syfohelsenettproxy.url}") private val syfohelsenettproxyBaseUrl: String
 ) {
 
     @TestConfiguration
-    class TestConfig(@Value("\${syfohelsenettproxy.url}") val baseUrl: String) {
+    class TestConfig(@Value("\${syfohelsenettproxy.url}") val syfohelsenettproxyBaseUrl: String) {
         @Bean("syfohelsenettproxyClient")
-        fun syfosmhelsenetproxyClient(builder: RestClient.Builder): RestClient {
-            return builder.baseUrl(baseUrl).build()
+        fun syfohelsenettproxyClient(builder: RestClient.Builder): SyfohelsenettproxyClient {
+            return SyfohelsenettproxyClient(builder.baseUrl(syfohelsenettproxyBaseUrl).build())
         }
     }
 
@@ -54,8 +54,9 @@ class SyfohelsenettproxyClientTest(
                     etternavn = "etternavn",
                 ),
             )
+
         mockRestServiceServer
-            .expect(requestTo(URI("$baseUrl/api/v2/behandlerMedHprNummer")))
+            .expect(requestTo(URI("$syfohelsenettproxyBaseUrl/api/v2/behandlerMedHprNummer")))
             .andExpect(method(GET))
             .andRespond(withStatus(OK).contentType(APPLICATION_JSON).body(response))
 
