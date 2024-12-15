@@ -14,7 +14,7 @@ import org.springframework.web.client.body
 
 @Component
 class SyfosmreglerClient(
-    @Qualifier("syfosmreglerRestClient") private val syfosmreglerClient: RestClient,
+    @Qualifier("syfosmreglerClient") private val syfosmreglerClient: RestClient,
 ) {
 
     private val logger = LoggerFactory.getLogger(SyfosmreglerClient::class.java)
