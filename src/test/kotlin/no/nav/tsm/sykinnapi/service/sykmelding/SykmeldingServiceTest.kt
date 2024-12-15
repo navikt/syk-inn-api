@@ -1,5 +1,6 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
+import kotlin.test.assertTrue
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
