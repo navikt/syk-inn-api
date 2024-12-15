@@ -13,7 +13,7 @@ import org.springframework.web.client.body
 
 @Component
 class SyfohelsenettproxyClient(
-    @Qualifier("syfohelsenettproxyClient") private val syfohelsenettproxyClient: RestClient,
+    @Qualifier("syfohelsenettproxyRestClient") private val syfohelsenettproxyClient: RestClient,
 ) {
     private val logger = LoggerFactory.getLogger(SyfohelsenettproxyClient::class.java)
 
