@@ -1,9 +1,9 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
-import kotlin.test.assertTrue
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import kotlin.test.assertTrue
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
@@ -17,9 +17,9 @@ import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingM
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest
 
-@SpringBootTest
+@RestClientTest
 class SykmeldingServiceTest {
 
     @MockK lateinit var sykmeldingOKProducer: SykmeldingOKProducer

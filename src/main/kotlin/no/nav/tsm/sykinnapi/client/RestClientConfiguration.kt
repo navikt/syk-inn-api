@@ -14,7 +14,7 @@ import org.springframework.web.client.RestClient
 @Import(OAuth2ClientAutoConfiguration::class)
 class RestClientConfiguration {
 
-    @Bean("syfosmreglerClient")
+    @Bean("syfosmreglerClientRestClient")
     fun syfosmreglerClient(
         @Value("\${syfosmregler.url}") syfosmreglerBaseUrl: String,
         syfosmreglerM2mRestClientBuilder: RestClient.Builder
@@ -22,7 +22,7 @@ class RestClientConfiguration {
         return syfosmreglerM2mRestClientBuilder.baseUrl(syfosmreglerBaseUrl).build()
     }
 
-    @Bean("syfohelsenettproxyClient")
+    @Bean("syfohelsenettproxyClientRestClient")
     fun syfohelsenettproxyClient(
         @Value("\${syfohelsenettproxy.url}") syfohelsenettproxyBaseUrl: String,
         syfohelsenettproxyM2mRestClientBuilder: RestClient.Builder
