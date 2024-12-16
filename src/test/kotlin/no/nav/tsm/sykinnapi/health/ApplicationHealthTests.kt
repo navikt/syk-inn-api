@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -19,8 +20,8 @@ class ApplicationHealthTests(
     @Value("\${management.endpoints.web.base-path}") private val basePath: String
 ) {
     @Autowired private lateinit var mockMvc: MockMvc
-
     @MockkBean private lateinit var restClientBuilderCustomizer: OAuth2AuthorizedClientManager
+    @MockkBean private lateinit var filterChain: ClientRegistrationRepository
 
     @Test
     internal fun `Should return HttpStatus OK when calling endpoint internal health`() {
