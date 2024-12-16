@@ -3,6 +3,7 @@ package no.nav.tsm.sykinnapi.service.sykmelding
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import kotlin.test.assertTrue
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.json.JsonTest
-import kotlin.test.assertTrue
 
 @JsonTest
 class SykmeldingServiceTest {
