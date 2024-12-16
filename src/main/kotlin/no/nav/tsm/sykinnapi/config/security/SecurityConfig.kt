@@ -19,7 +19,7 @@ class SecurityConfig {
             oauth2Client {}
             authorizeHttpRequests {
                 authorize("/internal/**", permitAll)
-                authorize("/v3/api-docs/**", authenticated)
+                authorize("/v3/api-docs/**", permitAll)
                 authorize("/api/**", authenticated)
                 authorize(anyRequest, denyAll)
             }
