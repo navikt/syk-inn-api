@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
 
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             csrf { disable() }
             oauth2ResourceServer { jwt {} }
@@ -20,8 +20,7 @@ class SecurityConfig {
             authorizeHttpRequests {
                 authorize("/internal/**", permitAll)
                 authorize("/v3/api-docs/**", permitAll)
-                authorize("/api/**", authenticated)
-                authorize(anyRequest, denyAll)
+                authorize(anyRequest, authenticated)
             }
             cors { disable() }
         }

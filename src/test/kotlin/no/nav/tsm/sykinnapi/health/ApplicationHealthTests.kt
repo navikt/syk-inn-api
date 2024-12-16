@@ -21,7 +21,7 @@ class ApplicationHealthTests(
 ) {
     @Autowired private lateinit var mockMvc: MockMvc
     @MockkBean private lateinit var restClientBuilderCustomizer: OAuth2AuthorizedClientManager
-    @MockkBean private lateinit var filterChain: ClientRegistrationRepository
+    @MockkBean private lateinit var securityFilterChain: ClientRegistrationRepository
 
     @Test
     internal fun `Should return HttpStatus OK when calling endpoint internal health`() {
