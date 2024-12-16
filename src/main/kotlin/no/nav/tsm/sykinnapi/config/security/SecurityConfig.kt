@@ -21,7 +21,6 @@ class SecurityConfig {
                     .anyRequest()
                     .authenticated()
             }
-            .oauth2ResourceServer { it.jwt {} }
             .headers { headersConfigurer ->
                 headersConfigurer.frameOptions { frameOptionsCustomizer ->
                     frameOptionsCustomizer.sameOrigin()
