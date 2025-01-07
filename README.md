@@ -57,7 +57,7 @@ docker build -t syk-inn-api .
 
 ### Running the application and the mock-oauth2-server from docker compose
 ``` bash
-docker-compose up -d
+docker compose up -d
 ```
 
 #### Api doc
