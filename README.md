@@ -36,7 +36,7 @@ or on windows
 ### Running the application locally
 #### With bootRun
 > [!NOTE]  
-> Remember to run the external services the application needs to be able to run, see [Running the application and the mock-oauth2-server from docker compose](#running-the-application-and-the-mock-oauth2-server-from-docker-compose)
+> Remember to run the external services the application needs to be able to run, see [Running the application and the needed external services](#running-the-application-and-the-needed-external-services)
 
 
 run this command
