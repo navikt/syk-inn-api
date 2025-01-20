@@ -55,9 +55,9 @@ docker build -t syk-inn-api .
 > [!NOTE]  
 > Remember to build the application before,you create a docker image, see [Building the application](#building-the-application)
 
-### Running the application and the mock-oauth2-server from docker compose
+### Running the application and the needed external services
 ``` bash
-docker compose up -d
+docker compose up
 ```
 
 #### Api doc

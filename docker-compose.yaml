@@ -5,9 +5,12 @@ services:
     environment:
       AZURE_APP_WELL_KNOWN_URL: "http://host.docker.internal:6969/azuread/.well-known/openid-configuration"
       AZURE_APP_CLIENT_ID: "syk-inn-api-client-id"
+      AZURE_OPENID_CONFIG_ISSUER: "http://host.docker.internal:6969/azuread"
       KAFKA_BROKERS: "kafka:9092"
     ports:
       - "8080:8080"
+    volumes:
+      - ./secure.log:/secure-logs/secure.log
   authserver:
     container_name: authserver
     image: ghcr.io/navikt/mock-oauth2-server:2.1.10
