@@ -26,6 +26,7 @@ class SyfosmreglerClient(
             .attributes(clientRegistrationId("syfosmregler-m2m"))
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header("Nav-CallId", receivedSykmelding.sykmelding.id)
+            .body(receivedSykmelding)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
             .body<ValidationResult>()
