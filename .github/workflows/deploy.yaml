@@ -154,19 +154,3 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/nais-dev.yaml
           VAR: image=${{ needs.build-push.outputs.image }}
-  deploy-prod:
-    if: github.ref_name == 'main'
-    name: Deploy to prod
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    needs: [ test, build-push, deploy-dev ]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to NAIS
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/nais-prod.yaml
-          VAR: image=${{ needs.build-push.outputs.image }}
