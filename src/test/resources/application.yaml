@@ -40,6 +40,9 @@ syfohelsenettproxy:
 syfosmregler:
     url: http://syfosmregler.teamsykmelding
 
+syfosmregister:
+    url: http://syfosmregister.teamsykmelding
+
 teamsykmelding:
     ok:
         sykmelding:

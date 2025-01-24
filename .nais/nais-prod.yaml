@@ -46,6 +46,9 @@ spec:
         - application: syfosmregler
           namespace: teamsykmelding
           cluster: prod-gcp
+        - application: syfosmregister
+          namespace: teamsykmelding
+          cluster: prod-gcp
   ingresses:
     - "https://syk-inn-api.intern.nav.no"
   secureLogs:
@@ -55,3 +58,5 @@ spec:
       value: api://prod-gcp.teamsykmelding.syfohelsenettproxy/.default
     - name: SYFOSMREGLER_SCOPE
       value: api://prod-gcp.teamsykmelding.syfosmregler/.default
+    - name: SYFOSMREGISTER_SCOPE
+      value: api://prod-gcp.teamsykmelding.syfosmregister/.default

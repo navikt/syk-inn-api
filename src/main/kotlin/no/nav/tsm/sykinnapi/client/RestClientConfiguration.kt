@@ -30,6 +30,14 @@ class RestClientConfiguration {
         return syfohelsenettproxyM2mRestClientBuilder.baseUrl(syfohelsenettproxyBaseUrl).build()
     }
 
+    @Bean("syfosmregisterClientRestClient")
+    fun syfosmregisterRestClient(
+        @Value("\${syfosmregister.url}") syfosmregisterBaseUrl: String,
+        syfosmregisterM2mRestClientBuilder: RestClient.Builder
+    ): RestClient {
+        return syfosmregisterM2mRestClientBuilder.baseUrl(syfosmregisterBaseUrl).build()
+    }
+
     @Bean
     fun restClientBuilderCustomizer(acm: OAuth2AuthorizedClientManager) = RestClientCustomizer {
         it.requestInterceptor(OAuth2ClientHttpRequestInterceptor(acm))
