@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
-import kotlin.test.BeforeTest
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet.AktivitetIkkeMulig
-import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem.*
+import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem.ICD10
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
@@ -18,6 +17,7 @@ import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingM
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
+import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingHent
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,11 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.http.MediaType.*
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
 @ExtendWith(MockKExtension::class)
@@ -58,6 +59,8 @@ class SykmeldingApiControllerTest {
     @MockkBean lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
     @MockkBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+
+    @MockkBean lateinit var sykmeldingHent: SykmeldingHent
 
     @Autowired lateinit var sykmeldingInnsending: SykmeldingInnsending
 

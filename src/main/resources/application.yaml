@@ -31,6 +31,15 @@ spring:
                         provider: aad
                         scope:
                             - ${syfosmregler.scope}
+
+                    syfosmregister-m2m:
+                        authorization-grant-type: client_credentials
+                        client-authentication-method: client_secret_basic
+                        client-id: ${azure.app.client.id}
+                        client-secret: ${azure.app.client.secret}
+                        provider: aad
+                        scope:
+                            - ${syfosmregister.scope}
                 provider:
                     aad:
                         issuer-uri: ${azure.openid.config.issuer}
@@ -94,6 +103,9 @@ syfohelsenettproxy:
 
 syfosmregler:
     url: http://syfosmregler.teamsykmelding
+
+syfosmregister:
+    url: http://syfosmregister.teamsykmelding
 
 teamsykmelding:
     ok:
