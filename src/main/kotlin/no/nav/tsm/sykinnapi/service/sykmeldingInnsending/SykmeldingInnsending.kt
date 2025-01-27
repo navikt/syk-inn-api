@@ -1,7 +1,6 @@
 package no.nav.tsm.sykinnapi.service.sykmeldingInnsending
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.util.UUID
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
@@ -10,6 +9,7 @@ import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class SykmeldingInnsending(
@@ -55,6 +55,12 @@ class SykmeldingInnsending(
                 receivedSykmelding,
                 validationResult,
             )
+
+        securelog.info("receivedSykmeldingWithValidationResult is: ${
+            objectMapper.writeValueAsString(
+                receivedSykmeldingWithValidationResult,
+            )
+        }")
 
         val sykmeldingid = sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
 
