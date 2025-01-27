@@ -51,21 +51,21 @@ class SykmeldingInnsending(
 
         val validationResult = syfosmreglerService.validate(receivedSykmelding)
 
-        val receivedSykmeldingWithValidationResult =
-            receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
-                receivedSykmelding,
-                validationResult,
-            )
-
         securelog.info(
-            "receivedSykmeldingWithValidationResult is: ${
+            "validationResult is for sykmeldingid ${sykmeldingId}: ${
                 objectMapper.writeValueAsString(
-                    receivedSykmeldingWithValidationResult,
+                    validationResult,
                 )
             }",
         )
 
         if (Status.OK == validationResult.status) {
+            val receivedSykmeldingWithValidationResult =
+                receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
+                    receivedSykmelding,
+                    validationResult,
+                )
+
             val sykmeldingid =
                 sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
             logger.info(
@@ -74,7 +74,7 @@ class SykmeldingInnsending(
             return sykmeldingId
         } else {
             throw IllegalStateException(
-                "Got validationResult send send to topic: ${receivedSykmeldingWithValidationResult.validationResult.status}"
+                "Got validationResult status that is not OK: ${validationResult.status}",
             )
         }
     }
