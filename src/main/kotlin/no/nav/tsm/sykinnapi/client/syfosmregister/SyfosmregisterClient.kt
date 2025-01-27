@@ -1,6 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfosmregister
 
-import no.nav.tsm.sykinnapi.modell.syfosmregister.SykmeldingDTO
+import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -18,17 +18,17 @@ class SyfosmregisterClient(
 
     private val logger = LoggerFactory.getLogger(SyfosmregisterClient::class.java)
 
-    fun getSykmelding(sykmeldingId: String): SykmeldingDTO =
+    fun getSykmelding(sykmeldingId: String): SykInnSykmeldingDTO =
         syfosmregisterClient
             .get()
-            .uri { uriBuilder -> uriBuilder.path("/api/v2/sykmelding/{sykmeldingId}").build() }
+            .uri { uriBuilder -> uriBuilder.path("/api/v2/sykmelding/sykinn/{sykmeldingId}").build() }
             .attributes(clientRegistrationId("syfosmregister-m2m"))
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .header("Nav-CallId", sykmeldingId)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
-            .body<SykmeldingDTO>()
-            ?: throw RuntimeException("Body is not SykmeldingDTO")
+            .body<SykInnSykmeldingDTO>()
+            ?: throw RuntimeException("Body is not SykInnSykmeldingDTO")
 
     private fun onStatusError(res: ClientHttpResponse) {
         throw RuntimeException("Error got statuscode: ${res.statusCode}").also {

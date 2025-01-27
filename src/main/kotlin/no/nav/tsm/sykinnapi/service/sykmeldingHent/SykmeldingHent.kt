@@ -1,30 +1,30 @@
 package no.nav.tsm.sykinnapi.service.sykmeldingHent
 
-import java.time.LocalDate
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SykmeldingHent(val syfosmregisterService: SyfosmregisterService) {
 
-    fun get(sykmeldingId: String, hprnummer: String): SykmeldingKvittering {
+    fun get(sykmeldingId: String, hprNummer: String): SykmeldingKvittering {
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
 
-        if (sykmeldingDTO.behandler.hpr == hprnummer) {
+        if (sykmeldingDTO.behandler.hprNummer == hprNummer) {
             return SykmeldingKvittering(
                 sykmeldingId = sykmeldingId,
                 periode =
                     Periode(
-                        sykmeldingDTO.sykmeldingsperioder.first().fom,
-                        sykmeldingDTO.sykmeldingsperioder.first().tom,
+                        fom = sykmeldingDTO.periode.fom,
+                        tom = sykmeldingDTO.periode.tom,
                     ),
                 pasient =
-                    Pasient("13421412414", "Per hansen"), // TODO lage nytt api i syfosmregister?
+                    Pasient( fnr = sykmeldingDTO.pasient.fnr),
                 hovedDiagnose =
                     Diagnose(
-                        code = sykmeldingDTO.medisinskVurdering!!.hovedDiagnose!!.kode,
-                        system = sykmeldingDTO.medisinskVurdering.hovedDiagnose!!.system,
-                        text = sykmeldingDTO.medisinskVurdering.hovedDiagnose.tekst ?: "",
+                        code = sykmeldingDTO.hovedDiagnose.code,
+                        system = sykmeldingDTO.hovedDiagnose.system,
+                        text = sykmeldingDTO.hovedDiagnose.text,
                     ),
             )
         } else {
@@ -42,6 +42,6 @@ data class SykmeldingKvittering(
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
-data class Pasient(val fnr: String, val navn: String)
+data class Pasient(val fnr: String)
 
 data class Diagnose(val code: String, val system: String, val text: String)
