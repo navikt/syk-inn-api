@@ -2,6 +2,7 @@ package no.nav.tsm.sykinnapi.service.sykmeldingInnsending
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
+import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
@@ -56,17 +57,25 @@ class SykmeldingInnsending(
                 validationResult,
             )
 
-        securelog.info("receivedSykmeldingWithValidationResult is: ${
-            objectMapper.writeValueAsString(
-                receivedSykmeldingWithValidationResult,
-            )
-        }")
-
-        val sykmeldingid = sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
-
-        logger.info(
-            "sykmeldingid with id $sykmeldingid is created and forwarded to the internal systems",
+        securelog.info(
+            "receivedSykmeldingWithValidationResult is: ${
+                objectMapper.writeValueAsString(
+                    receivedSykmeldingWithValidationResult,
+                )
+            }",
         )
-        return sykmeldingid
+
+        if (Status.OK == validationResult.status) {
+            val sykmeldingid =
+                sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
+            logger.info(
+                "sykmeldingid with id $sykmeldingid is created and forwarded to the internal systems",
+            )
+            return sykmeldingId
+        } else {
+            throw IllegalStateException(
+                "Got validationResult send send to topic: ${receivedSykmeldingWithValidationResult.validationResult.status}"
+            )
+        }
     }
 }

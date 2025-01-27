@@ -1,8 +1,8 @@
 package no.nav.tsm.sykinnapi.service.sykmeldingHent
 
+import java.time.LocalDate
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class SykmeldingHent(val syfosmregisterService: SyfosmregisterService) {
@@ -18,8 +18,7 @@ class SykmeldingHent(val syfosmregisterService: SyfosmregisterService) {
                         fom = sykmeldingDTO.periode.fom,
                         tom = sykmeldingDTO.periode.tom,
                     ),
-                pasient =
-                    Pasient( fnr = sykmeldingDTO.pasient.fnr),
+                pasient = Pasient(fnr = sykmeldingDTO.pasient.fnr),
                 hovedDiagnose =
                     Diagnose(
                         code = sykmeldingDTO.hovedDiagnose.code,
