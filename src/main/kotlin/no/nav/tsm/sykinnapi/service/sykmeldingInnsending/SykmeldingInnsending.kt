@@ -1,16 +1,17 @@
 package no.nav.tsm.sykinnapi.service.sykmeldingInnsending
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.util.*
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiResponse
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class SykmeldingInnsending(
@@ -24,7 +25,7 @@ class SykmeldingInnsending(
     private val securelog = LoggerFactory.getLogger("securelog")
     private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
 
-    fun send(sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload): String {
+    fun send(sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload): SykInnApiResponse {
 
         securelog.info(
             "sykInnApiNySykmeldingPayload is: ${
@@ -59,23 +60,35 @@ class SykmeldingInnsending(
             }",
         )
 
-        if (Status.OK == validationResult.status) {
-            val receivedSykmeldingWithValidationResult =
-                receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
-                    receivedSykmelding,
-                    validationResult,
-                )
-
-            val sykmeldingid =
-                sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
-            logger.info(
-                "sykmeldingid with id $sykmeldingid is created and forwarded to the internal systems",
+        val receivedSykmeldingWithValidationResult =
+            receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
+                receivedSykmelding,
+                validationResult,
             )
-            return sykmeldingId
+
+        if (Status.OK == validationResult.status) {
+            sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidationResult)
+
+            logger.info(
+                "sykmeldingid with id $sykmeldingId is created and forwarded to the internal systems",
+            )
         } else {
-            throw IllegalStateException(
-                "Got validationResult status that is not OK: ${validationResult.status}",
+            logger.warn(
+                "sykmeldingid with id $sykmeldingId is not created and not forwarded to" +
+                    " the internal systems, validationResult was: ${
+                        objectMapper.writeValueAsString(
+                            validationResult,
+                        )
+                    }",
             )
         }
+
+        val sykInnApiResponse =
+            SykInnApiResponse(
+                sykmeldingId = sykmeldingId,
+                validationResult = validationResult,
+            )
+
+        return sykInnApiResponse
     }
 }

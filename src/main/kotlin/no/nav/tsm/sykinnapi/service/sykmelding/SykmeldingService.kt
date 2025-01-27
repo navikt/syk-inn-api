@@ -9,9 +9,7 @@ class SykmeldingService(private val sykmeldingOKProducer: SykmeldingOKProducer) 
 
     fun sendToOkTopic(
         receivedSykmeldingWithValidationResult: ReceivedSykmeldingWithValidationResult,
-    ): String {
+    ) {
         sykmeldingOKProducer.send(receivedSykmeldingWithValidationResult)
-
-        return receivedSykmeldingWithValidationResult.sykmelding.id
     }
 }

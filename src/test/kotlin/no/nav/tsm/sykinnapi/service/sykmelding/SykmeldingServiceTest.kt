@@ -3,7 +3,6 @@ package no.nav.tsm.sykinnapi.service.sykmelding
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import kotlin.test.assertTrue
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
@@ -16,6 +15,7 @@ import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.json.JsonTest
 
@@ -34,7 +34,7 @@ class SykmeldingServiceTest {
     }
 
     @Test
-    internal fun `Should return sykmeldingId true when valid payload`() {
+    internal fun `Should return not throw exception when valid payload`() {
 
         val sykmelderFnr = "1344333"
 
@@ -71,8 +71,6 @@ class SykmeldingServiceTest {
                     )
                 )
 
-        val sykmeldingId = sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidation)
-
-        assertTrue(sykmeldingId.isNotBlank())
+        assertDoesNotThrow { sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidation) }
     }
 }

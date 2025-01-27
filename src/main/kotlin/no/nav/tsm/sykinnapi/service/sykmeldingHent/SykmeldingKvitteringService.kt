@@ -5,7 +5,7 @@ import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import org.springframework.stereotype.Service
 
 @Service
-class SykmeldingHent(val syfosmregisterService: SyfosmregisterService) {
+class SykmeldingKvitteringService(val syfosmregisterService: SyfosmregisterService) {
 
     fun get(sykmeldingId: String, hprNummer: String): SykmeldingKvittering {
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)

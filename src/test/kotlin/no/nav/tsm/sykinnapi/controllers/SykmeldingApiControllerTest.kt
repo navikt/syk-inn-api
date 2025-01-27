@@ -18,7 +18,7 @@ import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingM
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
-import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingHent
+import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingKvitteringService
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -60,7 +60,7 @@ class SykmeldingApiControllerTest {
 
     @MockkBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
-    @MockkBean lateinit var sykmeldingHent: SykmeldingHent
+    @MockkBean lateinit var sykmeldingKvitteringHent: SykmeldingKvitteringService
 
     @Autowired lateinit var sykmeldingInnsending: SykmeldingInnsending
 
@@ -91,8 +91,7 @@ class SykmeldingApiControllerTest {
         } returns receivedSykmeldingWithValidation
         every { syfohelsenettproxyService.getBehandlerByHpr(any(), any()) } returns
             Behandler(emptyList(), sykmelderFnr, payload.sykmelderHpr, "Fornavn", null, "etternavn")
-        every { sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidation) } returns
-            sykmeldingsId
+        every { sykmeldingService.sendToOkTopic(receivedSykmeldingWithValidation) } returns Unit
     }
 
     @Test

@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import java.util.*
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.syfohelsenettproxy.Behandler
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
@@ -20,6 +19,7 @@ import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class SykmeldingInnsendingTest {
@@ -71,13 +71,11 @@ class SykmeldingInnsendingTest {
                 etternavn = "etternavn"
             )
         every { syfosmreglerService.validate(any()) } returns ValidationResult.OK
-        every { sykmeldingService.sendToOkTopic(any()) } returns id
+        every { sykmeldingService.sendToOkTopic(any()) } returns Unit
         sykmeldingInnsending.send(sykInnApiNySykmeldingPayload)
         verify {
             syfohelsenettproxyService.getBehandlerByHpr(any(), any())
-            // receivedSykmeldingMapper.mapToReceivedSykmelding(any(), any(), any())
             syfosmreglerService.validate(any())
-            // receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(any(),any())
             sykmeldingService.sendToOkTopic(any())
         }
     }
