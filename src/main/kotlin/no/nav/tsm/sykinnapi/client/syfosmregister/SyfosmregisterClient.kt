@@ -22,7 +22,7 @@ class SyfosmregisterClient(
         syfosmregisterClient
             .get()
             .uri { uriBuilder ->
-                uriBuilder.path("/api/v2/sykmelding/sykinn/{sykmeldingId}").build()
+                uriBuilder.path("/api/v2/sykmelding/sykinn/${sykmeldingId}").build()
             }
             .attributes(clientRegistrationId("syfosmregister-m2m"))
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
