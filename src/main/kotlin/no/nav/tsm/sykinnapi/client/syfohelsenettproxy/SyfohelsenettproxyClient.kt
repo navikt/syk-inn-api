@@ -32,7 +32,7 @@ class SyfohelsenettproxyClient(
             ?: throw RuntimeException("Body is not Behandler")
 
     private fun onStatusError(res: ClientHttpResponse): Nothing {
-        throw RuntimeException("Error got statuscode: ${res.statusCode}").also {
+        throw RuntimeException("Error from syfohelsenettproxy got statuscode: ${res.statusCode}").also {
             logger.error(it.message, it)
         }
     }

@@ -33,7 +33,7 @@ class SyfosmregisterClient(
             ?: throw RuntimeException("Body is not SykInnSykmeldingDTO")
 
     private fun onStatusError(res: ClientHttpResponse) {
-        throw RuntimeException("Error got statuscode: ${res.statusCode}").also {
+        throw RuntimeException("Error from syfosmregister got statuscode: ${res.statusCode}").also {
             logger.error(it.message, it)
         }
     }

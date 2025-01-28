@@ -33,7 +33,7 @@ class SyfosmreglerClient(
             ?: throw RuntimeException("Body is not ValidationResult")
 
     private fun onStatusError(res: ClientHttpResponse) {
-        throw RuntimeException("Error got statuscode: ${res.statusCode}").also {
+        throw RuntimeException("Error from syfosmregler got statuscode: ${res.statusCode}").also {
             logger.error(it.message, it)
         }
     }
