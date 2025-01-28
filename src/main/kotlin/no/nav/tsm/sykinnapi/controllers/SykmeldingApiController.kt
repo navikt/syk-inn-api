@@ -22,6 +22,6 @@ class SykmeldingApiController(
     @GetMapping("/api/v1/sykmelding/{sykmeldingId}")
     fun getSykmeldingKvittering(
         @PathVariable sykmeldingId: String,
-        @RequestHeader("x-hpr") hprnummer: String
+        @RequestHeader("X-HPR") hprnummer: String
     ) = sykmeldingKvittering.get(sykmeldingId, hprnummer)
 }
