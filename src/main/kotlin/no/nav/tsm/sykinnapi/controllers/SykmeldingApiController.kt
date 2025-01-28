@@ -1,6 +1,7 @@
 package no.nav.tsm.sykinnapi.controllers
 
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingKvittering
 import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingKvitteringService
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,5 +24,7 @@ class SykmeldingApiController(
     fun getSykmeldingKvittering(
         @PathVariable sykmeldingId: String,
         @RequestHeader("X-HPR") hprnummer: String
-    ) = sykmeldingKvittering.get(sykmeldingId, hprnummer)
+    ): SykmeldingKvittering {
+       return sykmeldingKvittering.get(sykmeldingId, hprnummer)
+    }
 }
