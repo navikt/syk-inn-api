@@ -75,11 +75,8 @@ class SykmeldingInnsending(
         } else {
             logger.warn(
                 "sykmeldingid with id $sykmeldingId is not created and not forwarded to" +
-                    " the internal systems, validationResult was: ${
-                        objectMapper.writeValueAsString(
-                            validationResult,
-                        )
-                    }",
+                    " the internal systems, validationResult status is :${validationResult.status} " +
+                    "rules are: ${objectMapper.writeValueAsString(validationResult.ruleHits)}",
             )
         }
 

@@ -19,7 +19,6 @@ import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class SykmeldingInnsendingTest {
@@ -39,7 +38,6 @@ class SykmeldingInnsendingTest {
     fun test() {
 
         val fnr = "1344333"
-        val id = UUID.randomUUID().toString()
         val hpr = "123123"
 
         val sykInnApiNySykmeldingPayload =
