@@ -72,6 +72,10 @@ kotlin {
 
 tasks {
 
+    build {
+        dependsOn("bootJar")
+    }
+
     withType<BootJar> {
         archiveFileName = "app.jar"
     }

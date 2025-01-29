@@ -28,10 +28,10 @@ docker-compose --version
 ### Building the application
 To build locally and run the integration tests you can simply run
 ``` bash
-./gradlew bootJar
+./gradlew clean build
 ```
 or on windows
-`gradlew.bat bootJar`
+`gradlew.bat clean build`
 
 ### Running the application locally
 #### With bootRun

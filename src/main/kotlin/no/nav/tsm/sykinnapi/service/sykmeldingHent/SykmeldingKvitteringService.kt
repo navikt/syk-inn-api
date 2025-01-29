@@ -1,18 +1,19 @@
 package no.nav.tsm.sykinnapi.service.sykmeldingHent
 
+import java.time.LocalDate
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class SykmeldingKvitteringService(val syfosmregisterService: SyfosmregisterService) {
 
     private val logger = LoggerFactory.getLogger(SykmeldingKvitteringService::class.java)
 
-
     fun get(sykmeldingId: String, hprNummer: String): SykmeldingKvittering {
-        logger.info("Trying to fetch sykmelding for sykmeldingId=$sykmeldingId, hprNummer=$hprNummer")
+        logger.info(
+            "Trying to fetch sykmelding for sykmeldingId=$sykmeldingId, hprNummer=$hprNummer"
+        )
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
 
         if (sykmeldingDTO.behandler.hprNummer == hprNummer) {

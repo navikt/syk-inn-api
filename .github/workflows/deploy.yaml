@@ -69,8 +69,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'gradle'
-      - name: build artifact
-        run: ./gradlew bootJar
+      - name: build
+        run: ./gradlew clean build
       - name: Push docker image to GAR
         uses: nais/docker-build-push@v0
         id: docker-build-push
@@ -135,8 +135,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'gradle'
-      - name: build artifact
-        run: ./gradlew bootJar
+      - name: build
+        run: ./gradlew clean build
 
   deploy-dev:
     if: github.actor != 'dependabot[bot]'

@@ -25,6 +25,6 @@ class SykmeldingApiController(
         @PathVariable sykmeldingId: String,
         @RequestHeader("X-HPR") hprnummer: String
     ): SykmeldingKvittering {
-       return sykmeldingKvittering.get(sykmeldingId, hprnummer)
+        return sykmeldingKvittering.get(sykmeldingId, hprnummer)
     }
 }
