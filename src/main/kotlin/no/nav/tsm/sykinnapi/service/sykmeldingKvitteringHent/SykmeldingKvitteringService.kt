@@ -1,9 +1,9 @@
-package no.nav.tsm.sykinnapi.service.sykmeldingHent
+package no.nav.tsm.sykinnapi.service.sykmeldingKvitteringHent
 
-import java.time.LocalDate
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SykmeldingKvitteringService(val syfosmregisterService: SyfosmregisterService) {

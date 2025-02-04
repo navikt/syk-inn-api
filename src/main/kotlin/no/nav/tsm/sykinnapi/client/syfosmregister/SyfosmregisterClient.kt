@@ -32,6 +32,18 @@ class SyfosmregisterClient(
             .body<SykInnSykmeldingDTO>()
             ?: throw RuntimeException("Body is not SykInnSykmeldingDTO")
 
+    fun getSykmeldingByIdent(ident: String): List<SykInnSykmeldingDTO> =
+        syfosmregisterClient
+            .get()
+            .uri { uriBuilder -> uriBuilder.path("/api/v2/sykmelding/sykinn/ident").build() }
+            .attributes(clientRegistrationId("syfosmregister-m2m"))
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .header("X-IDENT", ident)
+            .retrieve()
+            .onStatus({ it.isError }) { req, res -> onStatusError(res) }
+            .body<List<SykInnSykmeldingDTO>>()
+            ?: throw RuntimeException("Body is not List<SykInnSykmeldingDTO>")
+
     private fun onStatusError(res: ClientHttpResponse) {
         throw RuntimeException("Error from syfosmregister got statuscode: ${res.statusCode}").also {
             logger.error(it.message, it)

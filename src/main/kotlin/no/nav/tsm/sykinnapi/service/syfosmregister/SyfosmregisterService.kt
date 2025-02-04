@@ -15,4 +15,11 @@ class SyfosmregisterService(
 
         return sykInnSykmeldingDTO
     }
+
+    fun getSykmeldingByIdent(ident: String): List<SykInnSykmeldingDTO> {
+
+        val sykInnSykmeldingerDTO = syfosmregisterClient.getSykmeldingByIdent(ident)
+
+        return sykInnSykmeldingerDTO
+    }
 }

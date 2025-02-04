@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
-import kotlin.test.BeforeTest
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
@@ -18,8 +17,9 @@ import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingM
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
-import no.nav.tsm.sykinnapi.service.sykmeldingHent.SykmeldingKvitteringService
+import no.nav.tsm.sykinnapi.service.sykmeldingByIdentHent.SykmeldingByIdentService
 import no.nav.tsm.sykinnapi.service.sykmeldingInnsending.SykmeldingInnsending
+import no.nav.tsm.sykinnapi.service.sykmeldingKvitteringHent.SykmeldingKvitteringService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +31,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
 @ExtendWith(MockKExtension::class)
@@ -60,9 +61,11 @@ class SykmeldingApiControllerTest {
 
     @MockkBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
-    @MockkBean lateinit var sykmeldingKvitteringHent: SykmeldingKvitteringService
+    @MockkBean lateinit var sykmeldingKvitteringService: SykmeldingKvitteringService
 
     @Autowired lateinit var sykmeldingInnsending: SykmeldingInnsending
+
+    @MockkBean lateinit var sykmeldingByIdentService: SykmeldingByIdentService
 
     val payload =
         SykInnApiNySykmeldingPayload(
