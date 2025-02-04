@@ -49,8 +49,6 @@ spec:
         - application: syfosmregister
           namespace: teamsykmelding
           cluster: prod-gcp
-  ingresses:
-    - "https://syk-inn-api.intern.nav.no"
   secureLogs:
     enabled: true
   env:
