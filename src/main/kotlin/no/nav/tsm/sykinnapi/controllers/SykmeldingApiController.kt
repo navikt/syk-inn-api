@@ -32,7 +32,6 @@ class SykmeldingApiController(
 
     @GetMapping("/api/v1/sykmelding")
     fun getSykmeldingByIdent(
-        @PathVariable sykmeldingId: String,
         @RequestHeader("X-IDENT") ident: String
     ): List<SykmeldingKvittering> {
         return sykmeldingByIdent.get(ident)
