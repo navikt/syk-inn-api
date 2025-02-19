@@ -6,7 +6,7 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
 val ktfmtVersion = "0.44"
-val openapiVersion = "2.8.4"
+val openapiVersion = "2.8.5"
 val syfoXmlCodegenVersion = "2.0.1"
 val jaxbApiVersion = "2.3.1"
 val jaxbVersion = "2.4.0-b180830.0438"
