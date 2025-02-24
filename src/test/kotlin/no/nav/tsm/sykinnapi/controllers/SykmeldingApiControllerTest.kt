@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import kotlin.test.BeforeTest
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
@@ -29,9 +30,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
 @ExtendWith(MockKExtension::class)
@@ -118,5 +119,12 @@ class SykmeldingApiControllerTest {
                     .content(objectMapper.writeValueAsString(payload)),
             )
             .andExpect(status().isForbidden)
+    }
+
+    @Test
+    internal fun `Should return BadRequest when Ident header is missing`() {
+        mockMvc
+            .perform(get("/api/v1/sykmelding").with(jwt()).contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest)
     }
 }

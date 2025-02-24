@@ -25,15 +25,17 @@ class SykmeldingApiController(
     @GetMapping("/api/v1/sykmelding/{sykmeldingId}")
     fun getSykmeldingKvittering(
         @PathVariable sykmeldingId: String,
-        @RequestHeader("X-HPR") hprnummer: String
+        @RequestHeader("HPR") hprnummer: String
     ): SykmeldingKvittering {
         return sykmeldingKvittering.get(sykmeldingId, hprnummer)
     }
 
     @GetMapping("/api/v1/sykmelding")
-    fun getSykmeldingByIdent(
-        @RequestHeader("X-IDENT") ident: String
-    ): List<SykmeldingKvittering> {
+    fun getSykmeldingByIdent(@RequestHeader("Ident") ident: String?): List<SykmeldingKvittering> {
+        if (ident == null) {
+            throw IllegalArgumentException("Ident header is missing")
+        }
+
         return sykmeldingByIdent.get(ident)
     }
 }
