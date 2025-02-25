@@ -28,25 +28,19 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest
 @JsonTest
 class SykmeldingServiceTest {
 
-    @MockK
-    lateinit var sykmeldingOKProducer: SykmeldingOKProducer
+    @MockK lateinit var sykmeldingOKProducer: SykmeldingOKProducer
 
-    @MockK
-    lateinit var syfosmregisterService: SyfosmregisterService
+    @MockK lateinit var syfosmregisterService: SyfosmregisterService
 
-    @MockK
-    lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+    @MockK lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
-    @MockK
-    lateinit var syfosmreglerService: SyfosmreglerService
+    @MockK lateinit var syfosmreglerService: SyfosmreglerService
 
-    @MockK
-    lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
+    @MockK lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
     lateinit var sykmeldingService: SykmeldingService
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
+    @Autowired private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {

@@ -1,6 +1,8 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.time.LocalDate
+import java.util.*
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
@@ -13,8 +15,6 @@ import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.util.*
 
 @Service
 class SykmeldingService(
@@ -35,7 +35,7 @@ class SykmeldingService(
         )
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
 
-        if (sykmeldingDTO.behandler.hprNummer == hprNummer) {
+        if (sykmeldingDTO.behandler.hpr == hprNummer) {
             return SykmeldingKvittering(
                 sykmeldingId = sykmeldingId,
                 periode =
@@ -108,8 +108,8 @@ class SykmeldingService(
         } else {
             logger.warn(
                 "sykmeldingid with id $sykmeldingId is not created and not forwarded to" +
-                        " the internal systems, validationResult status is :${validationResult.status} " +
-                        "rules are: ${objectMapper.writeValueAsString(validationResult.ruleHits)}",
+                    " the internal systems, validationResult status is :${validationResult.status} " +
+                    "rules are: ${objectMapper.writeValueAsString(validationResult.ruleHits)}",
             )
         }
 
