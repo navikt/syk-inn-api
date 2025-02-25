@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import kotlin.test.BeforeTest
 import no.nav.tsm.sykinnapi.mapper.receivedSykmeldingMapper
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
@@ -28,38 +29,31 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import kotlin.test.BeforeTest
 
 @WebMvcTest(SykmeldingApiController::class)
 @ExtendWith(MockKExtension::class)
 class SykmeldingApiControllerTest {
 
-    @Autowired
-    lateinit var mockMvc: MockMvc
+    @Autowired lateinit var mockMvc: MockMvc
 
-    @Autowired
-    lateinit var objectMapper: ObjectMapper
+    @Autowired lateinit var objectMapper: ObjectMapper
 
-    @MockkBean
-    lateinit var sykmeldingService: SykmeldingService
+    @MockkBean lateinit var sykmeldingService: SykmeldingService
 
-    @MockkBean
-    lateinit var syfosmreglerService: SyfosmreglerService
+    @MockkBean lateinit var syfosmreglerService: SyfosmreglerService
 
-    @MockkBean
-    lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
+    @MockkBean lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
-    @MockkBean
-    lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
+    @MockkBean lateinit var syfohelsenettproxyService: SyfohelsenettproxyService
 
     val payload =
         SykInnApiNySykmeldingPayload(
-                "12345",
-                "123123",
-                Sykmelding(
-                        Hoveddiagnose(ICD10, "S017"),
-                        AktivitetIkkeMulig("2020-01-01", "2020-01-02")
-                ),
+            "12345",
+            "123123",
+            Sykmelding(
+                Hoveddiagnose(ICD10, "S017"),
+                AktivitetIkkeMulig("2020-01-01", "2020-01-02")
+            ),
         )
 
     @BeforeTest
@@ -76,8 +70,8 @@ class SykmeldingApiControllerTest {
             receivedSykmelding
         every {
             receivedSykmeldingMapper.mapToReceivedSykmeldingWithValidationResult(
-                    receivedSykmelding,
-                    ValidationResult.OK,
+                receivedSykmelding,
+                ValidationResult.OK,
             )
         } returns receivedSykmeldingWithValidation
         every { syfohelsenettproxyService.getBehandlerByHpr(any(), any()) } returns
