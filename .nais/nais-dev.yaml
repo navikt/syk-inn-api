@@ -49,6 +49,12 @@ spec:
         - application: syfosmregister
           namespace: teamsykmelding
           cluster: dev-gcp
+        - application: smpdfgen
+          namespace: teamsykmelding
+          cluster: dev-gcp
+        - application: tsm-pdl-cache
+          namespace: tsm
+          cluster: dev-gcp
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
   secureLogs:
@@ -60,3 +66,7 @@ spec:
       value: api://dev-gcp.teamsykmelding.syfosmregler/.default
     - name: SYFOSMREGISTER_SCOPE
       value: api://dev-gcp.teamsykmelding.syfosmregister/.default
+    - name: SMPDFGEN_SCOPE
+      value: api://dev-gcp.teamsykmelding.smpdfgen/.default
+    - name: TSMPDL_SCOPE
+      value: api://dev-gcp.tsm.tsm-pdl-cache/.default

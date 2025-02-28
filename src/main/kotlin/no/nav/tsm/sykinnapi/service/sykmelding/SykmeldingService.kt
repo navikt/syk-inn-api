@@ -10,9 +10,11 @@ import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiResponse
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
+import no.nav.tsm.sykinnapi.service.smpdfgen.SmPdfGenService
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
+import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -22,6 +24,8 @@ class SykmeldingService(
     val sykmeldingOKProducer: SykmeldingOKProducer,
     val syfohelsenettproxyService: SyfohelsenettproxyService,
     val syfosmreglerService: SyfosmreglerService,
+    val smPdfGenService: SmPdfGenService,
+    val tsmPdlService: TsmPdlService,
     val receivedSykmeldingMapper: ReceivedSykmeldingMapper,
     val objectMapper: ObjectMapper
 ) {
@@ -34,6 +38,27 @@ class SykmeldingService(
             "Trying to fetch sykmelding for sykmeldingId=$sykmeldingId, hprNummer=$hprNummer",
         )
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
+
+        logger.info("Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId")
+
+        securelog.info(
+            "Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId and ident=${sykmeldingDTO.pasient.fnr}"
+        )
+
+        val pdlPerson = tsmPdlService.getPdlPerson(sykmeldingDTO.pasient.fnr)
+
+        val receivedSykmelding =
+            receivedSykmeldingMapper.mapSykmeldingDTOToReceivedSykmelding(
+                sykmeldingDTO,
+                sykmeldingDTO.behandler.fnr,
+                sykmeldingId,
+            )
+
+        logger.info("Trying to generate pdf for sykmeldingId=$sykmeldingId")
+
+        val pdfByteArray = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
+
+        logger.info("Pdf is created for sykmeldingId=$sykmeldingId")
 
         if (sykmeldingDTO.behandler.hpr == hprNummer) {
             return SykmeldingKvittering(
@@ -50,6 +75,7 @@ class SykmeldingService(
                         system = sykmeldingDTO.hovedDiagnose.system,
                         text = sykmeldingDTO.hovedDiagnose.text,
                     ),
+                pdf = pdfByteArray
             )
         } else {
             throw RuntimeException("HPR-nummer matcher ikke behandler")
@@ -128,14 +154,14 @@ class SykmeldingService(
         sykmeldingOKProducer.send(receivedSykmeldingWithValidationResult)
     }
 
-    fun getSykmeldingByIdent(ident: String): List<SykmeldingKvittering> {
-        logger.info(
+    fun getSykmeldingerByIdent(ident: String): List<SykmeldingHistorikk> {
+        securelog.info(
             "Trying to fetch sykmelding for ident=$ident",
         )
         val sykmeldingDTO = syfosmregisterService.getSykmeldingByIdent(ident)
 
         return sykmeldingDTO.map { sykmelding ->
-            SykmeldingKvittering(
+            SykmeldingHistorikk(
                 sykmeldingId = sykmelding.sykmeldingId,
                 periode =
                     Periode(
@@ -154,11 +180,19 @@ class SykmeldingService(
     }
 }
 
+data class SykmeldingHistorikk(
+    val sykmeldingId: String,
+    val periode: Periode,
+    val pasient: Pasient,
+    val hovedDiagnose: Diagnose,
+)
+
 data class SykmeldingKvittering(
     val sykmeldingId: String,
     val periode: Periode,
     val pasient: Pasient,
-    val hovedDiagnose: Diagnose
+    val hovedDiagnose: Diagnose,
+    val pdf: ByteArray
 )
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)

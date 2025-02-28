@@ -48,6 +48,11 @@ teamsykmelding:
         sykmelding:
             topic: teamsykmelding.ok-sykmelding
 
+smpdfgen:
+    url: http://smpdfgen.teamsykmelding
+
+tsmpdl:
+    url: http://tsm-pdl-cache.tsm
 
 KAFKA_TRUSTSTORE_PATH: ""
 KAFKA_CREDSTORE_PASSWORD: ""

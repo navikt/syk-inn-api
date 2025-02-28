@@ -40,6 +40,15 @@ spring:
                         provider: aad
                         scope:
                             - ${syfosmregister.scope}
+
+                    tsmpdl-m2m:
+                        authorization-grant-type: client_credentials
+                        client-authentication-method: client_secret_basic
+                        client-id: ${azure.app.client.id}
+                        client-secret: ${azure.app.client.secret}
+                        provider: aad
+                        scope:
+                            - ${tsmpdl.scope}
                 provider:
                     aad:
                         issuer-uri: ${azure.openid.config.issuer}
@@ -106,6 +115,12 @@ syfosmregler:
 
 syfosmregister:
     url: http://syfosmregister.teamsykmelding
+
+smpdfgen:
+    url: http://smpdfgen.teamsykmelding
+
+tsmpdl:
+   url: http://tsm-pdl-cache.tsm
 
 teamsykmelding:
     ok:

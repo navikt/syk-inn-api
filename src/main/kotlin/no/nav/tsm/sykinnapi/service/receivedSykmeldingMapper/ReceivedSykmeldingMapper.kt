@@ -6,6 +6,7 @@ import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ValidationResult
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.toReceivedSykmeldingWithValidation
+import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,6 +15,28 @@ import org.springframework.stereotype.Service
 class ReceivedSykmeldingMapper(private val objectMapper: ObjectMapper) {
 
     private val securelog = LoggerFactory.getLogger("securelog")
+
+    fun mapSykmeldingDTOToReceivedSykmelding(
+        sykmeldingDTO: SykInnSykmeldingDTO,
+        sykmelderFnr: String,
+        sykmeldingId: String
+    ): ReceivedSykmelding {
+
+        val receivedSykmelding =
+            receivedSykmeldingMapper(
+                sykmeldingDTO,
+                sykmelderFnr,
+                sykmeldingId,
+            )
+
+        securelog.info(
+            "Successfully created receivedSykmelding: ${
+                objectMapper.writeValueAsString(receivedSykmelding)
+            }",
+        )
+
+        return receivedSykmelding
+    }
 
     fun mapToReceivedSykmelding(
         sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,

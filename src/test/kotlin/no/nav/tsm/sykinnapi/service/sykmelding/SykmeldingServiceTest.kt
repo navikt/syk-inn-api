@@ -16,9 +16,11 @@ import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
+import no.nav.tsm.sykinnapi.service.smpdfgen.SmPdfGenService
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
+import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -36,6 +38,10 @@ class SykmeldingServiceTest {
 
     @MockK lateinit var syfosmreglerService: SyfosmreglerService
 
+    @MockK lateinit var smPdfGenService: SmPdfGenService
+
+    @MockK lateinit var tsmPdlService: TsmPdlService
+
     @MockK lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
     lateinit var sykmeldingService: SykmeldingService
@@ -51,6 +57,8 @@ class SykmeldingServiceTest {
                 syfohelsenettproxyService = syfohelsenettproxyService,
                 syfosmreglerService = syfosmreglerService,
                 receivedSykmeldingMapper = receivedSykmeldingMapper,
+                smPdfGenService = smPdfGenService,
+                tsmPdlService = tsmPdlService,
                 objectMapper = objectMapper,
             )
     }

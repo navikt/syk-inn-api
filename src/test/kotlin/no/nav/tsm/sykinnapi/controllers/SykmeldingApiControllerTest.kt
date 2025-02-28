@@ -16,9 +16,11 @@ import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiResponse
 import no.nav.tsm.sykinnapi.modell.sykinn.Sykmelding
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
+import no.nav.tsm.sykinnapi.service.smpdfgen.SmPdfGenService
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
+import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +43,10 @@ class SykmeldingApiControllerTest {
     @MockkBean lateinit var sykmeldingService: SykmeldingService
 
     @MockkBean lateinit var syfosmreglerService: SyfosmreglerService
+
+    @MockkBean lateinit var smPdfGenService: SmPdfGenService
+
+    @MockkBean lateinit var tsmPdlService: TsmPdlService
 
     @MockkBean lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
