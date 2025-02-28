@@ -26,6 +26,7 @@ class SmpdfgenClient(
             .post()
             .uri { uriBuilder -> uriBuilder.path("/api/v1/genpdf/sm/sm").build() }
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .body(payload)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
             .body<ByteArray>()
