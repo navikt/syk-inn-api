@@ -1,8 +1,6 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.time.LocalDate
-import java.util.*
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
@@ -17,6 +15,8 @@ import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.util.*
 
 @Service
 class SykmeldingService(
@@ -39,6 +39,10 @@ class SykmeldingService(
         )
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
 
+        logger.info(
+            "Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId"
+        )
+
         val pdlPerson = tsmPdlService.getPdlPerson(sykmeldingDTO.pasient.fnr)
 
         val receivedSykmelding =
@@ -47,6 +51,10 @@ class SykmeldingService(
                 sykmeldingDTO.behandler.fnr,
                 sykmeldingId,
             )
+
+        logger.info(
+            "Trying to generate pdf for sykmeldingId=$sykmeldingId"
+        )
 
         val pdfByteArray = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
 
