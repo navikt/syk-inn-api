@@ -129,7 +129,7 @@ smpdfgen:
     url: http://smpdfgen.teamsykmelding
 
 tsmpdl:
-  url: http://tsm-pdl-cache.tsm
+   url: http://tsm-pdl-cache.tsm
 
 teamsykmelding:
     ok:
