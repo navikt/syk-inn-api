@@ -1,15 +1,15 @@
 package no.nav.tsm.sykinnapi.mapper
 
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.util.*
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 fun receivedSykmeldingMapper(
     sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
@@ -64,6 +64,14 @@ fun receivedSykmeldingMapper(
     return receivedSykmelding
 }
 
+fun mapToSystem(system: String): DiagnoseSystem {
+    return when (system) {
+        "2.16.578.1.12.4.1.1.7110" -> DiagnoseSystem.ICD10
+        "2.16.578.1.12.4.1.1.7170" -> DiagnoseSystem.ICPC2
+        else -> throw RuntimeException("Ukjent system: $system")
+    }
+}
+
 fun receivedSykmeldingMapper(
     sykInnSykmeldingDTO: SykInnSykmeldingDTO,
     sykmelderFnr: String,
@@ -79,7 +87,7 @@ fun receivedSykmeldingMapper(
             hoveddiagnose =
                 Hoveddiagnose(
                     code = sykInnSykmeldingDTO.hovedDiagnose.code,
-                    system = DiagnoseSystem.valueOf(sykInnSykmeldingDTO.hovedDiagnose.system)
+                    system = mapToSystem(sykInnSykmeldingDTO.hovedDiagnose.system)
                 ),
             sykInnAktivitet =
                 Aktivitet.AktivitetIkkeMulig(
