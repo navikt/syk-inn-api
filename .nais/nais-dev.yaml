@@ -69,4 +69,4 @@ spec:
     - name: SMPDFGEN_SCOPE
       value: api://dev-gcp.teamsykmelding.smpdfgen/.default
     - name: TSMPDL_SCOPE
-      value: api://dev-gcp.teamsykmelding.tsm-pdl-cache/.default
+      value: api://dev-gcp.tsm.tsm-pdl-cache/.default
