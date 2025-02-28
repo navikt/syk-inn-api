@@ -153,7 +153,7 @@ class SykmeldingService(
     }
 
     fun getSykmeldingerByIdent(ident: String): List<SykmeldingHistorikk> {
-        logger.info(
+        securelog.info(
             "Trying to fetch sykmelding for ident=$ident",
         )
         val sykmeldingDTO = syfosmregisterService.getSykmeldingByIdent(ident)
