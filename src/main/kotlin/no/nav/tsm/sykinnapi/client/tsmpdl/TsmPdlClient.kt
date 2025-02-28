@@ -24,7 +24,7 @@ class TsmPdlClient(
             .uri { uriBuilder -> uriBuilder.path("/api/person").build() }
             .attributes(clientRegistrationId("tsmpdl-m2m"))
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("Ident", ident)
+            .header("ident", ident)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
             .body<PdlPerson>()
