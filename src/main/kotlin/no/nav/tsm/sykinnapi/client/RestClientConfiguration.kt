@@ -38,6 +38,22 @@ class RestClientConfiguration {
         return syfosmregisterM2mRestClientBuilder.baseUrl(syfosmregisterBaseUrl).build()
     }
 
+    @Bean("smpdfgenClientRestClient")
+    fun smpdfgenClientRestClient(
+        @Value("\${smpdfgen.url}") smpdfgenBaseUrl: String,
+        smpdfgenM2mRestClientBuilder: RestClient.Builder
+    ): RestClient {
+        return smpdfgenM2mRestClientBuilder.baseUrl(smpdfgenBaseUrl).build()
+    }
+
+    @Bean("tsmPdlClientRestClient")
+    fun tsmPdlClientRestClient(
+        @Value("\${tsmpdl.url}") tsmpdlBaseUrl: String,
+        tsmpdlM2mRestClientBuilder: RestClient.Builder
+    ): RestClient {
+        return tsmpdlM2mRestClientBuilder.baseUrl(tsmpdlBaseUrl).build()
+    }
+
     @Bean
     fun restClientBuilderCustomizer(acm: OAuth2AuthorizedClientManager) = RestClientCustomizer {
         it.requestInterceptor(OAuth2ClientHttpRequestInterceptor(acm))

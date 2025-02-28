@@ -2,7 +2,13 @@ package no.nav.tsm.sykinnapi.mapper
 
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
+import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
+import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
+import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
+import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 
 fun receivedSykmeldingMapper(
@@ -38,6 +44,73 @@ fun receivedSykmeldingMapper(
             tlfPasient = null,
             personNrLege = sykmelderFnr,
             legeHprNr = sykInnApiNySykmeldingPayload.sykmelderHpr,
+            legeHelsepersonellkategori = null,
+            navLogId = sykmeldingId,
+            msgId = sykmeldingId,
+            legekontorOrgNr = null,
+            legekontorOrgName = "",
+            legekontorHerId = null,
+            legekontorReshId = null,
+            mottattDato = now,
+            rulesetVersion = null,
+            fellesformat = fellesformatMarshaller.toString(fellesformat),
+            tssid = null,
+            merknader = null,
+            partnerreferanse = null,
+            vedlegg = emptyList(),
+            utenlandskSykmelding = null,
+        )
+
+    return receivedSykmelding
+}
+
+fun receivedSykmeldingMapper(
+    sykInnSykmeldingDTO: SykInnSykmeldingDTO,
+    sykmelderFnr: String,
+    sykmeldingId: String
+): ReceivedSykmelding {
+    val now = LocalDateTime.now(ZoneOffset.UTC)
+
+    val fellesformat =
+        mapToFellesformat(
+            sykmelderHpr = sykInnSykmeldingDTO.behandler.hpr!!,
+            sykmeldingId = sykmeldingId,
+            pasientfnr = sykInnSykmeldingDTO.pasient.fnr,
+            hoveddiagnose =
+                Hoveddiagnose(
+                    code = sykInnSykmeldingDTO.hovedDiagnose.code,
+                    system = DiagnoseSystem.valueOf(sykInnSykmeldingDTO.hovedDiagnose.system)
+                ),
+            sykInnAktivitet =
+                Aktivitet.AktivitetIkkeMulig(
+                    fom =
+                        sykInnSykmeldingDTO.periode.fom.format(
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                        ),
+                    tom =
+                        sykInnSykmeldingDTO.periode.fom.format(
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                        )
+                ),
+            now = now,
+        )
+
+    val sykmelding =
+        extractHelseOpplysningerArbeidsuforhet(fellesformat)
+            .toSykmelding(
+                sykmeldingId = sykmeldingId,
+                pasientAktoerId = "",
+                msgId = sykmeldingId,
+                signaturDato = now,
+            )
+
+    val receivedSykmelding =
+        ReceivedSykmelding(
+            sykmelding = sykmelding,
+            personNrPasient = sykInnSykmeldingDTO.pasient.fnr,
+            tlfPasient = null,
+            personNrLege = sykmelderFnr,
+            legeHprNr = sykInnSykmeldingDTO.behandler.hpr,
             legeHelsepersonellkategori = null,
             navLogId = sykmeldingId,
             msgId = sykmeldingId,

@@ -1,6 +1,7 @@
 package no.nav.tsm.sykinnapi.controllers
 
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingHistorikk
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingKvittering
 import no.nav.tsm.sykinnapi.service.sykmelding.SykmeldingService
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,11 +28,11 @@ class SykmeldingApiController(
     }
 
     @GetMapping("/api/v1/sykmelding")
-    fun getSykmeldingByIdent(@RequestHeader("Ident") ident: String?): List<SykmeldingKvittering> {
+    fun getSykmeldingByIdent(@RequestHeader("Ident") ident: String?): List<SykmeldingHistorikk> {
         if (ident == null) {
             throw IllegalArgumentException("Ident header is missing")
         }
 
-        return sykmeldingService.getSykmeldingByIdent(ident)
+        return sykmeldingService.getSykmeldingerByIdent(ident)
     }
 }
