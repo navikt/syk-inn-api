@@ -43,6 +43,8 @@ class SykmeldingService(
             "Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId"
         )
 
+        securelog.info("Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId and ident=${sykmeldingDTO.pasient.fnr}")
+
         val pdlPerson = tsmPdlService.getPdlPerson(sykmeldingDTO.pasient.fnr)
 
         val receivedSykmelding =
