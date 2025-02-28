@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.client.ClientHttpResponse
-import org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
@@ -26,7 +25,6 @@ class SmpdfgenClient(
         smpdfgenClientRestClient
             .post()
             .uri { uriBuilder -> uriBuilder.path("/api/v1/genpdf/sm/sm").build() }
-            .attributes(clientRegistrationId("smpdfgen-m2m"))
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
