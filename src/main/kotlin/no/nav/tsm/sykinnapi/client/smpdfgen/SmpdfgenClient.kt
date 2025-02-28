@@ -24,7 +24,7 @@ class SmpdfgenClient(
 
     fun createPdf(payload: PdfPayload) =
         smpdfgenClientRestClient
-            .get()
+            .post()
             .uri { uriBuilder -> uriBuilder.path("/api/v1/genpdf/sm/sm").build() }
             .attributes(clientRegistrationId("smpdfgen-m2m"))
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
