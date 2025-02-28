@@ -60,6 +60,10 @@ class SykmeldingService(
 
         val pdfByteArray = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
 
+        logger.info(
+            "Pdf is created for sykmeldingId=$sykmeldingId"
+        )
+
         if (sykmeldingDTO.behandler.hpr == hprNummer) {
             return SykmeldingKvittering(
                 sykmeldingId = sykmeldingId,
