@@ -268,4 +268,3 @@ sealed interface Aktivitet {
 
     data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : Aktivitet
 }
-// Karl, eller Erik,
