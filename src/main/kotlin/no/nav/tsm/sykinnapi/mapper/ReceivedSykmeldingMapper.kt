@@ -1,15 +1,15 @@
 package no.nav.tsm.sykinnapi.mapper
 
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.util.*
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
 import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 fun receivedSykmeldingMapper(
     sykInnApiNySykmeldingPayload: SykInnApiNySykmeldingPayload,
@@ -90,16 +90,35 @@ fun receivedSykmeldingMapper(
                     system = mapToSystem(sykInnSykmeldingDTO.hovedDiagnose.system)
                 ),
             sykInnAktivitet =
-                Aktivitet.AktivitetIkkeMulig(
-                    fom =
-                        sykInnSykmeldingDTO.periode.fom.format(
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
-                        ),
-                    tom =
-                        sykInnSykmeldingDTO.periode.fom.format(
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                when (sykInnSykmeldingDTO.aktivitet) {
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
+                        Aktivitet.Gradert(
+                            grad = sykInnSykmeldingDTO.aktivitet.grad,
+                            fom =
+                                sykInnSykmeldingDTO.aktivitet.fom.format(
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                                ),
+                            tom =
+                                sykInnSykmeldingDTO.aktivitet.tom.format(
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                                )
                         )
-                ),
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
+                        Aktivitet.AktivitetIkkeMulig(
+                            fom =
+                                sykInnSykmeldingDTO.aktivitet.fom.format(
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                                ),
+                            tom =
+                                sykInnSykmeldingDTO.aktivitet.tom.format(
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
+                                )
+                        )
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende -> TODO()
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
+                        TODO()
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd -> TODO()
+                },
             now = now,
         )
 

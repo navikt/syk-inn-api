@@ -1,8 +1,8 @@
 package no.nav.tsm.sykinnapi.service.sykmelding
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.time.LocalDate
-import java.util.*
 import no.nav.tsm.sykinnapi.config.kafka.SykmeldingOKProducer
 import no.nav.tsm.sykinnapi.controllers.SykmeldingApiController
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmeldingWithValidationResult
@@ -17,6 +17,8 @@ import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
 import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.util.*
 
 @Service
 class SykmeldingService(
@@ -63,11 +65,35 @@ class SykmeldingService(
         if (sykmeldingDTO.behandler.hpr == hprNummer) {
             return SykmeldingKvittering(
                 sykmeldingId = sykmeldingId,
-                periode =
-                    Periode(
-                        fom = sykmeldingDTO.periode.fom,
-                        tom = sykmeldingDTO.periode.tom,
-                    ),
+                aktivitet =
+                    when (sykmeldingDTO.aktivitet) {
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
+                            Aktivitet.AktivitetIkkeMulig(
+                                fom = sykmeldingDTO.aktivitet.fom,
+                                tom = sykmeldingDTO.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
+                            Aktivitet.Gradert(
+                                grad = sykmeldingDTO.aktivitet.grad,
+                                fom = sykmeldingDTO.aktivitet.fom,
+                                tom = sykmeldingDTO.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende ->
+                            Aktivitet.Avvetende(
+                                fom = sykmeldingDTO.aktivitet.fom,
+                                tom = sykmeldingDTO.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
+                            Aktivitet.Behandlingsdager(
+                                fom = sykmeldingDTO.aktivitet.fom,
+                                tom = sykmeldingDTO.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd ->
+                            Aktivitet.Reisetilskudd(
+                                fom = sykmeldingDTO.aktivitet.fom,
+                                tom = sykmeldingDTO.aktivitet.tom,
+                            )
+                    },
                 pasient = Pasient(fnr = sykmeldingDTO.pasient.fnr),
                 hovedDiagnose =
                     Diagnose(
@@ -163,11 +189,35 @@ class SykmeldingService(
         return sykmeldingDTO.map { sykmelding ->
             SykmeldingHistorikk(
                 sykmeldingId = sykmelding.sykmeldingId,
-                periode =
-                    Periode(
-                        fom = sykmelding.periode.fom,
-                        tom = sykmelding.periode.tom,
-                    ),
+                aktivitet =
+                    when (sykmelding.aktivitet) {
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
+                            Aktivitet.AktivitetIkkeMulig(
+                                fom = sykmelding.aktivitet.fom,
+                                tom = sykmelding.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
+                            Aktivitet.Gradert(
+                                grad = sykmelding.aktivitet.grad,
+                                fom = sykmelding.aktivitet.fom,
+                                tom = sykmelding.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende ->
+                            Aktivitet.Avvetende(
+                                fom = sykmelding.aktivitet.fom,
+                                tom = sykmelding.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
+                            Aktivitet.Behandlingsdager(
+                                fom = sykmelding.aktivitet.fom,
+                                tom = sykmelding.aktivitet.tom,
+                            )
+                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd ->
+                            Aktivitet.Reisetilskudd(
+                                fom = sykmelding.aktivitet.fom,
+                                tom = sykmelding.aktivitet.tom,
+                            )
+                    },
                 pasient = Pasient(fnr = sykmelding.pasient.fnr),
                 hovedDiagnose =
                     Diagnose(
@@ -182,21 +232,40 @@ class SykmeldingService(
 
 data class SykmeldingHistorikk(
     val sykmeldingId: String,
-    val periode: Periode,
+    val aktivitet: Aktivitet,
     val pasient: Pasient,
     val hovedDiagnose: Diagnose,
 )
 
 data class SykmeldingKvittering(
     val sykmeldingId: String,
-    val periode: Periode,
+    val aktivitet: Aktivitet,
     val pasient: Pasient,
     val hovedDiagnose: Diagnose,
     val pdf: ByteArray
 )
 
-data class Periode(val fom: LocalDate, val tom: LocalDate)
-
 data class Pasient(val fnr: String)
 
 data class Diagnose(val code: String, val system: String, val text: String)
+
+@JsonSubTypes(
+    JsonSubTypes.Type(Aktivitet.AktivitetIkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
+    JsonSubTypes.Type(Aktivitet.Gradert::class, name = "GRADERT"),
+    JsonSubTypes.Type(Aktivitet.Avvetende::class, name = "AVVENTENDE"),
+    JsonSubTypes.Type(Aktivitet.Behandlingsdager::class, name = "BEHANDLINGSDAGER"),
+    JsonSubTypes.Type(Aktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
+)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed interface Aktivitet {
+    data class AktivitetIkkeMulig(val fom: LocalDate, val tom: LocalDate) : Aktivitet
+
+    data class Gradert(val grad: Int, val fom: LocalDate, val tom: LocalDate) : Aktivitet
+
+    data class Avvetende(val fom: LocalDate, val tom: LocalDate) : Aktivitet
+
+    data class Behandlingsdager(val fom: LocalDate, val tom: LocalDate) : Aktivitet
+
+    data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : Aktivitet
+}
+// Karl, eller Erik,
