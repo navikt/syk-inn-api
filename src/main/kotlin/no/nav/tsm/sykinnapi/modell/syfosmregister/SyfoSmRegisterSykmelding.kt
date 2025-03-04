@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 
-data class SykInnSykmeldingDTO(
+data class SyfoSmRegisterSykmelding(
     val sykmeldingId: String,
     val aktivitet: Aktivitet,
-    val pasient: Pasient,
-    val hovedDiagnose: Diagnose,
-    val behandler: Behandler
+    val pasient: SyfoSmRegisterPasient,
+    val hovedDiagnose: SyfoSmRegisterDiagnose,
+    val behandler: SyfoSmRegisterBehandler
 )
 
 @JsonSubTypes(
@@ -32,8 +32,8 @@ sealed interface Aktivitet {
     data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : Aktivitet
 }
 
-data class Pasient(val fnr: String)
+data class SyfoSmRegisterPasient(val fnr: String)
 
-data class Behandler(val fnr: String, val hpr: String?)
+data class SyfoSmRegisterBehandler(val fnr: String, val hpr: String?)
 
-data class Diagnose(val code: String, val system: String, val text: String)
+data class SyfoSmRegisterDiagnose(val code: String, val system: String, val text: String)

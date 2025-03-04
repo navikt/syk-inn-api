@@ -1,6 +1,6 @@
 package no.nav.tsm.sykinnapi.client.syfosmregister
 
-import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
+import no.nav.tsm.sykinnapi.modell.syfosmregister.SyfoSmRegisterSykmelding
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -15,10 +15,9 @@ import org.springframework.web.client.body
 class SyfosmregisterClient(
     @Qualifier("syfosmregisterClientRestClient") private val syfosmregisterClient: RestClient,
 ) {
-
     private val logger = LoggerFactory.getLogger(SyfosmregisterClient::class.java)
 
-    fun getSykmelding(sykmeldingId: String): SykInnSykmeldingDTO =
+    fun getSykmelding(sykmeldingId: String): SyfoSmRegisterSykmelding =
         syfosmregisterClient
             .get()
             .uri { uriBuilder ->
@@ -29,10 +28,10 @@ class SyfosmregisterClient(
             .header("Nav-CallId", sykmeldingId)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
-            .body<SykInnSykmeldingDTO>()
+            .body<SyfoSmRegisterSykmelding>()
             ?: throw RuntimeException("Body is not SykInnSykmeldingDTO")
 
-    fun getSykmeldingByIdent(ident: String): List<SykInnSykmeldingDTO> =
+    fun getSykmeldingByIdent(ident: String): List<SyfoSmRegisterSykmelding> =
         syfosmregisterClient
             .get()
             .uri { uriBuilder -> uriBuilder.path("/api/v2/sykmelding/sykinn/ident").build() }
@@ -41,7 +40,7 @@ class SyfosmregisterClient(
             .header("X-IDENT", ident)
             .retrieve()
             .onStatus({ it.isError }) { req, res -> onStatusError(res) }
-            .body<List<SykInnSykmeldingDTO>>()
+            .body<List<SyfoSmRegisterSykmelding>>()
             ?: throw RuntimeException("Body is not List<SykInnSykmeldingDTO>")
 
     private fun onStatusError(res: ClientHttpResponse) {
