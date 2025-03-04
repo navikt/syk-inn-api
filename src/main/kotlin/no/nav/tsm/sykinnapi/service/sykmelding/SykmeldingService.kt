@@ -10,11 +10,9 @@ import no.nav.tsm.sykinnapi.modell.receivedSykmelding.Status
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiNySykmeldingPayload
 import no.nav.tsm.sykinnapi.modell.sykinn.SykInnApiResponse
 import no.nav.tsm.sykinnapi.service.receivedSykmeldingMapper.ReceivedSykmeldingMapper
-import no.nav.tsm.sykinnapi.service.smpdfgen.SmPdfGenService
 import no.nav.tsm.sykinnapi.service.syfohelsenettproxy.SyfohelsenettproxyService
 import no.nav.tsm.sykinnapi.service.syfosmregister.SyfosmregisterService
 import no.nav.tsm.sykinnapi.service.syfosmregler.SyfosmreglerService
-import no.nav.tsm.sykinnapi.service.tsmpdl.TsmPdlService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -26,86 +24,63 @@ class SykmeldingService(
     val sykmeldingOKProducer: SykmeldingOKProducer,
     val syfohelsenettproxyService: SyfohelsenettproxyService,
     val syfosmreglerService: SyfosmreglerService,
-    val smPdfGenService: SmPdfGenService,
-    val tsmPdlService: TsmPdlService,
     val receivedSykmeldingMapper: ReceivedSykmeldingMapper,
     val objectMapper: ObjectMapper
 ) {
-
     private val securelog = LoggerFactory.getLogger("securelog")
-    private val logger = LoggerFactory.getLogger(SykmeldingApiController::class.java)
+    private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
 
-    fun getSykmeldingKvittering(sykmeldingId: String, hprNummer: String): SykmeldingKvittering {
+    fun getSykmelding(sykmeldingId: String, hprNummer: String): EksisterendeSykmelding {
         logger.info(
             "Trying to fetch sykmelding for sykmeldingId=$sykmeldingId, hprNummer=$hprNummer",
         )
         val sykmeldingDTO = syfosmregisterService.getSykmelding(sykmeldingId)
-
-        logger.info("Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId")
-
-        securelog.info(
-            "Trying to fetch pdlPerson for sykmeldingId=$sykmeldingId and ident=${sykmeldingDTO.pasient.fnr}"
-        )
-
-        val pdlPerson = tsmPdlService.getPdlPerson(sykmeldingDTO.pasient.fnr)
-
-        val receivedSykmelding =
-            receivedSykmeldingMapper.mapSykmeldingDTOToReceivedSykmelding(
-                sykmeldingDTO,
-                sykmeldingDTO.behandler.fnr,
-                sykmeldingId,
-            )
-
-        logger.info("Trying to generate pdf for sykmeldingId=$sykmeldingId")
-
-        val base64EncodedPdf = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
-
-        logger.info("Pdf is created for sykmeldingId=$sykmeldingId")
-
-        if (sykmeldingDTO.behandler.hpr == hprNummer) {
-            return SykmeldingKvittering(
-                sykmeldingId = sykmeldingId,
-                aktivitet =
-                    when (sykmeldingDTO.aktivitet) {
-                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
-                            Aktivitet.AktivitetIkkeMulig(
-                                fom = sykmeldingDTO.aktivitet.fom,
-                                tom = sykmeldingDTO.aktivitet.tom,
-                            )
-                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
-                            Aktivitet.Gradert(
-                                grad = sykmeldingDTO.aktivitet.grad,
-                                fom = sykmeldingDTO.aktivitet.fom,
-                                tom = sykmeldingDTO.aktivitet.tom,
-                            )
-                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende ->
-                            Aktivitet.Avvetende(
-                                fom = sykmeldingDTO.aktivitet.fom,
-                                tom = sykmeldingDTO.aktivitet.tom,
-                            )
-                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
-                            Aktivitet.Behandlingsdager(
-                                fom = sykmeldingDTO.aktivitet.fom,
-                                tom = sykmeldingDTO.aktivitet.tom,
-                            )
-                        is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd ->
-                            Aktivitet.Reisetilskudd(
-                                fom = sykmeldingDTO.aktivitet.fom,
-                                tom = sykmeldingDTO.aktivitet.tom,
-                            )
-                    },
-                pasient = Pasient(fnr = sykmeldingDTO.pasient.fnr),
-                hovedDiagnose =
-                    Diagnose(
-                        code = sykmeldingDTO.hovedDiagnose.code,
-                        system = sykmeldingDTO.hovedDiagnose.system,
-                        text = sykmeldingDTO.hovedDiagnose.text,
-                    ),
-                pdf = base64EncodedPdf
-            )
-        } else {
+        if (sykmeldingDTO.behandler.hpr != hprNummer) {
             throw RuntimeException("HPR-nummer matcher ikke behandler")
         }
+
+        return EksisterendeSykmelding(
+            sykmeldingId = sykmeldingId,
+            aktivitet =
+                when (sykmeldingDTO.aktivitet) {
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
+                        Aktivitet.AktivitetIkkeMulig(
+                            fom = sykmeldingDTO.aktivitet.fom,
+                            tom = sykmeldingDTO.aktivitet.tom,
+                        )
+
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
+                        Aktivitet.Gradert(
+                            grad = sykmeldingDTO.aktivitet.grad,
+                            fom = sykmeldingDTO.aktivitet.fom,
+                            tom = sykmeldingDTO.aktivitet.tom,
+                        )
+
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende ->
+                        Aktivitet.Avvetende(
+                            fom = sykmeldingDTO.aktivitet.fom,
+                            tom = sykmeldingDTO.aktivitet.tom,
+                        )
+
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
+                        Aktivitet.Behandlingsdager(
+                            fom = sykmeldingDTO.aktivitet.fom,
+                            tom = sykmeldingDTO.aktivitet.tom,
+                        )
+
+                    is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd ->
+                        Aktivitet.Reisetilskudd(
+                            fom = sykmeldingDTO.aktivitet.fom,
+                            tom = sykmeldingDTO.aktivitet.tom,
+                        )
+                },
+            pasient = Pasient(fnr = sykmeldingDTO.pasient.fnr),
+            hovedDiagnose = Diagnose(
+                code = sykmeldingDTO.hovedDiagnose.code,
+                system = sykmeldingDTO.hovedDiagnose.system,
+                text = sykmeldingDTO.hovedDiagnose.text,
+            ),
+        )
     }
 
     fun sendSykmelding(
@@ -180,14 +155,14 @@ class SykmeldingService(
         sykmeldingOKProducer.send(receivedSykmeldingWithValidationResult)
     }
 
-    fun getSykmeldingerByIdent(ident: String): List<SykmeldingHistorikk> {
+    fun getSykmeldingerByIdent(ident: String): List<EksisterendeSykmelding> {
         securelog.info(
             "Trying to fetch sykmelding for ident=$ident",
         )
         val sykmeldingDTO = syfosmregisterService.getSykmeldingByIdent(ident)
 
         return sykmeldingDTO.map { sykmelding ->
-            SykmeldingHistorikk(
+            EksisterendeSykmelding(
                 sykmeldingId = sykmelding.sykmeldingId,
                 aktivitet =
                     when (sykmelding.aktivitet) {
@@ -196,22 +171,26 @@ class SykmeldingService(
                                 fom = sykmelding.aktivitet.fom,
                                 tom = sykmelding.aktivitet.tom,
                             )
+
                         is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
                             Aktivitet.Gradert(
                                 grad = sykmelding.aktivitet.grad,
                                 fom = sykmelding.aktivitet.fom,
                                 tom = sykmelding.aktivitet.tom,
                             )
+
                         is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Avvetende ->
                             Aktivitet.Avvetende(
                                 fom = sykmelding.aktivitet.fom,
                                 tom = sykmelding.aktivitet.tom,
                             )
+
                         is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Behandlingsdager ->
                             Aktivitet.Behandlingsdager(
                                 fom = sykmelding.aktivitet.fom,
                                 tom = sykmelding.aktivitet.tom,
                             )
+
                         is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Reisetilskudd ->
                             Aktivitet.Reisetilskudd(
                                 fom = sykmelding.aktivitet.fom,
@@ -230,19 +209,11 @@ class SykmeldingService(
     }
 }
 
-data class SykmeldingHistorikk(
+data class EksisterendeSykmelding(
     val sykmeldingId: String,
     val aktivitet: Aktivitet,
     val pasient: Pasient,
     val hovedDiagnose: Diagnose,
-)
-
-data class SykmeldingKvittering(
-    val sykmeldingId: String,
-    val aktivitet: Aktivitet,
-    val pasient: Pasient,
-    val hovedDiagnose: Diagnose,
-    val pdf: String
 )
 
 data class Pasient(val fnr: String)

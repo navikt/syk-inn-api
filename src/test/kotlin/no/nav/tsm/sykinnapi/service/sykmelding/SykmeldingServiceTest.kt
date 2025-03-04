@@ -38,10 +38,6 @@ class SykmeldingServiceTest {
 
     @MockK lateinit var syfosmreglerService: SyfosmreglerService
 
-    @MockK lateinit var smPdfGenService: SmPdfGenService
-
-    @MockK lateinit var tsmPdlService: TsmPdlService
-
     @MockK lateinit var receivedSykmeldingMapper: ReceivedSykmeldingMapper
 
     lateinit var sykmeldingService: SykmeldingService
@@ -57,8 +53,6 @@ class SykmeldingServiceTest {
                 syfohelsenettproxyService = syfohelsenettproxyService,
                 syfosmreglerService = syfosmreglerService,
                 receivedSykmeldingMapper = receivedSykmeldingMapper,
-                smPdfGenService = smPdfGenService,
-                tsmPdlService = tsmPdlService,
                 objectMapper = objectMapper,
             )
     }

@@ -5,7 +5,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import no.nav.tsm.sykinnapi.modell.receivedSykmelding.ReceivedSykmelding
-import no.nav.tsm.sykinnapi.modell.syfosmregister.SykInnSykmeldingDTO
+import no.nav.tsm.sykinnapi.modell.syfosmregister.SyfoSmRegisterSykmelding
 import no.nav.tsm.sykinnapi.modell.sykinn.Aktivitet
 import no.nav.tsm.sykinnapi.modell.sykinn.DiagnoseSystem
 import no.nav.tsm.sykinnapi.modell.sykinn.Hoveddiagnose
@@ -73,7 +73,7 @@ fun mapToSystem(system: String): DiagnoseSystem {
 }
 
 fun receivedSykmeldingMapper(
-    sykInnSykmeldingDTO: SykInnSykmeldingDTO,
+    syfoSmRegisterSykmelding: SyfoSmRegisterSykmelding,
     sykmelderFnr: String,
     sykmeldingId: String
 ): ReceivedSykmelding {
@@ -81,36 +81,36 @@ fun receivedSykmeldingMapper(
 
     val fellesformat =
         mapToFellesformat(
-            sykmelderHpr = sykInnSykmeldingDTO.behandler.hpr!!,
+            sykmelderHpr = syfoSmRegisterSykmelding.behandler.hpr!!,
             sykmeldingId = sykmeldingId,
-            pasientfnr = sykInnSykmeldingDTO.pasient.fnr,
+            pasientfnr = syfoSmRegisterSykmelding.pasient.fnr,
             hoveddiagnose =
                 Hoveddiagnose(
-                    code = sykInnSykmeldingDTO.hovedDiagnose.code,
-                    system = mapToSystem(sykInnSykmeldingDTO.hovedDiagnose.system)
+                    code = syfoSmRegisterSykmelding.hovedDiagnose.code,
+                    system = mapToSystem(syfoSmRegisterSykmelding.hovedDiagnose.system)
                 ),
             sykInnAktivitet =
-                when (sykInnSykmeldingDTO.aktivitet) {
+                when (syfoSmRegisterSykmelding.aktivitet) {
                     is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.Gradert ->
                         Aktivitet.Gradert(
-                            grad = sykInnSykmeldingDTO.aktivitet.grad,
+                            grad = syfoSmRegisterSykmelding.aktivitet.grad,
                             fom =
-                                sykInnSykmeldingDTO.aktivitet.fom.format(
+                                syfoSmRegisterSykmelding.aktivitet.fom.format(
                                     DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
                                 ),
                             tom =
-                                sykInnSykmeldingDTO.aktivitet.tom.format(
+                                syfoSmRegisterSykmelding.aktivitet.tom.format(
                                     DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
                                 )
                         )
                     is no.nav.tsm.sykinnapi.modell.syfosmregister.Aktivitet.AktivitetIkkeMulig ->
                         Aktivitet.AktivitetIkkeMulig(
                             fom =
-                                sykInnSykmeldingDTO.aktivitet.fom.format(
+                                syfoSmRegisterSykmelding.aktivitet.fom.format(
                                     DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
                                 ),
                             tom =
-                                sykInnSykmeldingDTO.aktivitet.tom.format(
+                                syfoSmRegisterSykmelding.aktivitet.tom.format(
                                     DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.of("nb", "NO"))
                                 )
                         )
@@ -134,10 +134,10 @@ fun receivedSykmeldingMapper(
     val receivedSykmelding =
         ReceivedSykmelding(
             sykmelding = sykmelding,
-            personNrPasient = sykInnSykmeldingDTO.pasient.fnr,
+            personNrPasient = syfoSmRegisterSykmelding.pasient.fnr,
             tlfPasient = null,
             personNrLege = sykmelderFnr,
-            legeHprNr = sykInnSykmeldingDTO.behandler.hpr,
+            legeHprNr = syfoSmRegisterSykmelding.behandler.hpr,
             legeHelsepersonellkategori = null,
             navLogId = sykmeldingId,
             msgId = sykmeldingId,
