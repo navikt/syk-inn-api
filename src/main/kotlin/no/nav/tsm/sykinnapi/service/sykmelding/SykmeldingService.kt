@@ -58,7 +58,7 @@ class SykmeldingService(
 
         logger.info("Trying to generate pdf for sykmeldingId=$sykmeldingId")
 
-        val pdfByteArray = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
+        val base64EncodedPdf = smPdfGenService.createPdf(receivedSykmelding, pdlPerson)
 
         logger.info("Pdf is created for sykmeldingId=$sykmeldingId")
 
@@ -101,7 +101,7 @@ class SykmeldingService(
                         system = sykmeldingDTO.hovedDiagnose.system,
                         text = sykmeldingDTO.hovedDiagnose.text,
                     ),
-                pdf = pdfByteArray
+                pdf = base64EncodedPdf
             )
         } else {
             throw RuntimeException("HPR-nummer matcher ikke behandler")
@@ -242,7 +242,7 @@ data class SykmeldingKvittering(
     val aktivitet: Aktivitet,
     val pasient: Pasient,
     val hovedDiagnose: Diagnose,
-    val pdf: ByteArray
+    val pdf: String
 )
 
 data class Pasient(val fnr: String)
