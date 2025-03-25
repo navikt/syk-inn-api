@@ -1,108 +1,48 @@
-import com.diffplug.gradle.spotless.SpotlessExtension
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
-val javaVersion = JvmTarget.JVM_21
-
-val logstashLogbackEncoderVersion = "8.0"
-val ktfmtVersion = "0.44"
-val openapiVersion = "2.8.5"
-val syfoXmlCodegenVersion = "2.0.1"
-val jaxbApiVersion = "2.3.1"
-val jaxbVersion = "2.4.0-b180830.0438"
-val javaxActivationVersion = "1.1.1"
-val diagnosekoderVersion = "1.2025.0"
-val springmockkVersion= "4.0.2"
+plugins {
+	kotlin("jvm") version "2.1.10"
+	kotlin("plugin.spring") version "2.1.10"
+	id("org.springframework.boot") version "3.4.4"
+	id("io.spring.dependency-management") version "1.1.7"
+}
 
 group = "no.nav.tsm"
-version = "1.0.0"
+version = "0.0.1-SNAPSHOT"
 
-plugins {
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.spring") version "2.1.10"
-    id("org.springframework.boot") version "3.4.2"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.2"
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
+	mavenCentral()
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openapiVersion")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
-    implementation("org.hibernate.validator:hibernate-validator")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegenVersion")
-    implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegenVersion")
-    implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegenVersion")
-    implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
-    implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
-    implementation("javax.activation:activation:$javaxActivationVersion")
-    implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
-    implementation("org.springframework.kafka:spring-kafka")
-
-    testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.flywaydb:flyway-core")
+	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("org.springframework.kafka:spring-kafka")
+	runtimeOnly("org.postgresql:postgresql")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.springframework.kafka:spring-kafka-test")
+	testImplementation("org.springframework.security:spring-security-test")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+	compilerOptions {
+		freeCompilerArgs.addAll("-Xjsr305=strict")
         jvmTarget.set(javaVersion)
-    }
+	}
 }
 
-
-tasks {
-
-    build {
-        dependsOn("bootJar")
-    }
-
-    withType<BootJar> {
-        archiveFileName = "app.jar"
-    }
-
-    withType<Test> {
-        useJUnitPlatform {
-        }
-        testLogging {
-            events("skipped", "failed")
-            showStackTraces = true
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
-
-    task("addPreCommitGitHookOnBuild") {
-        println("⚈ ⚈ ⚈ Running Add Pre Commit Git Hook Script on Build ⚈ ⚈ ⚈")
-        exec {
-            commandLine("cp", "./.scripts/pre-commit", "./.git/hooks")
-        }
-        println("✅ Added Pre Commit Git Hook Script.")
-    }
-
-    configure<SpotlessExtension> {
-        kotlin { ktfmt(ktfmtVersion).kotlinlangStyle() }
-        check {
-            dependsOn("spotlessApply")
-        }
-    }
-
+tasks.withType<Test> {
+	useJUnitPlatform()
 }
