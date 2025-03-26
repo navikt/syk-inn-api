@@ -5,11 +5,11 @@
             <includeMdcKeyName>x_request_id</includeMdcKeyName>
         </encoder>
     </appender>
-
+<!--// TODO logs directory should be changed back to secure-logs         <file>${SECURELOGS_DIR:-/secure-logs}/secure.log</file> og filePattern..-->
     <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${SECURELOGS_DIR:-/secure-logs}/secure.log</file>
+        <file>${SECURELOGS_DIR:-./logs}/secure.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${SECURELOGS_DIR:-/secure-logs}/secure.log.%i</fileNamePattern>
+            <fileNamePattern>${SECURELOGS_DIR:-./logs}/secure.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>1</maxIndex>
         </rollingPolicy>
@@ -23,11 +23,9 @@
         <appender-ref ref="secure_log" />
     </logger>
 
-
     <root level="INFO">
         <appender-ref ref="stdout_json"/>
     </root>
 
     <logger name="no.nav" level="INFO"/>
-
 </configuration>
