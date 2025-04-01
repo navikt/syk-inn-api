@@ -13,10 +13,21 @@ import java.util.*
 @Service
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
+    private val ruleService: RuleService,
+    private val helsenettProxyService: HelseNettProxyService,
+
+
 ) {
     fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<String> {
+        val sykmeldingId = UUID.randomUUID().toString()
+        val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
+
         // valider mot regler
-        val ruleResult = RuleValidationStub().validateRules(payload)
+        val ruleResult = ruleService.validateRules(
+            payload = payload,
+            sykmeldingId = sykmeldingId,
+            sykmelder = sykmelder
+        )
         if (!ruleResult) {
             return ResponseEntity.badRequest().body("Rule validation failed")
         }
