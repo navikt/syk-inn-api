@@ -12,8 +12,18 @@ class HelseNettProxyService(
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
 
     fun getSykmelderByHpr(hpr: String, sykmeldingId: String): Sykmelder {
-        logger.info("Getting sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId") //TODO ok to log hprnummer?
-        return helsenettProxyClient.getSykmelderByHpr(hpr, sykmeldingId)
+        logger.info(
+            "Getting sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId",
+        )
+        return when (val result = helsenettProxyClient.getSykmelderByHpr(hpr, sykmeldingId)) {
+            is HelsenettProxyClient.Result.Success -> result.data
+            is HelsenettProxyClient.Result.Failure -> {
+                logger.error(
+                    "Error while fetching sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId",
+                    result.error,
+                )
+                throw result.error
+            }
+        }
     }
-
 }

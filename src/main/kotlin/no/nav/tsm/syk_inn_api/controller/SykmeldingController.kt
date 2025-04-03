@@ -1,6 +1,6 @@
 package no.nav.tsm.syk_inn_api.controller
 
-import no.nav.tsm.syk_inn_api.model.SykmeldingDTO
+import java.util.*
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
 import no.nav.tsm.syk_inn_api.service.SykmeldingService
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping("/api/ut/sykmelding/")
@@ -42,13 +41,10 @@ class SykmeldingController(
             sykmeldingService.getSykmeldingById(sykmeldingId, hpr),
             org.springframework.http.HttpStatus.OK,
         )
-
     }
 
     @GetMapping("/")
-    fun getSykmeldingerByUserIdent(
-        @RequestHeader("Ident") ident: String?
-    ): ResponseEntity<Any> {
+    fun getSykmeldingerByUserIdent(@RequestHeader("Ident") ident: String?): ResponseEntity<Any> {
         if (ident == null) {
             return ResponseEntity.badRequest().body("Ident header is missing")
         }

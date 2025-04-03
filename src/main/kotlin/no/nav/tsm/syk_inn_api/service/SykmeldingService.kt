@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.service
 
+import java.util.*
 import no.nav.tsm.syk_inn_api.kafka.KafkaStubber
 import no.nav.tsm.syk_inn_api.model.SavedSykmelding
 import no.nav.tsm.syk_inn_api.model.SykmeldingDTO
@@ -8,33 +9,31 @@ import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val ruleService: RuleService,
     private val helsenettProxyService: HelseNettProxyService,
-
-
 ) {
     fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<String> {
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
 
         // valider mot regler
-        val ruleResult = ruleService.validateRules(
-            payload = payload,
-            sykmeldingId = sykmeldingId,
-            sykmelder = sykmelder
-        )
+        val ruleResult =
+            ruleService.validateRules(
+                payload = payload,
+                sykmeldingId = sykmeldingId,
+                sykmelder = sykmelder
+            )
         if (!ruleResult) {
             return ResponseEntity.badRequest().body("Rule validation failed")
         }
 
         // save payload
-//        sykmeldingRepository.save(payload)
-        //TODO implement
+        //        sykmeldingRepository.save(payload)
+        // TODO implement
         val savedPayload = repositorySaveStub(payload)
         if (savedPayload.id == null) {
             return ResponseEntity.internalServerError().body("Lagring av sykmelding feilet")
@@ -52,8 +51,8 @@ class SykmeldingService(
     }
 
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): ResponseEntity<Any> {
-//        val sykmelding = sykmeldingRepository.findById(sykmeldingId)
-        //TODO implement
+        //        val sykmelding = sykmeldingRepository.findById(sykmeldingId)
+        // TODO implement
         val sykmelding = repositoryGetByIdStub(sykmeldingId)
         if (sykmelding.isEmpty) {
             return ResponseEntity.notFound().build()
@@ -68,7 +67,7 @@ class SykmeldingService(
     }
 
     fun getSykmeldingerByIdent(ident: String): ResponseEntity<Any> {
-        //TODO implement
+        // TODO implement
         val sykmeldinger = repositoryGetByIdentStub(ident)
         if (sykmeldinger.isEmpty()) {
             return ResponseEntity.notFound().build()
@@ -96,4 +95,3 @@ class SykmeldingService(
         return listOf(SykmeldingDTO(id = UUID.randomUUID().toString(), fnr = "12345678901"))
     }
 }
-
