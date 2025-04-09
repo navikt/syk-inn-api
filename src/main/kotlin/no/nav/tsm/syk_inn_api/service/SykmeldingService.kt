@@ -7,6 +7,7 @@ import no.nav.tsm.syk_inn_api.model.SavedSykmelding
 import no.nav.tsm.syk_inn_api.model.SykmeldingDTO
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service
 class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val ruleService: RuleService,
-    private val helsenettProxyService: HelseNettProxyService,
+    private val helsenettProxyService: HelsenettProxyService,
 ) {
+    private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
+
     fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<Any> {
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
@@ -31,6 +34,9 @@ class SykmeldingService(
         if (ruleResult.status != RegulaStatus.OK) {
             return ResponseEntity.badRequest().body(ruleResult.status)
         }
+        logger.info(
+            "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
+        )
 
         // save payload
         //        sykmeldingRepository.save(payload)

@@ -35,8 +35,8 @@ class RuleService(
         sykmeldingId: String,
         sykmelder: Sykmelder
     ): RegulaResult {
-        try {
-            return executeRegulaRules(
+        return try {
+            executeRegulaRules(
                 createRegulaPayload(payload, sykmeldingId, sykmelder),
                 ExecutionMode.NORMAL,
             )
@@ -76,25 +76,25 @@ class RuleService(
                     sendtTidspunkt = LocalDateTime.now(),
                 ),
             behandler =
-                RegulaBehandler(
+                RegulaBehandler.Finnes(
                     suspendert =
                         btsysProxyService.isSuspended(
                             sykmelderFnr = sykmelder.fnr,
                             signaturDato = LocalDateTime.now().toString(),
                         ),
-                    godkjenninger = sykmelder.godkjenninger.map { it.toBehandlerGodkjenning() },
+                    godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
                     legekontorOrgnr = payload.legekontorOrgnr,
                     fnr = sykmelder.fnr,
-                ),
+                ),//TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
             avsender =
-                RegulaAvsender(
+                RegulaAvsender.Finnes(
                     fnr = sykmelder.fnr,
-                ),
+                ), // TODO Bør vi også forholde oss til Avsender.FinnesIkke ?
             behandletTidspunkt = LocalDateTime.now(),
         )
     }
 
-    private fun Godkjenning.toBehandlerGodkjenning() =
+    private fun Godkjenning.toSykmelderGodkjenning() =
         BehandlerGodkjenning(
             helsepersonellkategori =
                 helsepersonellkategori?.let {

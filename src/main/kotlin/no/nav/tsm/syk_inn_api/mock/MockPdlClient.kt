@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getFodselsdato(fnr: String): Result<LocalDate> {
-        return Result.Success(LocalDate.of(1991, 0, 12))
+        return Result.Success(LocalDate.of(1991, 4, 12))
     }
 }
