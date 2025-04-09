@@ -8,21 +8,19 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 
+interface IHelsenettProxyClient {
+    fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder>
+}
+
 @Component
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,
     @Value("\${syfohelsenettproxy.base-url}") private val baseUrl: String
-) {
+) : IHelsenettProxyClient {
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
 
-    sealed class Result<out T> {
-        data class Success<out T>(val data: T) : Result<T>()
-
-        data class Failure(val error: Throwable) : Result<Nothing>()
-    }
-
-    fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
+    override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
         return try {
             val response =
                 webClient
@@ -41,10 +39,10 @@ class HelsenettProxyClient(
             if (response != null) {
                 Result.Success(response)
             } else {
-                Result.Failure(HelsenettProxyException("HelseNettProxy returned no Sykmelder"))
+                Result.Failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
-            logger.error("Error while calling HelseNettProxy API", e)
+            logger.error("Error while calling HelsenettProxy API", e)
             Result.Failure(e)
         }
     }

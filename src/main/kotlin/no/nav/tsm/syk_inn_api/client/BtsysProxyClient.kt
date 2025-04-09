@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.client
 
-import no.nav.tsm.syk_inn_api.client.PdlClient.Result
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.service.TokenService
 import org.slf4j.LoggerFactory
@@ -8,22 +7,23 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
+interface IBtsysClient {
+    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Boolean>
+}
+
 @Component
 class BtsysProxyClient(
     webClientBuilder: WebClient.Builder,
     @Value("\${btsys.endpoint-url}") private val btsysEndpointUrl: String,
     private val tokenService: TokenService,
-) {
+) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(BtsysProxyClient::class.java)
 
-    sealed class Result<out T> {
-        data class Success<out T>(val data: T) : Result<T>()
-
-        data class Failure(val error: Throwable) : Result<Nothing>()
-    }
-
-    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Boolean> {
+    override fun checkSuspensionStatus(
+        sykmelderFnr: String,
+        oppslagsdato: String
+    ): Result<Boolean> {
         val accessToken = tokenService.getTokenForBtsys().accessToken
 
         return try {

@@ -8,22 +8,20 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
+interface IPdlClient {
+    fun getFodselsdato(fnr: String): Result<LocalDate>
+}
+
 @Component
 class PdlClient(
     webClientBuilder: WebClient.Builder,
     @Value("\${pdlcache.endpoint-url}") private val pdlEndpointUrl: String,
     private val tokenService: TokenService,
-) {
+) : IPdlClient {
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
-    private val logger = LoggerFactory.getLogger(PdlClient::class.java)
+    private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
 
-    sealed class Result<out T> {
-        data class Success<out T>(val data: T) : Result<T>()
-
-        data class Failure(val error: Throwable) : Result<Nothing>()
-    }
-
-    fun getFodselsdato(fnr: String): Result<LocalDate> {
+    override fun getFodselsdato(fnr: String): Result<LocalDate> {
         val accessToken = tokenService.getTokenForPdl().accessToken
         return try {
             val response =

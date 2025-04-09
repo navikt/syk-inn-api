@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.service
 
 import no.nav.tsm.syk_inn_api.client.BtsysProxyClient
 import no.nav.tsm.syk_inn_api.client.HelsenettProxyClient
+import no.nav.tsm.syk_inn_api.client.Result
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,8 +22,8 @@ class BtsysProxyService(
                     oppslagsdato = signaturDato,
                 )
         ) {
-            is BtsysProxyClient.Result.Success -> result.data
-            is BtsysProxyClient.Result.Failure -> {
+            is Result.Success -> result.data
+            is Result.Failure -> {
                 secureLog.error(
                     "Error while checking suspension status for sykmelderFnr=$sykmelderFnr",
                     result.error
