@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 data class SykmeldingPayload(
     val pasientFnr: String,
     val sykmelderHpr: String,
-    val sykmelding: Sykmelding
+    val sykmelding: Sykmelding,
+    val legekontorOrgnr: String,
 )
 
 data class Sykmelding(val hoveddiagnose: Hoveddiagnose, val aktivitet: Aktivitet)

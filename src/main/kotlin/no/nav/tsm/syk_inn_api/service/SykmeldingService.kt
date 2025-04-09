@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.service
 
 import java.util.*
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.kafka.KafkaStubber
 import no.nav.tsm.syk_inn_api.model.SavedSykmelding
 import no.nav.tsm.syk_inn_api.model.SykmeldingDTO
@@ -16,7 +17,7 @@ class SykmeldingService(
     private val ruleService: RuleService,
     private val helsenettProxyService: HelseNettProxyService,
 ) {
-    fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<String> {
+    fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<Any> {
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
 
@@ -27,8 +28,8 @@ class SykmeldingService(
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder
             )
-        if (!ruleResult) {
-            return ResponseEntity.badRequest().body("Rule validation failed")
+        if (ruleResult.status != RegulaStatus.OK) {
+            return ResponseEntity.badRequest().body(ruleResult.status)
         }
 
         // save payload
@@ -40,6 +41,7 @@ class SykmeldingService(
         }
 
         // send på kafka
+        // TODO implement
         val kafkaResponse = KafkaStubber().sendToOpprettSykmeldingTopic(payload)
         if (!kafkaResponse) {
             return ResponseEntity.internalServerError()

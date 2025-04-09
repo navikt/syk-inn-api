@@ -7,15 +7,20 @@ import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaMeta
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaPayload
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.executeRegulaRules
+import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.regulus.regula.payload.BehandlerGodkjenning
 import no.nav.tsm.regulus.regula.payload.BehandlerKode
 import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
+import no.nav.tsm.syk_inn_api.exception.RuleHitException
 import no.nav.tsm.syk_inn_api.model.Aktivitet
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,16 +28,24 @@ class RuleService(
     private val pdlService: PdlService,
     private val btsysProxyService: BtsysProxyService,
 ) {
+    private val logger = LoggerFactory.getLogger(RuleService::class.java)
 
     fun validateRules(
         payload: SykmeldingPayload,
         sykmeldingId: String,
         sykmelder: Sykmelder
-    ): Boolean {
-
-        val regulaPayload = createRegulaPayload(payload, sykmeldingId, sykmelder)
-        // todo validation against rules
-        return true
+    ): RegulaResult {
+        try {
+            return executeRegulaRules(
+                createRegulaPayload(payload, sykmeldingId, sykmelder),
+                ExecutionMode.NORMAL,
+            )
+        } catch (e: Exception) {
+            logger.error("Error while executing Regula rules", e)
+            throw RuleHitException(
+                "Error while executing Regula rules for sykmeldingId=$sykmeldingId"
+            )
+        }
     }
 
     private fun createRegulaPayload(
@@ -70,9 +83,7 @@ class RuleService(
                             signaturDato = LocalDateTime.now().toString(),
                         ),
                     godkjenninger = sykmelder.godkjenninger.map { it.toBehandlerGodkjenning() },
-                    legekontorOrgnr =
-                        "123456789", // TODO where do we find this, maybe its in Practitioner? or
-                    // another fhir endpoint?
+                    legekontorOrgnr = payload.legekontorOrgnr,
                     fnr = sykmelder.fnr,
                 ),
             avsender =
@@ -135,18 +146,18 @@ class RuleService(
             is Aktivitet.IkkeMulig ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.IkkeMulig(
                     fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom)
+                    tom = LocalDate.parse(aktivitet.tom),
                 )
             is Aktivitet.Gradert ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
-                    grad = aktivitet.grad
+                    grad = aktivitet.grad,
                 )
             is Aktivitet.Ugyldig ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Ugyldig(
                     fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom)
+                    tom = LocalDate.parse(aktivitet.tom),
                 )
         }
     }

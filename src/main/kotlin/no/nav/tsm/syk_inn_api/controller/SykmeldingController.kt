@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.controller
 
+import jakarta.servlet.http.HttpServletRequest
 import java.util.*
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
@@ -14,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/ut/sykmelding/")
+@RequestMapping("/api/sykmelding/")
 class SykmeldingController(
     private val sykmeldingService: SykmeldingService,
     private val sykmeldingPdfService: SykmeldingPdfService,
 ) {
 
     @PostMapping("/")
-    fun opprettSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<String> {
+    fun createSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<Any> {
         if (payload.pasientFnr.isBlank() || payload.sykmelderHpr.isBlank()) {
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
         }
@@ -32,11 +33,9 @@ class SykmeldingController(
     @GetMapping("/{sykmeldingId}")
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,
-        @RequestHeader("HPR") hpr: String
+        @RequestHeader("HPR") hpr: String,
+        request: HttpServletRequest,
     ): ResponseEntity<Any> {
-        if (hpr.isBlank()) {
-            return ResponseEntity.badRequest().body("HPR header is missing")
-        }
         return ResponseEntity(
             sykmeldingService.getSykmeldingById(sykmeldingId, hpr),
             org.springframework.http.HttpStatus.OK,
@@ -44,10 +43,7 @@ class SykmeldingController(
     }
 
     @GetMapping("/")
-    fun getSykmeldingerByUserIdent(@RequestHeader("Ident") ident: String?): ResponseEntity<Any> {
-        if (ident == null) {
-            return ResponseEntity.badRequest().body("Ident header is missing")
-        }
+    fun getSykmeldingerByUserIdent(@RequestHeader("Ident") ident: String): ResponseEntity<Any> {
         return ResponseEntity(
             sykmeldingService.getSykmeldingerByIdent(ident),
             org.springframework.http.HttpStatus.OK,
@@ -59,9 +55,6 @@ class SykmeldingController(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String
     ): ResponseEntity<Any> {
-        if (hpr.isBlank()) {
-            return ResponseEntity.badRequest().body("HPR header is missing")
-        }
         return ResponseEntity(
             sykmeldingPdfService.getPdf(sykmeldingId.toString(), hpr),
             org.springframework.http.HttpStatus.OK,

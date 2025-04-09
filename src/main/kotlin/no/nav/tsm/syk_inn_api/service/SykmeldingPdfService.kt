@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 class SykmeldingPdfService {
     fun getPdf(sykmeldingId: String, hpr: String): ResponseEntity<Any> {
 
-        // TODO implement
+        // TODO implement - kall dedikert app som genererer pdf
         return ResponseEntity("pdf".toByteArray(), null, 200)
     }
 }

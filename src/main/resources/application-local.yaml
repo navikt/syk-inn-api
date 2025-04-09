@@ -1,0 +1,38 @@
+
+server:
+  port: 8080
+  shutdown: graceful
+  error:
+    whitelabel:
+      enabled: false
+
+spring:
+  main:
+    banner-mode: 'off'
+  flyway:
+    enabled: false
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true"
+    username: myuser
+    password: mypassword
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+  security:
+    basic:
+      enabled: false
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
+#          jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
+#          audiences: ${AZURE_APP_CLIENT_ID}
+syfohelsenettproxy:
+  base-url: "http://localhost:8081/syfohelsenettproxy"
+btsys:
+  endpoint-url: "http://localhost:8082/btsys"
+pdlcache:
+    endpoint-url: "http://localhost:8083/pdlcache"
+nais:
+  token:
+    endpoint: "http://localhost:8084/nais/token"
