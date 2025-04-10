@@ -42,6 +42,7 @@ class BtsysProxyClient(
                         it.set("Nav-Consumer-Id", "syk-inn-api")
                         it.set("Nav-Personident", sykmelderFnr)
                         it.set("Authorization", "Bearer $accessToken")
+                        it.set("Accept", "application/json")
                     }
                     .retrieve()
                     .onStatus(

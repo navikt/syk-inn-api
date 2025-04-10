@@ -13,6 +13,7 @@ val jaxbVersion = "2.4.0-b180830.0438"
 val javaxActivationVersion = "1.1.1"
 val diagnosekoderVersion = "1.2025.0"
 val springmockkVersion= "4.0.2"
+val mockkVersion ="1.14.0"
 
 group = "no.nav.tsm"
 version = "1.0.0"
@@ -24,10 +25,6 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "7.0.2"
 }
-
-group = "no.nav.tsm"
-version = "1.0.0"
-
 
 java {
     toolchain {
@@ -65,6 +62,9 @@ dependencies {
 //    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
+
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 }
 

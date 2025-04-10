@@ -24,7 +24,6 @@ class SykmeldingService(
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
 
-        // valider mot regler
         val ruleResult =
             ruleService.validateRules(
                 payload = payload,
@@ -32,6 +31,9 @@ class SykmeldingService(
                 sykmelder = sykmelder
             )
         if (ruleResult.status != RegulaStatus.OK) {
+            logger.info(
+                "Sykmelding med id=$sykmeldingId er feilet validering mot regler med status=${ruleResult.status}",
+            )
             return ResponseEntity.badRequest().body(ruleResult.status)
         }
         logger.info(
