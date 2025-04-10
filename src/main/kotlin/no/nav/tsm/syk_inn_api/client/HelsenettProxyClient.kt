@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.client
 
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
 import no.nav.tsm.syk_inn_api.model.Sykmelder
+import no.nav.tsm.syk_inn_api.service.TokenService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -17,7 +18,8 @@ interface IHelsenettProxyClient {
 @Component
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,
-    @Value("\${syfohelsenettproxy.base-url}") private val baseUrl: String
+    @Value("\${syfohelsenettproxy.base-url}") private val baseUrl: String,
+    private val tokenService: TokenService,
 ) : IHelsenettProxyClient {
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
@@ -26,6 +28,8 @@ class HelsenettProxyClient(
         println("HelsenettProxyClient initialized with base URL: $baseUrl")
     }
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
+        val accessToken = tokenService.getTokenForBtsys().accessToken
+
         return try {
             val response =
                 webClient
@@ -35,6 +39,7 @@ class HelsenettProxyClient(
                         it.set("Content-Type", "application/json")
                         it.set("Nav-CallId", sykmeldingId)
                         it.set("hprNummer", behandlerHpr)
+                        it.set("Authorization", "Bearer $accessToken")
                     }
                     .retrieve()
                     .onStatus({ it.isError }) { res -> onStatusError(res) }
