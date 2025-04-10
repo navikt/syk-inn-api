@@ -1,7 +1,9 @@
 package no.nav.tsm.syk_inn_api.model
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonValue
 
 data class SykmeldingPayload(
     val pasientFnr: String,
@@ -26,9 +28,21 @@ sealed interface Aktivitet {
     data class Ugyldig(val fom: String, val tom: String) : Aktivitet
 }
 
-enum class DiagnoseSystem {
-    ICD10,
-    ICPC2
+
+enum class DiagnoseSystem(val oid: String) {
+    ICD10("2.16.578.1.12.4.1.1.7170"),
+    ICPC2("2.16.578.1.12.4.1.1.7171");
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fromOid(value: String): DiagnoseSystem =
+            values().find { it.oid == value }
+                ?: throw IllegalArgumentException("Unknown DiagnoseSystem OID: $value")
+    }
+
+    @JsonValue
+    fun toJson(): String = oid
 }
 
 data class Hoveddiagnose(

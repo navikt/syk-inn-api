@@ -53,12 +53,13 @@ class RuleService(
         sykmeldingId: String,
         sykmelder: Sykmelder
     ): RegulaPayload {
+        logger.info("the hoveddiagnose oid is: ${payload.sykmelding.hoveddiagnose.system.oid}")
         return RegulaPayload(
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
                 Diagnose(
                     kode = payload.sykmelding.hoveddiagnose.code,
-                    system = payload.sykmelding.hoveddiagnose.system.name,
+                    system = payload.sykmelding.hoveddiagnose.system.oid,
                 ),
             bidiagnoser = null,
             annenFravarsArsak = null,
