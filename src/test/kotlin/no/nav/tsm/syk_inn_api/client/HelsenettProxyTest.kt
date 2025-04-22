@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
 import no.nav.tsm.syk_inn_api.model.Sykmelder
@@ -15,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 class HelsenettProxyTest {
@@ -38,11 +38,12 @@ class HelsenettProxyTest {
 
         tokenService = mockk()
 
-        client = HelsenettProxyClient(
-            webClientBuilder = WebClient.builder(),
-            baseUrl = baseUrl,
-            tokenService = tokenService
-        )
+        client =
+            HelsenettProxyClient(
+                webClientBuilder = WebClient.builder(),
+                baseUrl = baseUrl,
+                tokenService = tokenService
+            )
     }
 
     @AfterEach
@@ -52,20 +53,17 @@ class HelsenettProxyTest {
 
     @Test
     fun `should send correct request and return success`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
-            "mocked-token",
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForHelsenettProxy() } returns
+            TexasClient.TokenResponse("mocked-token", expiresIn = 1000, tokenType = "Bearer")
 
         val sykmelder = getSykmelderTestData()
 
-        val response = MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody(objectMapper.writeValueAsString(sykmelder))
-            .setResponseCode(200)
+        val response =
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(objectMapper.writeValueAsString(sykmelder))
+                .setResponseCode(200)
         mockWebServer.enqueue(response)
-
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
         val request = mockWebServer.takeRequest()
@@ -80,15 +78,10 @@ class HelsenettProxyTest {
 
     @Test
     fun `should return failure when unauthorized`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
-            "invalid-token",
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForHelsenettProxy() } returns
+            TexasClient.TokenResponse("invalid-token", expiresIn = 1000, tokenType = "Bearer")
 
-        val response = MockResponse()
-            .setResponseCode(401)
-            .setBody("Unauthorized")
+        val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
 
         mockWebServer.enqueue(response)
 
@@ -99,15 +92,13 @@ class HelsenettProxyTest {
 
     @Test
     fun `should return failure when hprnummer header is missing or invalid`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
-            "mocked-token",
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForHelsenettProxy() } returns
+            TexasClient.TokenResponse("mocked-token", expiresIn = 1000, tokenType = "Bearer")
 
-        val response = MockResponse()
-            .setResponseCode(400)
-            .setBody("Bad request: missing or invalid hprNummer header")
+        val response =
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("Bad request: missing or invalid hprNummer header")
 
         mockWebServer.enqueue(response)
 
@@ -116,24 +107,16 @@ class HelsenettProxyTest {
         assertTrue(result is Result.Failure)
     }
 
-
     fun getSykmelderTestData(): Sykmelder {
         return Sykmelder(
-            godkjenninger = listOf(
-                Godkjenning(
-                    helsepersonellkategori = Kode(
-                        aktiv = true,
-                        oid = 0,
-                        verdi = "LE"
-                    ),
-                    autorisasjon = Kode(
-                        aktiv = true,
-                        oid = 7704,
-                        verdi = "1"
-                    ),
-                    tillegskompetanse = null
-                )
-            ),
+            godkjenninger =
+                listOf(
+                    Godkjenning(
+                        helsepersonellkategori = Kode(aktiv = true, oid = 0, verdi = "LE"),
+                        autorisasjon = Kode(aktiv = true, oid = 7704, verdi = "1"),
+                        tillegskompetanse = null
+                    )
+                ),
             fnr = "09099012345",
             hprNummer = "123456789",
             fornavn = "James",

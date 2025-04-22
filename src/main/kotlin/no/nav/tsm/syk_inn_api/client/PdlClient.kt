@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.client
 
-import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.exception.PdlException
 import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.service.TokenService

@@ -28,7 +28,6 @@ sealed interface Aktivitet {
     data class Ugyldig(val fom: String, val tom: String) : Aktivitet
 }
 
-
 enum class DiagnoseSystem(val oid: String) {
     ICD10("2.16.578.1.12.4.1.1.7170"),
     ICPC2("2.16.578.1.12.4.1.1.7171");
@@ -41,8 +40,7 @@ enum class DiagnoseSystem(val oid: String) {
                 ?: throw IllegalArgumentException("Unknown DiagnoseSystem OID: $value")
     }
 
-    @JsonValue
-    fun toJson(): String = oid
+    @JsonValue fun toJson(): String = oid
 }
 
 data class Hoveddiagnose(

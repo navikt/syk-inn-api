@@ -85,7 +85,7 @@ class RuleService(
                     godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
                     legekontorOrgnr = payload.legekontorOrgnr,
                     fnr = sykmelder.fnr,
-                ),//TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
+                ), // TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
             avsender =
                 RegulaAvsender.Finnes(
                     fnr = sykmelder.fnr,

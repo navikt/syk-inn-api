@@ -1,23 +1,206 @@
 package no.nav.tsm.syk_inn_api.service
 
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import java.util.*
+import kotlin.test.assertEquals
+import no.nav.tsm.regulus.regula.RegulaOutcome
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
+import no.nav.tsm.syk_inn_api.model.Aktivitet
+import no.nav.tsm.syk_inn_api.model.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.model.Godkjenning
+import no.nav.tsm.syk_inn_api.model.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.model.Kode
+import no.nav.tsm.syk_inn_api.model.Sykmelder
+import no.nav.tsm.syk_inn_api.model.Sykmelding
+import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+
+@ExtendWith(MockKExtension::class)
 class SykmeldingServiceTest {
+    private lateinit var sykmeldingService: SykmeldingService
+    private lateinit var helsenettProxyService: HelsenettProxyService
+    private lateinit var ruleService: RuleService
+    private lateinit var sykmeldingRepository: SykmeldingRepository
+
+    val behandlerHpr = "123456789"
+    val sykmeldingId = UUID.randomUUID().toString()
+
+    @BeforeEach
+    fun setup() {
+        helsenettProxyService = mockk()
+        ruleService = mockk()
+        sykmeldingRepository = mockk()
+        sykmeldingService =
+            SykmeldingService(
+                helsenettProxyService = helsenettProxyService,
+                ruleService = ruleService,
+                sykmeldingRepository = sykmeldingRepository,
+            )
+    }
+
+    @Test
+    fun `create sykmelding with valid data`() {
+        every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+            Sykmelder(
+                hprNummer = behandlerHpr,
+                fnr = "12345678901",
+                fornavn = "Ola",
+                mellomnavn = null,
+                etternavn = "Nordmann",
+                godkjenninger =
+                    listOf(
+                        Godkjenning(
+                            helsepersonellkategori =
+                                Kode(
+                                    aktiv = true,
+                                    oid = 0,
+                                    verdi = "LE",
+                                ),
+                            autorisasjon =
+                                Kode(
+                                    aktiv = true,
+                                    oid = 7704,
+                                    verdi = "1",
+                                ),
+                            tillegskompetanse = null,
+                        ),
+                    ),
+            )
+
+        every { ruleService.validateRules(any(), any(), any()) } returns
+            RegulaResult(
+                status = RegulaStatus.OK,
+                outcome =
+                    RegulaOutcome(
+                        status = RegulaStatus.OK,
+                        rule = "the rule",
+                        messageForUser = "message for user",
+                        messageForSender = "message for sender",
+                    ),
+                results = emptyList(),
+            )
+
+        // TODO implement sykmeldingRepository.save after repository is real
+
+        // TODO implement kafka sending after kafka is real
+
+        val result =
+            sykmeldingService.createSykmelding(
+                payload =
+                    SykmeldingPayload(
+                        pasientFnr = "12345678901",
+                        sykmelderHpr = "123456789",
+                        sykmelding =
+                            Sykmelding(
+                                hoveddiagnose =
+                                    Hoveddiagnose(
+                                        system = DiagnoseSystem.ICD10,
+                                        code = "S017",
+                                    ),
+                                aktivitet =
+                                    Aktivitet.IkkeMulig(
+                                        fom = "2020-01-01",
+                                        tom = "2020-01-30",
+                                    ),
+                            ),
+                        legekontorOrgnr = "987654321",
+                    ),
+            )
+
+        assertEquals(201, result.statusCode.value())
+    }
+
+    @Test
+    fun `failing to create sykmelding because of rule tree hit`() {
+        every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+            Sykmelder(
+                hprNummer = behandlerHpr,
+                fnr = "12345678901",
+                fornavn = "Ola",
+                mellomnavn = null,
+                etternavn = "Nordmann",
+                godkjenninger =
+                    listOf(
+                        Godkjenning(
+                            helsepersonellkategori =
+                                Kode(
+                                    aktiv = true,
+                                    oid = 0,
+                                    verdi = "LE",
+                                ),
+                            autorisasjon =
+                                Kode(
+                                    aktiv = true,
+                                    oid = 7704,
+                                    verdi = "1",
+                                ),
+                            tillegskompetanse = null,
+                        ),
+                    ),
+            )
+
+        every { ruleService.validateRules(any(), any(), any()) } returns
+            RegulaResult(
+                status = RegulaStatus.INVALID,
+                outcome =
+                    RegulaOutcome(
+                        status = RegulaStatus.INVALID,
+                        rule = "the rule that failed",
+                        messageForUser = "validation failed",
+                        messageForSender = "message for sender",
+                    ),
+                results = emptyList(),
+            )
+        val result =
+            sykmeldingService.createSykmelding(
+                payload =
+                    SykmeldingPayload(
+                        pasientFnr = "12345678901",
+                        sykmelderHpr = "123456789",
+                        sykmelding =
+                            Sykmelding(
+                                hoveddiagnose =
+                                    Hoveddiagnose(
+                                        system = DiagnoseSystem.ICD10,
+                                        code = "Z01",
+                                    ),
+                                aktivitet =
+                                    Aktivitet.IkkeMulig(
+                                        fom = "2020-01-01",
+                                        tom = "2020-01-30",
+                                    ),
+                            ),
+                        legekontorOrgnr = "987654321",
+                    ),
+            )
+
+        // TODO implement sykmeldingRepository.save after repository is real
+        // TODO implement kafka sending after kafka is real
+
+        assertEquals(400, result.statusCode.value())
+    }
 }
-
-
-//What a useful test here would look like:
-//In your unit test for SykmeldingService, you would:
+// What a useful test here would look like:
+// In your unit test for SykmeldingService, you would:
 //
-//Mock HelsenettProxyService, RuleService, and SykmeldingRepository (once real).
+// Mock HelsenettProxyService, RuleService, and SykmeldingRepository (once real).
 //
-//Call createSykmelding(...) with a mock payload.
+// Call createSykmelding(...) with a mock payload.
 //
-//Assert that:
+// Assert that:
 //
-//The result is ResponseEntity.status(CREATED)... when everything succeeds.
+// The result is ResponseEntity.status(CREATED)... when everything succeeds.
 //
-//You get BAD_REQUEST if ruleService.validateRules(...) fails.
+// You get BAD_REQUEST if ruleService.validateRules(...) fails.
 //
-//You get INTERNAL_SERVER_ERROR if the repository stub returns null or the Kafka step fails.
+// You get INTERNAL_SERVER_ERROR if the repository stub returns null or the Kafka step fails.
 //
-//Optionally verify interactions (e.g. verify(exactly = 1) { helsenettProxyService.getSykmelderByHpr(...) }).
+// Optionally verify interactions (e.g. verify(exactly = 1) {
+// helsenettProxyService.getSykmelderByHpr(...) }).
 //

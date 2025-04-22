@@ -17,11 +17,12 @@ class PdlService(
     fun getFodselsdato(fnr: String): LocalDate {
         return when (val result = pdlClient.getFodselsdato(fnr)) {
             is Result.Success -> {
-                result.data.foedselsdato ?: throw IllegalStateException("Fødselsdato is null for fnr=$fnr")
+                result.data.foedselsdato
+                    ?: throw IllegalStateException("Fødselsdato is null for fnr=$fnr")
             }
             is Result.Failure -> {
                 secureLog.error("Error while fetching birth date for fnr=$fnr", result.error)
-                throw result.error //should we handle the flow differently ? or use the throw here?
+                throw result.error // should we handle the flow differently ? or use the throw here?
             }
         }
     }

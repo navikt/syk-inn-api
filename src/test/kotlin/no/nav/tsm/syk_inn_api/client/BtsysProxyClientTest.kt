@@ -3,6 +3,8 @@ package no.nav.tsm.syk_inn_api.client
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.service.TokenService
 import okhttp3.mockwebserver.MockResponse
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @ExtendWith(MockKExtension::class)
 class BtsysProxyClientTest {
@@ -34,11 +34,12 @@ class BtsysProxyClientTest {
 
         tokenService = mockk()
 
-        client = BtsysProxyClient(
-            webClientBuilder = WebClient.builder(),
-            btsysEndpointUrl = baseUrl,
-            tokenService = tokenService
-        )
+        client =
+            BtsysProxyClient(
+                webClientBuilder = WebClient.builder(),
+                btsysEndpointUrl = baseUrl,
+                tokenService = tokenService
+            )
     }
 
     @AfterEach
@@ -49,16 +50,14 @@ class BtsysProxyClientTest {
     @Test
     fun `should send correct request and return success`() {
 
-        every { tokenService.getTokenForBtsys() } returns TexasClient.TokenResponse(
-            accessToken = token,
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForBtsys() } returns
+            TexasClient.TokenResponse(accessToken = token, expiresIn = 1000, tokenType = "Bearer")
 
-        val response = MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody("true")
-            .setResponseCode(200)
+        val response =
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("true")
+                .setResponseCode(200)
         mockWebServer.enqueue(response)
 
         val result = client.checkSuspensionStatus("12345678901", "2025-04-10")
@@ -75,15 +74,14 @@ class BtsysProxyClientTest {
 
     @Test
     fun `should return failure when unauthorized`() {
-        every { tokenService.getTokenForBtsys() } returns TexasClient.TokenResponse(
-            accessToken = "invalid-token",
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForBtsys() } returns
+            TexasClient.TokenResponse(
+                accessToken = "invalid-token",
+                expiresIn = 1000,
+                tokenType = "Bearer"
+            )
 
-        val response = MockResponse()
-            .setResponseCode(401)
-            .setBody("Unauthorized")
+        val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
 
         mockWebServer.enqueue(response)
 
@@ -92,18 +90,15 @@ class BtsysProxyClientTest {
         assertTrue(result is Result.Failure)
     }
 
-
     @Test
     fun `should return failure when personident header is missing or invalid`() {
-        every { tokenService.getTokenForBtsys() } returns TexasClient.TokenResponse(
-            accessToken = token,
-            expiresIn = 1000,
-            tokenType = "Bearer"
-        )
+        every { tokenService.getTokenForBtsys() } returns
+            TexasClient.TokenResponse(accessToken = token, expiresIn = 1000, tokenType = "Bearer")
 
-        val response = MockResponse()
-            .setResponseCode(400)
-            .setBody("Bad request: Missing or invalid Nav-Personident header")
+        val response =
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("Bad request: Missing or invalid Nav-Personident header")
 
         mockWebServer.enqueue(response)
 
@@ -112,5 +107,4 @@ class BtsysProxyClientTest {
         assertTrue(result is Result.Failure)
         assertTrue(result.error is BtsysException)
     }
-
 }

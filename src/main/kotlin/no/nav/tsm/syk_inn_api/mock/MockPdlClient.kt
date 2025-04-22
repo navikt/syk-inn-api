@@ -14,20 +14,24 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getFodselsdato(fnr: String): Result<PdlPerson> {
-        return Result.Success(PdlPerson(
-            navn = Navn(
-                fornavn = "Ola",
-                mellomnavn = null,
-                etternavn = "Nordmann",
-            ),
-            foedselsdato = LocalDate.of(1991, 4, 12),
-            identer = listOf(
-                Ident(
-                    ident = "12345678901",
-                    gruppe = IDENT_GRUPPE.FOLKEREGISTERIDENT,
-                    historisk = false,
-                ),
-            ),
-        ))
+        return Result.Success(
+            PdlPerson(
+                navn =
+                    Navn(
+                        fornavn = "Ola",
+                        mellomnavn = null,
+                        etternavn = "Nordmann",
+                    ),
+                foedselsdato = LocalDate.of(1991, 4, 12),
+                identer =
+                    listOf(
+                        Ident(
+                            ident = "12345678901",
+                            gruppe = IDENT_GRUPPE.FOLKEREGISTERIDENT,
+                            historisk = false,
+                        ),
+                    ),
+            )
+        )
     }
 }

@@ -25,8 +25,9 @@ class HelsenettProxyClient(
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
 
     init {
-        println("HelsenettProxyClient initialized with base URL: $baseUrl") //TODO delete this
+        println("HelsenettProxyClient initialized with base URL: $baseUrl") // TODO delete this
     }
+
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
         val accessToken = tokenService.getTokenForHelsenettProxy().accessToken
 
