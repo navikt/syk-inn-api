@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.client
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
@@ -28,7 +27,6 @@ class HelsenettProxyTest {
     private val token = "mocked-token"
 
     private lateinit var tokenService: TokenService
-//    val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
     val objectMapper = jacksonObjectMapper()
 
     @BeforeEach
@@ -54,7 +52,7 @@ class HelsenettProxyTest {
 
     @Test
     fun `should send correct request and return success`() {
-        every { tokenService.getTokenForBtsys() } returns TexasClient.TokenResponse(
+        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
             "mocked-token",
             expiresIn = 1000,
             tokenType = "Bearer"
@@ -80,17 +78,42 @@ class HelsenettProxyTest {
         assertTrue(result is Result.Success)
     }
 
-//TODO write test where it fails also
-
     @Test
     fun `should return failure when unauthorized`() {
+        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
+            "invalid-token",
+            expiresIn = 1000,
+            tokenType = "Bearer"
+        )
 
-        //TODO implement
+        val response = MockResponse()
+            .setResponseCode(401)
+            .setBody("Unauthorized")
+
+        mockWebServer.enqueue(response)
+
+        val result = client.getSykmelderByHpr("123456", "sykmeldingId")
+
+        assertTrue(result is Result.Failure)
     }
 
     @Test
     fun `should return failure when hprnummer header is missing or invalid`() {
-        //TODO implement
+        every { tokenService.getTokenForHelsenettProxy() } returns TexasClient.TokenResponse(
+            "mocked-token",
+            expiresIn = 1000,
+            tokenType = "Bearer"
+        )
+
+        val response = MockResponse()
+            .setResponseCode(400)
+            .setBody("Bad request: missing or invalid hprNummer header")
+
+        mockWebServer.enqueue(response)
+
+        val result = client.getSykmelderByHpr("INVALID", "sykmeldingId")
+
+        assertTrue(result is Result.Failure)
     }
 
 

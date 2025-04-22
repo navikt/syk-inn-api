@@ -20,4 +20,11 @@ class TokenService(
         val appName = "tsm-pdl-cache"
         return texasClient.requestToken(cluster, namespace, appName)
     }
+
+    fun getTokenForHelsenettProxy(): TexasClient.TokenResponse {
+        val cluster = "dev-gcp" // TODO make properties for these
+        val namespace = "teamsykmelding"
+        val appName = "syfohelsenettproxy"
+        return texasClient.requestToken(cluster, namespace, appName)
+    }
 }
