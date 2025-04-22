@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.client
 
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.exception.PdlException
+import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.service.TokenService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 interface IPdlClient {
-    fun getFodselsdato(fnr: String): Result<LocalDate>
+    fun getFodselsdato(fnr: String): Result<PdlPerson>
 }
 
 @Profile("!local")
@@ -23,7 +24,7 @@ class PdlClient(
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
 
-    override fun getFodselsdato(fnr: String): Result<LocalDate> {
+    override fun getFodselsdato(fnr: String): Result<PdlPerson> {
         val accessToken = tokenService.getTokenForPdl().accessToken
         return try {
             val response =
@@ -45,7 +46,7 @@ class PdlClient(
                             )
                         },
                     )
-                    .bodyToMono(LocalDate::class.java)
+                    .bodyToMono(PdlPerson::class.java)
                     .block()
 
             if (response != null) {
