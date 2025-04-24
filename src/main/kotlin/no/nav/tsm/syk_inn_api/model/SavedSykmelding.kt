@@ -1,6 +1,9 @@
 package no.nav.tsm.syk_inn_api.model
 
 data class SavedSykmelding(
-    val id: String,
-    val fnr: String,
+    val sykmeldingId: String,
+    val pasientFnr: String,
+    val sykmelderHpr: String,
+    val sykmelding: Sykmelding,
+    val legekontorOrgnr: String,
 )

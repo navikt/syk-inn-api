@@ -4,7 +4,7 @@ import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.kafka.KafkaStubber
 import no.nav.tsm.syk_inn_api.model.SavedSykmelding
-import no.nav.tsm.syk_inn_api.model.SykmeldingDTO
+import no.nav.tsm.syk_inn_api.model.SykmeldingEntity
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ class SykmeldingService(
             ruleService.validateRules(
                 payload = payload,
                 sykmeldingId = sykmeldingId,
-                sykmelder = sykmelder
+                sykmelder = sykmelder,
             )
         if (ruleResult.status != RegulaStatus.OK) {
             logger.info(
@@ -40,13 +40,18 @@ class SykmeldingService(
             "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
         )
 
-        // save payload
-        //        sykmeldingRepository.save(payload)
-        // TODO implement
-        val savedPayload = repositorySaveStub(payload)
-        if (savedPayload.id == null) {
+        val entity =
+            sykmeldingRepository.save(
+                mapToEntity(
+                    payload = payload,
+                    sykmeldingId = sykmeldingId,
+                ),
+            )
+        if (entity.id == null) {
+            logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return ResponseEntity.internalServerError().body("Lagring av sykmelding feilet")
         }
+        logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
         // send på kafka
         // TODO implement
@@ -60,48 +65,54 @@ class SykmeldingService(
         return ResponseEntity.status(HttpStatus.CREATED).body("Sykmeldingen er lagret")
     }
 
+    private fun mapToEntity(payload: SykmeldingPayload, sykmeldingId: String): SykmeldingEntity {
+        logger.info("Mapping sykmelding til entity")
+        return SykmeldingEntity(
+            sykmeldingId = sykmeldingId,
+            pasientFnr = payload.pasientFnr,
+            sykmelderHpr = payload.sykmelderHpr,
+            sykmelding = payload.sykmelding,
+            legekontorOrgnr = payload.legekontorOrgnr,
+        )
+    }
+
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): ResponseEntity<Any> {
-        //        val sykmelding = sykmeldingRepository.findById(sykmeldingId)
-        // TODO implement
-        val sykmelding = repositoryGetByIdStub(sykmeldingId)
-        if (sykmelding.isEmpty) {
-            return ResponseEntity.notFound().build()
-        }
+        val sykmelding =
+            sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId.toString())
+                ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
-            SavedSykmelding(
-                id = sykmeldingId.toString(),
-                fnr = sykmelding.get().fnr,
-            ),
+            mapToSavedSykmelding(sykmelding),
+        )
+    }
+
+    private fun mapToSavedSykmelding(sykmelding: SykmeldingEntity): SavedSykmelding {
+        return SavedSykmelding(
+            sykmeldingId = sykmelding.sykmeldingId,
+            pasientFnr = sykmelding.pasientFnr,
+            sykmelderHpr = sykmelding.sykmelderHpr,
+            sykmelding = sykmelding.sykmelding,
+            legekontorOrgnr = sykmelding.legekontorOrgnr,
         )
     }
 
     fun getSykmeldingerByIdent(ident: String): ResponseEntity<Any> {
-        // TODO implement
-        val sykmeldinger = repositoryGetByIdentStub(ident)
+        val sykmeldinger = sykmeldingRepository.findSykmeldingEntitiesByPasientFnr(ident)
+
         if (sykmeldinger.isEmpty()) {
-            return ResponseEntity.notFound().build()
+            return ResponseEntity.noContent().build()
         }
 
         return ResponseEntity.ok(
             sykmeldinger.map {
                 SavedSykmelding(
-                    id = it.id,
-                    fnr = it.fnr,
+                    sykmeldingId = it.sykmeldingId,
+                    pasientFnr = it.pasientFnr,
+                    sykmelderHpr = it.sykmelderHpr,
+                    sykmelding = it.sykmelding,
+                    legekontorOrgnr = it.legekontorOrgnr,
                 )
             },
         )
-    }
-
-    fun repositorySaveStub(payload: SykmeldingPayload): SykmeldingDTO {
-        return SykmeldingDTO(id = UUID.randomUUID().toString(), fnr = payload.pasientFnr)
-    }
-
-    fun repositoryGetByIdStub(id: UUID): Optional<SykmeldingDTO> {
-        return Optional.of(SykmeldingDTO(id = id.toString(), fnr = "12345678901"))
-    }
-
-    fun repositoryGetByIdentStub(ident: String): List<SykmeldingDTO> {
-        return listOf(SykmeldingDTO(id = UUID.randomUUID().toString(), fnr = "12345678901"))
     }
 }

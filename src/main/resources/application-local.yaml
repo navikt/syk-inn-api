@@ -11,6 +11,9 @@ spring:
     banner-mode: 'off'
   flyway:
     enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
   datasource:
     url: "jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true"
     username: myuser
