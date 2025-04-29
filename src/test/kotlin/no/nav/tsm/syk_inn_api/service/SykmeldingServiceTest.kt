@@ -17,6 +17,7 @@ import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.model.Sykmelding
 import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
+import no.nav.tsm.syk_inn_api.repository.SykmeldingRepositoryTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -186,21 +187,3 @@ class SykmeldingServiceTest {
         assertEquals(400, result.statusCode.value())
     }
 }
-// What a useful test here would look like:
-// In your unit test for SykmeldingService, you would:
-//
-// Mock HelsenettProxyService, RuleService, and SykmeldingRepository (once real).
-//
-// Call createSykmelding(...) with a mock payload.
-//
-// Assert that:
-//
-// The result is ResponseEntity.status(CREATED)... when everything succeeds.
-//
-// You get BAD_REQUEST if ruleService.validateRules(...) fails.
-//
-// You get INTERNAL_SERVER_ERROR if the repository stub returns null or the Kafka step fails.
-//
-// Optionally verify interactions (e.g. verify(exactly = 1) {
-// helsenettProxyService.getSykmelderByHpr(...) }).
-//

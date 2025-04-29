@@ -14,9 +14,7 @@ val javaxActivationVersion = "1.1.1"
 val diagnosekoderVersion = "1.2025.0"
 val springmockkVersion= "4.0.2"
 val mockkVersion ="1.14.0"
-
-group = "no.nav.tsm"
-version = "1.0.0"
+val testContainersVersion = "1.21.0"
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -25,6 +23,10 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "7.0.2"
 }
+
+group = "no.nav.tsm"
+version = "1.0.0"
+
 
 java {
     toolchain {
@@ -56,11 +58,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 //    testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("io.mockk:mockk:${mockkVersion}")
