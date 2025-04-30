@@ -1,10 +1,10 @@
 package no.nav.tsm.syk_inn_api.repository
 
-import no.nav.tsm.syk_inn_api.model.Aktivitet
-import no.nav.tsm.syk_inn_api.model.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.model.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.Sykmelding
-import no.nav.tsm.syk_inn_api.model.SykmeldingEntity
+import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional

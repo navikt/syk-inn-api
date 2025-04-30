@@ -16,10 +16,10 @@ import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.exception.RuleHitException
-import no.nav.tsm.syk_inn_api.model.Aktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Sykmelder
-import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

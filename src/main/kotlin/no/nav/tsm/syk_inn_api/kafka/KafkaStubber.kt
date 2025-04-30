@@ -1,6 +1,6 @@
 package no.nav.tsm.syk_inn_api.kafka
 
-import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 
 class KafkaStubber {
     fun sendToOpprettSykmeldingTopic(payload: SykmeldingPayload): Boolean {

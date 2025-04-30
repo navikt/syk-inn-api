@@ -3,9 +3,9 @@ package no.nav.tsm.syk_inn_api.service
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.kafka.KafkaStubber
-import no.nav.tsm.syk_inn_api.model.SavedSykmelding
-import no.nav.tsm.syk_inn_api.model.SykmeldingEntity
-import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.SavedSykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

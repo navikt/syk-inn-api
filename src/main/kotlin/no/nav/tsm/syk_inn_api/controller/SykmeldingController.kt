@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import java.util.*
-import no.nav.tsm.syk_inn_api.model.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
 import no.nav.tsm.syk_inn_api.service.SykmeldingService
 import org.springframework.http.ResponseEntity

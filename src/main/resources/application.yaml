@@ -16,6 +16,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  kafka:
+    bootstrap-servers: ${kafka.brokers}
+    security:
+      protocol: ssl
+    ssl:
+      trust-store-location: file:${kafka.truststore.path}
+      trust-store-type: JKS
+      trust-store-password: ${kafka.credstore.password}
+      key-store-location: file:${kafka.keystore.path}
+      key-store-type: PKCS12
+      key-store-password: ${kafka.credstore.password}
+    topics:
+      sykmeldinger-input: tsm.sykmeldinger-sykinn-input
+      sykmeldinger-output: tsm.tsm-sykmeldinger
   datasource:
     url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?reWriteBatchedInserts=true"
     username: ${DB_USERNAME}

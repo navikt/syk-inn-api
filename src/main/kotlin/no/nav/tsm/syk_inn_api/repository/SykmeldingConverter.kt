@@ -3,7 +3,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
-import no.nav.tsm.syk_inn_api.model.Sykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
 import org.slf4j.LoggerFactory
 
 @Converter(autoApply = true)

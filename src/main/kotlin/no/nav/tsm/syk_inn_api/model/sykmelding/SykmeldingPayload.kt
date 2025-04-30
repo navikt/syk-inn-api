@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.model
+package no.nav.tsm.syk_inn_api.model.sykmelding
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonSubTypes
