@@ -17,21 +17,22 @@ data class ValidationResult(
 )
 
 enum class RuleType {
-    OK, PENDING, INVALID
+    OK,
+    PENDING,
+    INVALID
 }
 
 enum class RuleResult {
-    OK, INVALID
+    OK,
+    INVALID
 }
 
 enum class ValidationType {
-    AUTOMATIC, MANUAL
+    AUTOMATIC,
+    MANUAL
 }
 
-data class RuleOutcome(
-    val outcome: RuleResult,
-    val timestamp: OffsetDateTime
-)
+data class RuleOutcome(val outcome: RuleResult, val timestamp: OffsetDateTime)
 
 sealed interface Rule {
     val type: RuleType
@@ -56,7 +57,7 @@ data class PendingRule(
     override val timestamp: OffsetDateTime,
     override val description: String,
     override val validationType: ValidationType
-    ) : Rule {
+) : Rule {
     override val type = RuleType.PENDING
 }
 

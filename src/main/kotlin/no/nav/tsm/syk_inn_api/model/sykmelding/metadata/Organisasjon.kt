@@ -16,7 +16,7 @@ enum class OrgIdType {
 
     companion object {
         fun parse(type: String): OrgIdType {
-            return when(type) {
+            return when (type) {
                 "AKO" -> AKO
                 "APO" -> APO
                 "AVD" -> AVD
@@ -43,7 +43,7 @@ enum class OrganisasjonsType {
 
     companion object {
         fun parse(v: String?): OrganisasjonsType {
-            return when(v) {
+            return when (v) {
                 "4" -> PRIVATE_SPESIALISTER_MED_DRIFTSAVTALER
                 "110" -> TANNLEGE_TANNHELSE
                 "NXU:IT" -> UGYLDIG

@@ -45,9 +45,7 @@ data class Adresse(
     val land: String?,
 )
 
-data class Kontaktinfo(
-    val type: KontaktinfoType, val value: String
-)
+data class Kontaktinfo(val type: KontaktinfoType, val value: String)
 
 enum class KontaktinfoType {
     TELEFONSVARER,

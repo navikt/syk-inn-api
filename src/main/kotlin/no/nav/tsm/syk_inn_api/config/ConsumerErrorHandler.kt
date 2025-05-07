@@ -11,13 +11,12 @@ import org.springframework.util.backoff.FixedBackOff
 import org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS
 
 @Component
-class ConsumerErrorHandler : DefaultErrorHandler(
-    null,
-    FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS)
-) {
+class ConsumerErrorHandler :
+    DefaultErrorHandler(null, FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS)) {
     companion object {
         private const val BACKOFF_INTERVAL = 60_000L
     }
+
     private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
 
     override fun handleOne(

@@ -16,9 +16,9 @@ import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.exception.RuleHitException
-import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Sykmelder
+import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -33,11 +33,12 @@ class RuleService(
     fun validateRules(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: Sykmelder
+        sykmelder: Sykmelder,
+        foedselsdato: LocalDate
     ): RegulaResult {
         return try {
             executeRegulaRules(
-                createRegulaPayload(payload, sykmeldingId, sykmelder),
+                createRegulaPayload(payload, sykmeldingId, sykmelder, foedselsdato),
                 ExecutionMode.NORMAL,
             )
         } catch (e: Exception) {
@@ -51,9 +52,11 @@ class RuleService(
     private fun createRegulaPayload(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: Sykmelder
+        sykmelder: Sykmelder,
+        foedselsdato: LocalDate
     ): RegulaPayload {
         return RegulaPayload(
+
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
                 Diagnose(
@@ -69,7 +72,7 @@ class RuleService(
             pasient =
                 RegulaPasient(
                     ident = payload.pasientFnr,
-                    fodselsdato = pdlService.getFodselsdato(payload.pasientFnr),
+                    fodselsdato = foedselsdato,
                 ),
             meta =
                 RegulaMeta.Meta(

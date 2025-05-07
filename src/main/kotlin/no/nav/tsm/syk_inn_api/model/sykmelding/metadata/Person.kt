@@ -40,6 +40,7 @@ enum class PersonIdType {
         }
     }
 }
+
 enum class Kjonn {
     MANN,
     KVINNE,
@@ -48,7 +49,7 @@ enum class Kjonn {
     UGYLDIG;
 
     companion object {
-        fun parse(v: String?) : Kjonn {
+        fun parse(v: String?): Kjonn {
             return when (v) {
                 "1" -> MANN
                 "2" -> KVINNE
@@ -64,24 +65,11 @@ enum class Kjonn {
     }
 }
 
-data class Navn(
-    val fornavn: String, val mellomnavn: String?, val etternavn: String
-)
+data class Navn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
 data class PersonId(
     val id: String,
     val type: PersonIdType,
-)
-
-
-data class Pasient (
-    val ids: List<PersonId>,
-    val navn: Navn?,
-    val fodselsdato: LocalDate?,
-    val kjonn: Kjonn?,
-    val nasjonalitet: String?,
-    val adresse: Adresse?,
-    val kontaktinfo: List<Kontaktinfo>,
 )
 
 enum class HelsepersonellKategori {
@@ -107,12 +95,12 @@ enum class HelsepersonellKategori {
 
     companion object {
         fun parse(v: String?): HelsepersonellKategori {
-            return when(v) {
-                "HE" ->	HELSESEKRETAR
-                "KI" ->	KIROPRAKTOR
-                "LE" ->	LEGE
-                "MT" ->	MANUELLTERAPEUT
-                "TL" ->	TANNLEGE
+            return when (v) {
+                "HE" -> HELSESEKRETAR
+                "KI" -> KIROPRAKTOR
+                "LE" -> LEGE
+                "MT" -> MANUELLTERAPEUT
+                "TL" -> TANNLEGE
                 "TH" -> TANNHELSESEKRETAR
                 "FT" -> FYSIOTERAPEUT
                 "SP" -> SYKEPLEIER
@@ -124,7 +112,7 @@ enum class HelsepersonellKategori {
                 "PS" -> PSYKOLOG
                 "FO" -> FOTTERAPEUT
                 "AA" -> AMBULANSEARBEIDER
-                "XX" ->  USPESIFISERT
+                "XX" -> USPESIFISERT
                 "HS" -> UGYLDIG
                 "token" -> UGYLDIG
                 null -> IKKE_OPPGITT
@@ -141,12 +129,12 @@ enum class RolleTilPasient {
 
     companion object {
         fun parse(v: String?): RolleTilPasient {
-           return when (v) {
-               "4" -> JOURNALANSVARLIG
-               "6" -> FASTLEGE
-               null -> IKKE_OPPGITT
-               else -> throw IllegalArgumentException("Ukjent rolle til pasient: $v")
-           }
+            return when (v) {
+                "4" -> JOURNALANSVARLIG
+                "6" -> FASTLEGE
+                null -> IKKE_OPPGITT
+                else -> throw IllegalArgumentException("Ukjent rolle til pasient: $v")
+            }
         }
     }
 }

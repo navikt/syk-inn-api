@@ -3,10 +3,12 @@ package no.nav.tsm.syk_inn_api.model.sykmelding.kafka
 import java.time.LocalDate
 
 enum class ARBEIDSGIVER_TYPE {
-    EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE, INGEN_ARBEIDSGIVER,
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE,
+    INGEN_ARBEIDSGIVER,
 }
 
-sealed interface ArbeidsgiverInfo{
+sealed interface ArbeidsgiverInfo {
     val type: ARBEIDSGIVER_TYPE
 }
 
@@ -29,13 +31,17 @@ data class FlereArbeidsgivere(
 
 class IngenArbeidsgiver() : ArbeidsgiverInfo {
     override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.INGEN_ARBEIDSGIVER
+
     override fun equals(other: Any?) = other is IngenArbeidsgiver
+
     override fun hashCode() = type.hashCode()
+
     override fun toString() = "IngenArbeidsgiver(type=$type)"
 }
 
 enum class IArbeidType {
-    ER_I_ARBEID, ER_IKKE_I_ARBEID,
+    ER_I_ARBEID,
+    ER_IKKE_I_ARBEID,
 }
 
 sealed interface IArbeid {

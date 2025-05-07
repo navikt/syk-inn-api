@@ -24,13 +24,16 @@ class KafkaConfig {
         props: KafkaProperties,
         errorHandler: ConsumerErrorHandler
     ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord> {
-        val consumerFactory = DefaultKafkaConsumerFactory(
-            props.buildConsumerProperties(null).apply {
-                put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
-                put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
-            }, StringDeserializer(), SykmeldingDeserializer(SykmeldingRecord::class)
-        )
+        val consumerFactory =
+            DefaultKafkaConsumerFactory(
+                props.buildConsumerProperties(null).apply {
+                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+                    put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
+                },
+                StringDeserializer(),
+                SykmeldingDeserializer(SykmeldingRecord::class)
+            )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
         factory.consumerFactory = consumerFactory
@@ -41,12 +44,15 @@ class KafkaConfig {
     @Bean
     fun kafkaProducer(props: KafkaProperties): KafkaProducer<String, SykmeldingRecord> {
         val producer =
-            KafkaProducer(props.buildProducerProperties(null).apply {
-                put(ProducerConfig.ACKS_CONFIG, "all")
-                put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip")
-                put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
-            }, StringSerializer(), SykmeldingRecordSerializer())
+            KafkaProducer(
+                props.buildProducerProperties(null).apply {
+                    put(ProducerConfig.ACKS_CONFIG, "all")
+                    put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip")
+                    put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
+                },
+                StringSerializer(),
+                SykmeldingRecordSerializer()
+            )
         return producer
     }
-
 }

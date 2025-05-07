@@ -8,12 +8,12 @@ import kotlin.test.assertEquals
 import no.nav.tsm.regulus.regula.RegulaOutcome
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
-import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.Godkjenning
-import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.Kode
 import no.nav.tsm.syk_inn_api.model.Sykmelder
+import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
@@ -38,9 +38,9 @@ class SykmeldingServiceTest {
         sykmeldingRepository = mockk()
         sykmeldingService =
             SykmeldingService(
-                helsenettProxyService = helsenettProxyService,
-                ruleService = ruleService,
                 sykmeldingRepository = sykmeldingRepository,
+                ruleService = ruleService,
+                helsenettProxyService = helsenettProxyService,,
             )
     }
 
@@ -73,7 +73,7 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        every { ruleService.validateRules(any(), any(), any()) } returns
+        every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult(
                 status = RegulaStatus.OK,
                 outcome =
@@ -145,7 +145,7 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        every { ruleService.validateRules(any(), any(), any()) } returns
+        every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult(
                 status = RegulaStatus.INVALID,
                 outcome =

@@ -67,7 +67,7 @@ class PdlClientTest {
             MockResponse().setHeader("Content-Type", "application/json").setBody(responseJson)
         mockWebServer.enqueue(response)
 
-        val result = client.getFodselsdato("01010078901")
+        val result = client.getPerson("01010078901")
 
         assertTrue(result is Result.Success)
         assertEquals(LocalDate.of(2000, 1, 1), result.data.foedselsdato)
@@ -86,7 +86,7 @@ class PdlClientTest {
             MockResponse().setHeader("Content-Type", "application/json").setResponseCode(401)
         mockWebServer.enqueue(response)
 
-        val result = client.getFodselsdato("01010078901")
+        val result = client.getPerson("01010078901")
 
         assertTrue(result is Result.Failure)
     }
@@ -104,7 +104,7 @@ class PdlClientTest {
             MockResponse().setHeader("Content-Type", "application/json").setResponseCode(400)
         mockWebServer.enqueue(response)
 
-        val result = client.getFodselsdato("")
+        val result = client.getPerson("")
 
         assertTrue(result is Result.Failure)
     }

@@ -6,11 +6,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.tsm.mottak.sykmelding.model.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.common.serialization.Serializer
 
-class SykmeldingRecordSerializer : Serializer<SykmeldingProducerRecord> {
+class SykmeldingRecordSerializer : Serializer<SykmeldingRecord> {
     private val objectMapper: ObjectMapper =
         jacksonObjectMapper().apply {
             registerKotlinModule()
@@ -19,7 +18,7 @@ class SykmeldingRecordSerializer : Serializer<SykmeldingProducerRecord> {
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
 
-    override fun serialize(topic: String, data: SykmeldingProducerRecord?): ByteArray? {
+    override fun serialize(topic: String, data: SykmeldingRecord?): ByteArray? {
         if (data != null) {
             return objectMapper.writeValueAsBytes(data)
         }

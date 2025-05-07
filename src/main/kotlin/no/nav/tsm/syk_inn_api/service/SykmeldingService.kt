@@ -17,18 +17,24 @@ class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val ruleService: RuleService,
     private val helsenettProxyService: HelsenettProxyService,
+    private val sykmeldingKafkaService: SykmeldingKafkaService,
+    private val pdlService: PdlService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
 
     fun createSykmelding(payload: SykmeldingPayload): ResponseEntity<Any> {
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
+        val pdlPerson = pdlService.getPdlPerson(payload.pasientFnr)
+        val foedselsdato = pdlPerson.foedselsdato
+        requireNotNull(foedselsdato)
 
         val ruleResult =
             ruleService.validateRules(
                 payload = payload,
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
+                foedselsdato = foedselsdato,
             )
         if (ruleResult.status != RegulaStatus.OK) {
             logger.info(
@@ -55,6 +61,7 @@ class SykmeldingService(
 
         // send på kafka
         // TODO implement
+        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder) ;
         val kafkaResponse = KafkaStubber().sendToOpprettSykmeldingTopic(payload)
         if (!kafkaResponse) {
             return ResponseEntity.internalServerError()

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Profile("local")
 @Component
 class MockPdlClient : IPdlClient {
-    override fun getFodselsdato(fnr: String): Result<PdlPerson> {
+    override fun getPerson(fnr: String): Result<PdlPerson> {
         return Result.Success(
             PdlPerson(
                 navn =

@@ -13,11 +13,12 @@ abstract class IntegrationTest {
 
     companion object {
         @Container
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:15-alpine").apply {
-            withDatabaseName("testdb")
-            withUsername("test")
-            withPassword("test")
-        }
+        private val postgres =
+            PostgreSQLContainer<Nothing>("postgres:15-alpine").apply {
+                withDatabaseName("testdb")
+                withUsername("test")
+                withPassword("test")
+            }
 
         @JvmStatic
         @DynamicPropertySource

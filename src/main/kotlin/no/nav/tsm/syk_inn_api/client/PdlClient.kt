@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 interface IPdlClient {
-    fun getFodselsdato(fnr: String): Result<PdlPerson>
+    fun getPerson(fnr: String): Result<PdlPerson>
 }
 
 @Profile("!local")
@@ -23,7 +23,7 @@ class PdlClient(
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
 
-    override fun getFodselsdato(fnr: String): Result<PdlPerson> {
+    override fun getPerson(fnr: String): Result<PdlPerson> {
         val accessToken = tokenService.getTokenForPdl().accessToken
         return try {
             val response =
