@@ -1,21 +1,26 @@
 package no.nav.tsm.syk_inn_api.service
 
 import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
+import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
 import no.nav.tsm.syk_inn_api.model.PdlPerson
+import no.nav.tsm.syk_inn_api.model.ValidationResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetIkkeMulig
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetKafka
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Avventende
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandler
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandlingsdager
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DiagnoseInfo
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Gradert
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.MedisinskVurdering
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Pasient
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykInnSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
@@ -31,6 +36,7 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
 
     private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
     val sykmeldingInputTopic = "tsm.sykmeldinger-input"
+    val sykmeldingMedBehandlingsutfallTopic = "tsm.sykmeldinger"
     fun send(
         payload: SykmeldingPayload,
         sykmeldingId: String,
@@ -39,9 +45,9 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
     ) {
         try {
             val sykmeldingKafkaMessage = SykmeldingRecord(
-                metadata = TODO(),
+                metadata = mapMessageMetadata(payload, sykmeldingId),
                 sykmelding = mapToSykInnSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
-                validation = TODO(),
+                validation = mapValidationResult(),
             )
             // TODO implement sending to Kafka
             println("Sending sykmelding with id=$sykmeldingId to Kafka")
@@ -57,6 +63,17 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
             println("Failed to send sykmelding with id=$sykmeldingId to Kafka")
             e.printStackTrace()
         }
+    }
+
+    private fun mapValidationResult(): ValidationResult {
+        TODO("Not yet implemented")
+    }
+
+    private fun mapMessageMetadata(
+        payload: SykmeldingPayload,
+        sykmeldingId: String
+    ): MessageMetadata {
+        TODO("Not yet implemented")
     }
 
     fun mapToSykInnSykmelding(
@@ -143,8 +160,27 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
                     )
                 }
 
-                is Aktivitet.Ugyldig -> {
-                    throw IllegalArgumentException("Ugyldig aktivitetstype, må ha gyldig type for å sende på Kafka topic")
+                is Aktivitet.Avventende -> {
+                    Avventende(
+                        innspillTilArbeidsgiver = payload.sykmelding.aktivitet.innspillTilArbeidsgiver,
+                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
+                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                    )
+                }
+
+                is Aktivitet.Behandlingsdager -> {
+                    Behandlingsdager(
+                        antallBehandlingsdager = payload.sykmelding.aktivitet.antallBehandlingsdager,
+                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
+                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                    )
+                }
+
+                is Aktivitet.Reisetilskudd -> {
+                    Reisetilskudd(
+                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
+                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                    )
                 }
             },
         )

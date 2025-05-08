@@ -157,8 +157,20 @@ class RuleService(
                     tom = LocalDate.parse(aktivitet.tom),
                     grad = aktivitet.grad,
                 )
-            is Aktivitet.Ugyldig ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.Ugyldig(
+            is Aktivitet.Avventende ->
+                no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
+                    avventendeInnspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
+                    fom = LocalDate.parse(aktivitet.fom),
+                    tom = LocalDate.parse(aktivitet.tom),
+                )
+            is Aktivitet.Behandlingsdager ->
+                no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
+                    behandlingsdager = aktivitet.antallBehandlingsdager,
+                    fom = LocalDate.parse(aktivitet.fom),
+                    tom = LocalDate.parse(aktivitet.tom),
+                )
+            is Aktivitet.Reisetilskudd ->
+                no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                 )

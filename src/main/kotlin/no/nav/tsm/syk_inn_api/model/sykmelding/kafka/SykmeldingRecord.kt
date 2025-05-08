@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.model.sykmelding.kafka
 
-import no.nav.tsm.mottak.sykmelding.model.metadata.Adresse
 import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
 import no.nav.tsm.mottak.sykmelding.model.metadata.Kontaktinfo
 import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
@@ -12,7 +11,7 @@ import java.time.OffsetDateTime
 data class SykmeldingRecord(
     val metadata: MessageMetadata,
     val sykmelding: ISykmelding,
-    val validation: ValidationResult, //TODO sjekk om dette er rett type
+    val validation: ValidationResult,
 )
 
 sealed interface ISykmelding {
@@ -67,7 +66,3 @@ data class DigitalSykmeldingMetadata(
     override val mottattDato: OffsetDateTime,
     override val genDate: OffsetDateTime,
 ): SykmeldingMeta
-
-
-data class AvsenderSystem(val navn: String, val versjon: String)
-
