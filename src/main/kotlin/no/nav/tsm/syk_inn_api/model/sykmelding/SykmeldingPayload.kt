@@ -24,14 +24,22 @@ data class Sykmelding(val hoveddiagnose: Hoveddiagnose, val aktivitet: Aktivitet
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface Aktivitet {
     data class IkkeMulig(val fom: String, val tom: String) : Aktivitet
-//    val medisinskArsak: MedisinskArsak?, TODO desse typane må kanskje gjelde for IkkeMulig
-//    val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
+    //    val medisinskArsak: MedisinskArsak?, TODO desse typane må kanskje gjelde for IkkeMulig -
+    // utvide på sikt.
+    //    val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
 
-    data class Gradert(val grad: Int, val fom: String, val tom: String) : Aktivitet
+    data class Gradert(
+        val grad: Int,
+        val fom: String,
+        val tom: String,
+        val reisetilskudd: Boolean
+    ) : Aktivitet
 
-    data class Behandlingsdager(val antallBehandlingsdager: Int, val fom: String, val tom: String) : Aktivitet
+    data class Behandlingsdager(val antallBehandlingsdager: Int, val fom: String, val tom: String) :
+        Aktivitet
 
-    data class Avventende(val innspillTilArbeidsgiver: String, val fom: String, val tom: String) : Aktivitet
+    data class Avventende(val innspillTilArbeidsgiver: String, val fom: String, val tom: String) :
+        Aktivitet
 
     data class Reisetilskudd(val fom: String, val tom: String) : Aktivitet
 }

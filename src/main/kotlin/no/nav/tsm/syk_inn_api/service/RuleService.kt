@@ -56,7 +56,6 @@ class RuleService(
         foedselsdato: LocalDate
     ): RegulaPayload {
         return RegulaPayload(
-
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
                 Diagnose(
@@ -177,10 +176,3 @@ class RuleService(
         }
     }
 }
-
-// bidiagnoser = null
-// annenFravarsArsak = null,
-// utdypendeOpplysninger = null // eller empty map? Burde kanskje støtte null
-// kontaktPasientBegrunnelseIkkeKontakt = null,
-// 8:12
-// resten er inferred/fetched/provida fra fhir

@@ -15,7 +15,7 @@ class PdlService(
     private val logger = LoggerFactory.getLogger(PdlService::class.java)
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
-    //TODO safe to delete - do we want it ?
+    // TODO safe to delete - do we want it ?
     fun getFodselsdato(fnr: String): LocalDate {
         return when (val result = pdlClient.getPerson(fnr)) {
             is Result.Success -> {

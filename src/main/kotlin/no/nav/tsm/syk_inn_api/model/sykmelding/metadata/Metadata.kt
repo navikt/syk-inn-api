@@ -1,7 +1,5 @@
 package no.nav.tsm.mottak.sykmelding.model.metadata
 
-import java.time.OffsetDateTime
-
 enum class MetadataType {
     DIGITAL
 }
@@ -15,7 +13,6 @@ data class Digital(
 ) : MessageMetadata {
     override val type: MetadataType = MetadataType.DIGITAL
 }
-
 
 enum class AckType {
     JA,

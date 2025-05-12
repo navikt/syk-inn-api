@@ -3,7 +3,11 @@ package no.nav.tsm.syk_inn_api.model.sykmelding.kafka
 import java.time.LocalDate
 
 enum class Aktivitetstype {
-    AKTIVITET_IKKE_MULIG, AVVENTENDE, BEHANDLINGSDAGER, GRADERT, REISETILSKUDD,
+    AKTIVITET_IKKE_MULIG,
+    AVVENTENDE,
+    BEHANDLINGSDAGER,
+    GRADERT,
+    REISETILSKUDD,
 }
 
 sealed interface AktivitetKafka {
@@ -21,26 +25,30 @@ data class Behandlingsdager(
 }
 
 data class Gradert(
-    val grad: Int, override val fom: LocalDate, override val tom: LocalDate, val reisetilskudd: Boolean,
+    val grad: Int,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    val reisetilskudd: Boolean,
 ) : AktivitetKafka {
     override val type = Aktivitetstype.GRADERT
 }
 
-data class Reisetilskudd(
-    override val fom: LocalDate, override val tom: LocalDate
-) : AktivitetKafka {
+data class Reisetilskudd(override val fom: LocalDate, override val tom: LocalDate) :
+    AktivitetKafka {
     override val type = Aktivitetstype.REISETILSKUDD
 }
 
 data class Avventende(
-    val innspillTilArbeidsgiver: String, override val fom: LocalDate, override val tom: LocalDate
+    val innspillTilArbeidsgiver: String,
+    override val fom: LocalDate,
+    override val tom: LocalDate
 ) : AktivitetKafka {
     override val type = Aktivitetstype.AVVENTENDE
 }
 
 data class AktivitetIkkeMulig(
-//    val medisinskArsak: MedisinskArsak?, TODO mangler vi noko i payload her?
-//    val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
+    val medisinskArsak: MedisinskArsak?,
+    val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
     override val fom: LocalDate,
     override val tom: LocalDate
 ) : AktivitetKafka {

@@ -1,8 +1,11 @@
 package no.nav.tsm.syk_inn_api.service
 
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
 import io.mockk.mockk
+import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 import no.nav.tsm.regulus.regula.RegulaOutcome
@@ -10,37 +13,47 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
+import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.repository.IntegrationTest
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class SykmeldingServiceTest {
+class SykmeldingServiceTest : IntegrationTest() {
     private lateinit var sykmeldingService: SykmeldingService
     private lateinit var helsenettProxyService: HelsenettProxyService
     private lateinit var ruleService: RuleService
+    private lateinit var sykmeldingKafkaService: SykmeldingKafkaService
     private lateinit var sykmeldingRepository: SykmeldingRepository
+    private lateinit var pdlService: PdlService
 
     val behandlerHpr = "123456789"
     val sykmeldingId = UUID.randomUUID().toString()
+    val foedselsdato = LocalDate.of(1990, 1, 1)
 
     @BeforeEach
     fun setup() {
         helsenettProxyService = mockk()
         ruleService = mockk()
         sykmeldingRepository = mockk()
+        sykmeldingKafkaService = mockk()
+        pdlService = mockk()
         sykmeldingService =
             SykmeldingService(
                 sykmeldingRepository = sykmeldingRepository,
                 ruleService = ruleService,
-                helsenettProxyService = helsenettProxyService,,
+                helsenettProxyService = helsenettProxyService,
+                sykmeldingKafkaService = sykmeldingKafkaService,
+                pdlService = pdlService,
             )
     }
 
@@ -49,7 +62,7 @@ class SykmeldingServiceTest {
         every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
             Sykmelder(
                 hprNummer = behandlerHpr,
-                fnr = "12345678901",
+                fnr = "01019078901",
                 fornavn = "Ola",
                 mellomnavn = null,
                 etternavn = "Nordmann",
@@ -73,6 +86,8 @@ class SykmeldingServiceTest {
                     ),
             )
 
+        every { pdlService.getPdlPerson(any()) } returns
+            PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult(
                 status = RegulaStatus.OK,
@@ -86,15 +101,23 @@ class SykmeldingServiceTest {
                 results = emptyList(),
             )
 
-        // TODO implement sykmeldingRepository.save after repository is real
+        every { sykmeldingRepository.save(any<SykmeldingEntity>()) } returns
+            SykmeldingEntity(
+                id = UUID.randomUUID(),
+                sykmeldingId = sykmeldingId,
+                pasientFnr = "01019078901",
+                sykmelderHpr = behandlerHpr,
+                legekontorOrgnr = "987654321",
+                sykmelding = getTestSykmelding(),
+            )
 
-        // TODO implement kafka sending after kafka is real
+        every { sykmeldingKafkaService.send(any(), any(), any(), any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientFnr = "12345678901",
+                        pasientFnr = "01019078901",
                         sykmelderHpr = "123456789",
                         sykmelding =
                             Sykmelding(
@@ -145,6 +168,9 @@ class SykmeldingServiceTest {
                     ),
             )
 
+        every { pdlService.getPdlPerson(any()) } returns
+            PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
+
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult(
                 status = RegulaStatus.INVALID,
@@ -157,6 +183,7 @@ class SykmeldingServiceTest {
                     ),
                 results = emptyList(),
             )
+
         val result =
             sykmeldingService.createSykmelding(
                 payload =
@@ -184,5 +211,20 @@ class SykmeldingServiceTest {
         // TODO implement kafka sending after kafka is real
 
         assertEquals(400, result.statusCode.value())
+    }
+
+    private fun getTestSykmelding(): Sykmelding {
+        return Sykmelding(
+            hoveddiagnose =
+                Hoveddiagnose(
+                    system = DiagnoseSystem.ICD10,
+                    code = "Z01",
+                ),
+            aktivitet =
+                Aktivitet.IkkeMulig(
+                    fom = "2020-01-01",
+                    tom = "2020-01-30",
+                ),
+        )
     }
 }

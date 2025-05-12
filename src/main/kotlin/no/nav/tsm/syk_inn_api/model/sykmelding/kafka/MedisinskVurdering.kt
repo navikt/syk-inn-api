@@ -1,15 +1,15 @@
 package no.nav.tsm.syk_inn_api.model.sykmelding.kafka
 
-import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import java.time.LocalDate
+import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 
-//enum class DiagnoseSystem {
+// enum class DiagnoseSystem {
 //    ICPC2,
 //    ICD10,
 //    ICPC2B,
 //    PHBU,
 //    UGYLDIG
-//}
+// }
 
 data class DiagnoseInfo(
     val system: DiagnoseSystem,
@@ -52,9 +52,9 @@ data class Yrkesskade(val yrkesskadeDato: LocalDate?)
 data class MedisinskVurdering(
     val hovedDiagnose: DiagnoseInfo?,
     val biDiagnoser: List<DiagnoseInfo>?,
-    val svangerskap: Boolean, //TODO må få inn i payload
-//    val yrkesskade: Yrkesskade?,
-    val skjermetForPasient: Boolean, //TODO må få inn i payload
-//    val syketilfelletStartDato: LocalDate?,
-//    val annenFraversArsak: AnnenFraverArsak?,
+    val svangerskap: Boolean, // TODO må få inn i payload
+    val yrkesskade: Yrkesskade?,
+    val skjermetForPasient: Boolean, // TODO må få inn i payload
+    val syketilfelletStartDato: LocalDate?,
+    val annenFraversArsak: AnnenFraverArsak?,
 )

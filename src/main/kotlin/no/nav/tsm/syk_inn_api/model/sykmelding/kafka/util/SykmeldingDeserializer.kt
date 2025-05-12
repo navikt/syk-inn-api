@@ -6,15 +6,15 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.apache.kafka.common.serialization.Deserializer
 import kotlin.reflect.KClass
+import org.apache.kafka.common.serialization.Deserializer
 
 class SykmeldingDeserializer<T : Any>(private val type: KClass<T>) : Deserializer<T> {
 
     private val objectMapper: ObjectMapper =
         jacksonObjectMapper().apply {
             registerKotlinModule()
-//            registerModule(SykmeldingModule()) //TODO Slett?
+            //            registerModule(SykmeldingModule()) //TODO Slett?
             registerModule(JavaTimeModule())
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)

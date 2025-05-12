@@ -61,7 +61,7 @@ class SykmeldingService(
 
         // send på kafka
         // TODO implement
-        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder) ;
+        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder)
         val kafkaResponse = KafkaStubber().sendToOpprettSykmeldingTopic(payload)
         if (!kafkaResponse) {
             return ResponseEntity.internalServerError()

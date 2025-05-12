@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.service
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import no.nav.tsm.mottak.sykmelding.model.metadata.Digital
 import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
 import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
@@ -28,8 +31,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.OffsetDateTime
 
 @Service
 class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>) {
@@ -37,6 +38,7 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
     private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
     val sykmeldingInputTopic = "tsm.sykmeldinger-input"
     val sykmeldingMedBehandlingsutfallTopic = "tsm.sykmeldinger"
+
     fun send(
         payload: SykmeldingPayload,
         sykmeldingId: String,
@@ -44,36 +46,40 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
         sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder,
     ) {
         try {
-            val sykmeldingKafkaMessage = SykmeldingRecord(
-                metadata = mapMessageMetadata(payload, sykmeldingId),
-                sykmelding = mapToSykInnSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
-                validation = mapValidationResult(),
-            )
-            // TODO implement sending to Kafka
-            println("Sending sykmelding with id=$sykmeldingId to Kafka")
-            val res = kafkaProducer.send(
-                ProducerRecord(
-                    sykmeldingInputTopic,
-                    sykmeldingKafkaMessage,
-                ),
-            ).get()
+            val sykmeldingKafkaMessage =
+                SykmeldingRecord(
+                    metadata = mapMessageMetadata(payload),
+                    sykmelding = mapToSykInnSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
+                    validation = mapValidationResult(),
+                )
+            logger.info("Sending sykmelding with id=$sykmeldingId to Kafka")
+            kafkaProducer
+                .send(
+                    ProducerRecord(
+                        sykmeldingInputTopic,
+                        sykmeldingKafkaMessage,
+                    ),
+                )
+                .get()
 
             logger.info("Sent sykmelding with id=$sykmeldingId to Kafka")
         } catch (e: Exception) {
-            println("Failed to send sykmelding with id=$sykmeldingId to Kafka")
+            logger.error("Failed to send sykmelding with id=$sykmeldingId to Kafka")
             e.printStackTrace()
         }
     }
 
-    private fun mapValidationResult(): ValidationResult {
-        TODO("Not yet implemented")
+    fun readSykmeldingKafkaMessage() {
+        TODO("implement this")
+        // read sykmeldingMedBehandlingsutfallTopic
     }
 
-    private fun mapMessageMetadata(
-        payload: SykmeldingPayload,
-        sykmeldingId: String
-    ): MessageMetadata {
-        TODO("Not yet implemented")
+    private fun mapValidationResult(): ValidationResult {
+        return ValidationResult(status = TODO(), timestamp = TODO(), rules = TODO())
+    }
+
+    private fun mapMessageMetadata(payload: SykmeldingPayload): MessageMetadata {
+        return Digital(orgnummer = payload.legekontorOrgnr)
     }
 
     fun mapToSykInnSykmelding(
@@ -89,38 +95,48 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
 
         return SykInnSykmelding(
             id = sykmeldingId,
-            metadata = DigitalSykmeldingMetadata(
-                mottattDato = OffsetDateTime.now(),
-                genDate = OffsetDateTime.now(),
-            ),
-            pasient = Pasient(
-                navn = pdlPerson.navn,
-                fnr = payload.pasientFnr,
-                kontaktinfo = emptyList(),
-            ),
+            metadata =
+                DigitalSykmeldingMetadata(
+                    mottattDato = OffsetDateTime.now(),
+                    genDate = OffsetDateTime.now(),
+                ),
+            pasient =
+                Pasient(
+                    navn = pdlPerson.navn,
+                    fnr = payload.pasientFnr,
+                    kontaktinfo = emptyList(),
+                ),
             medisinskVurdering = mapMedisinskVurdering(payload),
             aktivitetKafka = mapAktivitet(payload),
-            behandler = Behandler(
-                //TODO treng vi en Behandler type i tillegg til Sykmelder i payloaden?
-                navn = Navn(
-                    fornavn = sykmelder.fornavn,
-                    mellomnavn = sykmelder.mellomnavn,
-                    etternavn = sykmelder.etternavn,
+            behandler =
+                Behandler(
+                    // TODO treng vi en Behandler type i tillegg til Sykmelder i payloaden?
+                    navn =
+                        Navn(
+                            fornavn = sykmelder.fornavn,
+                            mellomnavn = sykmelder.mellomnavn,
+                            etternavn = sykmelder.etternavn,
+                        ),
+                    ids = mapPersonIdsForSykmelder(sykmelder),
+                    kontaktinfo = emptyList(),
                 ),
-                ids = mapPersonIdsForSykmelder(sykmelder),
-                kontaktinfo = emptyList(),
-            ),
-            sykmelder = Sykmelder(
-                ids = mapPersonIdsForSykmelder(sykmelder),
-                helsepersonellKategori = HelsepersonellKategori.parse(helsepersonellkategoriKode.verdi) // TODO er det rett verdi ??
-            ),
+            sykmelder =
+                Sykmelder(
+                    ids = mapPersonIdsForSykmelder(sykmelder),
+                    helsepersonellKategori =
+                        HelsepersonellKategori.parse(
+                            helsepersonellkategoriKode.verdi
+                        ), // TODO er det rett verdi ??
+                ),
         )
     }
 
-    private fun mapPersonIdsForSykmelder(sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder): List<PersonId> {
+    private fun mapPersonIdsForSykmelder(
+        sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder
+    ): List<PersonId> {
         requireNotNull(sykmelder.hprNummer)
         requireNotNull(sykmelder.fnr)
-        listOf(
+        return listOf(
             PersonId(
                 id = sykmelder.hprNummer,
                 type = PersonIdType.HPR,
@@ -135,10 +151,13 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
     fun mapMedisinskVurdering(payload: SykmeldingPayload): MedisinskVurdering {
         return MedisinskVurdering(
             hovedDiagnose = mapHoveddiagnose(payload.sykmelding.hoveddiagnose),
-            biDiagnoser = emptyList(), //TODO vi må støtte bidiagnoser inn i payload
-            svangerskap = false, //TODO må få inn i payload
-            skjermetForPasient = false, //TODO må få inn i payload
-        ),
+            biDiagnoser = emptyList(), // TODO vi må støtte bidiagnoser inn i payload
+            svangerskap = false, // TODO må få inn i payload
+            skjermetForPasient = false,
+            yrkesskade = null,
+            syketilfelletStartDato = null,
+            annenFraversArsak = null,
+        )
     }
 
     fun mapAktivitet(payload: SykmeldingPayload): List<AktivitetKafka> {
@@ -149,33 +168,33 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
                         grad = payload.sykmelding.aktivitet.grad,
                         fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
                         tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
-                        reisetilskudd = false, //TODO må få inn i payload - korleis veit vi om reisetilskudd
+                        reisetilskudd = payload.sykmelding.aktivitet.reisetilskudd,
                     )
                 }
-
                 is Aktivitet.IkkeMulig -> {
                     AktivitetIkkeMulig(
                         fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
                         tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                        medisinskArsak = null,
+                        arbeidsrelatertArsak = null,
                     )
                 }
-
                 is Aktivitet.Avventende -> {
                     Avventende(
-                        innspillTilArbeidsgiver = payload.sykmelding.aktivitet.innspillTilArbeidsgiver,
+                        innspillTilArbeidsgiver =
+                            payload.sykmelding.aktivitet.innspillTilArbeidsgiver,
                         fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
                         tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
                     )
                 }
-
                 is Aktivitet.Behandlingsdager -> {
                     Behandlingsdager(
-                        antallBehandlingsdager = payload.sykmelding.aktivitet.antallBehandlingsdager,
+                        antallBehandlingsdager =
+                            payload.sykmelding.aktivitet.antallBehandlingsdager,
                         fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
                         tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
                     )
                 }
-
                 is Aktivitet.Reisetilskudd -> {
                     Reisetilskudd(
                         fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
