@@ -17,3 +17,4 @@ services:
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       CLUSTER_ID: "HwucRjw5THeOT7XxRR7Gog=="
+      KAFKA_CREATE_TOPICS: "tsm.sykmeldinger-input:1:1"

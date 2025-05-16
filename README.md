@@ -25,6 +25,11 @@ You can check which version you have installed using this command:
 docker-compose --version
 ```
 
+Docker compose will deploy Kafka. To query the local Kafka instance you can use the following command to check for content in the topic::
+``` bash
+ kcat -b localhost:9092 -t tsm.sykmeldinger-input -C -o beginning
+```
+
 ### Building the application
 To build locally and run the integration tests you can simply run
 ``` bash
