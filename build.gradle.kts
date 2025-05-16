@@ -51,7 +51,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("no.nav.tsm.regulus:regula:37")
+    implementation("no.nav.tsm.regulus:regula:40")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")

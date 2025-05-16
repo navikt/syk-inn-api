@@ -8,8 +8,16 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.Navn
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.syk_inn_api.model.InvalidRule
+import no.nav.tsm.syk_inn_api.model.OKRule
 import no.nav.tsm.syk_inn_api.model.PdlPerson
+import no.nav.tsm.syk_inn_api.model.PendingRule
+import no.nav.tsm.syk_inn_api.model.Reason
+import no.nav.tsm.syk_inn_api.model.RuleType
 import no.nav.tsm.syk_inn_api.model.ValidationResult
+import no.nav.tsm.syk_inn_api.model.ValidationType
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
@@ -44,15 +52,15 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
         sykmeldingId: String,
         pdlPerson: PdlPerson,
         sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder,
+        regulaResult: RegulaResult,
     ) {
         try {
             val sykmeldingKafkaMessage =
                 SykmeldingRecord(
                     metadata = mapMessageMetadata(payload),
                     sykmelding = mapToSykInnSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
-                    validation = mapValidationResult(),
+                    validation = mapValidationResult(regulaResult),
                 )
-            logger.info("Sending sykmelding with id=$sykmeldingId to Kafka")
             kafkaProducer
                 .send(
                     ProducerRecord(
@@ -74,8 +82,51 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
         // read sykmeldingMedBehandlingsutfallTopic
     }
 
-    private fun mapValidationResult(): ValidationResult {
-        return ValidationResult(status = TODO(), timestamp = TODO(), rules = TODO())
+    private fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
+        val rule =
+            when (regulaResult) {
+                is RegulaResult.Ok -> {
+                    OKRule(
+                        name = RuleType.OK.name,
+                        timestamp = OffsetDateTime.now(),
+                        validationType = ValidationType.AUTOMATIC
+                    )
+                }
+                is RegulaResult.NotOk -> {
+                    when (regulaResult.outcome.status) {
+                        RegulaOutcomeStatus.MANUAL_PROCESSING ->
+                            PendingRule(
+                                name = RuleType.PENDING.name,
+                                reason =
+                                    Reason(
+                                        sykmeldt = regulaResult.outcome.reason.sykmeldt,
+                                        sykmelder = regulaResult.outcome.reason.sykmelder,
+                                    ),
+                                timestamp = OffsetDateTime.now(),
+                                validationType = ValidationType.MANUAL
+                            )
+                        RegulaOutcomeStatus.INVALID ->
+                            InvalidRule(
+                                name = RuleType.INVALID.name,
+                                reason =
+                                    Reason(
+                                        sykmeldt = regulaResult.outcome.reason.sykmeldt,
+                                        sykmelder = regulaResult.outcome.reason.sykmelder,
+                                    ),
+                                timestamp = OffsetDateTime.now(),
+                                validationType = ValidationType.AUTOMATIC
+                            )
+                        else -> {
+                            throw IllegalArgumentException(
+                                "Unknown status: ${regulaResult.outcome.status}"
+                            )
+                        }
+                    }
+                }
+            }
+
+        val rules = listOf(rule)
+        return ValidationResult(status = rule.type, timestamp = OffsetDateTime.now(), rules = rules)
     }
 
     private fun mapMessageMetadata(payload: SykmeldingPayload): MessageMetadata {
@@ -90,8 +141,8 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
     ): SykInnSykmelding {
         requireNotNull(sykmelder.fornavn)
         requireNotNull(sykmelder.etternavn)
-        val helsepersonellkategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
-        requireNotNull(helsepersonellkategoriKode)
+        val helsepersonellKategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
+        requireNotNull(helsepersonellKategoriKode)
 
         return SykInnSykmelding(
             id = sykmeldingId,
@@ -125,7 +176,7 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     helsepersonellKategori =
                         HelsepersonellKategori.parse(
-                            helsepersonellkategoriKode.verdi
+                            helsepersonellKategoriKode.verdi
                         ), // TODO er det rett verdi ??
                 ),
         )

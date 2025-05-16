@@ -8,3 +8,13 @@ spring:
         format_sql: true
   flyway:
     enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
+      properties:
+        spring.json.trusted.packages: "*"

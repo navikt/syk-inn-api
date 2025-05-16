@@ -32,7 +32,7 @@ class KafkaConfig {
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
                 },
                 StringDeserializer(),
-                SykmeldingDeserializer(SykmeldingRecord::class)
+                SykmeldingDeserializer()
             )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()

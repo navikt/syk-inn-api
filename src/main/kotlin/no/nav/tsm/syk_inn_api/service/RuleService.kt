@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class RuleService(
-    private val pdlService: PdlService,
     private val btsysProxyService: BtsysProxyService,
 ) {
     private val logger = LoggerFactory.getLogger(RuleService::class.java)

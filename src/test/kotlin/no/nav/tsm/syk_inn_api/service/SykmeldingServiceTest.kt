@@ -111,7 +111,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                 sykmelding = getTestSykmelding(),
             )
 
-        every { sykmeldingKafkaService.send(any(), any(), any(), any()) } just Runs
+        every { sykmeldingKafkaService.send(any(), any(), any(), any(), any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(

@@ -59,9 +59,7 @@ class SykmeldingService(
         }
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
-        // send på kafka
-        // TODO implement
-        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder)
+        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder, ruleResult)
         val kafkaResponse = KafkaStubber().sendToOpprettSykmeldingTopic(payload)
         if (!kafkaResponse) {
             return ResponseEntity.internalServerError()
