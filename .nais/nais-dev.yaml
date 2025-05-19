@@ -34,6 +34,14 @@ spec:
       tenant: trygdeetaten.no
   kafka:
     pool: nav-dev
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
   accessPolicy:
     inbound:
       rules:
