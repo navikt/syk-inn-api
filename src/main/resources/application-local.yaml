@@ -51,3 +51,4 @@ pdlcache:
 nais:
   token:
     endpoint: "http://localhost:8084/nais/token"
+  cluster: "dev-gcp"

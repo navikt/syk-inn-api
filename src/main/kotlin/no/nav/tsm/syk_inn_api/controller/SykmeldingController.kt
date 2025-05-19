@@ -5,6 +5,7 @@ import java.util.*
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
 import no.nav.tsm.syk_inn_api.service.SykmeldingService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,7 +39,7 @@ class SykmeldingController(
     ): ResponseEntity<Any> {
         return ResponseEntity(
             sykmeldingService.getSykmeldingById(sykmeldingId, hpr),
-            org.springframework.http.HttpStatus.OK,
+            HttpStatus.OK,
         )
     }
 
@@ -46,7 +47,7 @@ class SykmeldingController(
     fun getSykmeldingerByUserIdent(@RequestHeader("Ident") ident: String): ResponseEntity<Any> {
         return ResponseEntity(
             sykmeldingService.getSykmeldingerByIdent(ident),
-            org.springframework.http.HttpStatus.OK,
+            HttpStatus.OK,
         )
     }
 
@@ -57,7 +58,7 @@ class SykmeldingController(
     ): ResponseEntity<Any> {
         return ResponseEntity(
             sykmeldingPdfService.getPdf(sykmeldingId.toString(), hpr),
-            org.springframework.http.HttpStatus.OK,
+            HttpStatus.OK,
         )
     }
 }

@@ -87,13 +87,15 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-        topics = ["tsm.sykmeldinger"],
+//        topics = ["tsm.sykmeldinger"],
+        topics = ["tsm.sykmeldinger-input"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
         try {
+            logger.info("Consuming record: ${record.value()} from topic ${record.topic()}")
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
             logger.error("Failed to process sykmelding with id ${record.key()}", e)

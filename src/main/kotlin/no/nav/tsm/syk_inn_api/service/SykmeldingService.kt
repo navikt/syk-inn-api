@@ -77,15 +77,16 @@ class SykmeldingService(
     }
 
     fun getSykmeldingerByIdent(ident: String): ResponseEntity<Any> {
+        logger.info("Henter sykmeldinger for ident=$ident")
         val sykmeldinger = sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
 
         if (sykmeldinger.isEmpty()) {
-            return ResponseEntity.noContent().build()
+            return ResponseEntity.ok(emptyList<SavedSykmelding>())
         }
 
         return ResponseEntity.ok(
             sykmeldinger.map {
-                SavedSykmelding(
+                SavedSykmelding( //TODO this should have all the fields needed in the dashboard, wait with aareg.
                     sykmeldingId = it.sykmeldingId,
                     pasientFnr = it.pasientFnr,
                     sykmelderHpr = it.sykmelderHpr,

@@ -25,13 +25,11 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.UtenlandskSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.slf4j.LoggerFactory
-import org.springframework.boot.actuate.metrics.data.DefaultRepositoryTagsProvider
 import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
-    private val repositoryTagsProvider: DefaultRepositoryTagsProvider
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingPersistenceService::class.java)
 
@@ -71,7 +69,7 @@ class SykmeldingPersistenceService(
     }
 
     fun getSykmeldingerByIdent(ident: String): List<SykmeldingEntity> {
-        return sykmeldingRepository.findSykmeldingEntitiesByPasientFnr(ident)
+        return sykmeldingRepository.findAllByPasientFnr(ident)
     }
 
     fun updateSykmelding(sykmeldingId: String, sykmeldingRecord: SykmeldingRecord?) {
@@ -88,6 +86,7 @@ class SykmeldingPersistenceService(
         if (
             sykmeldingEntity == null && sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
         ) {
+            logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
             sykmeldingRepository.save(
                 SykmeldingEntity(
                     sykmeldingId = sykmeldingId,
@@ -102,6 +101,7 @@ class SykmeldingPersistenceService(
 
         if (sykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
             val updatedEntity = sykmeldingEntity?.copy(validertOk = true)
+            logger.info("Updating sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             sykmeldingRepository.save(
                 updatedEntity
                     ?: SykmeldingEntity(
