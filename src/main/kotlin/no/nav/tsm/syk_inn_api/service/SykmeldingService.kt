@@ -2,11 +2,9 @@ package no.nav.tsm.syk_inn_api.service
 
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
-import no.nav.tsm.syk_inn_api.kafka.KafkaStubber
 import no.nav.tsm.syk_inn_api.model.sykmelding.SavedSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -14,11 +12,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class SykmeldingService(
-    private val sykmeldingRepository: SykmeldingRepository,
     private val ruleService: RuleService,
     private val helsenettProxyService: HelsenettProxyService,
     private val sykmeldingKafkaService: SykmeldingKafkaService,
     private val pdlService: PdlService,
+    private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
 
@@ -46,13 +44,8 @@ class SykmeldingService(
             "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
         )
 
-        val entity =
-            sykmeldingRepository.save(
-                mapToEntity(
-                    payload = payload,
-                    sykmeldingId = sykmeldingId,
-                ),
-            )
+        val entity = sykmeldingPersistenceService.save(payload, sykmeldingId)
+
         if (entity.id == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return ResponseEntity.internalServerError().body("Lagring av sykmelding feilet")
@@ -60,30 +53,12 @@ class SykmeldingService(
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
         sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder, ruleResult)
-        val kafkaResponse = KafkaStubber().sendToOpprettSykmeldingTopic(payload)
-        if (!kafkaResponse) {
-            return ResponseEntity.internalServerError()
-                .body("Sending av sykmelding på kafka topic: opprett-sykmelding-w/e feilet")
-        }
-
-        // svar om sending på kafka er ok
         return ResponseEntity.status(HttpStatus.CREATED).body("Sykmeldingen er lagret")
-    }
-
-    private fun mapToEntity(payload: SykmeldingPayload, sykmeldingId: String): SykmeldingEntity {
-        logger.info("Mapping sykmelding til entity")
-        return SykmeldingEntity(
-            sykmeldingId = sykmeldingId,
-            pasientFnr = payload.pasientFnr,
-            sykmelderHpr = payload.sykmelderHpr,
-            sykmelding = payload.sykmelding,
-            legekontorOrgnr = payload.legekontorOrgnr,
-        )
     }
 
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): ResponseEntity<Any> {
         val sykmelding =
-            sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId.toString())
+            sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
                 ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(
@@ -102,7 +77,7 @@ class SykmeldingService(
     }
 
     fun getSykmeldingerByIdent(ident: String): ResponseEntity<Any> {
-        val sykmeldinger = sykmeldingRepository.findSykmeldingEntitiesByPasientFnr(ident)
+        val sykmeldinger = sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
 
         if (sykmeldinger.isEmpty()) {
             return ResponseEntity.noContent().build()

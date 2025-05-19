@@ -109,6 +109,8 @@ class HelsenettProxyException(message: String) : RuntimeException(message)
 
 class RuleHitException(message: String) : RuntimeException(message)
 
+class PersonNotFoundException(message: String) : Exception(message)
+
 data class ApiError(
     val message: String,
     val status: Int,

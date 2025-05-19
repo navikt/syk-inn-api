@@ -10,6 +10,7 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.model.InvalidRule
 import no.nav.tsm.syk_inn_api.model.OKRule
 import no.nav.tsm.syk_inn_api.model.PdlPerson
@@ -20,6 +21,7 @@ import no.nav.tsm.syk_inn_api.model.ValidationResult
 import no.nav.tsm.syk_inn_api.model.ValidationType
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetIkkeMulig
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetKafka
@@ -35,17 +37,24 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykInnSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
 @Service
-class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>) {
+class SykmeldingKafkaService(
+    private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
+    private val sykmeldingPersistenceService: SykmeldingPersistenceService,
+    @Value("\${nais.cluster}")
+    private val clusterName: String, // korleis funker denne avvhengigheten lokalt ?
+) {
 
     private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
     val sykmeldingInputTopic = "tsm.sykmeldinger-input"
-    val sykmeldingMedBehandlingsutfallTopic = "tsm.sykmeldinger"
 
     fun send(
         payload: SykmeldingPayload,
@@ -77,9 +86,31 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
         }
     }
 
-    fun readSykmeldingKafkaMessage() {
-        TODO("implement this")
-        // read sykmeldingMedBehandlingsutfallTopic
+    @KafkaListener(
+        //        topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
+        topics = ["tsm.sykmeldinger"],
+        groupId = "syk-inn-api-consumer",
+        containerFactory = "containerFactory",
+        batch = "false"
+    )
+    fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
+        try {
+            sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
+        } catch (e: PersonNotFoundException) {
+            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            if (clusterName == "dev-gcp") {
+                logger.warn("Person not found in dev-gcp, skipping sykmelding")
+            } else {
+                throw e
+            }
+        } catch (e: SykmeldingDBMappingException) {
+            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            if (clusterName == "dev-gcp") {
+                logger.warn("Failed to map sykmelding in dev-gcp, skipping sykmelding")
+            } else {
+                throw e
+            }
+        }
     }
 
     private fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
@@ -161,7 +192,6 @@ class SykmeldingKafkaService(private val kafkaProducer: KafkaProducer<String, Sy
             aktivitetKafka = mapAktivitet(payload),
             behandler =
                 Behandler(
-                    // TODO treng vi en Behandler type i tillegg til Sykmelder i payloaden?
                     navn =
                         Navn(
                             fornavn = sykmelder.fornavn,
