@@ -9,6 +9,8 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 import no.nav.tsm.regulus.regula.RegulaOutcome
+import no.nav.tsm.regulus.regula.RegulaOutcomeReason
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.Godkjenning
@@ -22,7 +24,6 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
-import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -33,7 +34,7 @@ class SykmeldingServiceTest : IntegrationTest() {
     private lateinit var helsenettProxyService: HelsenettProxyService
     private lateinit var ruleService: RuleService
     private lateinit var sykmeldingKafkaService: SykmeldingKafkaService
-    private lateinit var sykmeldingRepository: SykmeldingRepository
+    private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
     private lateinit var pdlService: PdlService
 
     val behandlerHpr = "123456789"
@@ -44,12 +45,12 @@ class SykmeldingServiceTest : IntegrationTest() {
     fun setup() {
         helsenettProxyService = mockk()
         ruleService = mockk()
-        sykmeldingRepository = mockk()
+        sykmeldingPersistenceService = mockk()
         sykmeldingKafkaService = mockk()
         pdlService = mockk()
         sykmeldingService =
             SykmeldingService(
-                sykmeldingRepository = sykmeldingRepository,
+                sykmeldingPersistenceService = sykmeldingPersistenceService,
                 ruleService = ruleService,
                 helsenettProxyService = helsenettProxyService,
                 sykmeldingKafkaService = sykmeldingKafkaService,
@@ -89,19 +90,11 @@ class SykmeldingServiceTest : IntegrationTest() {
         every { pdlService.getPdlPerson(any()) } returns
             PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
-            RegulaResult(
-                status = RegulaStatus.OK,
-                outcome =
-                    RegulaOutcome(
-                        status = RegulaStatus.OK,
-                        rule = "the rule",
-                        messageForUser = "message for user",
-                        messageForSender = "message for sender",
-                    ),
-                results = emptyList(),
+            RegulaResult.Ok(
+                emptyList(),
             )
 
-        every { sykmeldingRepository.save(any<SykmeldingEntity>()) } returns
+        every { sykmeldingPersistenceService.save(any(), any()) } returns
             SykmeldingEntity(
                 id = UUID.randomUUID(),
                 sykmeldingId = sykmeldingId,
@@ -172,14 +165,13 @@ class SykmeldingServiceTest : IntegrationTest() {
             PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
 
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
-            RegulaResult(
+            RegulaResult.NotOk(
                 status = RegulaStatus.INVALID,
                 outcome =
                     RegulaOutcome(
-                        status = RegulaStatus.INVALID,
+                        status = RegulaOutcomeStatus.INVALID,
                         rule = "the rule that failed",
-                        messageForUser = "validation failed",
-                        messageForSender = "message for sender",
+                        reason = RegulaOutcomeReason("validation failed", "message for sender"),
                     ),
                 results = emptyList(),
             )

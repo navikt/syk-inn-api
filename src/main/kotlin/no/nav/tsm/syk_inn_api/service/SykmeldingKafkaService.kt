@@ -11,6 +11,7 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
+import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.model.InvalidRule
 import no.nav.tsm.syk_inn_api.model.OKRule
 import no.nav.tsm.syk_inn_api.model.PdlPerson
@@ -21,7 +22,6 @@ import no.nav.tsm.syk_inn_api.model.ValidationResult
 import no.nav.tsm.syk_inn_api.model.ValidationType
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetIkkeMulig
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetKafka
@@ -87,10 +87,9 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-        //        topics = ["\${spring.kafka.topics.sykmeldinger-input}"],
         topics = ["tsm.sykmeldinger"],
         groupId = "syk-inn-api-consumer",
-        containerFactory = "containerFactory",
+        containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {

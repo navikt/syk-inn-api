@@ -111,6 +111,8 @@ class RuleHitException(message: String) : RuntimeException(message)
 
 class PersonNotFoundException(message: String) : Exception(message)
 
+class SykmeldingDBMappingException(message: String, ex: Exception) : Exception(message, ex)
+
 data class ApiError(
     val message: String,
     val status: Int,

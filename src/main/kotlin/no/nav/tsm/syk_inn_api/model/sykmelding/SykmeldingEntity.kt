@@ -16,4 +16,5 @@ data class SykmeldingEntity(
     val sykmelderHpr: String,
     @Convert(converter = SykmeldingConverter::class) val sykmelding: Sykmelding,
     val legekontorOrgnr: String,
+    val validertOk: Boolean = false,
 )

@@ -18,3 +18,5 @@ spring:
       value-deserializer: no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
       properties:
         spring.json.trusted.packages: "*"
+nais:
+  cluster: dev-gcp

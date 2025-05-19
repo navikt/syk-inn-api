@@ -63,3 +63,4 @@ pdlcache:
 nais:
   token:
     endpoint: ${NAIS_TOKEN_ENDPOINT}
+  cluster: ${NAIS_CLUSTER_NAME}
