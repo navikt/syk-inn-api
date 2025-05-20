@@ -8,6 +8,8 @@ enum class MetadataType {
     ENKEL,
     EMOTTAK,
     PAPIRSYKMELDING,
+    EGENMELDT,
+    UTENLANDSK_SYKMELDING,
 }
 
 sealed interface MessageMetadata {
@@ -36,6 +38,19 @@ data class EmottakEnkel(
     val vedlegg: List<String>?,
 ) : MessageMetadata {
     override val type = MetadataType.ENKEL
+}
+
+data class Egenmeldt(
+    val msgInfo: MessageInfo,
+) : MessageMetadata {
+    override val type: MetadataType = MetadataType.EGENMELDT
+}
+
+data class Utenlandsk(
+    val land: String,
+    val journalPostId: String,
+) : MessageMetadata {
+    override val type: MetadataType = MetadataType.UTENLANDSK_SYKMELDING
 }
 
 enum class AckType {

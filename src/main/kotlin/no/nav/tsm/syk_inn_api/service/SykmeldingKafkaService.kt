@@ -34,7 +34,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Gradert
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.MedisinskVurdering
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Pasient
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykInnSykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -74,6 +74,7 @@ class SykmeldingKafkaService(
                 .send(
                     ProducerRecord(
                         sykmeldingInputTopic,
+                        sykmeldingId,
                         sykmeldingKafkaMessage,
                     ),
                 )
@@ -95,6 +96,7 @@ class SykmeldingKafkaService(
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
         try {
+            //TODO om record.key er null så hopper vi over meldinga og øker offset med 1
             logger.info("Consuming record: ${record.value()} from topic ${record.topic()}")
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
@@ -111,6 +113,10 @@ class SykmeldingKafkaService(
             } else {
                 throw e
             }
+        }
+        catch (e: Exception) {
+            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            throw e
         }
     }
 
@@ -170,13 +176,13 @@ class SykmeldingKafkaService(
         sykmeldingId: String,
         pdlPerson: PdlPerson,
         sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder
-    ): SykInnSykmelding {
+    ): DigitalSykmelding {
         requireNotNull(sykmelder.fornavn)
         requireNotNull(sykmelder.etternavn)
         val helsepersonellKategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
         requireNotNull(helsepersonellKategoriKode)
 
-        return SykInnSykmelding(
+        return DigitalSykmelding(
             id = sykmeldingId,
             metadata =
                 DigitalSykmeldingMetadata(

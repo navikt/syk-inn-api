@@ -23,13 +23,23 @@ class ConsumerErrorHandler :
         thrownException: java.lang.Exception,
         record: ConsumerRecord<*, *>,
         consumer: Consumer<*, *>,
-        container: MessageListenerContainer
+        container: MessageListenerContainer,
     ): Boolean {
         log.error(
             "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
             thrownException
         )
         return super.handleOne(thrownException, record, consumer, container)
+    }
+
+    override fun handleOtherException(
+        thrownException: java.lang.Exception,
+        consumer: Consumer<*, *>,
+        container: MessageListenerContainer,
+        batchListener: Boolean
+    ) {
+        log.error("Feil i listener uten noen records", thrownException)
+        super.handleOtherException(thrownException, consumer, container, batchListener)
     }
 
     override fun handleRemaining(

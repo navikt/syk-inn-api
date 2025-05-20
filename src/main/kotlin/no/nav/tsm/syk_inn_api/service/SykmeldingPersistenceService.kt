@@ -18,7 +18,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandlingsdager
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Gradert
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Papirsykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykInnSykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.UtenlandskSykmelding
@@ -26,6 +26,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
 import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingPersistenceService(
@@ -73,12 +74,20 @@ class SykmeldingPersistenceService(
     }
 
     fun updateSykmelding(sykmeldingId: String, sykmeldingRecord: SykmeldingRecord?) {
+        logger.info("Inside the method to update sykmelding with id=$sykmeldingId")
         if (sykmeldingRecord == null) {
+            logger.info("SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId")
             delete(sykmeldingId)
             return
         }
 
+        logger.info("getting sykmelding with id $sykmeldingId from DB")
         val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
+        if(sykmeldingEntity != null) {
+            logger.info("Sykmelding with id=$sykmeldingId found in DB")
+        } else {
+            logger.info("Sykmelding with id=$sykmeldingId not found in DB")
+        }
         logger.info(
             "is $sykmeldingId equal to ${sykmeldingRecord.sykmelding.id} ?"
         ) // TODO delete this after testing
@@ -123,7 +132,7 @@ class SykmeldingPersistenceService(
 
     private fun mapHprNummer(value: SykmeldingRecord): String {
         return when (val sykmelding = value.sykmelding) {
-            is SykInnSykmelding -> {
+            is DigitalSykmelding -> {
                 sykmelding.sykmelder.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
                     ?: error("No HPR number found in Sykmelder-object")
             }

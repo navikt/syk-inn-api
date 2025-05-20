@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingModule
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.common.serialization.Serializer
 
@@ -20,6 +21,7 @@ class SykmeldingRecordSerializer : Serializer<SykmeldingRecord> {
 val objectMapper: ObjectMapper =
     ObjectMapper().apply {
         registerKotlinModule()
+        registerModule(SykmeldingModule())
         registerModule(JavaTimeModule())
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)

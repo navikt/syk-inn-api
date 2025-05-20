@@ -1,6 +1,7 @@
-package no.nav.tsm.mottak.sykmelding.kafka.util
+package no.nav.tsm.syk_inn_api.model.sykmelding.kafka.util
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.tsm.mottak.sykmelding.kafka.util.objectMapper
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.common.serialization.Deserializer
 

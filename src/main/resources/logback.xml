@@ -28,4 +28,5 @@
     </root>
 
     <logger name="no.nav" level="INFO"/>
+<!--    <logger name="org.apache" level="DEBUG"/>-->
 </configuration>

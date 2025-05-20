@@ -24,7 +24,7 @@ sealed interface ISykmelding {
     val aktivitetKafka: List<AktivitetKafka>
 }
 
-data class SykInnSykmelding(
+data class DigitalSykmelding(
     override val id: String,
     override val metadata: DigitalSykmeldingMetadata,
     override val pasient: Pasient,

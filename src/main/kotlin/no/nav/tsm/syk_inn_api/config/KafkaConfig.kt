@@ -1,6 +1,6 @@
 package no.nav.tsm.syk_inn_api.config
 
-import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingDeserializer
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.util.SykmeldingDeserializer
 import no.nav.tsm.mottak.sykmelding.kafka.util.SykmeldingRecordSerializer
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
