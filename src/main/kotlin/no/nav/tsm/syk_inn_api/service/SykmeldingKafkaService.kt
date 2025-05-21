@@ -43,6 +43,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 
 @Service
@@ -90,14 +91,18 @@ class SykmeldingKafkaService(
 
     @KafkaListener(
         //        topics = ["tsm.sykmeldinger"],
-        topics = ["tsm.sykmeldinger-input"],
+        topics = ["tsm.sykmeldinger-input"], // TODO hugs å endre til tsm.sykmeldinger
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
+    fun consume(record: ConsumerRecord<String, SykmeldingRecord>, acknowledgement: Acknowledgment) {
         try {
-            // TODO om record.key er null så hopper vi over meldinga og øker offset med 1
+            if (record.key() == null) {
+                logger.warn("Record key is null, skipping record")
+                acknowledgement.acknowledge()
+                return
+            }
             logger.info("Consuming record: ${record.value()} from topic ${record.topic()}")
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
