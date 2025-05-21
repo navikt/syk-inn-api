@@ -77,9 +77,14 @@ class SykmeldingService(
         )
     }
 
-    fun getSykmeldingerByIdent(ident: String): ResponseEntity<Any> {
+    fun getSykmeldingerByIdent(ident: String, orgnr: String): ResponseEntity<Any> {
         logger.info("Henter sykmeldinger for ident=$ident")
-        val sykmeldinger = sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
+        // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
+        // at den får lov til å sjå ?
+        val sykmeldinger =
+            sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
+                it.legekontorOrgnr == orgnr
+            }
 
         if (sykmeldinger.isEmpty()) {
             return ResponseEntity.ok(emptyList<SavedSykmelding>())

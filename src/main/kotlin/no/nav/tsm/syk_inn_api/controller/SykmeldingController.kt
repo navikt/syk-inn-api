@@ -44,9 +44,12 @@ class SykmeldingController(
     }
 
     @GetMapping("/")
-    fun getSykmeldingerByUserIdent(@RequestHeader("Ident") ident: String): ResponseEntity<Any> {
+    fun getSykmeldingerByUserIdent(
+        @RequestHeader("Ident") ident: String,
+        @RequestHeader("Orgnr") orgnr: String
+    ): ResponseEntity<Any> {
         return ResponseEntity(
-            sykmeldingService.getSykmeldingerByIdent(ident),
+            sykmeldingService.getSykmeldingerByIdent(ident, orgnr),
             HttpStatus.OK,
         )
     }

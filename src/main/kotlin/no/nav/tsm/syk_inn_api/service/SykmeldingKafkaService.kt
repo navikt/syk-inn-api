@@ -103,7 +103,9 @@ class SykmeldingKafkaService(
                 acknowledgement.acknowledge()
                 return
             }
-            logger.info("Consuming record: ${record.value()} from topic ${record.topic()}")
+            logger.info(
+                "Consuming record: ${record.value()} from topic ${record.topic()}"
+            ) // TODO logg i sikker logg før prod. DO IT!
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
             logger.error("Failed to process sykmelding with id ${record.key()}", e)
