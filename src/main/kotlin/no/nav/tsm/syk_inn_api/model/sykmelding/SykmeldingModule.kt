@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotlin.reflect.KClass
 import no.nav.tsm.mottak.sykmelding.model.metadata.Digital
 import no.nav.tsm.mottak.sykmelding.model.metadata.EDIEmottak
 import no.nav.tsm.mottak.sykmelding.model.metadata.Egenmeldt
@@ -43,8 +44,6 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingMeta
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.UtenlandskSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
-import kotlin.reflect.KClass
-
 
 class SykmeldingModule : SimpleModule() {
     init {
@@ -57,7 +56,6 @@ class SykmeldingModule : SimpleModule() {
         addDeserializer(SykmeldingMeta::class.java, SykmeldingMetaDeserializer())
     }
 }
-
 
 abstract class CustomDeserializer<T : Any> : JsonDeserializer<T>() {
     abstract fun getClass(type: String): KClass<out T>
@@ -113,7 +111,6 @@ class IArbeidDeserializer : CustomDeserializer<IArbeid>() {
         }
     }
 }
-
 
 class ArbeidsgiverInfoDeserializer : CustomDeserializer<ArbeidsgiverInfo>() {
     override fun getClass(type: String): KClass<out ArbeidsgiverInfo> {

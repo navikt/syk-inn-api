@@ -29,12 +29,12 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Avventende
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandler
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandlingsdager
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DiagnoseInfo
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Gradert
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.MedisinskVurdering
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Pasient
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -67,7 +67,8 @@ class SykmeldingKafkaService(
             val sykmeldingKafkaMessage =
                 SykmeldingRecord(
                     metadata = mapMessageMetadata(payload),
-                    sykmelding = mapToSykInnSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
+                    sykmelding =
+                        mapToDigitalSykmelding(payload, sykmeldingId, pdlPerson, sykmelder),
                     validation = mapValidationResult(regulaResult),
                 )
             kafkaProducer
@@ -88,7 +89,7 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-//        topics = ["tsm.sykmeldinger"],
+        //        topics = ["tsm.sykmeldinger"],
         topics = ["tsm.sykmeldinger-input"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
@@ -96,7 +97,7 @@ class SykmeldingKafkaService(
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
         try {
-            //TODO om record.key er null så hopper vi over meldinga og øker offset med 1
+            // TODO om record.key er null så hopper vi over meldinga og øker offset med 1
             logger.info("Consuming record: ${record.value()} from topic ${record.topic()}")
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
@@ -113,8 +114,7 @@ class SykmeldingKafkaService(
             } else {
                 throw e
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             logger.error("Failed to process sykmelding with id ${record.key()}", e)
             throw e
         }
@@ -171,7 +171,7 @@ class SykmeldingKafkaService(
         return Digital(orgnummer = payload.legekontorOrgnr)
     }
 
-    fun mapToSykInnSykmelding(
+    fun mapToDigitalSykmelding(
         payload: SykmeldingPayload,
         sykmeldingId: String,
         pdlPerson: PdlPerson,

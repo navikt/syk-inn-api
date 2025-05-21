@@ -1,37 +1,50 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import jakarta.persistence.AttributeConverter
-import jakarta.persistence.Converter
 import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
-import org.slf4j.LoggerFactory
+import org.postgresql.util.PGobject
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.convert.converter.Converter
+import org.springframework.data.convert.ReadingConverter
+import org.springframework.data.convert.WritingConverter
+import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 
-@Converter(autoApply = true)
-class SykmeldingConverter : AttributeConverter<Sykmelding, String> {
-    private val objectMapper =
-        ObjectMapper().apply {
-            registerModule(JavaTimeModule())
-            registerModule(KotlinModule.Builder().build())
-        }
-    private val logger = LoggerFactory.getLogger(SykmeldingConverter::class.java)
+@WritingConverter
+class SykmeldingWritingConverter(private val objectMapper: ObjectMapper = ObjectMapper()) :
+    Converter<Sykmelding, PGobject> {
 
-    override fun convertToDatabaseColumn(attribute: Sykmelding?): String? {
-        return try {
-            logger.debug("Converting Sykmelding to JSON string for database storage")
-            attribute?.let { objectMapper.writeValueAsString(it) }
-        } catch (e: Exception) {
-            logger.error("Error converting Sykmelding to JSON string: ${e.message}", e)
-            throw IllegalArgumentException("Could not convert Sykmelding to JSON string", e)
+    override fun convert(source: Sykmelding): PGobject {
+        val json = objectMapper.writeValueAsString(source)
+        return PGobject().apply {
+            type = "jsonb"
+            value = json
         }
     }
+}
 
-    override fun convertToEntityAttribute(dbData: String?): Sykmelding? {
-        return try {
-            logger.debug("Converting JSON string from database to Sykmelding")
-            dbData?.let { objectMapper.readValue(it, Sykmelding::class.java) }
-        } catch (e: Exception) {
-            logger.error("Error converting JSON string to Sykmelding: ${e.message}", e)
-            throw IllegalArgumentException("Could not convert JSON string to Sykmelding", e)
-        }
+@ReadingConverter
+class SykmeldingReadingConverter(private val objectMapper: ObjectMapper = ObjectMapper()) :
+    Converter<Any, Sykmelding> {
+
+    override fun convert(source: Any): Sykmelding {
+        val json =
+            when (source) {
+                is PGobject -> source.value
+                is String -> source
+                else ->
+                    throw IllegalArgumentException(
+                        "Unsupported type for Sykmelding: ${source.javaClass}"
+                    )
+            }
+        return objectMapper.readValue(json, Sykmelding::class.java)
+    }
+}
+
+@Configuration
+class CustomConverterConfig {
+    @Bean
+    fun customConversions(): JdbcCustomConversions {
+        return JdbcCustomConversions(
+            listOf(SykmeldingWritingConverter(), SykmeldingReadingConverter())
+        )
     }
 }

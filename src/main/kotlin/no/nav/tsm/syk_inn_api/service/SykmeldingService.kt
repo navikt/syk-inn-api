@@ -3,8 +3,9 @@ package no.nav.tsm.syk_inn_api.service
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.sykmelding.SavedSykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.fromPGobject
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -66,12 +67,12 @@ class SykmeldingService(
         )
     }
 
-    private fun mapToSavedSykmelding(sykmelding: SykmeldingEntity): SavedSykmelding {
+    private fun mapToSavedSykmelding(sykmelding: SykmeldingDb): SavedSykmelding {
         return SavedSykmelding(
             sykmeldingId = sykmelding.sykmeldingId,
             pasientFnr = sykmelding.pasientFnr,
             sykmelderHpr = sykmelding.sykmelderHpr,
-            sykmelding = sykmelding.sykmelding,
+            sykmelding = sykmelding.sykmelding.fromPGobject(),
             legekontorOrgnr = sykmelding.legekontorOrgnr,
         )
     }
@@ -86,11 +87,12 @@ class SykmeldingService(
 
         return ResponseEntity.ok(
             sykmeldinger.map {
-                SavedSykmelding( //TODO this should have all the fields needed in the dashboard, wait with aareg.
+                SavedSykmelding( // TODO this should have all the fields needed in the dashboard,
+                    // wait with aareg.
                     sykmeldingId = it.sykmeldingId,
                     pasientFnr = it.pasientFnr,
                     sykmelderHpr = it.sykmelderHpr,
-                    sykmelding = it.sykmelding,
+                    sykmelding = it.sykmelding.fromPGobject(),
                     legekontorOrgnr = it.legekontorOrgnr,
                 )
             },

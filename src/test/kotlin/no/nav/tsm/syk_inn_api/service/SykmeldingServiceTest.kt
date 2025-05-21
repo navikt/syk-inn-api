@@ -21,8 +21,9 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingEntity
+import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -95,13 +96,13 @@ class SykmeldingServiceTest : IntegrationTest() {
             )
 
         every { sykmeldingPersistenceService.save(any(), any()) } returns
-            SykmeldingEntity(
+            SykmeldingDb(
                 id = UUID.randomUUID(),
                 sykmeldingId = sykmeldingId,
                 pasientFnr = "01019078901",
                 sykmelderHpr = behandlerHpr,
                 legekontorOrgnr = "987654321",
-                sykmelding = getTestSykmelding(),
+                sykmelding = getTestSykmelding().toPGobject(),
             )
 
         every { sykmeldingKafkaService.send(any(), any(), any(), any(), any()) } just Runs
