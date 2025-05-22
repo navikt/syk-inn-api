@@ -6,23 +6,25 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
 val ktfmtVersion = "0.44"
-val openapiVersion = "2.8.5"
-val syfoXmlCodegenVersion = "2.0.1"
-val jaxbApiVersion = "2.3.1"
-val jaxbVersion = "2.4.0-b180830.0438"
-val javaxActivationVersion = "1.1.1"
-val diagnosekoderVersion = "1.2025.0"
-val springmockkVersion= "4.0.2"
-
-group = "no.nav.tsm"
-version = "1.0.0"
+val mockkVersion ="1.14.0"
+val testContainersVersion = "1.21.0"
 
 plugins {
     kotlin("jvm") version "2.1.10"
     kotlin("plugin.spring") version "2.1.10"
-    id("org.springframework.boot") version "3.4.3"
+    id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "7.0.2"
+}
+
+group = "no.nav.tsm"
+version = "1.0.0"
+
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
@@ -33,33 +35,42 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$openapiVersion")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
-    implementation("org.hibernate.validator:hibernate-validator")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("no.nav.helse.xml:xmlfellesformat:$syfoXmlCodegenVersion")
-    implementation("no.nav.helse.xml:kith-hodemelding:$syfoXmlCodegenVersion")
-    implementation("no.nav.helse.xml:sm2013:$syfoXmlCodegenVersion")
-    implementation("javax.xml.bind:jaxb-api:$jaxbApiVersion")
-    implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbVersion")
-    implementation("javax.activation:activation:$javaxActivationVersion")
-    implementation("no.nav.helse:diagnosekoder:$diagnosekoderVersion")
-    implementation("org.springframework.kafka:spring-kafka")
 
-    testImplementation("org.springframework.security:spring-security-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
+
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework:spring-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    implementation("no.nav.tsm.regulus:regula:40")
+
+//    implementation("org.flywaydb:flyway-core")
+//    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
+//    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
+
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 }
 
 kotlin {
@@ -68,7 +79,6 @@ kotlin {
         jvmTarget.set(javaVersion)
     }
 }
-
 
 tasks {
 
@@ -88,14 +98,17 @@ tasks {
             showStackTraces = true
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
+        systemProperty("spring.profiles.active", "local")
     }
 
-    task("addPreCommitGitHookOnBuild") {
-        println("⚈ ⚈ ⚈ Running Add Pre Commit Git Hook Script on Build ⚈ ⚈ ⚈")
-        exec {
-            commandLine("cp", "./.scripts/pre-commit", "./.git/hooks")
+    register<Exec>("addPreCommitGitHookOnBuild") {
+        doFirst {
+            println("⚈ ⚈ ⚈ Running Add Pre Commit Git Hook Script on Build ⚈ ⚈ ⚈")
         }
-        println("✅ Added Pre Commit Git Hook Script.")
+        commandLine("cp", "./.scripts/pre-commit", "./.git/hooks")
+        doLast {
+            println("✅ Added Pre Commit Git Hook Script.")
+        }
     }
 
     configure<SpotlessExtension> {
@@ -104,5 +117,5 @@ tasks {
             dependsOn("spotlessApply")
         }
     }
-
 }
+
