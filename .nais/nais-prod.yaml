@@ -6,6 +6,24 @@ metadata:
   labels:
     team: tsm
 spec:
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        name: syk-inn-api-instance
+        cascadingDelete: false
+        databases:
+          - name: syk-inn-api
+            envVarPrefix: DB
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
+        pointInTimeRecovery: true
+        tier: db-f1-micro
   image: {{ image }}
   replicas:
     min: 2
