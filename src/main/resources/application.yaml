@@ -98,6 +98,10 @@ management:
 
 logging.config: "classpath:logback.xml"
 
+logging:
+  level:
+    org.springframework.boot.context.properties: DEBUG
+
 syfohelsenettproxy:
   base-url: ${SYFOHELSENETTPROXY_BASE_URL}
 btsys:
