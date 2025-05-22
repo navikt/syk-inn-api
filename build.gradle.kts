@@ -6,13 +6,6 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.0"
 val ktfmtVersion = "0.44"
-val openapiVersion = "2.8.5"
-val syfoXmlCodegenVersion = "2.0.1"
-val jaxbApiVersion = "2.3.1"
-val jaxbVersion = "2.4.0-b180830.0438"
-val javaxActivationVersion = "1.1.1"
-val diagnosekoderVersion = "1.2025.0"
-val springmockkVersion= "4.0.2"
 val mockkVersion ="1.14.0"
 val testContainersVersion = "1.21.0"
 

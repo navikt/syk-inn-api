@@ -40,4 +40,11 @@ out/
 .kotlin
 logs/
 
+# Gradle files
+build/
+.gradle/
+
+# Securelogs
+secure.log
+
 .junie/
