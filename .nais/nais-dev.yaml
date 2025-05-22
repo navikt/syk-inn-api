@@ -85,3 +85,10 @@ spec:
       value: api://dev-gcp.tsm.tsm-pdl-cache/.default
     - name: LEGE_SUSPENSJON_PROXY_SCOPE
       value: api://dev-gcp.team-rocket.btsys-api/.default
+    - name: TSM_PDL_ENDPOINT_URL
+      value: http://tsm-pdl-cache.tsm
+    - name: BTSYS_ENDPOINT_URL
+      value: http://btsys.team-rocket
+    - name: SYFOHELSENETTPROXY_BASE_URL
+      value: http://syfohelsenettproxy.teamsykmelding
+

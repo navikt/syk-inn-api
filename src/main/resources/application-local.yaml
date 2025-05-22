@@ -22,8 +22,9 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
   security:
-    basic:
-      enabled: false
+    user:
+      name: myuser
+      password: secret123
 #    oauth2:
 #      resourceserver:
 #        jwt:
@@ -53,3 +54,6 @@ nais:
   token:
     endpoint: "http://localhost:8084/nais/token"
   cluster: "dev-gcp"
+topics:
+  write: "tsm.sykmeldinger-input"
+  read: "tsm.sykmeldinger-input"

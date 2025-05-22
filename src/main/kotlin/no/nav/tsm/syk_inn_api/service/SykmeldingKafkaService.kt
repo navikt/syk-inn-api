@@ -50,12 +50,10 @@ import org.springframework.stereotype.Service
 class SykmeldingKafkaService(
     private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
-    @Value("\${nais.cluster}")
-    private val clusterName: String, // korleis funker denne avvhengigheten lokalt ?
+    @Value("\${nais.cluster}") private val clusterName: String,
 ) {
-
+    @Value("\${topics.write}") private lateinit var sykmeldingInputTopic: String
     private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
-    val sykmeldingInputTopic = "tsm.sykmeldinger-input"
 
     fun send(
         payload: SykmeldingPayload,
@@ -90,8 +88,7 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-        //        topics = ["tsm.sykmeldinger"],
-        topics = ["tsm.sykmeldinger-input"], // TODO hugs å endre til tsm.sykmeldinger
+        topics = ["\$topics.read"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
