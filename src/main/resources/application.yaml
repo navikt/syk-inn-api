@@ -83,6 +83,21 @@ spring:
 
     bootstrap-servers: localhost:9092
 
+management:
+  endpoint:
+    health.probes.enabled: true
+    health.show-details: always
+    prometheus:
+      access: read_only
+  endpoints.web:
+    base-path: "/internal"
+    exposure.include: health,prometheus
+  health:
+    livenessstate.enabled: true
+    readinessState.enabled: true
+
+logging.config: "classpath:logback.xml"
+
 syfohelsenettproxy:
   base-url: ${SYFOHELSENETTPROXY_BASE_URL}
 btsys:
