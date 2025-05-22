@@ -42,6 +42,13 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
+  sql:
+      init:
+          platform: postgres
+  data:
+    jdbc:
+      repositories:
+        enabled: true
   security:
     oauth2:
       resourceserver:
