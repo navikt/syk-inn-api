@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
@@ -25,9 +26,17 @@ class SecurityConfig {
     @Bean
     @Profile("default")
     fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .authorizeHttpRequests { it.anyRequest().authenticated() }
-            .httpBasic(Customizer.withDefaults())
+        http {
+            securityMatcher("/**")
+            csrf { disable() }
+            oauth2ResourceServer { jwt {} }
+            oauth2Client {}
+            authorizeHttpRequests {
+                authorize("/internal/**", permitAll)
+                authorize(anyRequest, authenticated)
+            }
+            cors { disable() }
+        }
         return http.build()
     }
 }
