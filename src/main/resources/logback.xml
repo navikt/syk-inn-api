@@ -6,22 +6,37 @@
         </encoder>
     </appender>
 
-    <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-<!--        //this worked locally-->
-        <!--        <file>${SECURELOGS_DIR:-./logs}/secure.log</file>-->
-<!--        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">-->
-<!--&lt;!&ndash;            <fileNamePattern>${SECURELOGS_DIR:-./logs}/secure.log.%i</fileNamePattern>&ndash;&gt;-->
-        <file>${SECURELOGS_DIR:-/secure-logs}/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${SECURELOGS_DIR:-/secure-logs}/secure.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>50MB</maxFileSize>
-        </triggeringPolicy>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-    </appender>
+    <!-- LOCAL profile -->
+    <springProfile name="local">
+        <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${SECURELOGS_DIR:-./logs}/secure.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                <fileNamePattern>${SECURELOGS_DIR:-./logs}/secure.log.%i</fileNamePattern>
+                <minIndex>1</minIndex>
+                <maxIndex>1</maxIndex>
+            </rollingPolicy>
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <maxFileSize>50MB</maxFileSize>
+            </triggeringPolicy>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+    </springProfile>
+
+    <!-- NON-local (dev, prod, etc.) -->
+    <springProfile name="!local">
+        <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${SECURELOGS_DIR:-/secure-logs}/secure.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                <fileNamePattern>${SECURELOGS_DIR:-/secure-logs}/secure.log.%i</fileNamePattern>
+                <minIndex>1</minIndex>
+                <maxIndex>1</maxIndex>
+            </rollingPolicy>
+            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <maxFileSize>50MB</maxFileSize>
+            </triggeringPolicy>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+    </springProfile>
 
     <logger name="securelog" level="INFO" additivity="false">
         <appender-ref ref="secure_log" />

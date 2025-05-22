@@ -88,7 +88,7 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-        topics = ["\$topics.read"],
+        topics = ["\${topics.read}"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
