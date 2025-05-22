@@ -25,6 +25,11 @@ You can check which version you have installed using this command:
 docker-compose --version
 ```
 
+Docker compose will deploy Kafka. To query the local Kafka instance you can use the following command to check for content in the topic::
+``` bash
+ kcat -b localhost:9092 -t tsm.sykmeldinger-input -C -o beginning
+```
+
 ### Building the application
 To build locally and run the integration tests you can simply run
 ``` bash
@@ -37,7 +42,6 @@ or on windows
 #### With bootRun
 > [!NOTE]  
 > Remember to run the external services the application needs to be able to run, see [Running the application and the needed external services](#running-the-application-and-the-needed-external-services)
-
 
 run this command
 ``` bash
@@ -58,6 +62,16 @@ docker build -t syk-inn-api .
 ### Running the application and the needed external services
 ``` bash
 docker compose up
+```
+
+### Run a local postgres database
+``` bash
+docker run --name my-postgres \
+  -e POSTGRES_DB=sykinnapi \
+  -e POSTGRES_USER=myuser \
+  -e POSTGRES_PASSWORD=mypassword \
+  -p 5432:5432 \
+  -d postgres:16
 ```
 
 #### Api doc

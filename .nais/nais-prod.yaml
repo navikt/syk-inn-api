@@ -6,6 +6,24 @@ metadata:
   labels:
     team: tsm
 spec:
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        name: syk-inn-api-instance
+        cascadingDelete: false
+        databases:
+          - name: syk-inn-api
+            envVarPrefix: DB
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
+        pointInTimeRecovery: true
+        tier: db-f1-micro
   image: {{ image }}
   replicas:
     min: 2
@@ -58,3 +76,9 @@ spec:
       value: api://prod-gcp.teamsykmelding.syfosmregler/.default
     - name: SYFOSMREGISTER_SCOPE
       value: api://prod-gcp.teamsykmelding.syfosmregister/.default
+    - name: TSM_PDL_ENDPOINT_URL
+      value: http://tsm-pdl-cache.tsm
+    - name: BTSYS_ENDPOINT_URL
+      value: http://btsys.team-rocket
+    - name: SYFOHELSENETTPROXY_BASE_URL
+      value: http://syfohelsenettproxy.teamsykmelding

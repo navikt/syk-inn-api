@@ -5,7 +5,27 @@ metadata:
   namespace: tsm
   labels:
     team: tsm
+  annotations:
+    texas.nais.io/enabled: "true"
 spec:
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        name: syk-inn-api-instance
+        cascadingDelete: false
+        databases:
+          - name: syk-inn-api
+            envVarPrefix: DB
+        diskAutoresize: true
+        highAvailability: false
+        diskType: SSD
+        insights:
+          enabled: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
+        pointInTimeRecovery: true
+        tier: db-f1-micro
   image: {{ image }}
   replicas:
     min: 1
@@ -63,6 +83,9 @@ spec:
         - application: tsm-pdl-cache
           namespace: tsm
           cluster: dev-gcp
+        - application: btsys-api
+          namespace: team-rocket
+          cluster: dev-gcp
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
   secureLogs:
@@ -78,3 +101,12 @@ spec:
       value: api://dev-gcp.teamsykmelding.smpdfgen/.default
     - name: TSMPDL_SCOPE
       value: api://dev-gcp.tsm.tsm-pdl-cache/.default
+    - name: LEGE_SUSPENSJON_PROXY_SCOPE
+      value: api://dev-gcp.team-rocket.btsys-api/.default
+    - name: TSM_PDL_ENDPOINT_URL
+      value: http://tsm-pdl-cache.tsm
+    - name: BTSYS_ENDPOINT_URL
+      value: http://btsys.team-rocket
+    - name: SYFOHELSENETTPROXY_BASE_URL
+      value: http://syfohelsenettproxy.teamsykmelding
+
