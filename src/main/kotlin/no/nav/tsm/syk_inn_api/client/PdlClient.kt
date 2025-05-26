@@ -49,13 +49,13 @@ class PdlClient(
                     .block()
 
             if (response != null) {
-                Result.Success(response)
+                Result.success(response)
             } else {
-                Result.Failure(PdlException("Pdl returned no birth date"))
+                Result.failure(PdlException("Pdl returned no birth date"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 }

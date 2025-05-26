@@ -57,13 +57,13 @@ class BtsysProxyClient(
                     .block()
 
             if (response != null) {
-                Result.Success(response)
+                Result.success(response)
             } else {
-                Result.Failure(BtsysException("Btsys returned no suspension status"))
+                Result.failure(BtsysException("Btsys returned no suspension status"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling Btsys API", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 }

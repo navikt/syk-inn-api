@@ -69,8 +69,8 @@ class PdlClientTest {
 
         val result = client.getPerson("01010078901")
 
-        assertTrue(result is Result.Success)
-        assertEquals(LocalDate.of(2000, 1, 1), result.data.foedselsdato)
+        assertTrue(result.isSuccess)
+        assertEquals(LocalDate.of(2000, 1, 1), result.getOrNull()?.foedselsdato)
     }
 
     @Test
@@ -88,7 +88,7 @@ class PdlClientTest {
 
         val result = client.getPerson("01010078901")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -106,6 +106,6 @@ class PdlClientTest {
 
         val result = client.getPerson("")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 }

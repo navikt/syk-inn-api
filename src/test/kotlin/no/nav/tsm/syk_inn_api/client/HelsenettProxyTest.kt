@@ -73,7 +73,7 @@ class HelsenettProxyTest {
         assertEquals("sykmeldingId", request.getHeader("Nav-CallId"))
         assertEquals("123456", request.getHeader("hprNummer"))
 
-        assertTrue(result is Result.Success)
+        assertTrue(result.isSuccess)
     }
 
     @Test
@@ -87,7 +87,7 @@ class HelsenettProxyTest {
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -104,7 +104,7 @@ class HelsenettProxyTest {
 
         val result = client.getSykmelderByHpr("INVALID", "sykmeldingId")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     fun getSykmelderTestData(): Sykmelder {

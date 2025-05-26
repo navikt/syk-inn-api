@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.mock
 
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.client.IPdlClient
-import no.nav.tsm.syk_inn_api.client.Result
+
 import no.nav.tsm.syk_inn_api.model.IDENT_GRUPPE
 import no.nav.tsm.syk_inn_api.model.Ident
 import no.nav.tsm.syk_inn_api.model.Navn
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getPerson(fnr: String): Result<PdlPerson> {
-        return Result.Success(
+        return Result.success(
             PdlPerson(
                 navn =
                     Navn(

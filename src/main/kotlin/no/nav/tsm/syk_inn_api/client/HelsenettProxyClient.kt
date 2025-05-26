@@ -48,13 +48,13 @@ class HelsenettProxyClient(
                     .block()
 
             if (response != null) {
-                Result.Success(response)
+                Result.success(response)
             } else {
-                Result.Failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
+                Result.failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 
