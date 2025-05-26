@@ -22,7 +22,7 @@ class SykmeldingController(
     private val sykmeldingPdfService: SykmeldingPdfService,
 ) {
 
-    @PostMapping("/")
+    @PostMapping
     fun createSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<Any> {
         if (payload.pasientFnr.isBlank() || payload.sykmelderHpr.isBlank()) {
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
