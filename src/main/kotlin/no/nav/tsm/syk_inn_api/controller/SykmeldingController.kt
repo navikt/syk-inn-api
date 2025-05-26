@@ -5,8 +5,11 @@ import java.util.*
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
 import no.nav.tsm.syk_inn_api.service.SykmeldingService
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +24,8 @@ class SykmeldingController(
     private val sykmeldingService: SykmeldingService,
     private val sykmeldingPdfService: SykmeldingPdfService,
 ) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping
     fun createSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<Any> {
@@ -63,5 +68,12 @@ class SykmeldingController(
             sykmeldingPdfService.getPdf(sykmeldingId.toString(), hpr),
             HttpStatus.OK,
         )
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleBadRequest(ex: HttpMessageNotReadableException): ResponseEntity<String> {
+        logger.warn("Bad request: {}", ex.message)
+
+        return ResponseEntity.badRequest().body("Body missing or poorly formatted")
     }
 }
