@@ -36,9 +36,9 @@ class BtsysProxyClientTest {
 
         client =
             BtsysProxyClient(
-                webClientBuilder = WebClient.builder(),
-                btsysEndpointUrl = baseUrl,
-                tokenService = tokenService
+                    webClientBuilder = WebClient.builder(),
+                    btsysEndpointUrl = baseUrl,
+                    tokenService = tokenService,
             )
     }
 
@@ -68,17 +68,17 @@ class BtsysProxyClientTest {
         assertEquals("syk-inn-api", request.getHeader("Nav-Consumer-Id"))
         assertEquals("12345678901", request.getHeader("Nav-Personident"))
 
-        assertTrue(result is Result.Success)
-        assertEquals(true, result.data)
+        assertTrue(result.isSuccess)
+        assertEquals(true, result.getOrNull())
     }
 
     @Test
     fun `should return failure when unauthorized`() {
         every { tokenService.getTokenForBtsys() } returns
             TexasClient.TokenResponse(
-                accessToken = "invalid-token",
-                expiresIn = 1000,
-                tokenType = "Bearer"
+                    accessToken = "invalid-token",
+                    expiresIn = 1000,
+                    tokenType = "Bearer",
             )
 
         val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
@@ -87,7 +87,7 @@ class BtsysProxyClientTest {
 
         val result = client.checkSuspensionStatus("12345678901", "2025-04-10")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -104,7 +104,7 @@ class BtsysProxyClientTest {
 
         val result = client.checkSuspensionStatus("INVALID", "2025-04-10")
 
-        assertTrue(result is Result.Failure)
-        assertTrue(result.error is BtsysException)
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is BtsysException)
     }
 }

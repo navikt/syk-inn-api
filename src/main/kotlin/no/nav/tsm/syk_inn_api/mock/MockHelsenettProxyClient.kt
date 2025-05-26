@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.mock
 
 import no.nav.tsm.syk_inn_api.client.IHelsenettProxyClient
-import no.nav.tsm.syk_inn_api.client.Result
+
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
 import no.nav.tsm.syk_inn_api.model.Sykmelder
@@ -16,7 +16,7 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
     }
 
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
-        return Result.Success(
+        return Result.success(
             Sykmelder(
                 godkjenninger =
                     listOf(
