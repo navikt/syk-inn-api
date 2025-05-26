@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/sykmelding/")
+@RequestMapping("/api/sykmelding")
 class SykmeldingController(
     private val sykmeldingService: SykmeldingService,
     private val sykmeldingPdfService: SykmeldingPdfService,
