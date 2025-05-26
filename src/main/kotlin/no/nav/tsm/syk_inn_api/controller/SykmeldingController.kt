@@ -70,10 +70,4 @@ class SykmeldingController(
         )
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleBadRequest(ex: HttpMessageNotReadableException): ResponseEntity<String> {
-        logger.warn("Bad request: {}", ex.message)
-
-        return ResponseEntity.badRequest().body("Body missing or poorly formatted")
-    }
 }

@@ -88,7 +88,7 @@ class GlobalExceptionHandler {
 
         val error =
             ApiError(
-                message = errorMessage,
+                message = errorMessage + " Error: ${ex.message}",
                 status = HttpStatus.BAD_REQUEST.value(),
                 path = request.requestURI
             )
