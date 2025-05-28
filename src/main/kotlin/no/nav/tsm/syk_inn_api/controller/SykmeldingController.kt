@@ -2,14 +2,12 @@ package no.nav.tsm.syk_inn_api.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import java.util.*
+import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.service.SykmeldingPdfService
 import no.nav.tsm.syk_inn_api.service.SykmeldingService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,7 +31,16 @@ class SykmeldingController(
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
         }
 
-        return sykmeldingService.createSykmelding(payload)
+        val sykmeldingResult = sykmeldingService.createSykmelding(payload)
+        if (sykmeldingResult is SykmeldingResult.Failure) {
+            return ResponseEntity.status(sykmeldingResult.errorCode)
+                .body(sykmeldingResult.errorMessage)
+        }
+        require(sykmeldingResult is SykmeldingResult.Success) {
+            "Expected, but was SykmeldingResult.Failure"
+        }
+        return ResponseEntity.status(sykmeldingResult.statusCode)
+            .body(sykmeldingResult.savedSykmelding)
     }
 
     @GetMapping("/{sykmeldingId}")
@@ -42,10 +49,16 @@ class SykmeldingController(
         @RequestHeader("HPR") hpr: String,
         request: HttpServletRequest,
     ): ResponseEntity<Any> {
-        return ResponseEntity(
-            sykmeldingService.getSykmeldingById(sykmeldingId, hpr),
-            HttpStatus.OK,
-        )
+        val sykmeldingResult = sykmeldingService.getSykmeldingById(sykmeldingId, hpr)
+        if (sykmeldingResult is SykmeldingResult.Failure) {
+            return ResponseEntity.status(sykmeldingResult.errorCode)
+                .body(sykmeldingResult.errorMessage)
+        }
+        require(sykmeldingResult is SykmeldingResult.Success) {
+            "Expected, but was SykmeldingResult.Failure"
+        }
+        return ResponseEntity.status(sykmeldingResult.statusCode)
+            .body(sykmeldingResult.savedSykmelding)
     }
 
     @GetMapping("/")
@@ -53,10 +66,16 @@ class SykmeldingController(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("Orgnr") orgnr: String
     ): ResponseEntity<Any> {
-        return ResponseEntity(
-            sykmeldingService.getSykmeldingerByIdent(ident, orgnr),
-            HttpStatus.OK,
-        )
+        val sykmeldingResult = sykmeldingService.getSykmeldingerByIdent(ident, orgnr)
+        if (sykmeldingResult is SykmeldingResult.Failure) {
+            return ResponseEntity.status(sykmeldingResult.errorCode)
+                .body(sykmeldingResult.errorMessage)
+        }
+        require(sykmeldingResult is SykmeldingResult.Success) {
+            "Expected, but was SykmeldingResult.Failure"
+        }
+        return ResponseEntity.status(sykmeldingResult.statusCode)
+            .body(sykmeldingResult.sykmeldinger)
     }
 
     @GetMapping("/{sykmeldingId}/pdf", produces = ["application/pdf"])
@@ -64,10 +83,15 @@ class SykmeldingController(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String
     ): ResponseEntity<Any> {
-        return ResponseEntity(
-            sykmeldingPdfService.getPdf(sykmeldingId.toString(), hpr),
-            HttpStatus.OK,
-        )
-    }
 
+        val sykmeldingResult = sykmeldingPdfService.getPdf(sykmeldingId.toString(), hpr)
+        if (sykmeldingResult is SykmeldingResult.Failure) {
+            return ResponseEntity.status(sykmeldingResult.errorCode)
+                .body(sykmeldingResult.errorMessage)
+        }
+        require(sykmeldingResult is SykmeldingResult.Success) {
+            "Expected, but was SykmeldingResult.Failure"
+        }
+        return ResponseEntity.status(sykmeldingResult.statusCode).body(sykmeldingResult.pdf)
+    }
 }

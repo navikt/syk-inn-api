@@ -17,6 +17,7 @@ import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
 import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.Sykmelder
+import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
@@ -130,6 +131,8 @@ class SykmeldingServiceTest : IntegrationTest() {
                     ),
             )
 
+        assert(result is SykmeldingResult.Success)
+        require(result is SykmeldingResult.Success)
         assertEquals(201, result.statusCode.value())
     }
 
@@ -202,8 +205,9 @@ class SykmeldingServiceTest : IntegrationTest() {
 
         // TODO implement sykmeldingRepository.save after repository is real
         // TODO implement kafka sending after kafka is real
-
-        assertEquals(400, result.statusCode.value())
+        assert(result is SykmeldingResult.Failure)
+        require(result is SykmeldingResult.Failure)
+        assertEquals(400, result.errorCode.value())
     }
 
     private fun getTestSykmelding(): Sykmelding {
