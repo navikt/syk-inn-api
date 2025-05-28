@@ -104,21 +104,21 @@ class SykmeldingKafkaService(
             ) // TODO logg i sikker logg før prod. DO IT!
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
-            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            logger.error("Failed to process sykmelding with id ${record.key()} . Person not found in Pdl Exception", e)
             if (clusterName == "dev-gcp") {
                 logger.warn("Person not found in dev-gcp, skipping sykmelding")
             } else {
                 throw e
             }
         } catch (e: SykmeldingDBMappingException) {
-            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            logger.error("Failed to process sykmelding with id ${record.key()} . Failed to map sykmelding exception" , e)
             if (clusterName == "dev-gcp") {
                 logger.warn("Failed to map sykmelding in dev-gcp, skipping sykmelding")
             } else {
                 throw e
             }
         } catch (e: Exception) {
-            logger.error("Failed to process sykmelding with id ${record.key()}", e)
+            logger.error("Failed to process sykmelding with id ${record.key()} . Generic exception", e)
             throw e
         }
     }
