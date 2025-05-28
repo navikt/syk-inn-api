@@ -43,7 +43,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 
 @Service
@@ -93,13 +92,13 @@ class SykmeldingKafkaService(
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false"
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord>, acknowledgement: Acknowledgment) {
+    fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
         try {
-            if (record.key() == null) {
-                logger.warn("Record key is null, skipping record")
-                acknowledgement.acknowledge()
-                return
-            }
+            //            if (record.key() == null) {
+            //                logger.warn("Record key is null, skipping record")
+            //                acknowledgement.acknowledge()
+            //                return
+            //            }
             logger.info(
                 "Consuming record: ${record.value()} from topic ${record.topic()}"
             ) // TODO logg i sikker logg før prod. DO IT!
