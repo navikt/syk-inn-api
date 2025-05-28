@@ -57,8 +57,7 @@ class PdlClient(
             }
         } catch (e: HttpClientErrorException.NotFound) {
             throw PersonNotFoundException("Could not find person in pdl cache")
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)
             Result.Failure(e)
         }

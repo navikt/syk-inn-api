@@ -38,54 +38,34 @@ To build locally and run the integration tests you can simply run
 or on windows
 `gradlew.bat clean build`
 
-### Running the application locally
-#### With bootRun
-> [!NOTE]  
-> Remember to run the external services the application needs to be able to run, see [Running the application and the needed external services](#running-the-application-and-the-needed-external-services)
 
-run this command
-``` bash
-SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' SYFOSMREGLER_SCOPE=syfosmreglerscope SYFOSMREGISTER_SCOPE=syfosmregisterscope AZURE_OPENID_CONFIG_ISSUER='http://localhost:${mock-oauth2-server.port}/azuread' ./gradlew bootRun
-```
-or on windows
-`SECURELOGS_DIR=./ AZURE_APP_WELL_KNOWN_URL='http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration' AZURE_APP_CLIENT_ID='syk-inn-api-client-id' AZURE_OPENID_CONFIG_TOKEN_ENDPOINT='http://localhost:${mock-oauth2-server.port}/azuread/token' SYFOHELSENETTPROXY_SCOPE=syfohelsenettproxyscope AZURE_APP_CLIENT_SECRET=secretzz MOCK_OAUTH2_SERVER_PORT=6969 KAFKA_BROKERS='localhost:9092' KAFKA_TRUSTSTORE_PATH='' KAFKA_CREDSTORE_PASSWORD='' KAFKA_SECURITY_PROTOCOL='PLAINTEXT' KAFKA_KEYSTORE_PATH='' SYFOSMREGLER_SCOPE=syfosmreglerscope SYFOSMREGISTER_SCOPE=syfosmregisterscope AZURE_OPENID_CONFIG_ISSUER='http://localhost:${mock-oauth2-server.port}/azuread' gradlew.bat bootRun`
+---
+> new stuff under here this is the stuff you should read
+# Run this application locally
 
-#### With docker
-##### Creating a docker image
-Creating a docker image should be as simple as
-``` bash
-docker build -t syk-inn-api .
-```
-> [!NOTE]  
-> Remember to build the application before,you create a docker image, see [Building the application](#building-the-application)
-
-### Running the application and the needed external services
-``` bash
-docker compose up
-```
-
-### Run a local postgres database
-``` bash
-docker run --name my-postgres \
-  -e POSTGRES_DB=sykinnapi \
-  -e POSTGRES_USER=myuser \
-  -e POSTGRES_PASSWORD=mypassword \
-  -p 5432:5432 \
-  -d postgres:16
-```
-
-#### Api doc
-Locally
-http://localhost:8080/v3/api-docs
-or on
-http://syk-inn-api.intern.dev.nav.no:8080/v3/api-docs
-
-### Upgrading the gradle wrapper
-Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
+external services are mocked so we are not calling pdl, btsys etc- 
 
 ``` bash
-./gradlew wrapper --gradle-version $gradleVersjon
+docker compose up -d
+or 
+podman-compose up -d 
 ```
+
+## Initiate the database table 
+currently flyway is not enabled so before you send a create sykmelding you HAVE to create the sykmelding table. Start the db query console in your IDe and run this: 
+
+``` sql
+CREATE TABLE sykmelding (
+                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                            sykmelding_id TEXT NOT NULL,
+                            pasient_fnr TEXT NOT NULL,
+                            sykmelder_hpr TEXT NOT NULL,
+                            sykmelding JSONB NOT NULL,
+                            legekontor_orgnr TEXT NOT NULL,
+                            validert_ok BOOLEAN NOT NULL DEFAULT FALSE
+);
+```
+
 
 ### Contact
 This project is maintained by [navikt/tsm](CODEOWNERS)

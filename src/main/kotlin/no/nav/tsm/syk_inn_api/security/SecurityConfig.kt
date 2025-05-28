@@ -18,7 +18,8 @@ class SecurityConfig {
     fun localSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .authorizeHttpRequests { it.anyRequest().authenticated() }
+//            .authorizeHttpRequests { it.anyRequest().authenticated() }
+            .authorizeHttpRequests { it.anyRequest().permitAll() }
             .httpBasic(Customizer.withDefaults())
         return http.build()
     }
