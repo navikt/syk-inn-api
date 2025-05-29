@@ -6,15 +6,15 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.1"
 val ktfmtVersion = "0.44"
-val mockkVersion ="1.14.0"
+val mockkVersion ="1.14.2"
 val testContainersVersion = "1.21.0"
 
 plugins {
     kotlin("jvm") version "2.1.21"
     kotlin("plugin.spring") version "2.1.21"
-    id("org.springframework.boot") version "3.4.5"
+    id("org.springframework.boot") version "3.5.0"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.3"
+    id("com.diffplug.spotless") version "7.0.4"
 }
 
 group = "no.nav.tsm"
