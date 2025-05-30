@@ -47,10 +47,14 @@ class PdlClient(
                         { status -> status.isError },
                         { response ->
                             response.bodyToMono<String>().defaultIfEmpty("").flatMap { body ->
-                                val ex = PdlException(
-                                    "PDL responded with status: ${response.statusCode()} and body: $body"
+                                val ex =
+                                    PdlException(
+                                        "PDL responded with status: ${response.statusCode()} and body: $body"
+                                    )
+                                secureLog.error(
+                                    "Error while fetching person with fnr $fnr from PDL cache",
+                                    ex
                                 )
-                                secureLog.error("Error while fetching person with fnr $fnr from PDL cache", ex)
                                 Mono.error(ex)
                             }
                         },
@@ -64,7 +68,7 @@ class PdlClient(
             }
         } catch (e: HttpClientErrorException.NotFound) {
             secureLog.warn("Person with fnr $fnr not found in PDL cache", e)
-            logger.error("PDL person not found in PDL cache", e)
+            logger.warn("PDL person not found in PDL cache", e)
             throw PersonNotFoundException("Could not find person in pdl cache")
         } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)

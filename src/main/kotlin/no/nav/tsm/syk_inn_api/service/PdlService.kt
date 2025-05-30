@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.service
 
-import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.client.IPdlClient
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.model.PdlPerson

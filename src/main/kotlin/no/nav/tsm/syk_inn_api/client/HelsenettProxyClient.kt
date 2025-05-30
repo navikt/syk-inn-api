@@ -3,6 +3,7 @@ package no.nav.tsm.syk_inn_api.client
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
 import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.service.TokenService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -23,6 +24,7 @@ class HelsenettProxyClient(
 ) : IHelsenettProxyClient {
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
+    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     init {
         println("HelsenettProxyClient initialized with base URL: $baseUrl") // TODO delete this
@@ -50,10 +52,14 @@ class HelsenettProxyClient(
             if (response != null) {
                 Result.Success(response)
             } else {
+                val msg = "HelsenettProxy returned null response for sykmeldingId=$sykmeldingId"
+                logger.warn(msg)
+                secureLog.warn("$msg and hpr=$behandlerHpr")
                 Result.Failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
-            logger.error("Error while calling HelsenettProxy API", e)
+            logger.error("Error while calling HelsenettProxy API for sykmeldingId=$sykmeldingId", e)
+            secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$sykmeldingId", e)
             Result.Failure(e)
         }
     }
