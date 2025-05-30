@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.service
 
 import java.time.LocalDate
+import java.time.Month
 import java.time.OffsetDateTime
 import no.nav.tsm.mottak.sykmelding.model.metadata.Digital
 import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
@@ -40,6 +41,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
@@ -53,6 +55,7 @@ class SykmeldingKafkaService(
 ) {
     @Value("\${topics.write}") private lateinit var sykmeldingInputTopic: String
     private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
+    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     fun send(
         payload: SykmeldingPayload,
@@ -90,23 +93,30 @@ class SykmeldingKafkaService(
         topics = ["\${topics.read}"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
-        batch = "false"
+        batch = "false",
     )
     fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
         try {
-            //            if (record.key() == null) {
-            //                logger.warn("Record key is null, skipping record")
-            //                acknowledgement.acknowledge()
-            //                return
-            //            }
-            logger.info(
-                "Consuming record: ${record.value()} from topic ${record.topic()}"
-            ) // TODO logg i sikker logg før prod. DO IT!
+            secureLog.info(
+                "Consuming record: ${record.value()} from topic ${record.topic()}",
+            )
+            val tom = record.value().sykmelding.aktivitetKafka.first().tom
+            if (
+                tom.isBefore(
+                    LocalDate.of(
+                        2024,
+                        Month.JANUARY,
+                        1,
+                    ),
+                )
+            ) {
+                return // Skip processing for sykmeldinger before 2024
+            }
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
             logger.error(
                 "Failed to process sykmelding with id ${record.key()} . Person not found in Pdl Exception",
-                e
+                e,
             )
             if (clusterName == "dev-gcp") {
                 logger.warn("Person not found in dev-gcp, skipping sykmelding")
@@ -116,7 +126,7 @@ class SykmeldingKafkaService(
         } catch (e: SykmeldingDBMappingException) {
             logger.error(
                 "Failed to process sykmelding with id ${record.key()} . Failed to map sykmelding exception",
-                e
+                e,
             )
             if (clusterName == "dev-gcp") {
                 logger.warn("Failed to map sykmelding in dev-gcp, skipping sykmelding")
@@ -126,7 +136,7 @@ class SykmeldingKafkaService(
         } catch (e: Exception) {
             logger.error(
                 "Failed to process sykmelding with id ${record.key()} . Generic exception",
-                e
+                e,
             )
             throw e
         }
@@ -139,7 +149,7 @@ class SykmeldingKafkaService(
                     OKRule(
                         name = RuleType.OK.name,
                         timestamp = OffsetDateTime.now(),
-                        validationType = ValidationType.AUTOMATIC
+                        validationType = ValidationType.AUTOMATIC,
                     )
                 }
                 is RegulaResult.NotOk -> {
@@ -153,7 +163,7 @@ class SykmeldingKafkaService(
                                         sykmelder = regulaResult.outcome.reason.sykmelder,
                                     ),
                                 timestamp = OffsetDateTime.now(),
-                                validationType = ValidationType.MANUAL
+                                validationType = ValidationType.MANUAL,
                             )
                         RegulaOutcomeStatus.INVALID ->
                             InvalidRule(
@@ -164,11 +174,11 @@ class SykmeldingKafkaService(
                                         sykmelder = regulaResult.outcome.reason.sykmelder,
                                     ),
                                 timestamp = OffsetDateTime.now(),
-                                validationType = ValidationType.AUTOMATIC
+                                validationType = ValidationType.AUTOMATIC,
                             )
                         else -> {
                             throw IllegalArgumentException(
-                                "Unknown status: ${regulaResult.outcome.status}"
+                                "Unknown status: ${regulaResult.outcome.status}",
                             )
                         }
                     }
@@ -225,7 +235,7 @@ class SykmeldingKafkaService(
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     helsepersonellKategori =
                         HelsepersonellKategori.parse(
-                            helsepersonellKategoriKode.verdi
+                            helsepersonellKategoriKode.verdi,
                         ), // TODO er det rett verdi ??
                 ),
         )
