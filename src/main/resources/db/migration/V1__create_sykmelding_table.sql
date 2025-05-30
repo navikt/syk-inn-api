@@ -9,4 +9,3 @@ CREATE TABLE sykmelding (
                             legekontor_orgnr TEXT NOT NULL,
                             validert_ok BOOLEAN NOT NULL DEFAULT FALSE
 );
--- //TODO delete after flyway migration is ok
