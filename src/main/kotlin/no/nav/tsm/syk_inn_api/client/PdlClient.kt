@@ -4,12 +4,15 @@ import no.nav.tsm.syk_inn_api.exception.PdlException
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.service.TokenService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.publisher.Mono
 
 interface IPdlClient {
     fun getPerson(fnr: String): Result<PdlPerson>
@@ -24,6 +27,7 @@ class PdlClient(
 ) : IPdlClient {
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
+    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getPerson(fnr: String): Result<PdlPerson> {
         val accessToken = tokenService.getTokenForPdl().accessToken
@@ -42,20 +46,25 @@ class PdlClient(
                     .onStatus(
                         { status -> status.isError },
                         { response ->
-                            throw PdlException(
-                                "Pdl responded with status: ${response.statusCode()}",
-                            )
+                            response.bodyToMono<String>().defaultIfEmpty("").flatMap { body ->
+                                val ex = PdlException(
+                                    "PDL responded with status: ${response.statusCode()} and body: $body"
+                                )
+                                secureLog.error("Error while fetching person with fnr $fnr from PDL cache", ex)
+                                Mono.error(ex)
+                            }
                         },
                     )
                     .bodyToMono(PdlPerson::class.java)
                     .block()
-
             if (response != null) {
                 Result.Success(response)
             } else {
                 Result.Failure(PdlException("Pdl cache did not return a person"))
             }
         } catch (e: HttpClientErrorException.NotFound) {
+            secureLog.warn("Person with fnr $fnr not found in PDL cache", e)
+            logger.error("PDL person not found in PDL cache", e)
             throw PersonNotFoundException("Could not find person in pdl cache")
         } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)

@@ -15,20 +15,6 @@ class PdlService(
     private val logger = LoggerFactory.getLogger(PdlService::class.java)
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
-    // TODO safe to delete - do we want it ?
-    fun getFodselsdato(fnr: String): LocalDate {
-        return when (val result = pdlClient.getPerson(fnr)) {
-            is Result.Success -> {
-                result.data.foedselsdato
-                    ?: throw IllegalStateException("Fødselsdato is null for fnr=$fnr")
-            }
-            is Result.Failure -> {
-                secureLog.error("Error while fetching birth date for fnr=$fnr", result.error)
-                throw result.error // should we handle the flow differently ? or use the throw here?
-            }
-        }
-    }
-
     fun getPdlPerson(fnr: String): PdlPerson {
         return when (val result = pdlClient.getPerson(fnr)) {
             is Result.Success -> {
@@ -36,6 +22,7 @@ class PdlService(
             }
             is Result.Failure -> {
                 secureLog.error("Error while fetching person info for fnr=$fnr", result.error)
+                logger.error("Error while fetching person info from PDL, check secure logs")
                 throw result.error // should we handle the flow differently ? or use the throw here?
             }
         }

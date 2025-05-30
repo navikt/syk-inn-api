@@ -34,6 +34,7 @@ class SykmeldingController(
 
         val sykmeldingResult = sykmeldingService.createSykmelding(payload)
         if (sykmeldingResult is SykmeldingResult.Failure) {
+            logger.error("Failed to create sykmelding: ${sykmeldingResult.errorMessage}")
             return ResponseEntity.status(sykmeldingResult.errorCode)
                 .body(sykmeldingResult.errorMessage)
         }

@@ -36,7 +36,7 @@ class SykmeldingService(
                 foedselsdato = foedselsdato,
             )
         if (ruleResult.status != RegulaStatus.OK) {
-            logger.info(
+            logger.error(
                 "Sykmelding med id=$sykmeldingId er feilet validering mot regler med status=${ruleResult.status}",
             )
             return SykmeldingResult.Failure(
