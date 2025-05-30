@@ -60,7 +60,9 @@ class SykmeldingPersistenceService(
     fun updateSykmelding(sykmeldingId: String, sykmeldingRecord: SykmeldingRecord?) {
         logger.info("Inside the method to update sykmelding with id=$sykmeldingId")
         if (sykmeldingRecord == null) {
-            logger.info("SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId")
+            logger.info(
+                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId from syk-inn-api database"
+            )
             delete(sykmeldingId)
             return
         }

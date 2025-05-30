@@ -26,9 +26,18 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
     ): Boolean {
         log.error(
-            "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}. Exception: ${thrownException.message}",
+            """
+            Feil i prosesseringen av record:
+            - Topic: ${record.topic()}
+            - Offset: ${record.offset()}
+            - Key: ${record.key()}
+            - Exception: ${thrownException::class.simpleName}: ${thrownException.message}
+            - Cause: ${thrownException.cause?.let { "${it::class.simpleName}: ${it.message}" } ?: "None"}
+            """
+                .trimIndent(),
             thrownException
         )
+
         return super.handleOne(thrownException, record, consumer, container)
     }
 
