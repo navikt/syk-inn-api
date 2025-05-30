@@ -17,7 +17,10 @@ class HelsenettProxyService(
             "Getting sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId",
         )
         return when (val result = helsenettProxyClient.getSykmelderByHpr(hpr, sykmeldingId)) {
-            is Result.Success -> result.data
+            is Result.Success -> {
+                logger.info("Successfully fetched sykmelder for sykmeldingId=$sykmeldingId")
+                result.data
+            }
             is Result.Failure -> {
                 logger.error(
                     "Error while fetching sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId",

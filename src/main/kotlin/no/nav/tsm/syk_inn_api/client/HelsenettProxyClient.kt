@@ -26,10 +26,6 @@ class HelsenettProxyClient(
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
-    init {
-        println("HelsenettProxyClient initialized with base URL: $baseUrl") // TODO delete this
-    }
-
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
         val accessToken = tokenService.getTokenForHelsenettProxy().accessToken
 
@@ -50,6 +46,9 @@ class HelsenettProxyClient(
                     .block()
 
             if (response != null) {
+                logger.info(
+                    "Response from HelsenettProxy was successful for sykmeldingId=$sykmeldingId"
+                )
                 Result.Success(response)
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$sykmeldingId"
