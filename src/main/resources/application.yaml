@@ -13,6 +13,11 @@ spring:
     active: default
   flyway:
     enabled: true
+    user: ${db.username}
+    password: ${db.password}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    url: "${DB_JDBC_URL}"
   jpa:
     hibernate:
       ddl-auto: update
