@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.util.*
 
 interface IBtsysClient {
     fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Boolean>
@@ -28,6 +29,7 @@ class BtsysProxyClient(
     ): Result<Boolean> {
         val accessToken = tokenService.getTokenForBtsys().access_token
 
+        val loggId = UUID.randomUUID().toString()
         return try {
             val response =
                 webClient
@@ -39,6 +41,7 @@ class BtsysProxyClient(
                             .build()
                     }
                     .headers {
+                        it.set("Nav-Call-Id", loggId)
                         it.set("Nav-Consumer-Id", "syk-inn-api")
                         it.set("Nav-Personident", sykmelderFnr)
                         it.set("Authorization", "Bearer $accessToken")
