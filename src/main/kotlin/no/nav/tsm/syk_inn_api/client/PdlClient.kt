@@ -36,7 +36,7 @@ class PdlClient(
                 webClient
                     .get()
                     .uri { uriBuilder ->
-                        uriBuilder.path("/pdl/v1/fodselsdato").queryParam("fnr", fnr).build()
+                        uriBuilder.path("/api/person").queryParam("fnr", fnr).build()
                     }
                     .headers {
                         it.set("Nav-Consumer-Id", "syk-inn-api")
