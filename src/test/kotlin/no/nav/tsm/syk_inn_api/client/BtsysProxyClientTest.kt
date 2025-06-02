@@ -4,7 +4,9 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.service.TokenService
 import okhttp3.mockwebserver.MockResponse
@@ -38,7 +40,7 @@ class BtsysProxyClientTest {
             BtsysProxyClient(
                 webClientBuilder = WebClient.builder(),
                 btsysEndpointUrl = baseUrl,
-                tokenService = tokenService
+                tokenService = tokenService,
             )
     }
 
@@ -54,13 +56,13 @@ class BtsysProxyClientTest {
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,
-                token_type = "Bearer"
+                token_type = "Bearer",
             )
 
         val response =
             MockResponse()
                 .setHeader("Content-Type", "application/json")
-                .setBody("true")
+                .setBody("""{ "suspendert": false }""")
                 .setResponseCode(200)
         mockWebServer.enqueue(response)
 
@@ -72,8 +74,10 @@ class BtsysProxyClientTest {
         assertEquals("syk-inn-api", request.getHeader("Nav-Consumer-Id"))
         assertEquals("12345678901", request.getHeader("Nav-Personident"))
 
-        assertTrue(result is Result.Success)
-        assertEquals(true, result.data)
+        when (result) {
+            is Result.Success -> assertFalse(result.data.suspendert)
+            is Result.Failure -> fail("Expected success but got failure: ${result.error}")
+        }
     }
 
     @Test
@@ -82,7 +86,7 @@ class BtsysProxyClientTest {
             TexasClient.TokenResponse(
                 access_token = "invalid-token",
                 expires_in = 1000,
-                token_type = "Bearer"
+                token_type = "Bearer",
             )
 
         val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
@@ -100,7 +104,7 @@ class BtsysProxyClientTest {
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,
-                token_type = "Bearer"
+                token_type = "Bearer",
             )
 
         val response =

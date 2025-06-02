@@ -35,9 +35,7 @@ class PdlClient(
             val response =
                 webClient
                     .get()
-                    .uri { uriBuilder ->
-                        uriBuilder.path("/api/person").build()
-                    }
+                    .uri { uriBuilder -> uriBuilder.path("/api/person").build() }
                     .headers {
                         it.set("Nav-Consumer-Id", "syk-inn-api")
                         it.set("Authorization", "Bearer $accessToken")

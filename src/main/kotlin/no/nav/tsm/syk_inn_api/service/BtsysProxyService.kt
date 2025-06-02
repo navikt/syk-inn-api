@@ -22,7 +22,7 @@ class BtsysProxyService(
                     oppslagsdato = signaturDato,
                 )
         ) {
-            is Result.Success -> result.data
+            is Result.Success -> result.data.suspendert
             is Result.Failure -> {
                 secureLog.error(
                     "Error while checking suspension status for sykmelderFnr=$sykmelderFnr",

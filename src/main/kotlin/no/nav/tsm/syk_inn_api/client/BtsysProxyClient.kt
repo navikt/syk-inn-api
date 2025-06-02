@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.client
 
+import java.util.*
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.service.TokenService
 import org.slf4j.LoggerFactory
@@ -8,10 +9,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-import java.util.*
 
 interface IBtsysClient {
-    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Boolean>
+    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Suspendert>
 }
 
 @Profile("!local")
@@ -27,7 +27,7 @@ class BtsysProxyClient(
     override fun checkSuspensionStatus(
         sykmelderFnr: String,
         oppslagsdato: String
-    ): Result<Boolean> {
+    ): Result<Suspendert> {
         val accessToken = tokenService.getTokenForBtsys().access_token
 
         val loggId = UUID.randomUUID().toString()
@@ -53,12 +53,18 @@ class BtsysProxyClient(
                         { status -> status.isError },
                         { response ->
                             response.bodyToMono(String::class.java).flatMap { body ->
-                                logger.error("Btsys responded with status: ${response.statusCode()}, body: $body")
-                                Mono.error(BtsysException("Btsys responded with status: ${response.statusCode()}, body: $body"))
+                                logger.error(
+                                    "Btsys responded with status: ${response.statusCode()}, body: $body"
+                                )
+                                Mono.error(
+                                    BtsysException(
+                                        "Btsys responded with status: ${response.statusCode()}, body: $body"
+                                    )
+                                )
                             }
                         }
                     )
-                    .bodyToMono(Boolean::class.java)
+                    .bodyToMono(Suspendert::class.java)
                     .block()
 
             if (response != null) {
@@ -72,3 +78,5 @@ class BtsysProxyClient(
         }
     }
 }
+
+data class Suspendert(val suspendert: Boolean)
