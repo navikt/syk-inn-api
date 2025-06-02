@@ -60,7 +60,10 @@ class SykmeldingService(
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
         sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder, ruleResult)
-        return SykmeldingResult.Success(statusCode = HttpStatus.CREATED, savedSykmelding = mapToSavedSykmelding(entity))
+        return SykmeldingResult.Success(
+            statusCode = HttpStatus.CREATED,
+            savedSykmelding = mapToSavedSykmelding(entity)
+        )
     }
 
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResult {

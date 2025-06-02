@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.controller
 
-import jakarta.servlet.http.HttpServletRequest
 import java.util.*
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
@@ -42,7 +41,9 @@ class SykmeldingController(
             "Expected, but was SykmeldingResult.Failure"
         }
         requireNotNull(sykmeldingResult.savedSykmelding)
-        logger.info("Sykmelding created successfully with ID: ${sykmeldingResult.savedSykmelding.sykmeldingId}")
+        logger.info(
+            "Sykmelding created successfully with ID: ${sykmeldingResult.savedSykmelding.sykmeldingId}"
+        )
         return ResponseEntity.status(sykmeldingResult.statusCode)
             .body(sykmeldingResult.savedSykmelding)
     }
@@ -51,7 +52,6 @@ class SykmeldingController(
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
-        request: HttpServletRequest,
     ): ResponseEntity<Any> {
         val sykmeldingResult = sykmeldingService.getSykmeldingById(sykmeldingId, hpr)
         if (sykmeldingResult is SykmeldingResult.Failure) {
