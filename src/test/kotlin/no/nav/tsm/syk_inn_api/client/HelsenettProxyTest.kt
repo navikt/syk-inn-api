@@ -54,7 +54,7 @@ class HelsenettProxyTest {
     @Test
     fun `should send correct request and return success`() {
         every { tokenService.getTokenForHelsenettProxy() } returns
-            TexasClient.TokenResponse("mocked-token", expiresIn = 1000, tokenType = "Bearer")
+            TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
         val sykmelder = getSykmelderTestData()
 
@@ -79,7 +79,7 @@ class HelsenettProxyTest {
     @Test
     fun `should return failure when unauthorized`() {
         every { tokenService.getTokenForHelsenettProxy() } returns
-            TexasClient.TokenResponse("invalid-token", expiresIn = 1000, tokenType = "Bearer")
+            TexasClient.TokenResponse("invalid-token", expires_in = 1000, token_type = "Bearer")
 
         val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
 
@@ -93,7 +93,7 @@ class HelsenettProxyTest {
     @Test
     fun `should return failure when hprnummer header is missing or invalid`() {
         every { tokenService.getTokenForHelsenettProxy() } returns
-            TexasClient.TokenResponse("mocked-token", expiresIn = 1000, tokenType = "Bearer")
+            TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
         val response =
             MockResponse()

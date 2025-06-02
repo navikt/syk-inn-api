@@ -34,7 +34,7 @@ class TokenService(
         val namespace = "teamsykmelding"
         val appName = "syfohelsenettproxy"
         val res = texasClient.requestToken(cluster, namespace, appName)
-        logger.info("Received token for helsenett proxy: ${res.accessToken.take(10)}...")
+        logger.info("Received token for helsenett proxy: ${res.access_token.take(10)}...")
         return res
     }
 }

@@ -27,7 +27,7 @@ class HelsenettProxyClient(
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
-        val accessToken = tokenService.getTokenForHelsenettProxy().accessToken
+        val accessToken = tokenService.getTokenForHelsenettProxy().access_token
 
         return try {
             val response =

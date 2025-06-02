@@ -51,7 +51,11 @@ class BtsysProxyClientTest {
     fun `should send correct request and return success`() {
 
         every { tokenService.getTokenForBtsys() } returns
-            TexasClient.TokenResponse(accessToken = token, expiresIn = 1000, tokenType = "Bearer")
+            TexasClient.TokenResponse(
+                access_token = token,
+                expires_in = 1000,
+                token_type = "Bearer"
+            )
 
         val response =
             MockResponse()
@@ -76,9 +80,9 @@ class BtsysProxyClientTest {
     fun `should return failure when unauthorized`() {
         every { tokenService.getTokenForBtsys() } returns
             TexasClient.TokenResponse(
-                accessToken = "invalid-token",
-                expiresIn = 1000,
-                tokenType = "Bearer"
+                access_token = "invalid-token",
+                expires_in = 1000,
+                token_type = "Bearer"
             )
 
         val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
@@ -93,7 +97,11 @@ class BtsysProxyClientTest {
     @Test
     fun `should return failure when personident header is missing or invalid`() {
         every { tokenService.getTokenForBtsys() } returns
-            TexasClient.TokenResponse(accessToken = token, expiresIn = 1000, tokenType = "Bearer")
+            TexasClient.TokenResponse(
+                access_token = token,
+                expires_in = 1000,
+                token_type = "Bearer"
+            )
 
         val response =
             MockResponse()

@@ -44,9 +44,9 @@ class PdlClientTest {
     fun `should retrieve birth date and return success`() {
         every { tokenService.getTokenForPdl() } returns
             TexasClient.TokenResponse(
-                accessToken = token,
-                expiresIn = 1000,
-                tokenType = "Bearer",
+                access_token = token,
+                expires_in = 1000,
+                token_type = "Bearer",
             )
 
         val responseJson =
@@ -77,9 +77,9 @@ class PdlClientTest {
     fun `should return failure when unauthorized`() {
         every { tokenService.getTokenForPdl() } returns
             TexasClient.TokenResponse(
-                accessToken = "invalid-token",
-                expiresIn = 1000,
-                tokenType = "Bearer",
+                access_token = "invalid-token",
+                expires_in = 1000,
+                token_type = "Bearer",
             )
 
         val response =
@@ -95,9 +95,9 @@ class PdlClientTest {
     fun `should return failure when fnr is missing or invalid`() {
         every { tokenService.getTokenForPdl() } returns
             TexasClient.TokenResponse(
-                accessToken = token,
-                expiresIn = 1000,
-                tokenType = "Bearer",
+                access_token = token,
+                expires_in = 1000,
+                token_type = "Bearer",
             )
 
         val response =

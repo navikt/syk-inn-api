@@ -30,7 +30,7 @@ class PdlClient(
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getPerson(fnr: String): Result<PdlPerson> {
-        val accessToken = tokenService.getTokenForPdl().accessToken
+        val accessToken = tokenService.getTokenForPdl().access_token
         return try {
             val response =
                 webClient

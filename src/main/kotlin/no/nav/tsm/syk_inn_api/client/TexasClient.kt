@@ -79,5 +79,5 @@ class TexasClient(
 
     data class TokenRequest(val identity_provider: String, val target: String)
 
-    data class TokenResponse(val accessToken: String, val expiresIn: Int, val tokenType: String)
+    data class TokenResponse(val access_token: String, val expires_in: Int, val token_type: String)
 }

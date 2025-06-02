@@ -26,7 +26,7 @@ class BtsysProxyClient(
         sykmelderFnr: String,
         oppslagsdato: String
     ): Result<Boolean> {
-        val accessToken = tokenService.getTokenForBtsys().accessToken
+        val accessToken = tokenService.getTokenForBtsys().access_token
 
         return try {
             val response =
