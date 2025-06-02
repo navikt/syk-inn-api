@@ -24,7 +24,7 @@ class TexasClient(
         )
         val requestBody =
             TokenRequest(
-                identityProvider = "azuread",
+                identity_provider = "azuread",
                 target = "api://$cluster.$namespace.$otherApiAppName/.default"
             )
 
@@ -77,7 +77,7 @@ class TexasClient(
         }
     }
 
-    data class TokenRequest(val identityProvider: String, val target: String)
+    data class TokenRequest(val identity_provider: String, val target: String)
 
     data class TokenResponse(val accessToken: String, val expiresIn: Int, val tokenType: String)
 }
