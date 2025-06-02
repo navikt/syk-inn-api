@@ -45,8 +45,8 @@ sealed interface Aktivitet {
 }
 
 enum class DiagnoseSystem(val oid: String) {
-    ICD10("2.16.578.1.12.4.1.1.7170"),
-    ICPC2("2.16.578.1.12.4.1.1.7171");
+    ICPC2("2.16.578.1.12.4.1.1.7170"),
+    ICD10("2.16.578.1.12.4.1.1.7110");
 
     companion object {
         @JvmStatic
