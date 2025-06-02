@@ -44,7 +44,7 @@ class SykmeldingController(
         requireNotNull(sykmeldingResult.savedSykmelding)
         logger.info("Sykmelding created successfully with ID: ${sykmeldingResult.savedSykmelding.sykmeldingId}")
         return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body("{sykmeldingId: ${sykmeldingResult.savedSykmelding.sykmeldingId}}")
+            .body(sykmeldingResult.savedSykmelding)
     }
 
     @GetMapping("/{sykmeldingId}")
