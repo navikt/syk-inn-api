@@ -41,8 +41,10 @@ class SykmeldingController(
         require(sykmeldingResult is SykmeldingResult.Success) {
             "Expected, but was SykmeldingResult.Failure"
         }
+        requireNotNull(sykmeldingResult.savedSykmelding)
+        logger.info("Sykmelding created successfully with ID: ${sykmeldingResult.savedSykmelding.sykmeldingId}")
         return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.savedSykmelding)
+            .body("{sykmeldingId: ${sykmeldingResult.savedSykmelding.sykmeldingId}}")
     }
 
     @GetMapping("/{sykmeldingId}")
