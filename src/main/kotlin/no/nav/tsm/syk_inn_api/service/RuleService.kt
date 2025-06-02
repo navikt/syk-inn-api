@@ -81,7 +81,7 @@ class RuleService(
                     suspendert =
                         btsysProxyService.isSuspended(
                             sykmelderFnr = sykmelder.fnr,
-                            signaturDato = LocalDateTime.now().toString(),
+                            signaturDato = LocalDate.now().toString(),
                         ),
                     godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
                     legekontorOrgnr = payload.legekontorOrgnr,
