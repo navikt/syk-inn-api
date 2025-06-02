@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.util.*
 
 interface IBtsysClient {
@@ -51,9 +52,10 @@ class BtsysProxyClient(
                     .onStatus(
                         { status -> status.isError },
                         { response ->
-                            throw BtsysException(
-                                "Btsys responded with status: ${response.statusCode()}"
-                            )
+                            response.bodyToMono(String::class.java).flatMap { body ->
+                                logger.error("Btsys responded with status: ${response.statusCode()}, body: $body")
+                                Mono.error(BtsysException("Btsys responded with status: ${response.statusCode()}, body: $body"))
+                            }
                         }
                     )
                     .bodyToMono(Boolean::class.java)
