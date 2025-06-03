@@ -1,5 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmelding
 import org.postgresql.util.PGobject
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,9 +10,9 @@ import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 
 @WritingConverter
 class SykmeldingWritingConverter(private val objectMapper: ObjectMapper = ObjectMapper()) :
-    Converter<Sykmelding, PGobject> {
+    Converter<PersistedSykmelding, PGobject> {
 
-    override fun convert(source: Sykmelding): PGobject {
+    override fun convert(source: PersistedSykmelding): PGobject {
         val json = objectMapper.writeValueAsString(source)
         return PGobject().apply {
             type = "jsonb"
@@ -23,9 +23,9 @@ class SykmeldingWritingConverter(private val objectMapper: ObjectMapper = Object
 
 @ReadingConverter
 class SykmeldingReadingConverter(private val objectMapper: ObjectMapper = ObjectMapper()) :
-    Converter<Any, Sykmelding> {
+    Converter<Any, PersistedSykmelding> {
 
-    override fun convert(source: Any): Sykmelding {
+    override fun convert(source: Any): PersistedSykmelding {
         val json =
             when (source) {
                 is PGobject -> source.value
@@ -35,7 +35,7 @@ class SykmeldingReadingConverter(private val objectMapper: ObjectMapper = Object
                         "Unsupported type for Sykmelding: ${source.javaClass}"
                     )
             }
-        return objectMapper.readValue(json, Sykmelding::class.java)
+        return objectMapper.readValue(json, PersistedSykmelding::class.java)
     }
 }
 

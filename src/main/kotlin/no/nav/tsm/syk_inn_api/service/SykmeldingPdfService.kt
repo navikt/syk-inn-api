@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.service
 
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 

@@ -1,12 +1,12 @@
 package no.nav.tsm.syk_inn_api.repository
 
 import kotlin.test.Test
-import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmelding
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingHoveddiagnose
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -25,9 +25,15 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                 sykmelderHpr = "123456",
                 legekontorOrgnr = "987654321",
                 sykmelding =
-                    Sykmelding(
-                            hoveddiagnose = Hoveddiagnose(DiagnoseSystem.ICD10, "R99"),
-                            aktivitet = Aktivitet.IkkeMulig("2024-04-01", "2024-04-10")
+                    PersistedSykmelding(
+                            hoveddiagnose =
+                                PersistedSykmeldingHoveddiagnose(
+                                    DiagnoseSystem.ICD10,
+                                    "R99",
+                                    "Ukjent diagnose"
+                                ),
+                            aktivitet =
+                                PersistedSykmeldingAktivitet.IkkeMulig("2024-04-01", "2024-04-10")
                         )
                         .toPGobject()
             )

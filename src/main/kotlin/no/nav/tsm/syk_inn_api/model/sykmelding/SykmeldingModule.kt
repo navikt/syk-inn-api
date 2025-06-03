@@ -20,27 +20,22 @@ import no.nav.tsm.syk_inn_api.model.PendingRule
 import no.nav.tsm.syk_inn_api.model.Rule
 import no.nav.tsm.syk_inn_api.model.RuleType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.ARBEIDSGIVER_TYPE
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetIkkeMulig
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.AktivitetKafka
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Aktivitetstype
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.ArbeidsgiverInfo
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Avventende
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandlingsdager
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.EnArbeidsgiver
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.ErIArbeid
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.ErIkkeIArbeid
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.FlereArbeidsgivere
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Gradert
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.IArbeid
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.IArbeidType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.ISykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.IngenArbeidsgiver
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.OldSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Papirsykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Reisetilskudd
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingMeta
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordAktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordAktivitetsType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingType
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.UtenlandskSykmelding
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
@@ -48,7 +43,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
 class SykmeldingModule : SimpleModule() {
     init {
         addDeserializer(ISykmelding::class.java, SykmeldingDeserializer())
-        addDeserializer(AktivitetKafka::class.java, AktivitetDeserializer())
+        addDeserializer(SykmeldingRecordAktivitet::class.java, AktivitetDeserializer())
         addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
         addDeserializer(Rule::class.java, RuleDeserializer())
@@ -122,14 +117,17 @@ class ArbeidsgiverInfoDeserializer : CustomDeserializer<ArbeidsgiverInfo>() {
     }
 }
 
-class AktivitetDeserializer : CustomDeserializer<AktivitetKafka>() {
-    override fun getClass(type: String): KClass<out AktivitetKafka> {
-        return when (Aktivitetstype.valueOf(type)) {
-            Aktivitetstype.AKTIVITET_IKKE_MULIG -> AktivitetIkkeMulig::class
-            Aktivitetstype.AVVENTENDE -> Avventende::class
-            Aktivitetstype.BEHANDLINGSDAGER -> Behandlingsdager::class
-            Aktivitetstype.GRADERT -> Gradert::class
-            Aktivitetstype.REISETILSKUDD -> Reisetilskudd::class
+class AktivitetDeserializer : CustomDeserializer<SykmeldingRecordAktivitet>() {
+    override fun getClass(type: String): KClass<out SykmeldingRecordAktivitet> {
+        return when (SykmeldingRecordAktivitetsType.valueOf(type)) {
+            SykmeldingRecordAktivitetsType.AKTIVITET_IKKE_MULIG ->
+                SykmeldingRecordAktivitet.AktivitetIkkeMulig::class
+            SykmeldingRecordAktivitetsType.AVVENTENDE -> SykmeldingRecordAktivitet.Avventende::class
+            SykmeldingRecordAktivitetsType.BEHANDLINGSDAGER ->
+                SykmeldingRecordAktivitet.Behandlingsdager::class
+            SykmeldingRecordAktivitetsType.GRADERT -> SykmeldingRecordAktivitet.Gradert::class
+            SykmeldingRecordAktivitetsType.REISETILSKUDD ->
+                SykmeldingRecordAktivitet.Reisetilskudd::class
         }
     }
 }

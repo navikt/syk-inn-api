@@ -3,10 +3,8 @@ package no.nav.tsm.syk_inn_api.service
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
-import no.nav.tsm.syk_inn_api.model.sykmelding.SavedSykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.fromPGobject
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -48,9 +46,10 @@ class SykmeldingService(
             "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
         )
 
-        val entity = sykmeldingPersistenceService.save(payload, sykmeldingId)
+        val sykmeldingResponse =
+            sykmeldingPersistenceService.saveSykmeldingPayload(payload, sykmeldingId)
 
-        if (entity.id == null) {
+        if (sykmeldingResponse == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return SykmeldingResult.Failure(
                 errorMessage = "Internal server error ved lagring av sykmelding",
@@ -62,12 +61,12 @@ class SykmeldingService(
         sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder, ruleResult)
         return SykmeldingResult.Success(
             statusCode = HttpStatus.CREATED,
-            savedSykmelding = mapToSavedSykmelding(entity)
+            sykmeldingResponse = sykmeldingResponse
         )
     }
 
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResult {
-        val sykmelding =
+        val sykmeldingResponse =
             sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
                 ?: return SykmeldingResult.Failure(
                     errorMessage = "Sykmelding not found for sykmeldingId=$sykmeldingId",
@@ -75,18 +74,8 @@ class SykmeldingService(
                 )
 
         return SykmeldingResult.Success(
-            savedSykmelding = mapToSavedSykmelding(sykmelding),
+            sykmeldingResponse = sykmeldingResponse,
             statusCode = HttpStatus.OK
-        )
-    }
-
-    private fun mapToSavedSykmelding(sykmelding: SykmeldingDb): SavedSykmelding {
-        return SavedSykmelding(
-            sykmeldingId = sykmelding.sykmeldingId,
-            pasientFnr = sykmelding.pasientFnr,
-            sykmelderHpr = sykmelding.sykmelderHpr,
-            sykmelding = sykmelding.sykmelding.fromPGobject(),
-            legekontorOrgnr = sykmelding.legekontorOrgnr,
         )
     }
 
@@ -94,12 +83,12 @@ class SykmeldingService(
         logger.info("Henter sykmeldinger for ident=$ident")
         // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
         // at den får lov til å sjå ?
-        val sykmeldinger =
+        val sykmeldingResponses =
             sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
                 it.legekontorOrgnr == orgnr
             }
 
-        if (sykmeldinger.isEmpty()) {
+        if (sykmeldingResponses.isEmpty()) {
             return SykmeldingResult.Success(
                 sykmeldinger = emptyList(),
                 statusCode = HttpStatus.NO_CONTENT
@@ -107,7 +96,7 @@ class SykmeldingService(
         }
 
         return SykmeldingResult.Success(
-            sykmeldinger = sykmeldinger.map { mapToSavedSykmelding(it) },
+            sykmeldinger = sykmeldingResponses,
             statusCode = HttpStatus.OK
         )
     }

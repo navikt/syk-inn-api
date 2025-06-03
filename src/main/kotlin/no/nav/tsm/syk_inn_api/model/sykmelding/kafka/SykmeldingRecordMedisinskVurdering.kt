@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.model.sykmelding.kafka
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
 // enum class DiagnoseSystem {
 //    ICPC2,
@@ -49,7 +49,7 @@ data class ArbeidsrelatertArsak(val beskrivelse: String?, val arsak: Arbeidsrela
 
 data class Yrkesskade(val yrkesskadeDato: LocalDate?)
 
-data class MedisinskVurdering(
+data class SykmeldingRecordMedisinskVurdering(
     val hovedDiagnose: DiagnoseInfo?,
     val biDiagnoser: List<DiagnoseInfo>?,
     val svangerskap: Boolean, // TODO må få inn i payload

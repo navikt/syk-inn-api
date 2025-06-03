@@ -13,19 +13,24 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeReason
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
 import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
-import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.sykmelding.Sykmelding
+import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
+import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmelding
+import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -96,14 +101,40 @@ class SykmeldingServiceTest : IntegrationTest() {
                 emptyList(),
             )
 
-        every { sykmeldingPersistenceService.save(any(), any()) } returns
-            SykmeldingDb(
-                id = UUID.randomUUID(),
+        val sykmeldingResponse =
+            SykmeldingResponse(
                 sykmeldingId = sykmeldingId,
                 pasientFnr = "01019078901",
                 sykmelderHpr = behandlerHpr,
+                sykmelding =
+                    ExistingSykmelding(
+                        hoveddiagnose =
+                            ExistingSykmeldingHoveddiagnose(
+                                system = DiagnoseSystem.ICD10,
+                                code = "Z01",
+                                text = "Ukjent diagnose",
+                            ),
+                        aktivitet =
+                            ExistingSykmeldingAktivitet.IkkeMulig(
+                                fom = "2020-01-01",
+                                tom = "2020-01-30",
+                            ),
+                    ),
                 legekontorOrgnr = "987654321",
-                sykmelding = getTestSykmelding().toPGobject(),
+            )
+        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
+            sykmeldingResponse
+
+        every { sykmeldingPersistenceService.saveSykmeldingPayload(any(), any()) } returns
+            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
+                SykmeldingDb(
+                    id = UUID.randomUUID(),
+                    sykmeldingId = sykmeldingId,
+                    pasientFnr = "01019078901",
+                    sykmelderHpr = behandlerHpr,
+                    legekontorOrgnr = "987654321",
+                    sykmelding = getTestSykmelding().toPGobject(),
+                ),
             )
 
         every { sykmeldingKafkaService.send(any(), any(), any(), any(), any()) } just Runs
@@ -115,14 +146,14 @@ class SykmeldingServiceTest : IntegrationTest() {
                         pasientFnr = "01019078901",
                         sykmelderHpr = "123456789",
                         sykmelding =
-                            Sykmelding(
+                            OpprettSykmeldingPayload(
                                 hoveddiagnose =
                                     Hoveddiagnose(
                                         system = DiagnoseSystem.ICD10,
                                         code = "S017",
                                     ),
-                                aktivitet =
-                                    Aktivitet.IkkeMulig(
+                                opprettSykmeldingAktivitet =
+                                    OpprettSykmeldingAktivitet.IkkeMulig(
                                         fom = "2020-01-01",
                                         tom = "2020-01-30",
                                     ),
@@ -187,14 +218,14 @@ class SykmeldingServiceTest : IntegrationTest() {
                         pasientFnr = "12345678901",
                         sykmelderHpr = "123456789",
                         sykmelding =
-                            Sykmelding(
+                            OpprettSykmeldingPayload(
                                 hoveddiagnose =
                                     Hoveddiagnose(
                                         system = DiagnoseSystem.ICD10,
                                         code = "Z01",
                                     ),
-                                aktivitet =
-                                    Aktivitet.IkkeMulig(
+                                opprettSykmeldingAktivitet =
+                                    OpprettSykmeldingAktivitet.IkkeMulig(
                                         fom = "2020-01-01",
                                         tom = "2020-01-30",
                                     ),
@@ -210,15 +241,15 @@ class SykmeldingServiceTest : IntegrationTest() {
         assertEquals(400, result.errorCode.value())
     }
 
-    private fun getTestSykmelding(): Sykmelding {
-        return Sykmelding(
+    private fun getTestSykmelding(): OpprettSykmeldingPayload {
+        return OpprettSykmeldingPayload(
             hoveddiagnose =
                 Hoveddiagnose(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
                 ),
-            aktivitet =
-                Aktivitet.IkkeMulig(
+            opprettSykmeldingAktivitet =
+                OpprettSykmeldingAktivitet.IkkeMulig(
                     fom = "2020-01-01",
                     tom = "2020-01-30",
                 ),

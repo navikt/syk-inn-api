@@ -18,7 +18,7 @@ import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.exception.RuleHitException
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Sykmelder
-import no.nav.tsm.syk_inn_api.model.sykmelding.Aktivitet
+import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -63,7 +63,8 @@ class RuleService(
                 ),
             bidiagnoser = null,
             annenFravarsArsak = null,
-            aktivitet = listOf(mapToSykmeldingAktivitet(payload.sykmelding.aktivitet)),
+            aktivitet =
+                listOf(mapToSykmeldingAktivitet(payload.sykmelding.opprettSykmeldingAktivitet)),
             utdypendeOpplysninger = emptyMap(),
             tidligereSykmeldinger = emptyList(),
             kontaktPasientBegrunnelseIkkeKontakt = null,
@@ -141,36 +142,37 @@ class RuleService(
         )
 
     fun mapToSykmeldingAktivitet(
-        aktivitet: Aktivitet
+        opprettSykmeldingAktivitet: OpprettSykmeldingAktivitet
     ): no.nav.tsm.regulus.regula.payload.Aktivitet {
-        return when (aktivitet) {
-            is Aktivitet.IkkeMulig ->
+        return when (opprettSykmeldingAktivitet) {
+            is OpprettSykmeldingAktivitet.IkkeMulig ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.IkkeMulig(
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                 )
-            is Aktivitet.Gradert ->
+            is OpprettSykmeldingAktivitet.Gradert ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
-                    grad = aktivitet.grad,
+                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                    grad = opprettSykmeldingAktivitet.grad,
                 )
-            is Aktivitet.Avventende ->
+            is OpprettSykmeldingAktivitet.Avventende ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
-                    avventendeInnspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    avventendeInnspillTilArbeidsgiver =
+                        opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
+                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                 )
-            is Aktivitet.Behandlingsdager ->
+            is OpprettSykmeldingAktivitet.Behandlingsdager ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
-                    behandlingsdager = aktivitet.antallBehandlingsdager,
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    behandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
+                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                 )
-            is Aktivitet.Reisetilskudd ->
+            is OpprettSykmeldingAktivitet.Reisetilskudd ->
                 no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                 )
         }
     }

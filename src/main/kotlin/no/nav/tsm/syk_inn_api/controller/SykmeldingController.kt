@@ -40,12 +40,12 @@ class SykmeldingController(
         require(sykmeldingResult is SykmeldingResult.Success) {
             "Expected, but was SykmeldingResult.Failure"
         }
-        requireNotNull(sykmeldingResult.savedSykmelding)
+        requireNotNull(sykmeldingResult.sykmeldingResponse)
         logger.info(
-            "Sykmelding created successfully with ID: ${sykmeldingResult.savedSykmelding.sykmeldingId}"
+            "Sykmelding created successfully with ID: ${sykmeldingResult.sykmeldingResponse.sykmeldingId}"
         )
         return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.savedSykmelding)
+            .body(sykmeldingResult.sykmeldingResponse)
     }
 
     @GetMapping("/{sykmeldingId}")
@@ -62,7 +62,7 @@ class SykmeldingController(
             "Expected, but was SykmeldingResult.Failure"
         }
         return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.savedSykmelding)
+            .body(sykmeldingResult.sykmeldingResponse)
     }
 
     @GetMapping("/")

@@ -1,12 +1,12 @@
 package no.nav.tsm.syk_inn_api.model
 
-import no.nav.tsm.syk_inn_api.model.sykmelding.SavedSykmelding
+import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
 import org.springframework.http.HttpStatus
 
 sealed interface SykmeldingResult {
     data class Success(
-        val savedSykmelding: SavedSykmelding? = null,
-        val sykmeldinger: List<SavedSykmelding> = emptyList(),
+        val sykmeldingResponse: SykmeldingResponse? = null,
+        val sykmeldinger: List<SykmeldingResponse> = emptyList(),
         val statusCode: HttpStatus,
         val pdf: ByteArray? = null
     ) : SykmeldingResult {
