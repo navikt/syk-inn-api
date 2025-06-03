@@ -1,12 +1,8 @@
-package no.nav.tsm.syk_inn_api.mock
+package no.nav.tsm.syk_inn_api.person.pdl
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.client.IPdlClient
 import no.nav.tsm.syk_inn_api.client.Result
-import no.nav.tsm.syk_inn_api.model.IDENT_GRUPPE
-import no.nav.tsm.syk_inn_api.model.Ident
-import no.nav.tsm.syk_inn_api.model.Navn
-import no.nav.tsm.syk_inn_api.model.PdlPerson
+import no.nav.tsm.syk_inn_api.common.Navn
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 

@@ -6,8 +6,11 @@ val javaVersion = JvmTarget.JVM_21
 
 val logstashLogbackEncoderVersion = "8.1"
 val ktfmtVersion = "0.44"
-val mockkVersion ="1.14.0"
+val mockkVersion = "1.14.0"
 val testContainersVersion = "1.21.0"
+val openHtmlToPdfVersion = "1.1.28"
+val verapdfVersion = "1.28.1"
+val kotlinxHtmlVersion = "0.8.0"
 
 plugins {
     kotlin("jvm") version "2.1.21"
@@ -41,7 +44,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework:spring-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -53,6 +55,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.postgresql:postgresql")
+
+    // PDF generation dependencies:
+    implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
+    implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
+    implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
+    implementation("org.verapdf:validation-model-jakarta:$verapdfVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:${kotlinxHtmlVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-html:${kotlinxHtmlVersion}")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }

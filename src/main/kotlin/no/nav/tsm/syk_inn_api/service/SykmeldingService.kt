@@ -5,6 +5,7 @@ import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.person.PersonService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -14,7 +15,7 @@ class SykmeldingService(
     private val ruleService: RuleService,
     private val helsenettProxyService: HelsenettProxyService,
     private val sykmeldingKafkaService: SykmeldingKafkaService,
-    private val pdlService: PdlService,
+    private val personService: PersonService,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
@@ -22,16 +23,16 @@ class SykmeldingService(
     fun createSykmelding(payload: SykmeldingPayload): SykmeldingResult {
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
-        val pdlPerson = pdlService.getPdlPerson(payload.pasientFnr)
-        val foedselsdato = pdlPerson.foedselsdato
-        requireNotNull(foedselsdato)
+        val person = personService.getPersonByIdent(payload.pasientFnr)
+
+        requireNotNull(person.fodselsdato)
 
         val ruleResult =
             ruleService.validateRules(
                 payload = payload,
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
-                foedselsdato = foedselsdato,
+                foedselsdato = person.fodselsdato,
             )
         if (ruleResult.status != RegulaStatus.OK) {
             logger.error(
@@ -39,7 +40,7 @@ class SykmeldingService(
             )
             return SykmeldingResult.Failure(
                 errorMessage = "Bad request ved regelvalidering: ${ruleResult.status}",
-                errorCode = HttpStatus.BAD_REQUEST
+                errorCode = HttpStatus.BAD_REQUEST,
             )
         }
         logger.info(
@@ -53,15 +54,15 @@ class SykmeldingService(
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return SykmeldingResult.Failure(
                 errorMessage = "Internal server error ved lagring av sykmelding",
-                errorCode = HttpStatus.INTERNAL_SERVER_ERROR
+                errorCode = HttpStatus.INTERNAL_SERVER_ERROR,
             )
         }
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
-        sykmeldingKafkaService.send(payload, sykmeldingId, pdlPerson, sykmelder, ruleResult)
+        sykmeldingKafkaService.send(payload, sykmeldingId, person, sykmelder, ruleResult)
         return SykmeldingResult.Success(
             statusCode = HttpStatus.CREATED,
-            sykmeldingResponse = sykmeldingResponse
+            sykmeldingResponse = sykmeldingResponse,
         )
     }
 
@@ -70,12 +71,12 @@ class SykmeldingService(
             sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
                 ?: return SykmeldingResult.Failure(
                     errorMessage = "Sykmelding not found for sykmeldingId=$sykmeldingId",
-                    errorCode = HttpStatus.NOT_FOUND
+                    errorCode = HttpStatus.NOT_FOUND,
                 )
 
         return SykmeldingResult.Success(
             sykmeldingResponse = sykmeldingResponse,
-            statusCode = HttpStatus.OK
+            statusCode = HttpStatus.OK,
         )
     }
 
@@ -91,7 +92,7 @@ class SykmeldingService(
         if (sykmeldingResponses.isEmpty()) {
             return SykmeldingResult.Success(
                 sykmeldinger = emptyList(),
-                statusCode = HttpStatus.NO_CONTENT
+                statusCode = HttpStatus.NO_CONTENT,
             )
         }
 

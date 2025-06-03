@@ -6,7 +6,7 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.HelsepersonellKategori
 import no.nav.tsm.mottak.sykmelding.model.metadata.Kontaktinfo
 import no.nav.tsm.mottak.sykmelding.model.metadata.MessageMetadata
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
-import no.nav.tsm.syk_inn_api.model.Navn
+import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.model.ValidationResult
 
 data class SykmeldingRecord(
