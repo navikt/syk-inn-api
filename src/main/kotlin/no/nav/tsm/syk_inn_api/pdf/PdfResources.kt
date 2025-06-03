@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory
 private val logger = LoggerFactory.getLogger(PdfResources.javaClass)
 
 object PdfResources {
-    private val fontsFolder = File(this.javaClass.getResource("/pdf/fonts").toURI())
-
     val pdfFonts =
         listOf(
             FontMeta(
@@ -35,22 +33,20 @@ object PdfResources {
             ),
         )
 
-    fun loadFont(name: String) =
-        File(fontsFolder, name).also {
-            if (!it.exists()) {
-                throw IllegalArgumentException("Font file $name not found in $fontsFolder")
-            } else {
-                logger.info("Loading font: ${it.path}")
-            }
-        }
+    fun loadFont(name: String): File {
+        val stream = this.javaClass.getResourceAsStream("/pdf/fonts/$name")
+            ?: throw IllegalArgumentException("Font file $name not found")
 
+        val tempFile = File.createTempFile("font-", name).apply { deleteOnExit() }
+        stream.use { it.copyTo(tempFile.outputStream()) }
+        return tempFile
+    }
 
     val colorProfile: ByteArray =
-        IOUtils.toByteArray(object {}::class.java.getResourceAsStream("/pdf/sRGB.icc"))
+        IOUtils.toByteArray(this.javaClass.getResourceAsStream("/pdf/sRGB.icc"))
 
-    val logo =
-        object {}.javaClass.getResourceAsStream("/pdf/logo.svg")
-            ?: throw IllegalArgumentException("Logo resource not found")
+    val logo = this.javaClass.getResourceAsStream("/pdf/logo.svg")
+        ?: throw IllegalArgumentException("Logo resource not found")
 
 }
 
