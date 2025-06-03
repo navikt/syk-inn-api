@@ -6,7 +6,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -71,7 +70,7 @@ class HelsenettProxyTest {
         assertEquals("sykmeldingId", request.getHeader("Nav-CallId"))
         assertEquals("123456", request.getHeader("hprNummer"))
 
-        assertTrue(result is Result.Success)
+        assertTrue(result.isSuccess)
     }
 
     @Test
@@ -85,7 +84,7 @@ class HelsenettProxyTest {
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -102,7 +101,7 @@ class HelsenettProxyTest {
 
         val result = client.getSykmelderByHpr("INVALID", "sykmeldingId")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     fun getSykmelderTestData(): HprSykmelder {

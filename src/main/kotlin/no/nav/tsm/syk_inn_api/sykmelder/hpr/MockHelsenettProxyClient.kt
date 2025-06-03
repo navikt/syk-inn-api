@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
-import no.nav.tsm.syk_inn_api.client.Result
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -15,7 +14,7 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
         behandlerHpr: String,
         sykmeldingId: String
     ): Result<HprSykmelder> {
-        return Result.Success(
+        return Result.success(
             HprSykmelder(
                 godkjenninger =
                     listOf(

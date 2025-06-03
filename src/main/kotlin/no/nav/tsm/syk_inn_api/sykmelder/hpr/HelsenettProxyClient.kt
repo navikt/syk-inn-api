@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.slf4j.Logger
@@ -32,6 +31,10 @@ class HelsenettProxyClient(
     ): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
+        logger.info(
+            "Getting sykmelder for hpr=$behandlerHpr, sykmeldingId=$sykmeldingId",
+        )
+
         return try {
             val response =
                 webClient
@@ -52,17 +55,17 @@ class HelsenettProxyClient(
                 logger.info(
                     "Response from HelsenettProxy was successful for sykmeldingId=$sykmeldingId"
                 )
-                Result.Success(response)
+                Result.success(response)
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$sykmeldingId"
                 logger.warn(msg)
                 secureLog.warn("$msg and hpr=$behandlerHpr")
-                Result.Failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
+                Result.failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$sykmeldingId", e)
             secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$sykmeldingId", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 

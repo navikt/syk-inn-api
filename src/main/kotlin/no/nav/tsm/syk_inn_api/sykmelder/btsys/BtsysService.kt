@@ -7,8 +7,10 @@ class BtsysService(
     private val btsysClient: IBtsysClient,
 ) {
     fun isSuspended(sykmelderFnr: String, signaturDato: String): Result<Boolean> =
-        btsysClient.checkSuspensionStatus(
-            sykmelderFnr = sykmelderFnr,
-            oppslagsdato = signaturDato,
-        ).map { it.suspendert }
+        btsysClient
+            .checkSuspensionStatus(
+                sykmelderFnr = sykmelderFnr,
+                oppslagsdato = signaturDato,
+            )
+            .map { it.suspendert }
 }

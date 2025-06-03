@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
@@ -12,7 +13,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class SykmeldingService(
@@ -27,12 +27,21 @@ class SykmeldingService(
 
     fun createSykmelding(payload: SykmeldingPayload): SykmeldingResult {
         val sykmeldingId = UUID.randomUUID().toString()
-        val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
         val person = personService.getPersonByIdent(payload.pasientFnr)
-        val sykmelderSuspendert = btsysService.isSuspended(
-            sykmelderFnr = sykmelder.fnr,
-            signaturDato = LocalDate.now().toString(),
-        ).getOrThrow()
+        val sykmelder =
+            helsenettProxyService
+                .getSykmelderByHpr(
+                    payload.sykmelderHpr,
+                    sykmeldingId,
+                )
+                .getOrThrow()
+        val sykmelderSuspendert =
+            btsysService
+                .isSuspended(
+                    sykmelderFnr = sykmelder.fnr,
+                    signaturDato = LocalDate.now().toString(),
+                )
+                .getOrThrow()
 
         requireNotNull(person.fodselsdato) {
             "Person with ident=${payload.pasientFnr} does not have a valid fødselsdato"

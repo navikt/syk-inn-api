@@ -79,6 +79,7 @@ class SykmeldingServiceTest : IntegrationTest() {
     @Test
     fun `create sykmelding with valid data`() {
         every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+            Result.success(
                 HprSykmelder(
                     hprNummer = behandlerHpr,
                     fnr = "01019078901",
@@ -104,16 +105,16 @@ class SykmeldingServiceTest : IntegrationTest() {
                             ),
                         ),
                 )
+            )
 
         every { personService.getPersonByIdent(any()) } returns
-                Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
+            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
         every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
-                RegulaResult.Ok(
-                    emptyList(),
-                )
+            RegulaResult.Ok(
+                emptyList(),
+            )
 
-        every { btsysService.isSuspended(any(), any()) } returns
-                Result.success(false)
+        every { btsysService.isSuspended(any(), any()) } returns Result.success(false)
 
         val sykmeldingResponse =
             SykmeldingResponse(
@@ -137,19 +138,19 @@ class SykmeldingServiceTest : IntegrationTest() {
                 legekontorOrgnr = "987654321",
             )
         every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
-                sykmeldingResponse
+            sykmeldingResponse
 
         every { sykmeldingPersistenceService.saveSykmeldingPayload(any(), any()) } returns
-                sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
-                    SykmeldingDb(
-                        id = UUID.randomUUID(),
-                        sykmeldingId = sykmeldingId,
-                        pasientFnr = "01019078901",
-                        sykmelderHpr = behandlerHpr,
-                        legekontorOrgnr = "987654321",
-                        sykmelding = getTestSykmelding().toPGobject(),
-                    ),
-                )
+            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
+                SykmeldingDb(
+                    id = UUID.randomUUID(),
+                    sykmeldingId = sykmeldingId,
+                    pasientFnr = "01019078901",
+                    sykmelderHpr = behandlerHpr,
+                    legekontorOrgnr = "987654321",
+                    sykmelding = getTestSykmelding().toPGobject(),
+                ),
+            )
 
         every { sykmeldingKafkaService.send(any(), any(), any(), any(), any()) } just Runs
 
@@ -184,6 +185,7 @@ class SykmeldingServiceTest : IntegrationTest() {
     @Test
     fun `failing to create sykmelding because of rule tree hit`() {
         every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+            Result.success(
                 HprSykmelder(
                     hprNummer = behandlerHpr,
                     fnr = "12345678901",
@@ -209,24 +211,24 @@ class SykmeldingServiceTest : IntegrationTest() {
                             ),
                         ),
                 )
+            )
 
         every { personService.getPersonByIdent(any()) } returns
-                Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
+            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
 
         every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
-                RegulaResult.NotOk(
-                    status = RegulaStatus.INVALID,
-                    outcome =
-                        RegulaOutcome(
-                            status = RegulaOutcomeStatus.INVALID,
-                            rule = "the rule that failed",
-                            reason = RegulaOutcomeReason("validation failed", "message for sender"),
-                        ),
-                    results = emptyList(),
-                )
+            RegulaResult.NotOk(
+                status = RegulaStatus.INVALID,
+                outcome =
+                    RegulaOutcome(
+                        status = RegulaOutcomeStatus.INVALID,
+                        rule = "the rule that failed",
+                        reason = RegulaOutcomeReason("validation failed", "message for sender"),
+                    ),
+                results = emptyList(),
+            )
 
-        every { btsysService.isSuspended(any(), any()) } returns
-                Result.success(false)
+        every { btsysService.isSuspended(any(), any()) } returns Result.success(false)
 
         val result =
             sykmeldingService.createSykmelding(
