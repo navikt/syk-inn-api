@@ -4,10 +4,12 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import java.time.LocalDate
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertNotNull
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
-import java.time.LocalDate
-import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -19,8 +21,6 @@ import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
-import java.util.*
-import kotlin.test.assertNotNull
 
 @ExtendWith(MockKExtension::class)
 class PdfServiceTest {

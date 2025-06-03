@@ -50,20 +50,12 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingResponse, pasient: Person): String
                 div(classes = "content") {
                     table(classes = "info-table") {
                         tr {
-                            TableInfo("Navn") {
-                                "${pasient.displayName()} (${pasient.ident})"
-                            }
-                            TableInfo("Mottatt av Nav") {
-                                "TODO: Mangler i sykmelding"
-                            }
+                            TableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
+                            TableInfo("Mottatt av Nav") { "TODO: Mangler i sykmelding" }
                         }
                         tr {
-                            TableInfo("Arbeidsgiver") {
-                                "TODO: Mangler i sykmelding"
-                            }
-                            TableInfo("Periode") {
-                                "TODO: Formatter periode"
-                            }
+                            TableInfo("Arbeidsgiver") { "TODO: Mangler i sykmelding" }
+                            TableInfo("Periode") { "TODO: Formatter periode" }
                         }
                         tr {
                             TableInfo("Mulighet for arbeid") {
@@ -77,20 +69,13 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingResponse, pasient: Person): String
                             TableInfo("Diagnose") {
                                 "TODO tekst - ${sykmelding.sykmelding.hoveddiagnose.code}"
                             }
-                            TableInfo("Andre spørsmål") {
-                                "TODO: Er det svangerskapsrelatert"
-                            }
+                            TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
                         }
-                        tr {
-                            TableInfo("Melding til Nav", colspan = "2") {
-                                "TODO: Melding"
-                            }
-                        }
+                        tr { TableInfo("Melding til Nav", colspan = "2") { "TODO: Melding" } }
                         tr {
                             TableInfo("Innspill til arbeidsgiver", colspan = "2") {
                                 "TODO: Melding"
                             }
-
                         }
                     }
                 }

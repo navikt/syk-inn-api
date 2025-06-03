@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.person
 
-import no.nav.tsm.syk_inn_api.common.Navn
 import java.time.LocalDate
+import no.nav.tsm.syk_inn_api.common.Navn
 
 data class Person(
     val navn: Navn,

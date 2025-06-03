@@ -2,8 +2,8 @@ package no.nav.tsm.syk_inn_api.person
 
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.person.pdl.IDENT_GRUPPE
-import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
 import no.nav.tsm.syk_inn_api.person.pdl.IPdlClient
+import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

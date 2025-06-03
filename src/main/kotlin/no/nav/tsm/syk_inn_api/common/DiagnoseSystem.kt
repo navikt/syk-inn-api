@@ -24,14 +24,11 @@ object DiagnosekodeMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun findTextFromDiagnoseSystem(system: String, code: String): String? {
-        val diagnoseSystem =
-            try {
-                DiagnoseSystem.fromOid(system)
-            } catch (iae: IllegalArgumentException) {
-                logger.error("Unknown DiagnoseSystem OID: $system", iae)
-                return null
-            }
-
+        if (!DiagnoseSystem.entries.any { it.oid == system }) {
+            logger.error("Invalid DiagnoseSystem OID received: $system")
+            return null
+        }
+        val diagnoseSystem = DiagnoseSystem.fromOid(system)
         return when (diagnoseSystem) {
             DiagnoseSystem.ICD10 -> Diagnosekoder.icd10[code]?.text
             DiagnoseSystem.ICPC2 -> Diagnosekoder.icpc2[code]?.text
