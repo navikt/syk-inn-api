@@ -1,5 +1,6 @@
-package no.nav.tsm.syk_inn_api.model
+package no.nav.tsm.syk_inn_api.person.pdl
 
+import no.nav.tsm.syk_inn_api.common.Navn
 import java.time.LocalDate
 
 data class PdlPerson(
@@ -12,12 +13,6 @@ data class Ident(
     val ident: String,
     val gruppe: IDENT_GRUPPE,
     val historisk: Boolean,
-)
-
-data class Navn(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
 )
 
 enum class IDENT_GRUPPE {

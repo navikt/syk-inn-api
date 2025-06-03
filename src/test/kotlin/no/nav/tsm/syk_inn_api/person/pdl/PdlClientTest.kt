@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.client
+package no.nav.tsm.syk_inn_api.person.pdl
 
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
@@ -6,6 +6,8 @@ import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import no.nav.tsm.syk_inn_api.client.Result
+import no.nav.tsm.syk_inn_api.client.TexasClient
 import no.nav.tsm.syk_inn_api.service.TokenService
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

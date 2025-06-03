@@ -1,8 +1,8 @@
-package no.nav.tsm.syk_inn_api.client
+package no.nav.tsm.syk_inn_api.person.pdl
 
+import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.PdlException
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
-import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.service.TokenService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

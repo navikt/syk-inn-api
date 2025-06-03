@@ -14,9 +14,9 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.model.Godkjenning
 import no.nav.tsm.syk_inn_api.model.Kode
-import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.Sykmelder
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
@@ -26,6 +26,8 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
 import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
 import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmelding
 import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingAktivitet
@@ -42,11 +44,12 @@ class SykmeldingServiceTest : IntegrationTest() {
     private lateinit var ruleService: RuleService
     private lateinit var sykmeldingKafkaService: SykmeldingKafkaService
     private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
-    private lateinit var pdlService: PdlService
+    private lateinit var personService: PersonService
 
     val behandlerHpr = "123456789"
     val sykmeldingId = UUID.randomUUID().toString()
     val foedselsdato = LocalDate.of(1990, 1, 1)
+    val navn = Navn(fornavn = "Ola", mellomnavn = null, etternavn = "Nordmann")
 
     @BeforeEach
     fun setup() {
@@ -54,14 +57,14 @@ class SykmeldingServiceTest : IntegrationTest() {
         ruleService = mockk()
         sykmeldingPersistenceService = mockk()
         sykmeldingKafkaService = mockk()
-        pdlService = mockk()
+        personService = mockk()
         sykmeldingService =
             SykmeldingService(
                 sykmeldingPersistenceService = sykmeldingPersistenceService,
                 ruleService = ruleService,
                 helsenettProxyService = helsenettProxyService,
                 sykmeldingKafkaService = sykmeldingKafkaService,
-                pdlService = pdlService,
+                personService = personService,
             )
     }
 
@@ -94,8 +97,8 @@ class SykmeldingServiceTest : IntegrationTest() {
                     ),
             )
 
-        every { pdlService.getPdlPerson(any()) } returns
-            PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
+        every { personService.getPersonByIdent(any()) } returns
+            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult.Ok(
                 emptyList(),
@@ -196,8 +199,8 @@ class SykmeldingServiceTest : IntegrationTest() {
                     ),
             )
 
-        every { pdlService.getPdlPerson(any()) } returns
-            PdlPerson(navn = null, foedselsdato = foedselsdato, identer = emptyList())
+        every { personService.getPersonByIdent(any()) } returns
+            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
 
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult.NotOk(

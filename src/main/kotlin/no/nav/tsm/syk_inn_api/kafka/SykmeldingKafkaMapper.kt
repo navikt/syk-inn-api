@@ -12,7 +12,6 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.model.InvalidRule
 import no.nav.tsm.syk_inn_api.model.OKRule
-import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.PendingRule
 import no.nav.tsm.syk_inn_api.model.Reason
 import no.nav.tsm.syk_inn_api.model.RuleType
@@ -29,6 +28,7 @@ import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Pasient
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordAktivitet
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordMedisinskVurdering
+import no.nav.tsm.syk_inn_api.person.Person
 
 object SykmeldingKafkaMapper {
     fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
@@ -85,7 +85,7 @@ object SykmeldingKafkaMapper {
     fun mapToDigitalSykmelding(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        pdlPerson: PdlPerson,
+        person: Person,
         sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder
     ): DigitalSykmelding {
         requireNotNull(sykmelder.fornavn)
@@ -102,7 +102,7 @@ object SykmeldingKafkaMapper {
                 ),
             pasient =
                 Pasient(
-                    navn = pdlPerson.navn,
+                    navn = person.navn,
                     fnr = payload.pasientFnr,
                     kontaktinfo = emptyList(),
                 ),

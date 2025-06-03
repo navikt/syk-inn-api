@@ -6,10 +6,10 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.kafka.SykmeldingKafkaMapper
-import no.nav.tsm.syk_inn_api.model.PdlPerson
 import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.person.Person
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -32,7 +32,7 @@ class SykmeldingKafkaService(
     fun send(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        pdlPerson: PdlPerson,
+        person: Person,
         sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder,
         regulaResult: RegulaResult,
     ) {
@@ -44,7 +44,7 @@ class SykmeldingKafkaService(
                         SykmeldingKafkaMapper.mapToDigitalSykmelding(
                             payload,
                             sykmeldingId,
-                            pdlPerson,
+                            person,
                             sykmelder
                         ),
                     validation = SykmeldingKafkaMapper.mapValidationResult(regulaResult),
