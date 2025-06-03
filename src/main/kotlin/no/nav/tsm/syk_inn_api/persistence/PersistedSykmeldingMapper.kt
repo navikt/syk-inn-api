@@ -7,14 +7,14 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.Papir
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
-import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Papirsykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordAktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.UtenlandskSykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.XmlSykmelding
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.DigitalSykmelding
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.Papirsykmelding
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingRecord
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingRecordAktivitet
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.UtenlandskSykmelding
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.XmlSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
 
 object PersistedSykmeldingMapper {
@@ -66,7 +66,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingHoveddiagnose(
             system = system,
             code = code,
-            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toString(), code)
+            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system.oid, code)
                     ?: "Unknown diagnosis code: $code",
         )
     }

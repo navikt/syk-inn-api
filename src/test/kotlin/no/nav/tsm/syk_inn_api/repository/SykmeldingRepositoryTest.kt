@@ -2,11 +2,12 @@ package no.nav.tsm.syk_inn_api.repository
 
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
-import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
 import no.nav.tsm.syk_inn_api.persistence.PersistedSykmelding
 import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingDb
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingRepository
+import no.nav.tsm.syk_inn_api.persistence.toPGobject
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +19,21 @@ class SykmeldingRepositoryTest : IntegrationTest() {
 
     @Test
     fun `should save and find sykmelding entity by sykmeldingId`() {
+        val pgObjectSykmelding = PersistedSykmelding(
+            hoveddiagnose =
+                PersistedSykmeldingHoveddiagnose(
+                    DiagnoseSystem.ICD10,
+                    "R99",
+                    "Ukjent diagnose"
+                ),
+            aktivitet =
+                PersistedSykmeldingAktivitet.IkkeMulig("2024-04-01", "2024-04-10")
+        )
+            .toPGobject()
+
+        println("my object in json , $pgObjectSykmelding")
+
+
         val sykmeldingDb =
             SykmeldingDb(
                 sykmeldingId = "sykmelding-123",
@@ -25,19 +41,10 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                 sykmelderHpr = "123456",
                 legekontorOrgnr = "987654321",
                 sykmelding =
-                    PersistedSykmelding(
-                            hoveddiagnose =
-                                PersistedSykmeldingHoveddiagnose(
-                                    DiagnoseSystem.ICD10,
-                                    "R99",
-                                    "Ukjent diagnose"
-                                ),
-                            aktivitet =
-                                PersistedSykmeldingAktivitet.IkkeMulig("2024-04-01", "2024-04-10")
-                        )
-                        .toPGobject()
+                    pgObjectSykmelding
             )
 
+        println("sykmeldingDb before save , ${sykmeldingDb}")
         val savedEntity = sykmeldingRepository.save(sykmeldingDb)
 
         val found = sykmeldingRepository.findSykmeldingEntityBySykmeldingId("sykmelding-123")

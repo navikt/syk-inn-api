@@ -10,25 +10,25 @@ import no.nav.tsm.mottak.sykmelding.model.metadata.PersonId
 import no.nav.tsm.mottak.sykmelding.model.metadata.PersonIdType
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.syk_inn_api.model.InvalidRule
-import no.nav.tsm.syk_inn_api.model.OKRule
-import no.nav.tsm.syk_inn_api.model.PdlPerson
-import no.nav.tsm.syk_inn_api.model.PendingRule
-import no.nav.tsm.syk_inn_api.model.Reason
-import no.nav.tsm.syk_inn_api.model.RuleType
-import no.nav.tsm.syk_inn_api.model.ValidationResult
-import no.nav.tsm.syk_inn_api.model.ValidationType
-import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Behandler
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DiagnoseInfo
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmelding
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.DigitalSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Pasient
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.Sykmelder
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordAktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecordMedisinskVurdering
+import no.nav.tsm.syk_inn_api.external.pdl.PdlPerson
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.Behandler
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.DiagnoseInfo
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.DigitalSykmelding
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.DigitalSykmeldingMetadata
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.Pasient
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.Sykmelder
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingRecordAktivitet
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingRecordMedisinskVurdering
+import no.nav.tsm.syk_inn_api.rules.InvalidRule
+import no.nav.tsm.syk_inn_api.rules.OKRule
+import no.nav.tsm.syk_inn_api.rules.PendingRule
+import no.nav.tsm.syk_inn_api.rules.Reason
+import no.nav.tsm.syk_inn_api.rules.RuleType
+import no.nav.tsm.syk_inn_api.rules.ValidationResult
+import no.nav.tsm.syk_inn_api.rules.ValidationType
+import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 
 object SykmeldingKafkaMapper {
     fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
@@ -86,7 +86,7 @@ object SykmeldingKafkaMapper {
         payload: SykmeldingPayload,
         sykmeldingId: String,
         pdlPerson: PdlPerson,
-        sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder
+        sykmelder: no.nav.tsm.syk_inn_api.common.Sykmelder
     ): DigitalSykmelding {
         requireNotNull(sykmelder.fornavn)
         requireNotNull(sykmelder.etternavn)
@@ -131,7 +131,7 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapPersonIdsForSykmelder(
-        sykmelder: no.nav.tsm.syk_inn_api.model.Sykmelder
+        sykmelder: no.nav.tsm.syk_inn_api.common.Sykmelder
     ): List<PersonId> {
         requireNotNull(sykmelder.hprNummer)
         requireNotNull(sykmelder.fnr)

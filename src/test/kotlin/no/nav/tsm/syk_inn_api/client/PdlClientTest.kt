@@ -6,7 +6,10 @@ import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.common.Result
+import no.nav.tsm.syk_inn_api.external.pdl.PdlClient
+import no.nav.tsm.syk_inn_api.external.token.TexasClient
+import no.nav.tsm.syk_inn_api.external.token.TokenService
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach

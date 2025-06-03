@@ -14,23 +14,31 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.model.Godkjenning
-import no.nav.tsm.syk_inn_api.model.Kode
-import no.nav.tsm.syk_inn_api.model.PdlPerson
-import no.nav.tsm.syk_inn_api.model.Sykmelder
-import no.nav.tsm.syk_inn_api.model.SykmeldingResult
-import no.nav.tsm.syk_inn_api.model.sykmelding.Hoveddiagnose
-import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.model.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
+import no.nav.tsm.syk_inn_api.common.Godkjenning
+import no.nav.tsm.syk_inn_api.common.Kode
+import no.nav.tsm.syk_inn_api.common.Sykmelder
+import no.nav.tsm.syk_inn_api.external.helsenett.HelsenettProxyService
+import no.nav.tsm.syk_inn_api.external.pdl.PdlPerson
+import no.nav.tsm.syk_inn_api.external.pdl.PdlService
+import no.nav.tsm.syk_inn_api.kafka.SykmeldingKafkaService
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmelding
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.persistence.toPGobject
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmelding
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingHoveddiagnose
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.rules.RuleService
+import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingResult
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -241,15 +249,16 @@ class SykmeldingServiceTest : IntegrationTest() {
         assertEquals(400, result.errorCode.value())
     }
 
-    private fun getTestSykmelding(): OpprettSykmeldingPayload {
-        return OpprettSykmeldingPayload(
+    private fun getTestSykmelding(): PersistedSykmelding {
+        return PersistedSykmelding(
             hoveddiagnose =
-                Hoveddiagnose(
+                PersistedSykmeldingHoveddiagnose(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
+                    text = "Ukjent diagnose",
                 ),
-            opprettSykmeldingAktivitet =
-                OpprettSykmeldingAktivitet.IkkeMulig(
+            aktivitet =
+                PersistedSykmeldingAktivitet.IkkeMulig(
                     fom = "2020-01-01",
                     tom = "2020-01-30",
                 ),

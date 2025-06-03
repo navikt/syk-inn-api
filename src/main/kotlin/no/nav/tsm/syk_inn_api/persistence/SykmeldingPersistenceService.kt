@@ -1,14 +1,10 @@
 package no.nav.tsm.syk_inn_api.persistence
 
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingPayload
-import no.nav.tsm.syk_inn_api.model.sykmelding.fromPGobject
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.model.sykmelding.kafka.SykmeldingType
-import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
-import no.nav.tsm.syk_inn_api.repository.SykmeldingRepository
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponseMapper
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingRecord
+import no.nav.tsm.syk_inn_api.kafka.model.sykmelding.SykmeldingType
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponseMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

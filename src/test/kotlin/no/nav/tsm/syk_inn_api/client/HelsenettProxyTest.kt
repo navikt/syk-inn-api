@@ -6,10 +6,13 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import no.nav.tsm.syk_inn_api.model.Godkjenning
-import no.nav.tsm.syk_inn_api.model.Kode
-import no.nav.tsm.syk_inn_api.model.Sykmelder
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.common.Godkjenning
+import no.nav.tsm.syk_inn_api.common.Kode
+import no.nav.tsm.syk_inn_api.common.Result
+import no.nav.tsm.syk_inn_api.common.Sykmelder
+import no.nav.tsm.syk_inn_api.external.helsenett.HelsenettProxyClient
+import no.nav.tsm.syk_inn_api.external.token.TexasClient
+import no.nav.tsm.syk_inn_api.external.token.TokenService
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
