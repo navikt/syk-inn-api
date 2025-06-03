@@ -13,7 +13,7 @@ data class SykmeldingPayload(
 
 data class OpprettSykmeldingPayload(
     val hoveddiagnose: Hoveddiagnose,
-    val opprettSykmeldingAktivitet: OpprettSykmeldingAktivitet
+    val aktivitet: OpprettSykmeldingAktivitet
 )
 
 @JsonSubTypes(

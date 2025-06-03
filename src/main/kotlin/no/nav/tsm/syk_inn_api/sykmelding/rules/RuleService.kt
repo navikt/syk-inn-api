@@ -70,8 +70,7 @@ class RuleService() {
                 ),
             bidiagnoser = null,
             annenFravarsArsak = null,
-            aktivitet =
-                listOf(mapToSykmeldingAktivitet(payload.sykmelding.opprettSykmeldingAktivitet)),
+            aktivitet = listOf(mapToSykmeldingAktivitet(payload.sykmelding.aktivitet)),
             utdypendeOpplysninger = emptyMap(),
             tidligereSykmeldinger = emptyList(),
             kontaktPasientBegrunnelseIkkeKontakt = null,

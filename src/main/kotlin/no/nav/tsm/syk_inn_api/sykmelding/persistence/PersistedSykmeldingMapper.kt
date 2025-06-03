@@ -29,7 +29,7 @@ object PersistedSykmeldingMapper {
                 ),
             aktivitet =
                 mapOpprettSykmeldingAktivitetToPersistedSykmeldingAktivitet(
-                    payload.sykmelding.opprettSykmeldingAktivitet
+                    payload.sykmelding.aktivitet
                 ),
         )
     }

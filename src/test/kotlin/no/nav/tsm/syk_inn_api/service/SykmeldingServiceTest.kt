@@ -168,7 +168,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                         system = DiagnoseSystem.ICD10,
                                         code = "S017",
                                     ),
-                                opprettSykmeldingAktivitet =
+                                aktivitet =
                                     OpprettSykmeldingAktivitet.IkkeMulig(
                                         fom = "2020-01-01",
                                         tom = "2020-01-30",
@@ -242,7 +242,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                         system = DiagnoseSystem.ICD10,
                                         code = "Z01",
                                     ),
-                                opprettSykmeldingAktivitet =
+                                aktivitet =
                                     OpprettSykmeldingAktivitet.IkkeMulig(
                                         fom = "2020-01-01",
                                         tom = "2020-01-30",
@@ -266,7 +266,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
                 ),
-            opprettSykmeldingAktivitet =
+            aktivitet =
                 OpprettSykmeldingAktivitet.IkkeMulig(
                     fom = "2020-01-01",
                     tom = "2020-01-30",
