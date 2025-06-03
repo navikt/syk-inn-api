@@ -23,12 +23,12 @@ fun createPDFA(html: String): ByteArray {
             .apply {
                 PdfRendererBuilder()
                     .apply {
-                        for (font in pdfFonts) {
+                        for (font in PdfResources.pdfFonts) {
                             val ttf =
                                 TTFParser()
                                     .parse(
                                         RandomAccessReadBufferedFile(
-                                            loadFont(font.fileName),
+                                            PdfResources.loadFont(font.fileName),
                                         ),
                                     )
                                     .also { it.isEnableGsub = false }
@@ -43,7 +43,7 @@ fun createPDFA(html: String): ByteArray {
                     }
                     .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_A)
                     .usePdfUaAccessibility(true)
-                    .useColorProfile(colorProfile)
+                    .useColorProfile(PdfResources.colorProfile)
                     .useSVGDrawer(BatikSVGDrawer())
                     .withHtmlContent(html, null)
                     .toStream(this)

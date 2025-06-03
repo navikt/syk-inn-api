@@ -11,7 +11,7 @@ fun FlowContent.NavHeader(title: String) {
     div(classes = "header") {
         img {
             src =
-                logo.readBytes().let { bytes ->
+                PdfResources.logo.readBytes().let { bytes ->
                     "data:image/svg+xml;base64," +
                         java.util.Base64.getEncoder().encodeToString(bytes)
                 }
