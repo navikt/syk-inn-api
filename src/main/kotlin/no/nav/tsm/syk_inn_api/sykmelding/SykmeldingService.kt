@@ -4,6 +4,7 @@ import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.PersonService
+import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -11,11 +12,13 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SykmeldingService(
     private val ruleService: RuleService,
     private val helsenettProxyService: HelsenettProxyService,
+    private val btsysService: BtsysService,
     private val sykmeldingKafkaService: SykmeldingKafkaService,
     private val personService: PersonService,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
@@ -26,14 +29,21 @@ class SykmeldingService(
         val sykmeldingId = UUID.randomUUID().toString()
         val sykmelder = helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId)
         val person = personService.getPersonByIdent(payload.pasientFnr)
+        val sykmelderSuspendert = btsysService.isSuspended(
+            sykmelderFnr = sykmelder.fnr,
+            signaturDato = LocalDate.now().toString(),
+        ).getOrThrow()
 
-        requireNotNull(person.fodselsdato)
+        requireNotNull(person.fodselsdato) {
+            "Person with ident=${payload.pasientFnr} does not have a valid fødselsdato"
+        }
 
         val ruleResult =
             ruleService.validateRules(
                 payload = payload,
                 sykmeldingId = sykmeldingId,
                 sykmelder = sykmelder,
+                sykmelderSuspendert = sykmelderSuspendert,
                 foedselsdato = person.fodselsdato,
             )
         if (ruleResult.status != RegulaStatus.OK) {
@@ -100,7 +110,7 @@ class SykmeldingService(
 
         return SykmeldingResult.Success(
             sykmeldinger = sykmeldingResponses,
-            statusCode = HttpStatus.OK
+            statusCode = HttpStatus.OK,
         )
     }
 }

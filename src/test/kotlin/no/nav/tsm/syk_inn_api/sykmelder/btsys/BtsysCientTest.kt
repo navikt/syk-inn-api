@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
@@ -19,10 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
 
 @ExtendWith(MockKExtension::class)
-class BtsysProxyClientTest {
+class BtsysCientTest {
 
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var client: BtsysProxyClient
+    private lateinit var client: BtsysCient
 
     private val token = "mocked-token"
 
@@ -38,7 +37,7 @@ class BtsysProxyClientTest {
         texasClient = mockk()
 
         client =
-            BtsysProxyClient(
+            BtsysCient(
                 webClientBuilder = WebClient.builder(),
                 btsysEndpointUrl = baseUrl,
                 texasClient = texasClient,
@@ -75,9 +74,8 @@ class BtsysProxyClientTest {
         assertEquals("syk-inn-api", request.getHeader("Nav-Consumer-Id"))
         assertEquals("12345678901", request.getHeader("Nav-Personident"))
 
-        when (result) {
-            is Result.Success -> assertFalse(result.data.suspendert)
-            is Result.Failure -> fail("Expected success but got failure: ${result.error}")
+        result.fold({ assertFalse(it.suspendert) }) {
+            fail("Expected success but got failure: $it")
         }
     }
 
@@ -96,7 +94,7 @@ class BtsysProxyClientTest {
 
         val result = client.checkSuspensionStatus("12345678901", "2025-04-10")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -117,7 +115,7 @@ class BtsysProxyClientTest {
 
         val result = client.checkSuspensionStatus("INVALID", "2025-04-10")
 
-        assertTrue(result is Result.Failure)
-        assertTrue(result.error is BtsysException)
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is BtsysException)
     }
 }

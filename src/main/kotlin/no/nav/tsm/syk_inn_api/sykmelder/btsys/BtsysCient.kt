@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
 import java.util.*
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.slf4j.LoggerFactory
@@ -17,13 +16,13 @@ interface IBtsysClient {
 
 @Profile("!local")
 @Component
-class BtsysProxyClient(
+class BtsysCient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
     @Value("\${btsys.endpoint-url}") private val btsysEndpointUrl: String,
 ) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
-    private val logger = LoggerFactory.getLogger(BtsysProxyClient::class.java)
+    private val logger = LoggerFactory.getLogger(BtsysCient::class.java)
 
     override fun checkSuspensionStatus(
         sykmelderFnr: String,
@@ -69,13 +68,13 @@ class BtsysProxyClient(
                     .block()
 
             if (response != null) {
-                Result.Success(response)
+                Result.success(response)
             } else {
-                Result.Failure(BtsysException("Btsys returned no suspension status"))
+                Result.failure(BtsysException("Btsys returned no suspension status"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling Btsys API", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 
