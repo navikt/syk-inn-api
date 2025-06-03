@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.person.pdl
 
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.PdlException
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.security.TexasClient
@@ -62,9 +61,9 @@ class PdlClient(
                     .bodyToMono(PdlPerson::class.java)
                     .block()
             if (response != null) {
-                Result.Success(response)
+                Result.success(response)
             } else {
-                Result.Failure(PdlException("Pdl cache did not return a person"))
+                Result.failure(PdlException("Pdl cache did not return a person"))
             }
         } catch (e: HttpClientErrorException.NotFound) {
             secureLog.warn("Person with fnr $fnr not found in PDL cache", e)
@@ -72,7 +71,7 @@ class PdlClient(
             throw PersonNotFoundException("Could not find person in pdl cache")
         } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)
-            Result.Failure(e)
+            Result.failure(e)
         }
     }
 

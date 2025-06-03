@@ -108,7 +108,7 @@ class SykmeldingServiceTest : IntegrationTest() {
             )
 
         every { personService.getPersonByIdent(any()) } returns
-            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
+            Result.success(Person(navn = navn, fodselsdato = foedselsdato, ident = "123"))
         every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
             RegulaResult.Ok(
                 emptyList(),
@@ -214,7 +214,7 @@ class SykmeldingServiceTest : IntegrationTest() {
             )
 
         every { personService.getPersonByIdent(any()) } returns
-            Person(navn = navn, fodselsdato = foedselsdato, ident = "123")
+            Result.success(Person(navn = navn, fodselsdato = foedselsdato, ident = "123"))
 
         every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
             RegulaResult.NotOk(

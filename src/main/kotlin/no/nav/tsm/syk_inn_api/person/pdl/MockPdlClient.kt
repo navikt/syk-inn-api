@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.person.pdl
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.common.Navn
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getPerson(fnr: String): Result<PdlPerson> {
-        return Result.Success(
+        return Result.success(
             PdlPerson(
                 navn =
                     Navn(

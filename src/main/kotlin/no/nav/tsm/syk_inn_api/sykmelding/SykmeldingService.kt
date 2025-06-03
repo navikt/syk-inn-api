@@ -27,7 +27,7 @@ class SykmeldingService(
 
     fun createSykmelding(payload: SykmeldingPayload): SykmeldingResult {
         val sykmeldingId = UUID.randomUUID().toString()
-        val person = personService.getPersonByIdent(payload.pasientFnr)
+        val person = personService.getPersonByIdent(payload.pasientFnr).getOrThrow()
         val sykmelder =
             helsenettProxyService
                 .getSykmelderByHpr(

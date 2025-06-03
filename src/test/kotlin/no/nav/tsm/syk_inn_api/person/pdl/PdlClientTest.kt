@@ -6,7 +6,6 @@ import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -71,8 +70,8 @@ class PdlClientTest {
 
         val result = client.getPerson("01010078901")
 
-        assertTrue(result is Result.Success)
-        assertEquals(LocalDate.of(2000, 1, 1), result.data.foedselsdato)
+        assertTrue(result.isSuccess)
+        assertEquals(LocalDate.of(2000, 1, 1), result.getOrThrow().foedselsdato)
     }
 
     @Test
@@ -90,7 +89,7 @@ class PdlClientTest {
 
         val result = client.getPerson("01010078901")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -108,6 +107,6 @@ class PdlClientTest {
 
         val result = client.getPerson("")
 
-        assertTrue(result is Result.Failure)
+        assertTrue(result.isFailure)
     }
 }

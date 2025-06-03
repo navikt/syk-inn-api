@@ -41,10 +41,12 @@ class PdfServiceTest {
         clearAllMocks()
 
         every { personServiceMock.getPersonByIdent("12345678901") } returns
-            Person(
-                navn = Navn("Ola", "Mellomnavn", "Nordmann"),
-                ident = "12345678901",
-                fodselsdato = LocalDate.parse("1989-06-07"),
+            Result.success(
+                Person(
+                    navn = Navn("Ola", "Mellomnavn", "Nordmann"),
+                    ident = "12345678901",
+                    fodselsdato = LocalDate.parse("1989-06-07"),
+                )
             )
     }
 

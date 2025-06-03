@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.person
 
-import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.person.pdl.IDENT_GRUPPE
 import no.nav.tsm.syk_inn_api.person.pdl.IPdlClient
 import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
@@ -15,33 +14,40 @@ class PersonService(
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
-    fun getPersonByIdent(ident: String): Person {
+    fun getPersonByIdent(ident: String): Result<Person> {
         val person: PdlPerson =
-            when (val result = pdlClient.getPerson(ident)) {
-                is Result.Success -> result.data
-                is Result.Failure -> {
-                    secureLog.error("Error while fetching person info for fnr=$ident", result.error)
-                    logger.error("Error while fetching person info from PDL, check secure logs")
-                    throw result
-                        .error // should we handle the flow differently ? or use the throw here?
-                }
+            pdlClient.getPerson(ident).fold({ it }) {
+                secureLog.error("Error while fetching person info for fnr=$ident", it)
+                logger.error("Error while fetching person info from PDL, check secure logs")
+                return Result.failure(it)
             }
 
         val currentIdent =
             person.identer
                 .find { it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT && !it.historisk }
                 ?.ident
-                ?: throw IllegalStateException(
+                ?: null
+
+        if (currentIdent == null) {
+            return Result.failure(
+                IllegalStateException(
                     "No valid FOLKEREGISTERIDENT found for person with ident $ident"
                 )
+            )
+        }
 
-        val personNavn =
-            person.navn ?: throw IllegalStateException("No name found for person with ident $ident")
+        if (person.navn == null) {
+            return Result.failure(
+                IllegalStateException("No name found for person with ident $ident")
+            )
+        }
 
-        return Person(
-            navn = personNavn,
-            ident = currentIdent,
-            fodselsdato = person.foedselsdato,
+        return Result.success(
+            Person(
+                navn = person.navn,
+                ident = currentIdent,
+                fodselsdato = person.foedselsdato,
+            )
         )
     }
 }

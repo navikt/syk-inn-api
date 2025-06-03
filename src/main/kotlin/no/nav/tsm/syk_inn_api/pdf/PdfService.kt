@@ -21,9 +21,9 @@ class PdfService(
                         ?: throw IllegalStateException("Got success, but no savedSykmelding")
             }
 
-        val pasient = personService.getPersonByIdent(sykmelding.pasientFnr)
-        val html = buildSykmeldingHtml(sykmelding, pasient)
-
-        return Result.success(createPDFA(html))
+        return personService
+            .getPersonByIdent(sykmelding.pasientFnr)
+            .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }
+            .map { createPDFA(it) }
     }
 }
