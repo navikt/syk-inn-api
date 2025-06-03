@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.person.pdl
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.PdlException
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -22,15 +22,16 @@ interface IPdlClient {
 @Component
 class PdlClient(
     webClientBuilder: WebClient.Builder,
+    private val texasClient: TexasClient,
     @Value("\${pdlcache.endpoint-url}") private val pdlEndpointUrl: String,
-    private val tokenService: TokenService,
 ) : IPdlClient {
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getPerson(fnr: String): Result<PdlPerson> {
-        val accessToken = tokenService.getTokenForPdl().access_token
+        val (accessToken) = getToken()
+
         return try {
             val response =
                 webClient
@@ -74,4 +75,7 @@ class PdlClient(
             Result.Failure(e)
         }
     }
+
+    private fun getToken(): TexasClient.TokenResponse =
+        texasClient.requestToken("tsm", "tsm-pdl-cache")
 }

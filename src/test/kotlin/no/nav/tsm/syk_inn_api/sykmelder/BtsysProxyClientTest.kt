@@ -1,15 +1,15 @@
-package no.nav.tsm.syk_inn_api.client
+package no.nav.tsm.syk_inn_api.sykmelder
 
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import no.nav.tsm.syk_inn_api.client.Result
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import no.nav.tsm.syk_inn_api.exception.BtsysException
-import no.nav.tsm.syk_inn_api.service.TokenService
-import no.nav.tsm.syk_inn_api.sykmelder.BtsysProxyClient
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -26,7 +26,7 @@ class BtsysProxyClientTest {
 
     private val token = "mocked-token"
 
-    private lateinit var tokenService: TokenService
+    private lateinit var texasClient: TexasClient
 
     @BeforeEach
     fun setup() {
@@ -35,13 +35,13 @@ class BtsysProxyClientTest {
 
         val baseUrl = mockWebServer.url("/").toString()
 
-        tokenService = mockk()
+        texasClient = mockk()
 
         client =
             BtsysProxyClient(
                 webClientBuilder = WebClient.builder(),
                 btsysEndpointUrl = baseUrl,
-                tokenService = tokenService,
+                texasClient = texasClient,
             )
     }
 
@@ -53,7 +53,7 @@ class BtsysProxyClientTest {
     @Test
     fun `should send correct request and return success`() {
 
-        every { tokenService.getTokenForBtsys() } returns
+        every { texasClient.requestToken("team-rocket", "btsys-api") } returns
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,
@@ -83,7 +83,7 @@ class BtsysProxyClientTest {
 
     @Test
     fun `should return failure when unauthorized`() {
-        every { tokenService.getTokenForBtsys() } returns
+        every { texasClient.requestToken("team-rocket", "btsys-api") } returns
             TexasClient.TokenResponse(
                 access_token = "invalid-token",
                 expires_in = 1000,
@@ -101,7 +101,7 @@ class BtsysProxyClientTest {
 
     @Test
     fun `should return failure when personident header is missing or invalid`() {
-        every { tokenService.getTokenForBtsys() } returns
+        every { texasClient.requestToken("team-rocket", "btsys-api") } returns
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,

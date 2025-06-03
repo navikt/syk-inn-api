@@ -1,16 +1,13 @@
-package no.nav.tsm.syk_inn_api.client
+package no.nav.tsm.syk_inn_api.sykmelder
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import no.nav.tsm.syk_inn_api.client.Result
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import no.nav.tsm.syk_inn_api.service.TokenService
-import no.nav.tsm.syk_inn_api.sykmelder.Godkjenning
-import no.nav.tsm.syk_inn_api.sykmelder.HelsenettProxyClient
-import no.nav.tsm.syk_inn_api.sykmelder.Kode
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -24,10 +21,10 @@ class HelsenettProxyTest {
 
     private lateinit var mockWebServer: MockWebServer
     private lateinit var client: HelsenettProxyClient
+    private lateinit var texasClient: TexasClient
 
     private val token = "mocked-token"
 
-    private lateinit var tokenService: TokenService
     val objectMapper = jacksonObjectMapper()
 
     @BeforeEach
@@ -37,13 +34,13 @@ class HelsenettProxyTest {
 
         val baseUrl = mockWebServer.url("/").toString()
 
-        tokenService = mockk()
+        texasClient = mockk()
 
         client =
             HelsenettProxyClient(
                 webClientBuilder = WebClient.builder(),
                 baseUrl = baseUrl,
-                tokenService = tokenService
+                texasClient = texasClient
             )
     }
 
@@ -54,7 +51,7 @@ class HelsenettProxyTest {
 
     @Test
     fun `should send correct request and return success`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns
+        every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
         val sykmelder = getSykmelderTestData()
@@ -79,7 +76,7 @@ class HelsenettProxyTest {
 
     @Test
     fun `should return failure when unauthorized`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns
+        every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("invalid-token", expires_in = 1000, token_type = "Bearer")
 
         val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
@@ -93,7 +90,7 @@ class HelsenettProxyTest {
 
     @Test
     fun `should return failure when hprnummer header is missing or invalid`() {
-        every { tokenService.getTokenForHelsenettProxy() } returns
+        every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
         val response =

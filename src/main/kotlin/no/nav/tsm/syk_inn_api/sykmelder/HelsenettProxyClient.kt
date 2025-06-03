@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelder
 
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -19,15 +19,15 @@ interface IHelsenettProxyClient {
 @Component
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,
+    private val texasClient: TexasClient,
     @Value("\${syfohelsenettproxy.base-url}") private val baseUrl: String,
-    private val tokenService: TokenService,
 ) : IHelsenettProxyClient {
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
-        val accessToken = tokenService.getTokenForHelsenettProxy().access_token
+        val (accessToken) = getToken()
 
         return try {
             val response =
@@ -67,4 +67,7 @@ class HelsenettProxyClient(
         throw RuntimeException("Error from syfohelsenettproxy got status code: ${res.statusCode()}")
             .also { logger.error(it.message, it) }
     }
+
+    fun getToken(): TexasClient.TokenResponse =
+        texasClient.requestToken("teamsykmelding", "syfohelsenettproxy")
 }

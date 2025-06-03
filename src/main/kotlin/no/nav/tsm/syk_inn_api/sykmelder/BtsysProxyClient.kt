@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelder
 import java.util.*
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.BtsysException
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -19,8 +19,8 @@ interface IBtsysClient {
 @Component
 class BtsysProxyClient(
     webClientBuilder: WebClient.Builder,
+    private val texasClient: TexasClient,
     @Value("\${btsys.endpoint-url}") private val btsysEndpointUrl: String,
-    private val tokenService: TokenService,
 ) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(BtsysProxyClient::class.java)
@@ -29,7 +29,7 @@ class BtsysProxyClient(
         sykmelderFnr: String,
         oppslagsdato: String
     ): Result<Suspendert> {
-        val accessToken = tokenService.getTokenForBtsys().access_token
+        val (accessToken) = this.getToken()
 
         val loggId = UUID.randomUUID().toString()
         return try {
@@ -55,15 +55,15 @@ class BtsysProxyClient(
                         { response ->
                             response.bodyToMono(String::class.java).flatMap { body ->
                                 logger.error(
-                                    "Btsys responded with status: ${response.statusCode()}, body: $body"
+                                    "Btsys responded with status: ${response.statusCode()}, body: $body",
                                 )
                                 Mono.error(
                                     BtsysException(
-                                        "Btsys responded with status: ${response.statusCode()}, body: $body"
-                                    )
+                                        "Btsys responded with status: ${response.statusCode()}, body: $body",
+                                    ),
                                 )
                             }
-                        }
+                        },
                     )
                     .bodyToMono(Suspendert::class.java)
                     .block()
@@ -78,6 +78,9 @@ class BtsysProxyClient(
             Result.Failure(e)
         }
     }
+
+    private fun getToken(): TexasClient.TokenResponse =
+        texasClient.requestToken("team-rocket", "btsys-api")
 }
 
 data class Suspendert(val suspendert: Boolean)

@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.client
+package no.nav.tsm.syk_inn_api.security
 
 import java.nio.file.AccessDeniedException
 import javax.naming.AuthenticationException
@@ -13,19 +13,20 @@ import reactor.core.publisher.Mono
 @Component
 class TexasClient(
     webClientBuilder: WebClient.Builder,
-    @Value("\${nais.token.endpoint}") private val naisTokenEndpoint: String
+    @Value("\${nais.token.endpoint}") private val naisTokenEndpoint: String,
+    @Value("\${nais.cluster}") private val cluster: String,
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(naisTokenEndpoint).build()
     private val logger = LoggerFactory.getLogger(TexasClient::class.java)
 
-    fun requestToken(cluster: String, namespace: String, otherApiAppName: String): TokenResponse {
+    fun requestToken(namespace: String, otherApiAppName: String): TokenResponse {
         logger.info(
-            "Requesting token for $otherApiAppName in namespace $namespace on cluster $cluster and endpoint $naisTokenEndpoint"
+            "Requesting token for $otherApiAppName in namespace $namespace on cluster $cluster and endpoint $naisTokenEndpoint",
         )
         val requestBody =
             TokenRequest(
                 identity_provider = "azuread",
-                target = "api://$cluster.$namespace.$otherApiAppName/.default"
+                target = "api://$cluster.$namespace.$otherApiAppName/.default",
             )
 
         return try {
@@ -38,7 +39,7 @@ class TexasClient(
                 .onStatus({ status -> status.is4xxClientError }) { response ->
                     response.bodyToMono(String::class.java).flatMap { errorBody ->
                         logger.error(
-                            "TexasClient got a Client error: ${response.statusCode()} - $errorBody"
+                            "TexasClient got a Client error: ${response.statusCode()} - $errorBody",
                         )
                         Mono.error(handleClientError(response.statusCode().value(), errorBody))
                     }
@@ -46,10 +47,10 @@ class TexasClient(
                 .onStatus({ status -> status.is5xxServerError }) { response ->
                     response.bodyToMono(String::class.java).flatMap { errorBody ->
                         logger.error(
-                            "TexasClient got a Server error: ${response.statusCode()} - $errorBody"
+                            "TexasClient got a Server error: ${response.statusCode()} - $errorBody",
                         )
                         Mono.error(
-                            RuntimeException("Server error (${response.statusCode()}): $errorBody")
+                            RuntimeException("Server error (${response.statusCode()}): $errorBody"),
                         )
                     }
                 }
@@ -59,7 +60,7 @@ class TexasClient(
         } catch (ex: WebClientResponseException) {
             logger.error(
                 "WebClientResponseException: ${ex.statusCode} - ${ex.responseBodyAsString}",
-                ex
+                ex,
             )
             throw RuntimeException("HTTP error: ${ex.statusCode} - ${ex.responseBodyAsString}", ex)
         } catch (ex: Exception) {

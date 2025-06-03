@@ -7,8 +7,7 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import no.nav.tsm.syk_inn_api.client.Result
-import no.nav.tsm.syk_inn_api.client.TexasClient
-import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +22,7 @@ class PdlClientTest {
 
     private val token = "mocked-token"
 
-    private lateinit var tokenService: TokenService
+    private lateinit var texasClient: TexasClient
 
     @BeforeEach
     fun setup() {
@@ -32,19 +31,19 @@ class PdlClientTest {
 
         val baseUrl = mockWebServer.url("/").toString()
 
-        tokenService = mockk()
+        texasClient = mockk()
 
         client =
             PdlClient(
                 webClientBuilder = WebClient.builder(),
                 pdlEndpointUrl = baseUrl,
-                tokenService = tokenService,
+                texasClient = texasClient,
             )
     }
 
     @Test
     fun `should retrieve birth date and return success`() {
-        every { tokenService.getTokenForPdl() } returns
+        every { texasClient.requestToken("tsm", "tsm-pdl-cache") } returns
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,
@@ -77,7 +76,7 @@ class PdlClientTest {
 
     @Test
     fun `should return failure when unauthorized`() {
-        every { tokenService.getTokenForPdl() } returns
+        every { texasClient.requestToken("tsm", "tsm-pdl-cache") } returns
             TexasClient.TokenResponse(
                 access_token = "invalid-token",
                 expires_in = 1000,
@@ -95,7 +94,7 @@ class PdlClientTest {
 
     @Test
     fun `should return failure when fnr is missing or invalid`() {
-        every { tokenService.getTokenForPdl() } returns
+        every { texasClient.requestToken("tsm", "tsm-pdl-cache") } returns
             TexasClient.TokenResponse(
                 access_token = token,
                 expires_in = 1000,
