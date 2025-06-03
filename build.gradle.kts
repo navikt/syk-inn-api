@@ -11,6 +11,7 @@ val testContainersVersion = "1.21.0"
 val openHtmlToPdfVersion = "1.1.28"
 val verapdfVersion = "1.28.1"
 val kotlinxHtmlVersion = "0.8.0"
+val arrowVersion = "2.1.2"
 
 plugins {
     kotlin("jvm") version "2.1.21"
@@ -55,6 +56,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.postgresql:postgresql")
+
+    implementation("io.arrow-kt:arrow-core:$arrowVersion")
 
     // PDF generation dependencies:
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")

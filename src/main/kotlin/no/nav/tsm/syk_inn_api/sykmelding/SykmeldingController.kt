@@ -1,8 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
-import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -28,53 +28,58 @@ class SykmeldingController(
         }
 
         val sykmeldingResult = sykmeldingService.createSykmelding(payload)
-        if (sykmeldingResult is SykmeldingResult.Failure) {
-            logger.error("Failed to create sykmelding: ${sykmeldingResult.errorMessage}")
-            return ResponseEntity.status(sykmeldingResult.errorCode)
-                .body(sykmeldingResult.errorMessage)
+
+        return sykmeldingResult.fold(
+            { it.toResponseEntity() },
+        ) { sykmelding ->
+            logger.info(
+                "Sykmelding created successfully with ID: ${sykmelding.sykmeldingId}",
+            )
+
+            ResponseEntity.status(HttpStatus.CREATED).body(sykmelding)
         }
-        require(sykmeldingResult is SykmeldingResult.Success) {
-            "Expected, but was SykmeldingResult.Failure"
-        }
-        requireNotNull(sykmeldingResult.sykmeldingResponse)
-        logger.info(
-            "Sykmelding created successfully with ID: ${sykmeldingResult.sykmeldingResponse.sykmeldingId}"
-        )
-        return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.sykmeldingResponse)
     }
 
     @GetMapping("/{sykmeldingId}")
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
-    ): ResponseEntity<Any> {
-        val sykmeldingResult = sykmeldingService.getSykmeldingById(sykmeldingId, hpr)
-        if (sykmeldingResult is SykmeldingResult.Failure) {
-            return ResponseEntity.status(sykmeldingResult.errorCode)
-                .body(sykmeldingResult.errorMessage)
+    ): ResponseEntity<Any> =
+        sykmeldingService.getSykmeldingById(sykmeldingId, hpr).fold(
+            { ResponseEntity.ok(it) },
+        ) {
+            when (it) {
+                is IllegalArgumentException -> ResponseEntity.notFound().build()
+                else -> ResponseEntity.internalServerError().build()
+            }
         }
-        require(sykmeldingResult is SykmeldingResult.Success) {
-            "Expected, but was SykmeldingResult.Failure"
-        }
-        return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.sykmeldingResponse)
-    }
 
     @GetMapping("/")
     fun getSykmeldingerByUserIdent(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("Orgnr") orgnr: String
-    ): ResponseEntity<Any> {
-        val sykmeldingResult = sykmeldingService.getSykmeldingerByIdent(ident, orgnr)
-        if (sykmeldingResult is SykmeldingResult.Failure) {
-            return ResponseEntity.status(sykmeldingResult.errorCode)
-                .body(sykmeldingResult.errorMessage)
+    ): ResponseEntity<Any> =
+        sykmeldingService.getSykmeldingerByIdent(ident, orgnr).fold(
+            { ResponseEntity.ok(it) },
+        ) {
+            ResponseEntity.internalServerError().build()
         }
-        require(sykmeldingResult is SykmeldingResult.Success) {
-            "Expected, but was SykmeldingResult.Failure"
-        }
-        return ResponseEntity.status(sykmeldingResult.statusCode)
-            .body(sykmeldingResult.sykmeldinger)
-    }
 }
+
+/**
+ * Handles all error cases for SykmeldingCreationErrors, and maps them to appropriate HTTP
+ * responses.
+ */
+private fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
+    when (this) {
+        SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION ->
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rule validation failed")
+        SykmeldingService.SykmeldingCreationErrors.PERSISTENCE_ERROR ->
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to persist sykmelding")
+        SykmeldingService.SykmeldingCreationErrors.RESOURCE_ERROR ->
+            ResponseEntity.status(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                )
+                .body("Failed to fetch required resources")
+    }

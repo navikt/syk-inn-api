@@ -8,6 +8,8 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.fail
 import no.nav.tsm.regulus.regula.RegulaOutcome
 import no.nav.tsm.regulus.regula.RegulaOutcomeReason
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
@@ -15,7 +17,6 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
-import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
@@ -177,9 +178,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                     ),
             )
 
-        assert(result is SykmeldingResult.Success)
-        require(result is SykmeldingResult.Success)
-        assertEquals(201, result.statusCode.value())
+        result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
 
     @Test
@@ -253,11 +252,11 @@ class SykmeldingServiceTest : IntegrationTest() {
                     ),
             )
 
-        // TODO implement sykmeldingRepository.save after repository is real
-        // TODO implement kafka sending after kafka is real
-        assert(result is SykmeldingResult.Failure)
-        require(result is SykmeldingResult.Failure)
-        assertEquals(400, result.errorCode.value())
+        result.fold({
+            assertEquals(it, SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION)
+        }) {
+            fail("Expected rule validation error but got success: $it")
+        }
     }
 
     private fun getTestSykmelding(): OpprettSykmeldingPayload {

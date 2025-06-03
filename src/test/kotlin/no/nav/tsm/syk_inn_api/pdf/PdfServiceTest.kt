@@ -10,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertNotNull
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
-import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
@@ -20,7 +19,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingHoveddiagnos
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.http.HttpStatus
 
 @ExtendWith(MockKExtension::class)
 class PdfServiceTest {
@@ -75,10 +73,7 @@ class PdfServiceTest {
             )
 
         every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid, "123456789") } returns
-            SykmeldingResult.Success(
-                sykmeldingResponse = simpleSykmelding,
-                statusCode = HttpStatus.OK,
-            )
+            Result.success(simpleSykmelding)
 
         val pdf = pdfService.createSykmeldingPdf(testSykmeldingUuid, "123456789").getOrThrow()
 

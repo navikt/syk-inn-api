@@ -26,7 +26,6 @@ class PersonService(
             person.identer
                 .find { it.gruppe == IDENT_GRUPPE.FOLKEREGISTERIDENT && !it.historisk }
                 ?.ident
-                ?: null
 
         if (currentIdent == null) {
             return Result.failure(
@@ -39,6 +38,12 @@ class PersonService(
         if (person.navn == null) {
             return Result.failure(
                 IllegalStateException("No name found for person with ident $ident")
+            )
+        }
+
+        if (person.foedselsdato == null) {
+            return Result.failure(
+                IllegalStateException("No fødselsdato found for person with ident $ident")
             )
         }
 

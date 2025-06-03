@@ -1,17 +1,20 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.raise.result
+import arrow.core.right
 import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
-import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,27 +28,39 @@ class SykmeldingService(
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
 
-    fun createSykmelding(payload: SykmeldingPayload): SykmeldingResult {
-        val sykmeldingId = UUID.randomUUID().toString()
-        val person = personService.getPersonByIdent(payload.pasientFnr).getOrThrow()
-        val sykmelder =
-            helsenettProxyService
-                .getSykmelderByHpr(
-                    payload.sykmelderHpr,
-                    sykmeldingId,
-                )
-                .getOrThrow()
-        val sykmelderSuspendert =
-            btsysService
-                .isSuspended(
-                    sykmelderFnr = sykmelder.fnr,
-                    signaturDato = LocalDate.now().toString(),
-                )
-                .getOrThrow()
+    enum class SykmeldingCreationErrors {
+        RULE_VALIDATION,
+        PERSISTENCE_ERROR,
+        RESOURCE_ERROR
+    }
 
-        requireNotNull(person.fodselsdato) {
-            "Person with ident=${payload.pasientFnr} does not have a valid fødselsdato"
+    fun createSykmelding(
+        payload: SykmeldingPayload
+    ): Either<SykmeldingCreationErrors, SykmeldingResponse> {
+        val sykmeldingId = UUID.randomUUID().toString()
+        val resources = result {
+            val person = personService.getPersonByIdent(payload.pasientFnr).bind()
+            val sykmelder =
+                helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId).bind()
+            val sykmelderSuspendert =
+                btsysService
+                    .isSuspended(
+                        sykmelderFnr = sykmelder.fnr,
+                        signaturDato = LocalDate.now().toString(),
+                    )
+                    .bind()
+
+            Triple(person, sykmelder, sykmelderSuspendert)
         }
+
+        val (person, sykmelder, sykmelderSuspendert) =
+            resources.fold(
+                { it },
+                {
+                    logger.error("Feil ved henting av eksterne ressurser: $it")
+                    return SykmeldingCreationErrors.RESOURCE_ERROR.left()
+                },
+            )
 
         val ruleResult =
             ruleService.validateRules(
@@ -55,14 +70,13 @@ class SykmeldingService(
                 sykmelderSuspendert = sykmelderSuspendert,
                 foedselsdato = person.fodselsdato,
             )
+
         if (ruleResult.status != RegulaStatus.OK) {
             logger.error(
                 "Sykmelding med id=$sykmeldingId er feilet validering mot regler med status=${ruleResult.status}",
             )
-            return SykmeldingResult.Failure(
-                errorMessage = "Bad request ved regelvalidering: ${ruleResult.status}",
-                errorCode = HttpStatus.BAD_REQUEST,
-            )
+
+            return SykmeldingCreationErrors.RULE_VALIDATION.left()
         }
         logger.info(
             "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
@@ -73,53 +87,39 @@ class SykmeldingService(
 
         if (sykmeldingResponse == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
-            return SykmeldingResult.Failure(
-                errorMessage = "Internal server error ved lagring av sykmelding",
-                errorCode = HttpStatus.INTERNAL_SERVER_ERROR,
-            )
+            return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
         }
+
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
         sykmeldingKafkaService.send(payload, sykmeldingId, person, sykmelder, ruleResult)
-        return SykmeldingResult.Success(
-            statusCode = HttpStatus.CREATED,
-            sykmeldingResponse = sykmeldingResponse,
-        )
+
+        return sykmeldingResponse.right()
     }
 
-    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResult {
-        val sykmeldingResponse =
+    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): Result<SykmeldingResponse> {
+        val sykmelding =
             sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
-                ?: return SykmeldingResult.Failure(
-                    errorMessage = "Sykmelding not found for sykmeldingId=$sykmeldingId",
-                    errorCode = HttpStatus.NOT_FOUND,
+                ?: return Result.failure(
+                    IllegalArgumentException("Sykmelding not found for sykmeldingId=$sykmeldingId"),
                 )
 
-        return SykmeldingResult.Success(
-            sykmeldingResponse = sykmeldingResponse,
-            statusCode = HttpStatus.OK,
-        )
+        return Result.success(sykmelding)
     }
 
-    fun getSykmeldingerByIdent(ident: String, orgnr: String): SykmeldingResult {
+    fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingResponse>> {
         logger.info("Henter sykmeldinger for ident=$ident")
         // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
         // at den får lov til å sjå ?
-        val sykmeldingResponses =
+        val sykmeldinger: List<SykmeldingResponse> =
             sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
                 it.legekontorOrgnr == orgnr
             }
 
-        if (sykmeldingResponses.isEmpty()) {
-            return SykmeldingResult.Success(
-                sykmeldinger = emptyList(),
-                statusCode = HttpStatus.NO_CONTENT,
-            )
+        if (sykmeldinger.isEmpty()) {
+            return Result.success(emptyList())
         }
 
-        return SykmeldingResult.Success(
-            sykmeldinger = sykmeldingResponses,
-            statusCode = HttpStatus.OK,
-        )
+        return Result.success(sykmeldinger)
     }
 }

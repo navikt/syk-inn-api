@@ -6,7 +6,7 @@ import no.nav.tsm.syk_inn_api.common.Navn
 data class Person(
     val navn: Navn,
     val ident: String,
-    val fodselsdato: LocalDate?,
+    val fodselsdato: LocalDate,
 )
 
 fun Person.displayName(): String =
