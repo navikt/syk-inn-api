@@ -13,11 +13,11 @@ import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.service.SykmeldingService
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmelding
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.ExistingSykmeldingHoveddiagnose
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus

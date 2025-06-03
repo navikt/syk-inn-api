@@ -9,6 +9,7 @@ import kotlin.test.assertTrue
 import kotlin.test.fail
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.service.TokenService
+import no.nav.tsm.syk_inn_api.sykmelder.BtsysProxyClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach

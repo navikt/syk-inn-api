@@ -1,6 +1,6 @@
 package no.nav.tsm.syk_inn_api.model
 
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.springframework.http.HttpStatus
 
 sealed interface SykmeldingResult {

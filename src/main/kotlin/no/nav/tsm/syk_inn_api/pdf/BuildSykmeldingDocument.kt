@@ -4,7 +4,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.displayName
-import no.nav.tsm.syk_inn_api.sykmeldingresponse.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.intellij.lang.annotations.Language
 
 fun FlowContent.NavHeader(title: String) {

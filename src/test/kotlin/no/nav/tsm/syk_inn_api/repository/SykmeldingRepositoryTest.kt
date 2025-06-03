@@ -2,11 +2,12 @@ package no.nav.tsm.syk_inn_api.repository
 
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.model.sykmelding.SykmeldingDb
-import no.nav.tsm.syk_inn_api.model.sykmelding.toPGobject
-import no.nav.tsm.syk_inn_api.persistence.PersistedSykmelding
-import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.persistence.PersistedSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional

@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.pdf
 import java.util.*
 import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.service.SykmeldingService
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import org.springframework.stereotype.Service
 
 @Service
