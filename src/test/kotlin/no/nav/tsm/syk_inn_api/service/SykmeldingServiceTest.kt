@@ -19,10 +19,10 @@ import no.nav.tsm.syk_inn_api.model.SykmeldingResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.repository.IntegrationTest
-import no.nav.tsm.syk_inn_api.sykmelder.Godkjenning
-import no.nav.tsm.syk_inn_api.sykmelder.HelsenettProxyService
-import no.nav.tsm.syk_inn_api.sykmelder.Kode
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
@@ -75,7 +75,7 @@ class SykmeldingServiceTest : IntegrationTest() {
     @Test
     fun `create sykmelding with valid data`() {
         every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
-            Sykmelder(
+            HprSykmelder(
                 hprNummer = behandlerHpr,
                 fnr = "01019078901",
                 fornavn = "Ola",
@@ -83,15 +83,15 @@ class SykmeldingServiceTest : IntegrationTest() {
                 etternavn = "Nordmann",
                 godkjenninger =
                     listOf(
-                        Godkjenning(
+                        HprGodkjenning(
                             helsepersonellkategori =
-                                Kode(
+                                HprKode(
                                     aktiv = true,
                                     oid = 0,
                                     verdi = "LE",
                                 ),
                             autorisasjon =
-                                Kode(
+                                HprKode(
                                     aktiv = true,
                                     oid = 7704,
                                     verdi = "1",
@@ -177,7 +177,7 @@ class SykmeldingServiceTest : IntegrationTest() {
     @Test
     fun `failing to create sykmelding because of rule tree hit`() {
         every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
-            Sykmelder(
+            HprSykmelder(
                 hprNummer = behandlerHpr,
                 fnr = "12345678901",
                 fornavn = "Ola",
@@ -185,15 +185,15 @@ class SykmeldingServiceTest : IntegrationTest() {
                 etternavn = "Nordmann",
                 godkjenninger =
                     listOf(
-                        Godkjenning(
+                        HprGodkjenning(
                             helsepersonellkategori =
-                                Kode(
+                                HprKode(
                                     aktiv = true,
                                     oid = 0,
                                     verdi = "LE",
                                 ),
                             autorisasjon =
-                                Kode(
+                                HprKode(
                                     aktiv = true,
                                     oid = 7704,
                                     verdi = "1",

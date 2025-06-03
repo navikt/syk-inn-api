@@ -5,6 +5,7 @@ import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
@@ -86,7 +87,7 @@ object SykmeldingKafkaMapper {
         payload: SykmeldingPayload,
         sykmeldingId: String,
         person: Person,
-        sykmelder: no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
+        sykmelder: HprSykmelder
     ): DigitalSykmelding {
         requireNotNull(sykmelder.fornavn)
         requireNotNull(sykmelder.etternavn)
@@ -130,9 +131,7 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    private fun mapPersonIdsForSykmelder(
-        sykmelder: no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
-    ): List<PersonId> {
+    private fun mapPersonIdsForSykmelder(sykmelder: HprSykmelder): List<PersonId> {
         requireNotNull(sykmelder.hprNummer)
         requireNotNull(sykmelder.fnr)
         return listOf(

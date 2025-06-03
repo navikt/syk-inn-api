@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 
 interface IHelsenettProxyClient {
-    fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder>
+    fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<HprSykmelder>
 }
 
 @Profile("!local")
@@ -26,7 +26,10 @@ class HelsenettProxyClient(
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
-    override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
+    override fun getSykmelderByHpr(
+        behandlerHpr: String,
+        sykmeldingId: String
+    ): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
         return try {
@@ -42,7 +45,7 @@ class HelsenettProxyClient(
                     }
                     .retrieve()
                     .onStatus({ it.isError }) { res -> onStatusError(res) }
-                    .bodyToMono(Sykmelder::class.java)
+                    .bodyToMono(HprSykmelder::class.java)
                     .block()
 
             if (response != null) {

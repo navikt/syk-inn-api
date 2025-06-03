@@ -16,9 +16,9 @@ import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.exception.RuleHitException
-import no.nav.tsm.syk_inn_api.sykmelder.BtsysProxyService
-import no.nav.tsm.syk_inn_api.sykmelder.Godkjenning
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysProxyService
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
@@ -33,7 +33,7 @@ class RuleService(
     fun validateRules(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: Sykmelder,
+        sykmelder: HprSykmelder,
         foedselsdato: LocalDate
     ): RegulaResult {
         return try {
@@ -52,7 +52,7 @@ class RuleService(
     private fun createRegulaPayload(
         payload: SykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: Sykmelder,
+        sykmelder: HprSykmelder,
         foedselsdato: LocalDate
     ): RegulaPayload {
         return RegulaPayload(
@@ -97,7 +97,7 @@ class RuleService(
         )
     }
 
-    private fun Godkjenning.toSykmelderGodkjenning() =
+    private fun HprGodkjenning.toSykmelderGodkjenning() =
         BehandlerGodkjenning(
             helsepersonellkategori =
                 helsepersonellkategori?.let {

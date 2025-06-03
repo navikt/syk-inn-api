@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import no.nav.tsm.syk_inn_api.client.Result
 import org.springframework.context.annotation.Profile
@@ -11,14 +11,17 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
         println("MockHelsenettProxyClient initialized")
     }
 
-    override fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<Sykmelder> {
+    override fun getSykmelderByHpr(
+        behandlerHpr: String,
+        sykmeldingId: String
+    ): Result<HprSykmelder> {
         return Result.Success(
-            Sykmelder(
+            HprSykmelder(
                 godkjenninger =
                     listOf(
-                        Godkjenning(
-                            helsepersonellkategori = Kode(aktiv = true, oid = 0, verdi = "LE"),
-                            autorisasjon = Kode(aktiv = true, oid = 7704, verdi = "1"),
+                        HprGodkjenning(
+                            helsepersonellkategori = HprKode(aktiv = true, oid = 0, verdi = "LE"),
+                            autorisasjon = HprKode(aktiv = true, oid = 7704, verdi = "1"),
                             tillegskompetanse = null
                         )
                     ),

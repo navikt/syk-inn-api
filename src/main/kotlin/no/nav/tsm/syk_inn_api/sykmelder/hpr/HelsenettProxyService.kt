@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import no.nav.tsm.syk_inn_api.client.Result
 import org.slf4j.LoggerFactory
@@ -10,7 +10,7 @@ class HelsenettProxyService(
 ) {
     private val logger = LoggerFactory.getLogger(HelsenettProxyService::class.java)
 
-    fun getSykmelderByHpr(hpr: String, sykmeldingId: String): Sykmelder {
+    fun getSykmelderByHpr(hpr: String, sykmeldingId: String): HprSykmelder {
         logger.info(
             "Getting sykmelder for hpr=$hpr, sykmeldingId=$sykmeldingId",
         )

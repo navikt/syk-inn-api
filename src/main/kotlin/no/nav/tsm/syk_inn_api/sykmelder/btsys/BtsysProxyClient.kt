@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
 import java.util.*
 import no.nav.tsm.syk_inn_api.client.Result

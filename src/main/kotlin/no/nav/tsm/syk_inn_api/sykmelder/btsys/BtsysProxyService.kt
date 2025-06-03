@@ -1,6 +1,7 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
 import no.nav.tsm.syk_inn_api.client.Result
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

@@ -1,13 +1,13 @@
-package no.nav.tsm.syk_inn_api.sykmelder
+package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.nav.tsm.syk_inn_api.client.Result
-import no.nav.tsm.syk_inn_api.security.TexasClient
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import no.nav.tsm.syk_inn_api.client.Result
+import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
@@ -105,13 +105,13 @@ class HelsenettProxyTest {
         assertTrue(result is Result.Failure)
     }
 
-    fun getSykmelderTestData(): Sykmelder {
-        return Sykmelder(
+    fun getSykmelderTestData(): HprSykmelder {
+        return HprSykmelder(
             godkjenninger =
                 listOf(
-                    Godkjenning(
-                        helsepersonellkategori = Kode(aktiv = true, oid = 0, verdi = "LE"),
-                        autorisasjon = Kode(aktiv = true, oid = 7704, verdi = "1"),
+                    HprGodkjenning(
+                        helsepersonellkategori = HprKode(aktiv = true, oid = 0, verdi = "LE"),
+                        autorisasjon = HprKode(aktiv = true, oid = 7704, verdi = "1"),
                         tillegskompetanse = null
                     )
                 ),

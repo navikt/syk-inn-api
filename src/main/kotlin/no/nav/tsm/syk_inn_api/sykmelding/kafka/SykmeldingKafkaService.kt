@@ -6,7 +6,7 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -33,7 +33,7 @@ class SykmeldingKafkaService(
         payload: SykmeldingPayload,
         sykmeldingId: String,
         person: Person,
-        sykmelder: Sykmelder,
+        sykmelder: HprSykmelder,
         regulaResult: RegulaResult,
     ) {
         try {

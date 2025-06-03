@@ -10,6 +10,7 @@ import no.nav.tsm.syk_inn_api.client.Result
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -50,19 +51,19 @@ class PdlClientTest {
                 token_type = "Bearer",
             )
 
+        @Language("JSON")
         val responseJson =
             """
-        {
-          "navn": {
-            "fornavn": "Test",
-            "mellomnavn": null,
-            "etternavn": "Person"
-          },
-          "foedselsdato": "2000-01-01",
-          "identer": []
-        }
-    """
-                .trimIndent()
+                |{
+                |  "navn": {
+                |    "fornavn": "Test",
+                |    "mellomnavn": null,
+                |    "etternavn": "Person"
+                |  },
+                |  "foedselsdato": "2000-01-01",
+                |  "identer": []
+                |}"""
+                .trimMargin()
 
         val response =
             MockResponse().setHeader("Content-Type", "application/json").setBody(responseJson)
