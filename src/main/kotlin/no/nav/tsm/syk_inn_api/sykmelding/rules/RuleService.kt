@@ -36,16 +36,21 @@ class RuleService() {
     ): RegulaResult {
         return try {
             executeRegulaRules(
-                ruleExecutionPayload =
-                    createRegulaPayload(
-                        payload = payload,
-                        sykmeldingId = sykmeldingId,
-                        sykmelder = sykmelder,
-                        sykmelderSuspendert = sykmelderSuspendert,
-                        foedselsdato = foedselsdato,
-                    ),
-                mode = ExecutionMode.NORMAL,
-            )
+                    ruleExecutionPayload =
+                        createRegulaPayload(
+                            payload = payload,
+                            sykmeldingId = sykmeldingId,
+                            sykmelder = sykmelder,
+                            sykmelderSuspendert = sykmelderSuspendert,
+                            foedselsdato = foedselsdato,
+                        ),
+                    mode = ExecutionMode.NORMAL,
+                )
+                .also {
+                    logger.error(
+                        "Sykmelding med id=$sykmeldingId er validering ${it.status.name} mot regler med",
+                    )
+                }
         } catch (e: Exception) {
             logger.error("Error while executing Regula rules", e)
             throw RuleHitException(

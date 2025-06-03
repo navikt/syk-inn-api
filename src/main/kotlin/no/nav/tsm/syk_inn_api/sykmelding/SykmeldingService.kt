@@ -72,15 +72,8 @@ class SykmeldingService(
             )
 
         if (ruleResult.status != RegulaStatus.OK) {
-            logger.error(
-                "Sykmelding med id=$sykmeldingId er feilet validering mot regler med status=${ruleResult.status}",
-            )
-
             return SykmeldingCreationErrors.RULE_VALIDATION.left()
         }
-        logger.info(
-            "Sykmelding med id=$sykmeldingId er validert mot regler med status=${ruleResult.status}",
-        )
 
         val sykmeldingResponse =
             sykmeldingPersistenceService.saveSykmeldingPayload(payload, sykmeldingId)
@@ -89,8 +82,6 @@ class SykmeldingService(
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
         }
-
-        logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
         sykmeldingKafkaService.send(payload, sykmeldingId, person, sykmelder, ruleResult)
 

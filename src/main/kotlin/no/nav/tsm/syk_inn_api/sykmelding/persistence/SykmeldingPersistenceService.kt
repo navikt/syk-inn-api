@@ -37,6 +37,8 @@ class SykmeldingPersistenceService(
             return null
         }
 
+        logger.info("Sykmelding with id=$sykmeldingId er lagret")
+
         return mapDatabaseEntityToSykmeldingResponse(savedEntity)
     }
 
@@ -63,7 +65,7 @@ class SykmeldingPersistenceService(
             sykmelderHpr = dbObject.sykmelderHpr,
             sykmelding =
                 SykmeldingResponseMapper.mapPersistedSykmeldingToExistingSykmelding(
-                    dbObject.sykmelding.fromPGobject()
+                    dbObject.sykmelding.fromPGobject(),
                 ),
             legekontorOrgnr = dbObject.legekontorOrgnr,
         )
@@ -82,7 +84,7 @@ class SykmeldingPersistenceService(
                 PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(sykmeldingRecord)
                     .toPGobject(),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
-            validertOk = validertOk
+            validertOk = validertOk,
         )
     }
 
@@ -96,7 +98,7 @@ class SykmeldingPersistenceService(
         logger.info("Inside the method to update sykmelding with id=$sykmeldingId")
         if (sykmeldingRecord == null) {
             logger.info(
-                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId from syk-inn-api database"
+                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId from syk-inn-api database",
             )
             delete(sykmeldingId)
             return
@@ -128,7 +130,7 @@ class SykmeldingPersistenceService(
                     ?: mapSykmeldingRecordToSykmeldingDatabaseEntity(
                         sykmeldingId,
                         sykmeldingRecord,
-                        true
+                        true,
                     ),
             )
             logger.info("Updated sykmelding with id=${sykmeldingRecord.sykmelding.id}")
