@@ -2,9 +2,10 @@ package no.nav.tsm.syk_inn_api.sykmelding.response
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
-data class SykmeldingResponse(
+data class SykmeldingDocument(
     val sykmeldingId: String,
     val pasientFnr: String,
     val sykmelderHpr: String,
@@ -13,8 +14,16 @@ data class SykmeldingResponse(
 )
 
 data class ExistingSykmelding(
-    val hoveddiagnose: ExistingSykmeldingHoveddiagnose,
-    val aktivitet: ExistingSykmeldingAktivitet
+    val hoveddiagnose: ExistingSykmeldingDiagnoseInfo?,
+    val aktivitet: List<ExistingSykmeldingAktivitet>,
+    val bidiagnoser: List<ExistingSykmeldingDiagnoseInfo>,
+    val svangerskapsrelatert: Boolean,
+    val pasientenSkalSkjermes: Boolean,
+    val meldinger: ExistingSykmeldingMeldinger,
+    val yrkesskade: ExistingSykmeldingYrkesskade?,
+    val arbeidsgiver: ExistingSykmeldingArbeidsgiver?,
+    val tilbakedatering: ExistingSykmeldingTilbakedatering?,
+    val regelResultat: ExistingSykmeldingRuleResult,
 )
 
 @JsonSubTypes(
@@ -47,8 +56,33 @@ sealed interface ExistingSykmeldingAktivitet {
     data class Reisetilskudd(val fom: String, val tom: String) : ExistingSykmeldingAktivitet
 }
 
-data class ExistingSykmeldingHoveddiagnose(
+data class ExistingSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,
     val code: String,
     val text: String,
+)
+
+data class ExistingSykmeldingRuleResult(
+    val result: String,
+    val meldingTilSender: String?,
+)
+
+data class ExistingSykmeldingTilbakedatering(
+    val startdato: LocalDate,
+    val begrunnelse: String,
+)
+
+data class ExistingSykmeldingArbeidsgiver(
+    val harFlere: Boolean,
+    val arbeidsgivernavn: String,
+)
+
+data class ExistingSykmeldingYrkesskade(
+    val yrkesskade: Boolean,
+    val skadedato: LocalDate?,
+)
+
+data class ExistingSykmeldingMeldinger(
+    val tilNav: String?,
+    val tilArbeidsgiver: String?,
 )

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.helse.diagnosekoder.Diagnosekoder
 
 enum class DiagnoseSystem(val oid: String) {
-    ICPC2("2.16.578.1.12.4.1.1.7170"),
-    ICD10("2.16.578.1.12.4.1.1.7110");
+    //    ICPC2("2.16.578.1.12.4.1.1.7170"),
+    //    ICD10("2.16.578.1.12.4.1.1.7110");
+    ICPC2("ICPC2"),
+    ICD10("ICD10");
 
     companion object {
         @JvmStatic

@@ -8,14 +8,14 @@ enum class ARBEIDSGIVER_TYPE {
     INGEN_ARBEIDSGIVER,
 }
 
-sealed interface ArbeidsgiverInfo {
+sealed interface SykmeldingRecordArbeidsgiverInfo {
     val type: ARBEIDSGIVER_TYPE
 }
 
 data class EnArbeidsgiver(
     val meldingTilArbeidsgiver: String?,
     val tiltakArbeidsplassen: String?,
-) : ArbeidsgiverInfo {
+) : SykmeldingRecordArbeidsgiverInfo {
     override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.EN_ARBEIDSGIVER
 }
 
@@ -25,11 +25,11 @@ data class FlereArbeidsgivere(
     val stillingsprosent: Int?,
     val meldingTilArbeidsgiver: String?,
     val tiltakArbeidsplassen: String?
-) : ArbeidsgiverInfo {
+) : SykmeldingRecordArbeidsgiverInfo {
     override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.FLERE_ARBEIDSGIVERE
 }
 
-class IngenArbeidsgiver() : ArbeidsgiverInfo {
+class IngenArbeidsgiver() : SykmeldingRecordArbeidsgiverInfo {
     override val type: ARBEIDSGIVER_TYPE = ARBEIDSGIVER_TYPE.INGEN_ARBEIDSGIVER
 
     override fun equals(other: Any?) = other is IngenArbeidsgiver

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.HelsepersonellKategori
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Kontaktinfo
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.MessageMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonId
@@ -32,9 +33,17 @@ data class DigitalSykmelding(
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
+    val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
+    val tilbakedatering: SykmeldingRecordTilbakedatering?,
+    val meldinger: SykmeldingRecordMeldinger,
 ) : ISykmelding {
     override val type = SykmeldingType.DIGITAL
 }
+
+data class SykmeldingRecordMeldinger(
+    val tilNav: String?,
+    val tilArbeidsgiver: String?,
+)
 
 data class SykmeldingRecordPasient(
     val navn: Navn?,
@@ -43,7 +52,7 @@ data class SykmeldingRecordPasient(
 )
 
 data class SykmeldingRecordBehandler(
-    val navn: no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Navn,
+    val navn: KafkaPersonNavn,
     //    val adresse: Adresse?,
     val ids: List<PersonId>,
     val kontaktinfo: List<Kontaktinfo>,
@@ -86,13 +95,13 @@ data class XmlSykmelding(
     override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
-    val arbeidsgiver: ArbeidsgiverInfo,
+    val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
-    val prognose: Prognose?,
-    val tiltak: Tiltak?,
-    val bistandNav: BistandNav?,
-    val tilbakedatering: Tilbakedatering?,
+    val prognose: SykmeldingRecordPrognose?,
+    val tiltak: SykmeldingRecordTiltak?,
+    val bistandNav: SykmeldingRecordBistandNav?,
+    val tilbakedatering: SykmeldingRecordTilbakedatering?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
 ) : ISykmelding {
     override val type = SykmeldingType.XML
@@ -104,13 +113,13 @@ data class Papirsykmelding(
     override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
-    val arbeidsgiver: ArbeidsgiverInfo,
+    val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
-    val prognose: Prognose?,
-    val tiltak: Tiltak?,
-    val bistandNav: BistandNav?,
-    val tilbakedatering: Tilbakedatering?,
+    val prognose: SykmeldingRecordPrognose?,
+    val tiltak: SykmeldingRecordTiltak?,
+    val bistandNav: SykmeldingRecordBistandNav?,
+    val tilbakedatering: SykmeldingRecordTilbakedatering?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
 ) : ISykmelding {
     override val type = SykmeldingType.PAPIR
@@ -127,23 +136,23 @@ data class UtenlandskSykmelding(
     override val type = SykmeldingType.UTENLANDSK
 }
 
-data class BistandNav(
+data class SykmeldingRecordBistandNav(
     val bistandUmiddelbart: Boolean,
     val beskrivBistand: String?,
 )
 
-data class Tiltak(
+data class SykmeldingRecordTiltak(
     val tiltakNav: String?,
     val andreTiltak: String?,
 )
 
-data class Prognose(
+data class SykmeldingRecordPrognose(
     val arbeidsforEtterPeriode: Boolean,
     val hensynArbeidsplassen: String?,
     val arbeid: IArbeid?,
 )
 
-data class Tilbakedatering(
+data class SykmeldingRecordTilbakedatering(
     val kontaktDato: LocalDate?,
     val begrunnelse: String?,
 )

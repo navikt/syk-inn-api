@@ -12,7 +12,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -36,12 +36,14 @@ class SykmeldingService(
 
     fun createSykmelding(
         payload: SykmeldingPayload
-    ): Either<SykmeldingCreationErrors, SykmeldingResponse> {
+    ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
         val sykmeldingId = UUID.randomUUID().toString()
         val resources = result {
-            val person = personService.getPersonByIdent(payload.pasientFnr).bind()
+            val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
             val sykmelder =
-                helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId).bind()
+                helsenettProxyService
+                    .getSykmelderByHpr(payload.meta.sykmelderHpr, sykmeldingId)
+                    .bind()
             val sykmelderSuspendert =
                 btsysService
                     .isSuspended(
@@ -76,7 +78,13 @@ class SykmeldingService(
         }
 
         val sykmeldingResponse =
-            sykmeldingPersistenceService.saveSykmeldingPayload(payload, sykmeldingId)
+            sykmeldingPersistenceService.saveSykmeldingPayload(
+                payload,
+                sykmeldingId,
+                person,
+                sykmelder,
+                ruleResult
+            )
 
         if (sykmeldingResponse == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
@@ -89,14 +97,14 @@ class SykmeldingService(
     }
 
     // TODO: Faktisk implementer hpr-tilgangsstyring
-    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResponse? =
+    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingDocument? =
         sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
-    fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingResponse>> {
+    fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingDocument>> {
         logger.info("Henter sykmeldinger for ident=$ident")
         // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
         // at den får lov til å sjå ?
-        val sykmeldinger: List<SykmeldingResponse> =
+        val sykmeldinger: List<SykmeldingDocument> =
             sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
                 it.legekontorOrgnr == orgnr
             }

@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.rules
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.diagnosekoder.Diagnosekoder
 import no.nav.tsm.regulus.regula.RegulaAvsender
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaMeta
@@ -15,10 +16,12 @@ import no.nav.tsm.regulus.regula.payload.BehandlerKode
 import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.exception.RuleHitException
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -48,7 +51,7 @@ class RuleService() {
                 )
                 .also {
                     logger.error(
-                        "Sykmelding med id=$sykmeldingId er validering ${it.status.name} mot regler med",
+                        "Sykmelding med id=$sykmeldingId er validering ${it.status.name} mot regler",
                     )
                 }
         } catch (e: Exception) {
@@ -70,18 +73,22 @@ class RuleService() {
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
                 Diagnose(
-                    kode = payload.sykmelding.hoveddiagnose.code,
-                    system = payload.sykmelding.hoveddiagnose.system.oid,
+                    kode = payload.values.hoveddiagnose.code,
+                    system =
+                        when (payload.values.hoveddiagnose.system) {
+                            DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
+                            DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                        },
                 ),
-            bidiagnoser = null,
+            bidiagnoser = mapToRegulaBidiagnoser(payload.values.bidiagnoser),
             annenFravarsArsak = null,
-            aktivitet = listOf(mapToSykmeldingAktivitet(payload.sykmelding.aktivitet)),
+            aktivitet = mapToSykmeldingAktivitet(payload.values.aktivitet.first()),
             utdypendeOpplysninger = emptyMap(),
-            tidligereSykmeldinger = emptyList(),
+            tidligereSykmeldinger = emptyList(), //TODO her bør vi kanskje slå opp tidligere sykmeldinger? sende inn frå kallande service.
             kontaktPasientBegrunnelseIkkeKontakt = null,
             pasient =
                 RegulaPasient(
-                    ident = payload.pasientFnr,
+                    ident = payload.meta.pasientIdent,
                     fodselsdato = foedselsdato,
                 ),
             meta =
@@ -92,7 +99,7 @@ class RuleService() {
                 RegulaBehandler.Finnes(
                     suspendert = sykmelderSuspendert,
                     godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
-                    legekontorOrgnr = payload.legekontorOrgnr,
+                    legekontorOrgnr = payload.meta.legekontorOrgnr,
                     fnr = sykmelder.fnr,
                 ), // TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
             avsender =
@@ -101,6 +108,23 @@ class RuleService() {
                 ), // TODO Bør vi også forholde oss til Avsender.FinnesIkke ?
             behandletTidspunkt = LocalDateTime.now(),
         )
+    }
+
+    private fun mapToRegulaBidiagnoser(bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>?): List<Diagnose>? {
+        if(bidiagnoser.isNullOrEmpty()) {
+            return null
+        }
+
+        return bidiagnoser.map { diagnose ->
+            Diagnose(
+                kode = diagnose.code,
+                system =
+                    when (diagnose.system) {
+                        DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
+                        DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                    },
+            )
+        }
     }
 
     private fun HprGodkjenning.toSykmelderGodkjenning() =
@@ -150,37 +174,39 @@ class RuleService() {
 
     fun mapToSykmeldingAktivitet(
         opprettSykmeldingAktivitet: OpprettSykmeldingAktivitet
-    ): no.nav.tsm.regulus.regula.payload.Aktivitet {
-        return when (opprettSykmeldingAktivitet) {
-            is OpprettSykmeldingAktivitet.IkkeMulig ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.IkkeMulig(
-                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
-                )
-            is OpprettSykmeldingAktivitet.Gradert ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
-                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
-                    grad = opprettSykmeldingAktivitet.grad,
-                )
-            is OpprettSykmeldingAktivitet.Avventende ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
-                    avventendeInnspillTilArbeidsgiver =
-                        opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
-                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
-                )
-            is OpprettSykmeldingAktivitet.Behandlingsdager ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
-                    behandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
-                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
-                )
-            is OpprettSykmeldingAktivitet.Reisetilskudd ->
-                no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
-                    fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                    tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
-                )
-        }
+    ): List<no.nav.tsm.regulus.regula.payload.Aktivitet> {
+        return listOf(
+            when (opprettSykmeldingAktivitet) {
+                is OpprettSykmeldingAktivitet.IkkeMulig ->
+                    no.nav.tsm.regulus.regula.payload.Aktivitet.IkkeMulig(
+                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                    )
+                is OpprettSykmeldingAktivitet.Gradert ->
+                    no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
+                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        grad = opprettSykmeldingAktivitet.grad,
+                    )
+                is OpprettSykmeldingAktivitet.Avventende ->
+                    no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
+                        avventendeInnspillTilArbeidsgiver =
+                            opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
+                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                    )
+                is OpprettSykmeldingAktivitet.Behandlingsdager ->
+                    no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
+                        behandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
+                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                    )
+                is OpprettSykmeldingAktivitet.Reisetilskudd ->
+                    no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
+                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
+                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                    )
+            }
+        )
     }
 }

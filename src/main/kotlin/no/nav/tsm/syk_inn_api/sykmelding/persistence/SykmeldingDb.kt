@@ -10,10 +10,11 @@ import org.springframework.data.relational.core.mapping.Table
 data class SykmeldingDb(
     @Id val id: UUID? = null,
     val sykmeldingId: String,
-    val pasientFnr: String,
+    val pasientIdent: String,
     val sykmelderHpr: String,
     val sykmelding: PGobject,
     val legekontorOrgnr: String,
+    val legekontorTlf: String?,
     val validertOk: Boolean = false,
 )
 

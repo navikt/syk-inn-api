@@ -57,9 +57,9 @@ data class KafkaYrkesskade(val yrkesskadeDato: LocalDate?)
 data class SykmeldingRecordMedisinskVurdering(
     val hovedDiagnose: KafkaDiagnoseInfo?,
     val biDiagnoser: List<KafkaDiagnoseInfo>?,
-    val svangerskap: Boolean, // TODO må få inn i payload
+    val svangerskap: Boolean,
     val yrkesskade: KafkaYrkesskade?,
-    val skjermetForPasient: Boolean, // TODO må få inn i payload
+    val skjermetForPasient: Boolean,
     val syketilfelletStartDato: LocalDate?,
     val annenFraversArsak: KafkaAnnenFraverArsak?,
 )

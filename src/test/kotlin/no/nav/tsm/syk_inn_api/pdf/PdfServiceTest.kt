@@ -4,6 +4,10 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import java.awt.Desktop
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.Test
@@ -15,8 +19,10 @@ import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingHoveddiagnose
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -52,7 +58,7 @@ class PdfServiceTest {
     @Test
     fun `should create a simple PDF`() {
         val simpleSykmelding =
-            SykmeldingResponse(
+            SykmeldingDocument(
                 sykmeldingId = "sykmeldingId",
                 pasientFnr = "12345678901",
                 sykmelderHpr = "123456789",
@@ -60,17 +66,32 @@ class PdfServiceTest {
                 sykmelding =
                     ExistingSykmelding(
                         hoveddiagnose =
-                            ExistingSykmeldingHoveddiagnose(
+                            ExistingSykmeldingDiagnoseInfo(
                                 system = DiagnoseSystem.ICPC2,
                                 code = "X01",
                                 text = "Hodepine",
                             ),
                         aktivitet =
-                            ExistingSykmeldingAktivitet.IkkeMulig(
-                                fom = "2023-01-01",
-                                tom = "2023-01-10",
+                            listOf(
+                                ExistingSykmeldingAktivitet.IkkeMulig(
+                                    fom = "2023-01-01",
+                                    tom = "2023-01-10",
+                                )
                             ),
-                    ),
+                        bidiagnoser = emptyList(),
+                        svangerskapsrelatert = false,
+                        pasientenSkalSkjermes = false,
+                        meldinger =
+                            ExistingSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
+                        yrkesskade = null,
+                        arbeidsgiver = null,
+                        tilbakedatering = null,
+                        regelResultat =
+                            ExistingSykmeldingRuleResult(
+                                result = "OK",
+                                meldingTilSender = null,
+                            ),
+                    )
             )
 
         every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid, "123456789") } returns
@@ -89,12 +110,12 @@ fun openPdf(bytes: ByteArray, temp: Boolean = true) {
     if (temp) {
         val tmpFile = kotlin.io.path.createTempFile(suffix = ".pdf").toFile()
         tmpFile.writeBytes(bytes)
-        java.awt.Desktop.getDesktop().open(tmpFile)
+        Desktop.getDesktop().open(tmpFile)
     } else {
         // Write to example.pdf in the current directory
-        val outputStream: java.io.OutputStream = java.io.FileOutputStream("example.pdf")
+        val outputStream: OutputStream = FileOutputStream("example.pdf")
         outputStream.write(bytes)
         outputStream.close()
-        java.awt.Desktop.getDesktop().open(java.io.File("example.pdf"))
+        Desktop.getDesktop().open(File("example.pdf"))
     }
 }
