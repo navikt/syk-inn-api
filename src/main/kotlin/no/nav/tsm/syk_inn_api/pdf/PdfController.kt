@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class PdfController(private val pdfService: PdfService) {
 
+    private val logger = org.slf4j.LoggerFactory.getLogger(this::class.java)
+
     @GetMapping("/api/sykmelding/{sykmeldingId}/pdf", produces = ["application/pdf"])
     fun getSykmeldingPdf(
         @PathVariable sykmeldingId: UUID,
@@ -29,8 +31,11 @@ class PdfController(private val pdfService: PdfService) {
                     ResponseEntity.ok().body(pdf)
                 }
             },
-        ) {
-            ResponseEntity.status(500).body("Internal server error: ${it.message}")
+        ) { error ->
+            logger.error(
+                "Failed to create PDF for sykmeldingId: $sykmeldingId, error: ${error.message}"
+            )
+            ResponseEntity.status(500).body("Internal server error")
         }
     }
 }
