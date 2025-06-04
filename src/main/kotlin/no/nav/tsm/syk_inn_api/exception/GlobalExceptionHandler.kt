@@ -21,6 +21,8 @@ class GlobalExceptionHandler {
         iae: IllegalArgumentException
     ): ResponseEntity<ErrorMessage> {
 
+        logger.error("IllegalArgumentException occurred ${iae.message}", iae)
+
         val errorMessage = ErrorMessage(HttpStatus.BAD_REQUEST.value(), iae.message)
         return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
     }
@@ -86,9 +88,14 @@ class GlobalExceptionHandler {
         val errorMessage =
             "Invalid or missing request body. Please ensure the payload is properly formatted."
 
+        logger.error(
+            "HttpMessageNotReadableException while processing request to ${request.requestURI}: ${ex.message}",
+            ex
+        )
+
         val error =
             ApiError(
-                message = errorMessage + " Error: ${ex.message}",
+                message = errorMessage + " Error: ${ex.message}" + "e: $ex",
                 status = HttpStatus.BAD_REQUEST.value(),
                 path = request.requestURI
             )

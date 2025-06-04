@@ -12,5 +12,5 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDb, UUID> {
 
     fun deleteBySykmeldingId(sykmeldingId: String)
 
-    fun findAllByPasientFnr(pasientFnr: String): List<SykmeldingDb>
+    fun findAllByPasientIdent(pasientIdent: String): List<SykmeldingDb>
 }

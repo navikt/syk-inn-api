@@ -25,9 +25,11 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
@@ -36,8 +38,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceServic
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
 import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingHoveddiagnose
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -117,39 +121,60 @@ class SykmeldingServiceTest : IntegrationTest() {
 
         every { btsysService.isSuspended(any(), any()) } returns Result.success(false)
 
-        val sykmeldingResponse =
-            SykmeldingResponse(
+        val sykmeldingDocument =
+            SykmeldingDocument(
                 sykmeldingId = sykmeldingId,
                 pasientFnr = "01019078901",
                 sykmelderHpr = behandlerHpr,
                 sykmelding =
                     ExistingSykmelding(
                         hoveddiagnose =
-                            ExistingSykmeldingHoveddiagnose(
+                            ExistingSykmeldingDiagnoseInfo(
                                 system = DiagnoseSystem.ICD10,
                                 code = "Z01",
                                 text = "Ukjent diagnose",
                             ),
                         aktivitet =
-                            ExistingSykmeldingAktivitet.IkkeMulig(
-                                fom = "2020-01-01",
-                                tom = "2020-01-30",
+                            listOf(
+                                ExistingSykmeldingAktivitet.IkkeMulig(
+                                    fom = "2020-01-01",
+                                    tom = "2020-01-30",
+                                )
+                            ),
+                        bidiagnoser = emptyList(),
+                        svangerskapsrelatert = false,
+                        pasientenSkalSkjermes = false,
+                        meldinger =
+                            ExistingSykmeldingMeldinger(
+                                tilNav = null,
+                                tilArbeidsgiver = null,
+                            ),
+                        yrkesskade = null,
+                        arbeidsgiver = null,
+                        tilbakedatering = null,
+                        regelResultat =
+                            ExistingSykmeldingRuleResult(
+                                result = "OK",
+                                meldingTilSender = null,
                             ),
                     ),
                 legekontorOrgnr = "987654321",
             )
         every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
-            sykmeldingResponse
+            sykmeldingDocument
 
-        every { sykmeldingPersistenceService.saveSykmeldingPayload(any(), any()) } returns
+        every {
+            sykmeldingPersistenceService.saveSykmeldingPayload(any(), any(), any(), any(), any())
+        } returns
             sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
                 SykmeldingDb(
                     id = UUID.randomUUID(),
                     sykmeldingId = sykmeldingId,
-                    pasientFnr = "01019078901",
+                    pasientIdent = "01019078901",
                     sykmelderHpr = behandlerHpr,
                     legekontorOrgnr = "987654321",
                     sykmelding = getTestSykmelding().toPGobject(),
+                    legekontorTlf = "12345678",
                 ),
             )
 
@@ -159,22 +184,39 @@ class SykmeldingServiceTest : IntegrationTest() {
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientFnr = "01019078901",
-                        sykmelderHpr = "123456789",
-                        sykmelding =
-                            OpprettSykmeldingPayload(
+                        meta =
+                            OpprettSykmeldingMetadata(
+                                pasientIdent = "01019078901",
+                                sykmelderHpr = "123456789",
+                                legekontorOrgnr = "987654321",
+                                legekontorTlf = "577788888",
+                            ),
+                        values =
+                            OpprettSykmelding(
                                 hoveddiagnose =
-                                    Hoveddiagnose(
+                                    OpprettSykmeldingDiagnoseInfo(
                                         system = DiagnoseSystem.ICD10,
                                         code = "S017",
                                     ),
                                 aktivitet =
-                                    OpprettSykmeldingAktivitet.IkkeMulig(
-                                        fom = "2020-01-01",
-                                        tom = "2020-01-30",
+                                    listOf(
+                                        OpprettSykmeldingAktivitet.IkkeMulig(
+                                            fom = "2020-01-01",
+                                            tom = "2020-01-30",
+                                        )
                                     ),
+                                pasientenSkalSkjermes = false,
+                                bidiagnoser = emptyList(),
+                                meldinger =
+                                    OpprettSykmeldingMeldinger(
+                                        tilNav = null,
+                                        tilArbeidsgiver = null,
+                                    ),
+                                svangerskapsrelatert = false,
+                                yrkesskade = null,
+                                arbeidsgiver = null,
+                                tilbakedatering = null,
                             ),
-                        legekontorOrgnr = "987654321",
                     ),
             )
 
@@ -233,22 +275,39 @@ class SykmeldingServiceTest : IntegrationTest() {
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientFnr = "12345678901",
-                        sykmelderHpr = "123456789",
-                        sykmelding =
-                            OpprettSykmeldingPayload(
+                        meta =
+                            OpprettSykmeldingMetadata(
+                                pasientIdent = "12345678901",
+                                sykmelderHpr = "123456789",
+                                legekontorOrgnr = "987654321",
+                                legekontorTlf = "12345678"
+                            ),
+                        values =
+                            OpprettSykmelding(
                                 hoveddiagnose =
-                                    Hoveddiagnose(
+                                    OpprettSykmeldingDiagnoseInfo(
                                         system = DiagnoseSystem.ICD10,
                                         code = "Z01",
                                     ),
                                 aktivitet =
-                                    OpprettSykmeldingAktivitet.IkkeMulig(
-                                        fom = "2020-01-01",
-                                        tom = "2020-01-30",
+                                    listOf(
+                                        OpprettSykmeldingAktivitet.IkkeMulig(
+                                            fom = "2020-01-01",
+                                            tom = "2020-01-30",
+                                        )
                                     ),
+                                pasientenSkalSkjermes = false,
+                                bidiagnoser = emptyList(),
+                                meldinger =
+                                    OpprettSykmeldingMeldinger(
+                                        tilNav = null,
+                                        tilArbeidsgiver = null
+                                    ),
+                                svangerskapsrelatert = false,
+                                yrkesskade = null,
+                                arbeidsgiver = null,
+                                tilbakedatering = null
                             ),
-                        legekontorOrgnr = "987654321",
                     ),
             )
 
@@ -259,18 +318,27 @@ class SykmeldingServiceTest : IntegrationTest() {
         }
     }
 
-    private fun getTestSykmelding(): OpprettSykmeldingPayload {
-        return OpprettSykmeldingPayload(
+    private fun getTestSykmelding(): OpprettSykmelding {
+        return OpprettSykmelding(
             hoveddiagnose =
-                Hoveddiagnose(
+                OpprettSykmeldingDiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
                 ),
             aktivitet =
-                OpprettSykmeldingAktivitet.IkkeMulig(
-                    fom = "2020-01-01",
-                    tom = "2020-01-30",
+                listOf(
+                    OpprettSykmeldingAktivitet.IkkeMulig(
+                        fom = "2020-01-01",
+                        tom = "2020-01-30",
+                    )
                 ),
+            pasientenSkalSkjermes = false,
+            bidiagnoser = emptyList(),
+            meldinger = OpprettSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
+            svangerskapsrelatert = false,
+            yrkesskade = null,
+            arbeidsgiver = null,
+            tilbakedatering = null
         )
     }
 }

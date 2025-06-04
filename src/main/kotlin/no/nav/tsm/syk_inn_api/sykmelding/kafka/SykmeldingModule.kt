@@ -15,7 +15,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.MetadataType
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Papir
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Utenlandsk
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.ARBEIDSGIVER_TYPE
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.ArbeidsgiverInfo
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.EnArbeidsgiver
@@ -31,6 +30,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Papirsykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingMeta
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordAktivitetsType
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordArbeidsgiverInfo
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.UtenlandskSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.XmlSykmelding
@@ -44,7 +44,10 @@ class SykmeldingModule : SimpleModule() {
     init {
         addDeserializer(ISykmelding::class.java, SykmeldingDeserializer())
         addDeserializer(SykmeldingRecordAktivitet::class.java, AktivitetDeserializer())
-        addDeserializer(ArbeidsgiverInfo::class.java, ArbeidsgiverInfoDeserializer())
+        addDeserializer(
+            SykmeldingRecordArbeidsgiverInfo::class.java,
+            ArbeidsgiverInfoDeserializer()
+        )
         addDeserializer(IArbeid::class.java, IArbeidDeserializer())
         addDeserializer(Rule::class.java, RuleDeserializer())
         addDeserializer(MessageMetadata::class.java, MeldingsinformasjonDeserializer())
@@ -107,8 +110,8 @@ class IArbeidDeserializer : CustomDeserializer<IArbeid>() {
     }
 }
 
-class ArbeidsgiverInfoDeserializer : CustomDeserializer<ArbeidsgiverInfo>() {
-    override fun getClass(type: String): KClass<out ArbeidsgiverInfo> {
+class ArbeidsgiverInfoDeserializer : CustomDeserializer<SykmeldingRecordArbeidsgiverInfo>() {
+    override fun getClass(type: String): KClass<out SykmeldingRecordArbeidsgiverInfo> {
         return when (ARBEIDSGIVER_TYPE.valueOf(type)) {
             ARBEIDSGIVER_TYPE.EN_ARBEIDSGIVER -> EnArbeidsgiver::class
             ARBEIDSGIVER_TYPE.FLERE_ARBEIDSGIVERE -> FlereArbeidsgivere::class

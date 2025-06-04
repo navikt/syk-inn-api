@@ -23,7 +23,7 @@ class SykmeldingController(
     @PostMapping
     fun createSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<Any> {
         logger.info("Received request to create sykmelding with payload: $payload")
-        if (payload.pasientFnr.isBlank() || payload.sykmelderHpr.isBlank()) {
+        if (payload.meta.pasientIdent.isBlank() || payload.meta.sykmelderHpr.isBlank()) {
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
         }
 

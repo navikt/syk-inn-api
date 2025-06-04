@@ -2,18 +2,51 @@ package no.nav.tsm.syk_inn_api.sykmelding
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
 data class SykmeldingPayload(
-    val pasientFnr: String,
-    val sykmelderHpr: String,
-    val sykmelding: OpprettSykmeldingPayload,
-    val legekontorOrgnr: String,
+    val meta: OpprettSykmeldingMetadata,
+    val values: OpprettSykmelding,
 )
 
-data class OpprettSykmeldingPayload(
-    val hoveddiagnose: Hoveddiagnose,
-    val aktivitet: OpprettSykmeldingAktivitet
+data class OpprettSykmeldingMetadata(
+    val pasientIdent: String,
+    val sykmelderHpr: String,
+    val legekontorOrgnr: String,
+    val legekontorTlf: String,
+)
+
+data class OpprettSykmelding(
+    val pasientenSkalSkjermes: Boolean,
+    val hoveddiagnose: OpprettSykmeldingDiagnoseInfo,
+    val bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>,
+    val aktivitet: List<OpprettSykmeldingAktivitet>,
+    val meldinger: OpprettSykmeldingMeldinger,
+    val svangerskapsrelatert: Boolean,
+    val yrkesskade: OpprettSykmeldingYrkesskade?,
+    val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
+    val tilbakedatering: OpprettSykmeldingTilbakedatering?,
+)
+
+data class OpprettSykmeldingMeldinger(
+    val tilNav: String?,
+    val tilArbeidsgiver: String?,
+)
+
+data class OpprettSykmeldingYrkesskade(
+    val yrkesskade: Boolean,
+    val skadedato: LocalDate?,
+)
+
+data class OpprettSykmeldingArbeidsgiver(
+    val harFlere: Boolean,
+    val arbeidsgivernavn: String,
+)
+
+data class OpprettSykmeldingTilbakedatering(
+    val startdato: LocalDate,
+    val begrunnelse: String,
 )
 
 @JsonSubTypes(
@@ -46,7 +79,7 @@ sealed interface OpprettSykmeldingAktivitet {
     data class Reisetilskudd(val fom: String, val tom: String) : OpprettSykmeldingAktivitet
 }
 
-data class Hoveddiagnose(
+data class OpprettSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,
     val code: String,
 )

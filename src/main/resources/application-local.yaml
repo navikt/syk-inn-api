@@ -61,3 +61,7 @@ topics:
 #  level:
 #    root: DEBUG
 #    org.springframework.boot.autoconfigure: DEBUG
+#    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: TRACE
+#    org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor: TRACE
+#    org.springframework.http.converter.json.MappingJackson2HttpMessageConverter: TRACE
+#    org.springframework.web.method.HandlerMethod: TRACE

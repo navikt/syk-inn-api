@@ -5,7 +5,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.displayName
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import org.intellij.lang.annotations.Language
 
 private object HtmlResources {
@@ -35,7 +35,7 @@ fun TR.TableInfo(title: String, colspan: String? = null, value: () -> String) {
     }
 }
 
-fun buildSykmeldingHtml(sykmelding: SykmeldingResponse, pasient: Person): String {
+fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String {
     val htmlContent =
         createHTML(prettyPrint = true, xhtmlCompatible = true).html {
             head {
@@ -71,7 +71,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingResponse, pasient: Person): String
                         }
                         tr {
                             TableInfo("Diagnose") {
-                                "TODO tekst - ${sykmelding.sykmelding.hoveddiagnose.code}"
+                                "TODO tekst - ${sykmelding.sykmelding.hoveddiagnose?.code}"
                             }
                             TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
                         }

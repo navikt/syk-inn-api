@@ -9,6 +9,7 @@ import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -78,17 +79,14 @@ class SykmeldingKafkaService(
                 "Consuming record: ${record.value()} from topic ${record.topic()}",
             )
             val tom = record.value().sykmelding.sykmeldingRecordAktivitet.first().tom
-            if (
-                tom.isBefore(
-                    LocalDate.of(
-                        2024,
-                        Month.JANUARY,
-                        1,
-                    ),
-                )
-            ) {
+            if (isVeryOldSykmelding(tom)) {
                 return // Skip processing for sykmeldinger before 2024
             }
+
+            if (record.value().sykmelding.type == SykmeldingType.UTENLANDSK) {
+                return // skip processing for utenlandske sykmeldinger
+            }
+
             sykmeldingPersistenceService.updateSykmelding(record.key(), record.value())
         } catch (e: PersonNotFoundException) {
             logger.error(
@@ -117,5 +115,15 @@ class SykmeldingKafkaService(
             )
             throw e
         }
+    }
+
+    private fun isVeryOldSykmelding(tom: LocalDate): Boolean {
+        return tom.isBefore(
+            LocalDate.of(
+                2024,
+                Month.JANUARY,
+                1,
+            )
+        )
     }
 }
