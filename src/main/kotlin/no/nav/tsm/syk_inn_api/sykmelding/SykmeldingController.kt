@@ -30,7 +30,7 @@ class SykmeldingController(
         val sykmeldingResult = sykmeldingService.createSykmelding(payload)
 
         return sykmeldingResult.fold(
-            { it.toResponseEntity() },
+            { error -> error.toResponseEntity() },
         ) { sykmelding ->
             logger.info(
                 "Sykmelding created successfully with ID: ${sykmelding.sykmeldingId}",
@@ -44,18 +44,15 @@ class SykmeldingController(
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
-    ): ResponseEntity<Any> =
-        sykmeldingService.getSykmeldingById(sykmeldingId, hpr).fold(
-            { sykmelding ->
-                if (sykmelding == null) {
-                    ResponseEntity.notFound().build()
-                } else {
-                    ResponseEntity.ok(sykmelding)
-                }
-            },
-        ) {
-            ResponseEntity.internalServerError().build()
+    ): ResponseEntity<Any> {
+        val sykmelding = sykmeldingService.getSykmeldingById(sykmeldingId, hpr)
+
+        return if (sykmelding == null) {
+            ResponseEntity.notFound().build()
+        } else {
+            ResponseEntity.ok(sykmelding)
         }
+    }
 
     @GetMapping("/")
     fun getSykmeldingerByUserIdent(

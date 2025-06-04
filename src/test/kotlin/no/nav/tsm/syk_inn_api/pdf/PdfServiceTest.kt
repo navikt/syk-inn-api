@@ -44,7 +44,7 @@ class PdfServiceTest {
                     navn = Navn("Ola", "Mellomnavn", "Nordmann"),
                     ident = "12345678901",
                     fodselsdato = LocalDate.parse("1989-06-07"),
-                )
+                ),
             )
     }
 
@@ -73,7 +73,7 @@ class PdfServiceTest {
             )
 
         every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid, "123456789") } returns
-            Result.success(simpleSykmelding)
+            simpleSykmelding
 
         val pdf = pdfService.createSykmeldingPdf(testSykmeldingUuid, "123456789").getOrThrow()
 

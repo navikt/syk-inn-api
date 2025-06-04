@@ -88,8 +88,8 @@ class SykmeldingService(
         return sykmeldingResponse.right()
     }
 
-    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): Result<SykmeldingResponse?> =
-        Result.success(sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString()))
+    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResponse? =
+        sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
     fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingResponse>> {
         logger.info("Henter sykmeldinger for ident=$ident")

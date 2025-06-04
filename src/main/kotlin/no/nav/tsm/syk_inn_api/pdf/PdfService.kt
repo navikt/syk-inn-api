@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.pdf
 
-import arrow.core.flatMap
 import java.util.*
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
@@ -11,13 +10,13 @@ class PdfService(
     private val sykmeldingService: SykmeldingService,
     private val personService: PersonService
 ) {
-    fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray?> =
-        sykmeldingService.getSykmeldingById(sykmeldingId, hpr).flatMap { sykmelding ->
-            if (sykmelding == null) return Result.success(null)
+    fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray?> {
+        val sykmelding =
+            sykmeldingService.getSykmeldingById(sykmeldingId, hpr) ?: return Result.success(null)
 
-            personService
-                .getPersonByIdent(sykmelding.pasientFnr)
-                .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }
-                .map { createPDFA(it) }
-        }
+        return personService
+            .getPersonByIdent(sykmelding.pasientFnr)
+            .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }
+            .map { html -> createPDFA(html) }
+    }
 }
