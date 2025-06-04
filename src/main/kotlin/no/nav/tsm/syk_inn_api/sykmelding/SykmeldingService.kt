@@ -39,7 +39,7 @@ class SykmeldingService(
     ): Either<SykmeldingCreationErrors, SykmeldingResponse> {
         val sykmeldingId = UUID.randomUUID().toString()
         val resources = result {
-            val person = personService.getPersonByIdent(payload.pasientFnr).bind()
+            val person = personService.getPersonByIdent(payload.pasientIdent).bind()
             val sykmelder =
                 helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId).bind()
             val sykmelderSuspendert =

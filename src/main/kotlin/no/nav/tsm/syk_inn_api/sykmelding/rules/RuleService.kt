@@ -81,7 +81,7 @@ class RuleService() {
             kontaktPasientBegrunnelseIkkeKontakt = null,
             pasient =
                 RegulaPasient(
-                    ident = payload.pasientFnr,
+                    ident = payload.pasientIdent,
                     fodselsdato = foedselsdato,
                 ),
             meta =

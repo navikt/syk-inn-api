@@ -25,9 +25,9 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
@@ -159,12 +159,12 @@ class SykmeldingServiceTest : IntegrationTest() {
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientFnr = "01019078901",
+                        pasientIdent = "01019078901",
                         sykmelderHpr = "123456789",
                         sykmelding =
-                            OpprettSykmeldingPayload(
+                            OpprettSykmelding(
                                 hoveddiagnose =
-                                    Hoveddiagnose(
+                                    OpprettSykmeldingDiagnoseInfo(
                                         system = DiagnoseSystem.ICD10,
                                         code = "S017",
                                     ),
@@ -233,12 +233,12 @@ class SykmeldingServiceTest : IntegrationTest() {
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientFnr = "12345678901",
+                        pasientIdent = "12345678901",
                         sykmelderHpr = "123456789",
                         sykmelding =
-                            OpprettSykmeldingPayload(
+                            OpprettSykmelding(
                                 hoveddiagnose =
-                                    Hoveddiagnose(
+                                    OpprettSykmeldingDiagnoseInfo(
                                         system = DiagnoseSystem.ICD10,
                                         code = "Z01",
                                     ),
@@ -259,10 +259,10 @@ class SykmeldingServiceTest : IntegrationTest() {
         }
     }
 
-    private fun getTestSykmelding(): OpprettSykmeldingPayload {
-        return OpprettSykmeldingPayload(
+    private fun getTestSykmelding(): OpprettSykmelding {
+        return OpprettSykmelding(
             hoveddiagnose =
-                Hoveddiagnose(
+                OpprettSykmeldingDiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
                 ),

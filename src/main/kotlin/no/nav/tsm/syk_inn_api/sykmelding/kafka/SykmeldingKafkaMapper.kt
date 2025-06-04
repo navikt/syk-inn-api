@@ -7,7 +7,7 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
@@ -106,7 +106,7 @@ object SykmeldingKafkaMapper {
             pasient =
                 SykmeldingRecordPasient(
                     navn = person.navn,
-                    fnr = payload.pasientFnr,
+                    fnr = payload.pasientIdent,
                     kontaktinfo = emptyList(),
                 ),
             sykmeldingRecordMedisinskVurdering = mapMedisinskVurdering(payload),
@@ -205,7 +205,7 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun mapHoveddiagnose(hoveddiagnose: Hoveddiagnose): KafkaDiagnoseInfo {
+    fun mapHoveddiagnose(hoveddiagnose: OpprettSykmeldingDiagnoseInfo): KafkaDiagnoseInfo {
         return KafkaDiagnoseInfo(
             system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
             kode = hoveddiagnose.code,

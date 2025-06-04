@@ -50,7 +50,7 @@ class SykmeldingPersistenceService(
         logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
-            pasientFnr = payload.pasientFnr,
+            pasientFnr = payload.pasientIdent,
             sykmelderHpr = payload.sykmelderHpr,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(payload)

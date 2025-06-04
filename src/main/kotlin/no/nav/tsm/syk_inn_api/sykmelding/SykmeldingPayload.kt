@@ -3,18 +3,50 @@ package no.nav.tsm.syk_inn_api.sykmelding
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import java.time.LocalDate
 
 data class SykmeldingPayload(
-    val pasientFnr: String,
-    val sykmelderHpr: String,
-    val sykmelding: OpprettSykmeldingPayload,
-    val legekontorOrgnr: String,
+    val meta: OpprettSykmeldingMetadata,
+    val value: OpprettSykmelding,
 )
 
-data class OpprettSykmeldingPayload(
-    val hoveddiagnose: Hoveddiagnose,
-    val aktivitet: OpprettSykmeldingAktivitet
+data class OpprettSykmeldingMetadata(
+    val pasientIdent: String,
+    val sykmelderHpr: String,
+    val legekontorOrgnr: String,
+    val legekontorTlf: String,
 )
+
+data class OpprettSykmelding(
+    val hoveddiagnose: OpprettSykmeldingDiagnoseInfo,
+    val bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>,
+    val aktivitet: OpprettSykmeldingAktivitet,
+    val meldinger: OpprettSykmeldingMeldinger,
+    val andreSporsmal: OpprettSykmeldingAndreSporsmal,
+    val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
+    val tilbakedatering: OpprettSykmeldingTilbakedatering?,
+)
+
+data class OpprettSykmeldingMeldinger(
+    val tilNav: String?,
+    val tilArbeidsgiver: String?,
+)
+
+data class OpprettSykmeldingAndreSporsmal(
+    val svangerskapsrelatert: Boolean,
+    val yrkesskade: Boolean,
+)
+
+data class OpprettSykmeldingArbeidsgiver(
+    val harFlere: Boolean,
+    val arbeidsgivernavn: String,
+)
+
+data class OpprettSykmeldingTilbakedatering(
+    val startdato: LocalDate,
+    val begrunnelse: String,
+)
+
 
 @JsonSubTypes(
     JsonSubTypes.Type(OpprettSykmeldingAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
@@ -46,7 +78,7 @@ sealed interface OpprettSykmeldingAktivitet {
     data class Reisetilskudd(val fom: String, val tom: String) : OpprettSykmeldingAktivitet
 }
 
-data class Hoveddiagnose(
+data class OpprettSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,
     val code: String,
 )
