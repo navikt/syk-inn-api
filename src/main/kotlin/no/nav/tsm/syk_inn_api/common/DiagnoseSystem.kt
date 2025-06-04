@@ -17,21 +17,13 @@ enum class DiagnoseSystem(val oid: String) {
                 ?: throw IllegalArgumentException("Unknown DiagnoseSystem OID: $value")
     }
 
-    @JsonValue fun toJson(): String = oid
+    @JsonValue
+    fun toJson(): String = oid
 }
 
 object DiagnosekodeMapper {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
-    fun findTextFromDiagnoseSystem(system: String, code: String): String? {
-        if (!DiagnoseSystem.entries.any { it.oid == system }) {
-            logger.error("Invalid DiagnoseSystem OID received: $system")
-            return null
-        }
-        val diagnoseSystem = DiagnoseSystem.fromOid(system)
-        return when (diagnoseSystem) {
-            DiagnoseSystem.ICD10 -> Diagnosekoder.icd10[code]?.text
-            DiagnoseSystem.ICPC2 -> Diagnosekoder.icpc2[code]?.text
-        }
+    fun findTextFromDiagnoseSystem(system: DiagnoseSystem, code: String): String? = when (system) {
+        DiagnoseSystem.ICD10 -> Diagnosekoder.icd10[code]?.text
+        DiagnoseSystem.ICPC2 -> Diagnosekoder.icpc2[code]?.text
     }
 }
