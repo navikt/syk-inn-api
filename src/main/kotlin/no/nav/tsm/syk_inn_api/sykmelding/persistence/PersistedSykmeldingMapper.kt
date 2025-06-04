@@ -65,7 +65,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingHoveddiagnose(
             system = system,
             code = code,
-            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toString(), code)
+            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system, code)
                     ?: "Unknown diagnosis code: $code",
         )
     }
