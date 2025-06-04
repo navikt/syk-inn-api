@@ -9,6 +9,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EmottakEnkel
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Papir
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonIdType
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaDiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Papirsykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordAktivitet
@@ -48,7 +49,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmelding(
             hoveddiagnose =
                 mapHoveddiagnoseToPersistedSykmeldinghoveddiagnose(
-                    hovedDiagnose.system,
+                    hovedDiagnose.system.toDiagnoseSystem(),
                     hovedDiagnose.kode
                 ),
             aktivitet =
@@ -172,6 +173,17 @@ object PersistedSykmeldingMapper {
             is UtenlandskSykmelding -> {
                 logger.warn("Sykmelding type is not SykInnSykmelding, cannot map HPR number")
                 return "Utenlandsk"
+            }
+        }
+    }
+
+    private fun KafkaDiagnoseSystem.toDiagnoseSystem(): DiagnoseSystem {
+        return when (this) {
+            KafkaDiagnoseSystem.ICD10 -> DiagnoseSystem.ICD10
+            KafkaDiagnoseSystem.ICPC2 -> DiagnoseSystem.ICPC2
+            else -> {
+                logger.error("Unknown DiagnoseSystem: $this")
+                throw IllegalArgumentException("Unknown DiagnoseSystem: $this")
             }
         }
     }

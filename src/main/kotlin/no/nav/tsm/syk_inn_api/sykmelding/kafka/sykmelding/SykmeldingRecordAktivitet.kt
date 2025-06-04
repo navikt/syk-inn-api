@@ -59,8 +59,8 @@ sealed interface SykmeldingRecordAktivitet {
     }
 
     data class AktivitetIkkeMulig(
-        val medisinskArsak: MedisinskArsak?,
-        val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
+        val medisinskArsak: KafkaMedisinskArsak?,
+        val arbeidsrelatertArsak: KafkaArbeidsrelatertArsak?,
         override val fom: LocalDate,
         override val tom: LocalDate
     ) : SykmeldingRecordAktivitet {

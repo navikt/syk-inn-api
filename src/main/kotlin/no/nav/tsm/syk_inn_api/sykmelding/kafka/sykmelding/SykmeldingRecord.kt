@@ -19,7 +19,7 @@ sealed interface ISykmelding {
     val type: SykmeldingType
     val id: String
     val metadata: SykmeldingMeta
-    val pasient: Pasient
+    val pasient: SykmeldingRecordPasient
     val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering
     val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>
 }
@@ -27,29 +27,29 @@ sealed interface ISykmelding {
 data class DigitalSykmelding(
     override val id: String,
     override val metadata: DigitalSykmeldingMetadata,
-    override val pasient: Pasient,
+    override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
-    val behandler: Behandler,
-    val sykmelder: Sykmelder,
+    val behandler: SykmeldingRecordBehandler,
+    val sykmelder: SykmeldingRecordSykmelder,
 ) : ISykmelding {
     override val type = SykmeldingType.DIGITAL
 }
 
-data class Pasient(
+data class SykmeldingRecordPasient(
     val navn: Navn?,
     val fnr: String,
     val kontaktinfo: List<Kontaktinfo>,
 )
 
-data class Behandler(
+data class SykmeldingRecordBehandler(
     val navn: no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Navn,
     //    val adresse: Adresse?,
     val ids: List<PersonId>,
     val kontaktinfo: List<Kontaktinfo>,
 )
 
-data class Sykmelder(
+data class SykmeldingRecordSykmelder(
     val ids: List<PersonId>,
     val helsepersonellKategori: HelsepersonellKategori,
 )
@@ -83,12 +83,12 @@ data class OldSykmeldingMetadata(
 data class XmlSykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
-    override val pasient: Pasient,
+    override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
     val arbeidsgiver: ArbeidsgiverInfo,
-    val behandler: Behandler,
-    val sykmelder: Sykmelder,
+    val behandler: SykmeldingRecordBehandler,
+    val sykmelder: SykmeldingRecordSykmelder,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
     val bistandNav: BistandNav?,
@@ -101,12 +101,12 @@ data class XmlSykmelding(
 data class Papirsykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
-    override val pasient: Pasient,
+    override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
     val arbeidsgiver: ArbeidsgiverInfo,
-    val behandler: Behandler,
-    val sykmelder: Sykmelder,
+    val behandler: SykmeldingRecordBehandler,
+    val sykmelder: SykmeldingRecordSykmelder,
     val prognose: Prognose?,
     val tiltak: Tiltak?,
     val bistandNav: BistandNav?,
@@ -119,7 +119,7 @@ data class Papirsykmelding(
 data class UtenlandskSykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
-    override val pasient: Pasient,
+    override val pasient: SykmeldingRecordPasient,
     override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
     override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
     val utenlandskInfo: UtenlandskInfo

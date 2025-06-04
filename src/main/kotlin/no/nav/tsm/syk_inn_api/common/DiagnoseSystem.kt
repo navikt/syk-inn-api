@@ -3,7 +3,6 @@ package no.nav.tsm.syk_inn_api.common
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.helse.diagnosekoder.Diagnosekoder
-import org.slf4j.LoggerFactory
 
 enum class DiagnoseSystem(val oid: String) {
     ICPC2("2.16.578.1.12.4.1.1.7170"),
@@ -17,13 +16,13 @@ enum class DiagnoseSystem(val oid: String) {
                 ?: throw IllegalArgumentException("Unknown DiagnoseSystem OID: $value")
     }
 
-    @JsonValue
-    fun toJson(): String = oid
+    @JsonValue fun toJson(): String = oid
 }
 
 object DiagnosekodeMapper {
-    fun findTextFromDiagnoseSystem(system: DiagnoseSystem, code: String): String? = when (system) {
-        DiagnoseSystem.ICD10 -> Diagnosekoder.icd10[code]?.text
-        DiagnoseSystem.ICPC2 -> Diagnosekoder.icpc2[code]?.text
-    }
+    fun findTextFromDiagnoseSystem(system: DiagnoseSystem, code: String): String? =
+        when (system) {
+            DiagnoseSystem.ICD10 -> Diagnosekoder.icd10[code]?.text
+            DiagnoseSystem.ICPC2 -> Diagnosekoder.icpc2[code]?.text
+        }
 }

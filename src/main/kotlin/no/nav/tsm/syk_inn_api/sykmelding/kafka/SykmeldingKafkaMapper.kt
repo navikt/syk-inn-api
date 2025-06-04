@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.Hoveddiagnose
@@ -15,14 +16,15 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.MessageMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Navn
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonId
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonIdType
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Behandler
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Pasient
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Sykmelder
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaDiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordBehandler
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordMedisinskVurdering
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordPasient
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.rules.InvalidRule
 import no.nav.tsm.syk_inn_api.sykmelding.rules.OKRule
 import no.nav.tsm.syk_inn_api.sykmelding.rules.PendingRule
@@ -102,7 +104,7 @@ object SykmeldingKafkaMapper {
                     genDate = OffsetDateTime.now(),
                 ),
             pasient =
-                Pasient(
+                SykmeldingRecordPasient(
                     navn = person.navn,
                     fnr = payload.pasientFnr,
                     kontaktinfo = emptyList(),
@@ -110,7 +112,7 @@ object SykmeldingKafkaMapper {
             sykmeldingRecordMedisinskVurdering = mapMedisinskVurdering(payload),
             sykmeldingRecordAktivitet = mapAktivitet(payload),
             behandler =
-                Behandler(
+                SykmeldingRecordBehandler(
                     navn =
                         Navn(
                             fornavn = sykmelder.fornavn,
@@ -121,7 +123,7 @@ object SykmeldingKafkaMapper {
                     kontaktinfo = emptyList(),
                 ),
             sykmelder =
-                Sykmelder(
+                SykmeldingRecordSykmelder(
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     helsepersonellKategori =
                         HelsepersonellKategori.parse(
@@ -203,10 +205,17 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun mapHoveddiagnose(hoveddiagnose: Hoveddiagnose): DiagnoseInfo {
-        return DiagnoseInfo(
-            system = hoveddiagnose.system,
+    fun mapHoveddiagnose(hoveddiagnose: Hoveddiagnose): KafkaDiagnoseInfo {
+        return KafkaDiagnoseInfo(
+            system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
             kode = hoveddiagnose.code,
         )
+    }
+
+    private fun DiagnoseSystem.toKafkaDiagnoseSystem(): KafkaDiagnoseSystem {
+        return when (this) {
+            DiagnoseSystem.ICPC2 -> KafkaDiagnoseSystem.ICPC2
+            DiagnoseSystem.ICD10 -> KafkaDiagnoseSystem.ICD10
+        }
     }
 }

@@ -1,34 +1,33 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
-// enum class DiagnoseSystem {
-//    ICPC2,
-//    ICD10,
-//    ICPC2B,
-//    PHBU,
-//    UGYLDIG
-// }
+enum class KafkaDiagnoseSystem {
+    ICPC2,
+    ICD10,
+    ICPC2B,
+    PHBU,
+    UGYLDIG
+}
 
-data class DiagnoseInfo(
-    val system: DiagnoseSystem,
+data class KafkaDiagnoseInfo(
+    val system: KafkaDiagnoseSystem,
     val kode: String,
 )
 
-enum class MedisinskArsakType {
+enum class KafkaMedisinskArsakType {
     TILSTAND_HINDRER_AKTIVITET,
     AKTIVITET_FORVERRER_TILSTAND,
     AKTIVITET_FORHINDRER_BEDRING,
     ANNET,
 }
 
-enum class ArbeidsrelatertArsakType {
+enum class KafkaArbeidsrelatertArsakType {
     MANGLENDE_TILRETTELEGGING,
     ANNET,
 }
 
-enum class AnnenFravarArsakType {
+enum class KafkaAnnenFravarArsakType {
     GODKJENT_HELSEINSTITUSJON,
     BEHANDLING_FORHINDRER_ARBEID,
     ARBEIDSRETTET_TILTAK,
@@ -41,20 +40,26 @@ enum class AnnenFravarArsakType {
     BEHANDLING_STERILISERING,
 }
 
-data class AnnenFraverArsak(val beskrivelse: String?, val arsak: List<AnnenFravarArsakType>?)
+data class KafkaAnnenFraverArsak(
+    val beskrivelse: String?,
+    val arsak: List<KafkaAnnenFravarArsakType>?
+)
 
-data class MedisinskArsak(val beskrivelse: String?, val arsak: MedisinskArsakType)
+data class KafkaMedisinskArsak(val beskrivelse: String?, val arsak: KafkaMedisinskArsakType)
 
-data class ArbeidsrelatertArsak(val beskrivelse: String?, val arsak: ArbeidsrelatertArsakType)
+data class KafkaArbeidsrelatertArsak(
+    val beskrivelse: String?,
+    val arsak: KafkaArbeidsrelatertArsakType
+)
 
-data class Yrkesskade(val yrkesskadeDato: LocalDate?)
+data class KafkaYrkesskade(val yrkesskadeDato: LocalDate?)
 
 data class SykmeldingRecordMedisinskVurdering(
-    val hovedDiagnose: DiagnoseInfo?,
-    val biDiagnoser: List<DiagnoseInfo>?,
+    val hovedDiagnose: KafkaDiagnoseInfo?,
+    val biDiagnoser: List<KafkaDiagnoseInfo>?,
     val svangerskap: Boolean, // TODO må få inn i payload
-    val yrkesskade: Yrkesskade?,
+    val yrkesskade: KafkaYrkesskade?,
     val skjermetForPasient: Boolean, // TODO må få inn i payload
     val syketilfelletStartDato: LocalDate?,
-    val annenFraversArsak: AnnenFraverArsak?,
+    val annenFraversArsak: KafkaAnnenFraverArsak?,
 )

@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata
 
 import java.time.OffsetDateTime
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Pasient
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordPasient
 
 enum class MetadataType {
     DIGITAL,
@@ -84,7 +84,7 @@ data class EDIEmottak(
     val msgInfo: MessageInfo,
     val sender: Organisasjon,
     val receiver: Organisasjon,
-    val pasient: Pasient?,
+    val pasient: SykmeldingRecordPasient?,
     val vedlegg: List<String>?,
 ) : MessageMetadata {
     override val type = MetadataType.EMOTTAK

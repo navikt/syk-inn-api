@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
@@ -116,10 +117,28 @@ class SykmeldingPersistenceService(
             sykmeldingEntity == null && sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
         ) {
             logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
-            sykmeldingRepository.save(
-                mapSykmeldingRecordToSykmeldingDatabaseEntity(sykmeldingId, sykmeldingRecord, true),
-            )
-            logger.debug("Saved sykmelding with id=${sykmeldingRecord.sykmelding.id}")
+            try {
+                val entity =
+                    mapSykmeldingRecordToSykmeldingDatabaseEntity(
+                        sykmeldingId,
+                        sykmeldingRecord,
+                        true
+                    )
+                sykmeldingRepository.save(entity)
+                logger.debug("Saved new sykmelding with id=${sykmeldingRecord.sykmelding.id}")
+            } catch (ex: Exception) {
+                logger.info(
+                    "Unable to map SykmeldingRecord to database entity for sykmeldingId=$sykmeldingId and will therefore be skipped and not saved"
+                )
+                logger.error(
+                    "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
+                    ex,
+                )
+                throw SykmeldingDBMappingException(
+                    "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
+                    ex,
+                )
+            }
         }
 
         if (sykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
