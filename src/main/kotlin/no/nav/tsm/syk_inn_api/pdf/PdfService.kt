@@ -11,8 +11,10 @@ class PdfService(
     private val sykmeldingService: SykmeldingService,
     private val personService: PersonService
 ) {
-    fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray> =
+    fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray?> =
         sykmeldingService.getSykmeldingById(sykmeldingId, hpr).flatMap { sykmelding ->
+            if (sykmelding == null) return Result.success(null)
+
             personService
                 .getPersonByIdent(sykmelding.pasientFnr)
                 .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }

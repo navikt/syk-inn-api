@@ -46,12 +46,15 @@ class SykmeldingController(
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<Any> =
         sykmeldingService.getSykmeldingById(sykmeldingId, hpr).fold(
-            { ResponseEntity.ok(it) },
+            { sykmelding ->
+                if (sykmelding == null) {
+                    ResponseEntity.notFound().build()
+                } else {
+                    ResponseEntity.ok(sykmelding)
+                }
+            },
         ) {
-            when (it) {
-                is IllegalArgumentException -> ResponseEntity.notFound().build()
-                else -> ResponseEntity.internalServerError().build()
-            }
+            ResponseEntity.internalServerError().build()
         }
 
     @GetMapping("/")

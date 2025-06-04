@@ -22,7 +22,13 @@ class PdfController(private val pdfService: PdfService) {
             )
 
         return createdPdf.fold(
-            { ResponseEntity.status(200).body(it) },
+            { pdf ->
+                if (pdf == null) {
+                    ResponseEntity.status(404).body("Sykmelding not found or PDF generation failed")
+                } else {
+                    ResponseEntity.ok().body(pdf)
+                }
+            },
         ) {
             ResponseEntity.status(500).body("Internal server error: ${it.message}")
         }

@@ -88,15 +88,8 @@ class SykmeldingService(
         return sykmeldingResponse.right()
     }
 
-    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): Result<SykmeldingResponse> {
-        val sykmelding =
-            sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
-                ?: return Result.failure(
-                    IllegalArgumentException("Sykmelding not found for sykmeldingId=$sykmeldingId"),
-                )
-
-        return Result.success(sykmelding)
-    }
+    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): Result<SykmeldingResponse?> =
+        Result.success(sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString()))
 
     fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingResponse>> {
         logger.info("Henter sykmeldinger for ident=$ident")

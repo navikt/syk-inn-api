@@ -34,8 +34,9 @@ object PdfResources {
         )
 
     fun loadFont(name: String): File {
-        val stream = this.javaClass.getResourceAsStream("/pdf/fonts/$name")
-            ?: throw IllegalArgumentException("Font file $name not found")
+        val stream =
+            this.javaClass.getResourceAsStream("/pdf/fonts/$name")
+                ?: throw IllegalArgumentException("Font file $name not found")
 
         val tempFile = File.createTempFile("font-", name).apply { deleteOnExit() }
         stream.use { it.copyTo(tempFile.outputStream()) }
@@ -45,9 +46,9 @@ object PdfResources {
     val colorProfile: ByteArray =
         IOUtils.toByteArray(this.javaClass.getResourceAsStream("/pdf/sRGB.icc"))
 
-    val logo = this.javaClass.getResourceAsStream("/pdf/logo.svg")
-        ?: throw IllegalArgumentException("Logo resource not found")
-
+    val logo =
+        this.javaClass.getResourceAsStream("/pdf/logo.svg")
+            ?: throw IllegalArgumentException("Logo resource not found")
 }
 
 data class FontMeta(
@@ -57,4 +58,3 @@ data class FontMeta(
     val subset: Boolean,
     val fileName: String,
 )
-
