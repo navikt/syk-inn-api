@@ -39,9 +39,9 @@ class SykmeldingService(
     ): Either<SykmeldingCreationErrors, SykmeldingResponse> {
         val sykmeldingId = UUID.randomUUID().toString()
         val resources = result {
-            val person = personService.getPersonByIdent(payload.pasientIdent).bind()
+            val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
             val sykmelder =
-                helsenettProxyService.getSykmelderByHpr(payload.sykmelderHpr, sykmeldingId).bind()
+                helsenettProxyService.getSykmelderByHpr(payload.meta.sykmelderHpr, sykmeldingId).bind()
             val sykmelderSuspendert =
                 btsysService
                     .isSuspended(
@@ -76,7 +76,7 @@ class SykmeldingService(
         }
 
         val sykmeldingResponse =
-            sykmeldingPersistenceService.saveSykmeldingPayload(payload, sykmeldingId)
+            sykmeldingPersistenceService.saveSykmeldingPayload(payload, sykmeldingId, person, sykmelder, ruleResult)
 
         if (sykmeldingResponse == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")

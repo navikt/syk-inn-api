@@ -18,11 +18,13 @@ data class OpprettSykmeldingMetadata(
 )
 
 data class OpprettSykmelding(
+    val pasientenSkalSkjermes: Boolean,
     val hoveddiagnose: OpprettSykmeldingDiagnoseInfo,
     val bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>,
-    val aktivitet: OpprettSykmeldingAktivitet,
+    val aktivitet:List<OpprettSykmeldingAktivitet>,
     val meldinger: OpprettSykmeldingMeldinger,
-    val andreSporsmal: OpprettSykmeldingAndreSporsmal,
+    val svangerskapsrelatert: Boolean,
+    val yrkesskade: OpprettSykmeldingYrkesskade?,
     val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
     val tilbakedatering: OpprettSykmeldingTilbakedatering?,
 )
@@ -32,9 +34,9 @@ data class OpprettSykmeldingMeldinger(
     val tilArbeidsgiver: String?,
 )
 
-data class OpprettSykmeldingAndreSporsmal(
-    val svangerskapsrelatert: Boolean,
+data class OpprettSykmeldingYrkesskade(
     val yrkesskade: Boolean,
+    val skadedato: LocalDate?,
 )
 
 data class OpprettSykmeldingArbeidsgiver(

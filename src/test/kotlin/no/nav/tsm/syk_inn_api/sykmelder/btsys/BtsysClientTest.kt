@@ -18,10 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
 
 @ExtendWith(MockKExtension::class)
-class BtsysCientTest {
+class BtsysClientTest {
 
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var client: BtsysCient
+    private lateinit var client: BtsysClient
 
     private val token = "mocked-token"
 
@@ -37,7 +37,7 @@ class BtsysCientTest {
         texasClient = mockk()
 
         client =
-            BtsysCient(
+            BtsysClient(
                 webClientBuilder = WebClient.builder(),
                 btsysEndpointUrl = baseUrl,
                 texasClient = texasClient,

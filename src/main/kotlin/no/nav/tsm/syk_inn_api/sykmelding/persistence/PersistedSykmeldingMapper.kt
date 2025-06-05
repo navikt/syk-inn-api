@@ -1,7 +1,13 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
+import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprTilleggskompetanse
 import no.nav.tsm.syk_inn_api.sykmelding.*
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EDIEmottak
@@ -21,26 +27,37 @@ object PersistedSykmeldingMapper {
 
     private val logger = LoggerFactory.getLogger(PersistedSykmeldingMapper::class.java)
 
-    fun mapSykmeldingPayloadToPersistedSykmelding(payload: SykmeldingPayload): PersistedSykmelding {
+    fun mapSykmeldingPayloadToPersistedSykmelding(
+        payload: SykmeldingPayload,
+        sykmeldingId: String,
+        pasient: Person,
+        sykmelder: HprSykmelder,
+        ruleResult: RegulaResult
+    ): PersistedSykmelding {
         return PersistedSykmelding(
-            hoveddiagnose =
-                mapHoveddiagnoseToPersistedSykmeldinghoveddiagnose(
-                    system = payload.sykmelding.hoveddiagnose.system,
-                    code = payload.sykmelding.hoveddiagnose.code,
-                ),
-            aktivitet =
-                mapOpprettSykmeldingAktivitetToPersistedSykmeldingAktivitet(
-                    payload.sykmelding.aktivitet
-                ),
+            sykmeldingId = sykmeldingId,
+            hoveddiagnose = payload.value.hoveddiagnose.toPersistedSykmeldingDiagnoseInfo(),
+            aktivitet = payload.value.aktivitet.toPersistedSykmeldingAktivitet(),
+            pasient = pasient.toPersistedSykmeldingPasient(),
+            sykmelder = sykmelder.toPersistedSykmeldingSykmelder(payload.meta.sykmelderHpr),
+            bidiagnoser = payload.value.bidiagnoser.toPersistedSykmeldingDiagnoseInfo(),
+            svangerskapsrelatert = payload.value.svangerskapsrelatert,
+            pasientenSkalSkjermes = payload.value.pasientenSkalSkjermes,
+            meldinger = payload.value.meldinger.toPersistedSykmeldingMeldinger(),
+            yrkesskade = payload.value.yrkesskade.toPersistedSykmeldingYrkesskade(),
+            arbeidsgiver = payload.value.arbeidsgiver.toPersistedSykmeldingArbeidsgiver(),
+            tilbakedatering = payload.value.tilbakedatering.toPersistedSykmeldingTilbakedatering(),
+            regelResultat = ruleResult.toPersistedSykmeldingRuleResult(),
         )
     }
 
     fun mapSykmeldingRecordToPersistedSykmelding(
         sykmeldingRecord: SykmeldingRecord,
     ): PersistedSykmelding {
+        //TODO utvide...
         val hovedDiagnose =
             requireNotNull(
-                sykmeldingRecord.sykmelding.sykmeldingRecordMedisinskVurdering.hovedDiagnose
+                sykmeldingRecord.sykmelding.sykmeldingRecordMedisinskVurdering.hovedDiagnose,
             ) {
                 "Missing hovedDiagnose in sykmeldingRecord"
             } // TODO("Handle this case - we need to support bidiagnose etc. is it ok to miss
@@ -48,26 +65,35 @@ object PersistedSykmeldingMapper {
 
         return PersistedSykmelding(
             hoveddiagnose =
-                mapHoveddiagnoseToPersistedSykmeldinghoveddiagnose(
+                mapHoveddiagnoseToPersistedSykmeldingHoveddiagnose(
                     hovedDiagnose.system.toDiagnoseSystem(),
-                    hovedDiagnose.kode
+                    hovedDiagnose.kode,
                 ),
             aktivitet =
                 mapSykmeldingRecordAktivitetToPersistedSykmeldingAktivitet(
-                    sykmeldingRecord.sykmelding.sykmeldingRecordAktivitet.first()
+                    sykmeldingRecord.sykmelding.sykmeldingRecordAktivitet.first(),
                 ),
         )
     }
 
-    private fun mapHoveddiagnoseToPersistedSykmeldinghoveddiagnose(
+    private fun mapHoveddiagnoseToPersistedSykmeldingHoveddiagnose(
         system: DiagnoseSystem,
         code: String
-    ): PersistedSykmeldingHoveddiagnose {
-        return PersistedSykmeldingHoveddiagnose(
+    ): PersistedSykmeldingDiagnoseInfo {
+        return PersistedSykmeldingDiagnoseInfo(
             system = system,
             code = code,
             text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system, code)
-                    ?: "Unknown diagnosis code: $code",
+                ?: "Unknown diagnosis code: $code",
+        )
+    }
+
+    private fun OpprettSykmeldingDiagnoseInfo.toPersistedSykmeldingDiagnoseInfo(): PersistedSykmeldingDiagnoseInfo {
+        return PersistedSykmeldingDiagnoseInfo(
+            system = system,
+            code = code,
+            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system, code)
+                ?: "Unknown diagnosis code: $code",
         )
     }
 
@@ -80,6 +106,7 @@ object PersistedSykmeldingMapper {
                     fom = sykmeldingRecordAktivitet.fom.toString(),
                     tom = sykmeldingRecordAktivitet.tom.toString(),
                 )
+
             is SykmeldingRecordAktivitet.Gradert ->
                 PersistedSykmeldingAktivitet.Gradert(
                     grad = sykmeldingRecordAktivitet.grad,
@@ -87,18 +114,21 @@ object PersistedSykmeldingMapper {
                     tom = sykmeldingRecordAktivitet.tom.toString(),
                     reisetilskudd = sykmeldingRecordAktivitet.reisetilskudd,
                 )
+
             is SykmeldingRecordAktivitet.Avventende ->
                 PersistedSykmeldingAktivitet.Avventende(
                     innspillTilArbeidsgiver = sykmeldingRecordAktivitet.innspillTilArbeidsgiver,
                     fom = sykmeldingRecordAktivitet.fom.toString(),
                     tom = sykmeldingRecordAktivitet.tom.toString(),
                 )
+
             is SykmeldingRecordAktivitet.Behandlingsdager ->
                 PersistedSykmeldingAktivitet.Behandlingsdager(
                     antallBehandlingsdager = sykmeldingRecordAktivitet.antallBehandlingsdager,
                     fom = sykmeldingRecordAktivitet.fom.toString(),
                     tom = sykmeldingRecordAktivitet.tom.toString(),
                 )
+
             is SykmeldingRecordAktivitet.Reisetilskudd ->
                 PersistedSykmeldingAktivitet.Reisetilskudd(
                     fom = sykmeldingRecordAktivitet.fom.toString(),
@@ -107,51 +137,18 @@ object PersistedSykmeldingMapper {
         }
     }
 
-    private fun mapOpprettSykmeldingAktivitetToPersistedSykmeldingAktivitet(
-        opprettSykmeldingAktivitet: OpprettSykmeldingAktivitet,
-    ): PersistedSykmeldingAktivitet {
-        return when (opprettSykmeldingAktivitet) {
-            is OpprettSykmeldingAktivitet.IkkeMulig ->
-                PersistedSykmeldingAktivitet.IkkeMulig(
-                    fom = opprettSykmeldingAktivitet.fom,
-                    tom = opprettSykmeldingAktivitet.tom,
-                )
-            is OpprettSykmeldingAktivitet.Gradert ->
-                PersistedSykmeldingAktivitet.Gradert(
-                    grad = opprettSykmeldingAktivitet.grad,
-                    fom = opprettSykmeldingAktivitet.fom,
-                    tom = opprettSykmeldingAktivitet.tom,
-                    reisetilskudd = opprettSykmeldingAktivitet.reisetilskudd,
-                )
-            is OpprettSykmeldingAktivitet.Avventende ->
-                PersistedSykmeldingAktivitet.Avventende(
-                    innspillTilArbeidsgiver = opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
-                    fom = opprettSykmeldingAktivitet.fom,
-                    tom = opprettSykmeldingAktivitet.tom,
-                )
-            is OpprettSykmeldingAktivitet.Behandlingsdager ->
-                PersistedSykmeldingAktivitet.Behandlingsdager(
-                    antallBehandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
-                    fom = opprettSykmeldingAktivitet.fom,
-                    tom = opprettSykmeldingAktivitet.tom,
-                )
-            is OpprettSykmeldingAktivitet.Reisetilskudd ->
-                PersistedSykmeldingAktivitet.Reisetilskudd(
-                    fom = opprettSykmeldingAktivitet.fom,
-                    tom = opprettSykmeldingAktivitet.tom,
-                )
-        }
-    }
-
     fun mapLegekontorOrgnr(sykmeldingRecord: SykmeldingRecord): String {
         return when (val metadata = sykmeldingRecord.metadata) {
             is Digital -> metadata.orgnummer
             is Papir -> metadata.sender.ids.firstOrNull().let { it?.id }
-                    ?: error("No orgnr found in sender object")
+                ?: error("No orgnr found in sender object")
+
             is EmottakEnkel -> metadata.sender.ids.firstOrNull().let { it?.id }
-                    ?: error("No orgnr found in sender object")
+                ?: error("No orgnr found in sender object")
+
             is EDIEmottak -> metadata.sender.ids.firstOrNull().let { it?.id }
-                    ?: error("No orgnr found in sender object")
+                ?: error("No orgnr found in sender object")
+
             else -> "Missing legekontor orgnr"
         }
     }
@@ -162,14 +159,17 @@ object PersistedSykmeldingMapper {
                 sykmelding.sykmelder.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
                     ?: error("No HPR number found in Sykmelder-object")
             }
+
             is Papirsykmelding -> {
                 sykmelding.sykmelder.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
                     ?: error("No HPR number found in Sykmelder-object")
             }
+
             is XmlSykmelding -> {
                 sykmelding.sykmelder.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
                     ?: error("No HPR number found in Sykmelder-object")
             }
+
             is UtenlandskSykmelding -> {
                 logger.warn("Sykmelding type is not SykInnSykmelding, cannot map HPR number")
                 return "Utenlandsk"
@@ -187,4 +187,177 @@ object PersistedSykmeldingMapper {
             }
         }
     }
+
+    private fun Person.toPersistedSykmeldingPasient(): PersistedSykmeldingPasient {
+        return PersistedSykmeldingPasient(
+            navn = navn,
+            ident = ident,
+            fodselsdato = fodselsdato
+        )
+    }
+
+    private fun HprSykmelder.toPersistedSykmeldingSykmelder(hprNummer: String): PersistedSykmeldingSykmelder {
+        return PersistedSykmeldingSykmelder(
+            godkjenninger = godkjenninger.toPersistedSykmeldingHprGodkjenning(),
+            ident = this.fnr,
+            hprNummer = hprNummer,
+            fornavn = this.fornavn,
+            mellomnavn = this.mellomnavn,
+            etternavn = this.etternavn,
+        )
+    }
+
+    private fun OpprettSykmeldingMeldinger.toPersistedSykmeldingMeldinger(): PersistedSykmeldingMeldinger {
+        return PersistedSykmeldingMeldinger(
+            tilNav = tilNav,
+            tilArbeidsgiver = tilArbeidsgiver,
+        )
+    }
+
+    private fun OpprettSykmeldingTilbakedatering?.toPersistedSykmeldingTilbakedatering(): PersistedSykmeldingTilbakedatering? {
+        if(this == null) return null
+
+        return PersistedSykmeldingTilbakedatering(
+            startdato = startdato,
+            begrunnelse = begrunnelse,
+        )
+    }
+
+    private fun OpprettSykmeldingYrkesskade?.toPersistedSykmeldingYrkesskade(): PersistedSykmeldingYrkesskade? {
+        if(this == null) return null
+
+        return PersistedSykmeldingYrkesskade(
+            yrkesskade = yrkesskade,
+            skadedato = skadedato,
+        )
+    }
+
+    private fun OpprettSykmeldingArbeidsgiver?.toPersistedSykmeldingArbeidsgiver(): PersistedSykmeldingArbeidsgiver? {
+        if(this == null) return null
+
+        return PersistedSykmeldingArbeidsgiver(
+            harFlere = harFlere,
+            arbeidsgivernavn = arbeidsgivernavn
+        )
+
+    }
+
+    private fun List<OpprettSykmeldingDiagnoseInfo>.toPersistedSykmeldingDiagnoseInfo(): List<PersistedSykmeldingDiagnoseInfo> {
+        if(this.isEmpty()) return emptyList()
+        val diagnoseInfo = mutableListOf<PersistedSykmeldingDiagnoseInfo>()
+
+        this.forEach { info ->
+            diagnoseInfo.add(
+                PersistedSykmeldingDiagnoseInfo(
+                    system = info.system,
+                    code = info.code,
+                    text = DiagnosekodeMapper.findTextFromDiagnoseSystem(info.system, info.code)
+                        ?: "Unknown diagnosis code: $info.code",
+                )
+            )
+        }
+        return diagnoseInfo
+    }
+
+    private fun List<OpprettSykmeldingAktivitet>.toPersistedSykmeldingAktivitet(): List<PersistedSykmeldingAktivitet> {
+        if(this.isEmpty()) return emptyList()
+
+        val aktivitet = mutableListOf<PersistedSykmeldingAktivitet>()
+        this.forEach { opprettSykmeldingAktivitet ->
+            when (opprettSykmeldingAktivitet) {
+                is OpprettSykmeldingAktivitet.IkkeMulig ->
+                    aktivitet.add(
+                        PersistedSykmeldingAktivitet.IkkeMulig(
+                            fom = opprettSykmeldingAktivitet.fom,
+                            tom = opprettSykmeldingAktivitet.tom,
+                        ),
+                    )
+
+                is OpprettSykmeldingAktivitet.Gradert ->
+                    aktivitet.add(
+                        PersistedSykmeldingAktivitet.Gradert(
+                            grad = opprettSykmeldingAktivitet.grad,
+                            fom = opprettSykmeldingAktivitet.fom,
+                            tom = opprettSykmeldingAktivitet.tom,
+                            reisetilskudd = opprettSykmeldingAktivitet.reisetilskudd,
+                        ),
+                    )
+
+                is OpprettSykmeldingAktivitet.Avventende ->
+                    aktivitet.add(
+                        PersistedSykmeldingAktivitet.Avventende(
+                            innspillTilArbeidsgiver = opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
+                            fom = opprettSykmeldingAktivitet.fom,
+                            tom = opprettSykmeldingAktivitet.tom,
+                        ),
+                    )
+
+                is OpprettSykmeldingAktivitet.Behandlingsdager ->
+                    aktivitet.add(
+                        PersistedSykmeldingAktivitet.Behandlingsdager(
+                            antallBehandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
+                            fom = opprettSykmeldingAktivitet.fom,
+                            tom = opprettSykmeldingAktivitet.tom,
+                        ),
+                    )
+
+                is OpprettSykmeldingAktivitet.Reisetilskudd ->
+                    aktivitet.add(
+                        PersistedSykmeldingAktivitet.Reisetilskudd(
+                            fom = opprettSykmeldingAktivitet.fom,
+                            tom = opprettSykmeldingAktivitet.tom,
+                        ),
+                    )
+            }
+        }
+
+        return aktivitet
+    }
+
+    private fun List<HprGodkjenning>.toPersistedSykmeldingHprGodkjenning(): List<PersistedSykmeldingHprGodkjenning> {
+        if(this.isEmpty()) return emptyList()
+
+        val hprGodkjenninger = mutableListOf<PersistedSykmeldingHprGodkjenning>()
+
+        this.forEach { godkjenning ->
+            hprGodkjenninger.add(PersistedSykmeldingHprGodkjenning(
+                helsepersonellkategori = godkjenning.helsepersonellkategori.toPersistedSykmeldingHprKode(),
+                autorisasjon = godkjenning.autorisasjon.toPersistedSykmeldingHprKode(),
+                tillegskompetanse = godkjenning.tillegskompetanse.toPersistedSykmeldingTilleggskompetanse()
+            ))
+        }
+
+    }
+
+    private fun RegulaResult.toPersistedSykmeldingRuleResult(): PersistedSykmeldingRuleResult {
+        return when(this) {
+            is RegulaResult.Ok -> PersistedSykmeldingRuleResult(
+                result = this.status.name,
+                meldingTilSender = null
+            )
+
+            is RegulaResult.NotOk -> PersistedSykmeldingRuleResult(
+                result = this.status.name,
+                meldingTilSender = outcome.reason.sykmelder
+            )
+        }
+    }
+    private fun List<HprTilleggskompetanse>?.toPersistedSykmeldingTilleggskompetanse(): List<PersistedSykmeldingHprTilleggskompetanse>? {
+        if(this.isEmpty()) return emptyList()
+
+
+    }
+
+    private fun HprKode?.toPersistedSykmeldingHprKode(): PersistedSykmeldingHprKode? {
+        if(this == null) return null
+
+        return PersistedSykmeldingHprKode(
+            aktiv = aktiv,
+            oid = oid,
+            verdi = verdi
+        )
+    }
 }
+
+
+

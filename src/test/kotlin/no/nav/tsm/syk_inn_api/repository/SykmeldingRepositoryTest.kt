@@ -4,7 +4,7 @@ import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingHoveddiagnose
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
@@ -22,13 +22,13 @@ class SykmeldingRepositoryTest : IntegrationTest() {
         val sykmeldingDb =
             SykmeldingDb(
                 sykmeldingId = "sykmelding-123",
-                pasientFnr = "12345678910",
+                pasientIdent = "12345678910",
                 sykmelderHpr = "123456",
                 legekontorOrgnr = "987654321",
                 sykmelding =
                     PersistedSykmelding(
                             hoveddiagnose =
-                                PersistedSykmeldingHoveddiagnose(
+                                PersistedSykmeldingDiagnoseInfo(
                                     DiagnoseSystem.ICD10,
                                     "R99",
                                     "Ukjent diagnose"
@@ -45,6 +45,6 @@ class SykmeldingRepositoryTest : IntegrationTest() {
 
         assertThat(found).isNotNull
         assertThat(found?.id).isEqualTo(savedEntity.id)
-        assertThat(found?.pasientFnr).isEqualTo("12345678910")
+        assertThat(found?.pasientIdent).isEqualTo("12345678910")
     }
 }

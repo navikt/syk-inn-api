@@ -70,18 +70,18 @@ class RuleService() {
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
                 Diagnose(
-                    kode = payload.sykmelding.hoveddiagnose.code,
-                    system = payload.sykmelding.hoveddiagnose.system.oid,
+                    kode = payload.value.hoveddiagnose.code,
+                    system = payload.value.hoveddiagnose.system.oid,
                 ),
             bidiagnoser = null,
             annenFravarsArsak = null,
-            aktivitet = listOf(mapToSykmeldingAktivitet(payload.sykmelding.aktivitet)),
+            aktivitet = listOf(mapToSykmeldingAktivitet(payload.value.aktivitet)),
             utdypendeOpplysninger = emptyMap(),
             tidligereSykmeldinger = emptyList(),
             kontaktPasientBegrunnelseIkkeKontakt = null,
             pasient =
                 RegulaPasient(
-                    ident = payload.pasientIdent,
+                    ident = payload.meta.pasientIdent,
                     fodselsdato = foedselsdato,
                 ),
             meta =
@@ -92,7 +92,7 @@ class RuleService() {
                 RegulaBehandler.Finnes(
                     suspendert = sykmelderSuspendert,
                     godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
-                    legekontorOrgnr = payload.legekontorOrgnr,
+                    legekontorOrgnr = payload.meta.legekontorOrgnr,
                     fnr = sykmelder.fnr,
                 ), // TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
             avsender =

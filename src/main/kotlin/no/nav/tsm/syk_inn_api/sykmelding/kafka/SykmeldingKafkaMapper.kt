@@ -82,7 +82,7 @@ object SykmeldingKafkaMapper {
     }
 
     fun mapMessageMetadata(payload: SykmeldingPayload): MessageMetadata {
-        return Digital(orgnummer = payload.legekontorOrgnr)
+        return Digital(orgnummer = payload.meta.legekontorOrgnr)
     }
 
     fun mapToDigitalSykmelding(
@@ -106,7 +106,7 @@ object SykmeldingKafkaMapper {
             pasient =
                 SykmeldingRecordPasient(
                     navn = person.navn,
-                    fnr = payload.pasientIdent,
+                    fnr = payload.meta.pasientIdent,
                     kontaktinfo = emptyList(),
                 ),
             sykmeldingRecordMedisinskVurdering = mapMedisinskVurdering(payload),
@@ -150,7 +150,7 @@ object SykmeldingKafkaMapper {
 
     fun mapMedisinskVurdering(payload: SykmeldingPayload): SykmeldingRecordMedisinskVurdering {
         return SykmeldingRecordMedisinskVurdering(
-            hovedDiagnose = mapHoveddiagnose(payload.sykmelding.hoveddiagnose),
+            hovedDiagnose = mapHoveddiagnose(payload.value.hoveddiagnose),
             biDiagnoser = emptyList(), // TODO vi må støtte bidiagnoser inn i payload
             svangerskap = false, // TODO må få inn i payload
             skjermetForPasient = false,
@@ -162,19 +162,19 @@ object SykmeldingKafkaMapper {
     // TODO bør være egen mapper klasse for records  greier ?
     fun mapAktivitet(payload: SykmeldingPayload): List<SykmeldingRecordAktivitet> {
         return listOf(
-            when (payload.sykmelding.aktivitet) {
+            when (payload.value.aktivitet) {
                 is OpprettSykmeldingAktivitet.Gradert -> {
                     SykmeldingRecordAktivitet.Gradert(
-                        grad = payload.sykmelding.aktivitet.grad,
-                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
-                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
-                        reisetilskudd = payload.sykmelding.aktivitet.reisetilskudd,
+                        grad = payload.value.aktivitet.grad,
+                        fom = LocalDate.parse(payload.value.aktivitet.fom),
+                        tom = LocalDate.parse(payload.value.aktivitet.tom),
+                        reisetilskudd = payload.value.aktivitet.reisetilskudd,
                     )
                 }
                 is OpprettSykmeldingAktivitet.IkkeMulig -> {
                     SykmeldingRecordAktivitet.AktivitetIkkeMulig(
-                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
-                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                        fom = LocalDate.parse(payload.value.aktivitet.fom),
+                        tom = LocalDate.parse(payload.value.aktivitet.tom),
                         medisinskArsak = null,
                         arbeidsrelatertArsak = null,
                     )
@@ -182,23 +182,23 @@ object SykmeldingKafkaMapper {
                 is OpprettSykmeldingAktivitet.Avventende -> {
                     SykmeldingRecordAktivitet.Avventende(
                         innspillTilArbeidsgiver =
-                            payload.sykmelding.aktivitet.innspillTilArbeidsgiver,
-                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
-                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                            payload.value.aktivitet.innspillTilArbeidsgiver,
+                        fom = LocalDate.parse(payload.value.aktivitet.fom),
+                        tom = LocalDate.parse(payload.value.aktivitet.tom),
                     )
                 }
                 is OpprettSykmeldingAktivitet.Behandlingsdager -> {
                     SykmeldingRecordAktivitet.Behandlingsdager(
                         antallBehandlingsdager =
-                            payload.sykmelding.aktivitet.antallBehandlingsdager,
-                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
-                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                            payload.value.aktivitet.antallBehandlingsdager,
+                        fom = LocalDate.parse(payload.value.aktivitet.fom),
+                        tom = LocalDate.parse(payload.value.aktivitet.tom),
                     )
                 }
                 is OpprettSykmeldingAktivitet.Reisetilskudd -> {
                     SykmeldingRecordAktivitet.Reisetilskudd(
-                        fom = LocalDate.parse(payload.sykmelding.aktivitet.fom),
-                        tom = LocalDate.parse(payload.sykmelding.aktivitet.tom),
+                        fom = LocalDate.parse(payload.value.aktivitet.fom),
+                        tom = LocalDate.parse(payload.value.aktivitet.tom),
                     )
                 }
             },

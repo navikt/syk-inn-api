@@ -1,6 +1,9 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
+import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
@@ -23,14 +26,20 @@ class SykmeldingPersistenceService(
 
     fun saveSykmeldingPayload(
         payload: SykmeldingPayload,
-        sykmeldingId: String
-    ): SykmeldingResponse? {
+        sykmeldingId: String,
+        person: Person,
+        sykmelder: HprSykmelder,
+        ruleResult: RegulaResult,
+        ): SykmeldingResponse? {
         logger.info("Lagrer sykmelding med id=${sykmeldingId}")
         val savedEntity =
             sykmeldingRepository.save(
                 mapSykmeldingPayloadToDatabaseEntity(
                     payload = payload,
                     sykmeldingId = sykmeldingId,
+                    pasient = person,
+                    sykmelder = sykmelder,
+                    ruleResult = ruleResult,
                 ),
             )
         if (savedEntity.id == null) {
@@ -45,24 +54,34 @@ class SykmeldingPersistenceService(
 
     private fun mapSykmeldingPayloadToDatabaseEntity(
         payload: SykmeldingPayload,
-        sykmeldingId: String
-    ): SykmeldingDb {
+        sykmeldingId: String,
+        pasient: Person,
+        sykmelder: HprSykmelder,
+        ruleResult: RegulaResult,
+        ): SykmeldingDb {
         logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
-            pasientFnr = payload.pasientIdent,
-            sykmelderHpr = payload.sykmelderHpr,
+            pasientIdent = payload.meta.pasientIdent,
+            sykmelderHpr = payload.meta.sykmelderHpr,
             sykmelding =
-                PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(payload)
+                PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
+                    payload,
+                    sykmeldingId,
+                    pasient,
+                    sykmelder,
+                    ruleResult,
+                )
                     .toPGobject(),
-            legekontorOrgnr = payload.legekontorOrgnr,
+            legekontorOrgnr = payload.meta.legekontorOrgnr,
+            legekontorTlf = payload.meta.legekontorTlf,
         )
     }
 
     fun mapDatabaseEntityToSykmeldingResponse(dbObject: SykmeldingDb): SykmeldingResponse {
         return SykmeldingResponse(
             sykmeldingId = dbObject.sykmeldingId,
-            pasientFnr = dbObject.pasientFnr,
+            pasientFnr = dbObject.pasientIdent,
             sykmelderHpr = dbObject.sykmelderHpr,
             sykmelding =
                 SykmeldingResponseMapper.mapPersistedSykmeldingToExistingSykmelding(
@@ -79,7 +98,7 @@ class SykmeldingPersistenceService(
     ): SykmeldingDb {
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
-            pasientFnr = sykmeldingRecord.sykmelding.pasient.fnr,
+            pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
             sykmelderHpr = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(sykmeldingRecord)
@@ -118,6 +137,7 @@ class SykmeldingPersistenceService(
         ) {
             logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
             try {
+                //TODO skal sjekke om den faktisk er avvist eller ikkje før en kan sette validert ok.
                 val entity =
                     mapSykmeldingRecordToSykmeldingDatabaseEntity(
                         sykmeldingId,

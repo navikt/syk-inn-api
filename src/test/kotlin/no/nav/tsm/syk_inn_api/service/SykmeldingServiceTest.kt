@@ -28,6 +28,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
@@ -141,12 +142,18 @@ class SykmeldingServiceTest : IntegrationTest() {
         every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
             sykmeldingResponse
 
-        every { sykmeldingPersistenceService.saveSykmeldingPayload(any(), any()) } returns
+        every { sykmeldingPersistenceService.saveSykmeldingPayload(
+            any(),
+            any(),
+            person,
+            sykmelder,
+            ruleResult
+        ) } returns
             sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
                 SykmeldingDb(
                     id = UUID.randomUUID(),
                     sykmeldingId = sykmeldingId,
-                    pasientFnr = "01019078901",
+                    pasientIdent = "01019078901",
                     sykmelderHpr = behandlerHpr,
                     legekontorOrgnr = "987654321",
                     sykmelding = getTestSykmelding().toPGobject(),
@@ -159,9 +166,13 @@ class SykmeldingServiceTest : IntegrationTest() {
             sykmeldingService.createSykmelding(
                 payload =
                     SykmeldingPayload(
-                        pasientIdent = "01019078901",
-                        sykmelderHpr = "123456789",
-                        sykmelding =
+                        meta = OpprettSykmeldingMetadata(
+                            pasientIdent = "01019078901",
+                            sykmelderHpr = "123456789",
+                            legekontorOrgnr = "987654321",
+                            legekontorTlf = "577788888",
+                        ),
+                        value =
                             OpprettSykmelding(
                                 hoveddiagnose =
                                     OpprettSykmeldingDiagnoseInfo(
@@ -174,7 +185,6 @@ class SykmeldingServiceTest : IntegrationTest() {
                                         tom = "2020-01-30",
                                     ),
                             ),
-                        legekontorOrgnr = "987654321",
                     ),
             )
 
