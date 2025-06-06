@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.pdf
 
+import java.util.Base64
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import no.nav.tsm.syk_inn_api.person.Person
@@ -7,14 +8,17 @@ import no.nav.tsm.syk_inn_api.person.displayName
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import org.intellij.lang.annotations.Language
 
+private object HtmlResources {
+    val b64Logo =
+        this.javaClass.getResourceAsStream("/pdf/logo.svg").use { stream ->
+            stream.readBytes().let { bytes -> Base64.getEncoder().encodeToString(bytes) }
+        }
+}
+
 fun FlowContent.NavHeader(title: String) {
     div(classes = "header") {
         img {
-            src =
-                PdfResources.logo.readBytes().let { bytes ->
-                    "data:image/svg+xml;base64," +
-                        java.util.Base64.getEncoder().encodeToString(bytes)
-                }
+            src = "data:image/svg+xml;base64,${HtmlResources.b64Logo}"
             alt = "NAV Logo"
         }
         h1 { +title }

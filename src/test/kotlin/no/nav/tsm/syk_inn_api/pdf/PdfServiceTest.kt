@@ -28,6 +28,7 @@ class PdfServiceTest {
 
     private val pdfService: PdfService =
         PdfService(
+            pdfGenerator = PdfGenerator(),
             sykmeldingService = sykmeldingServiceMock,
             personService = personServiceMock,
         )
@@ -80,7 +81,7 @@ class PdfServiceTest {
         assertNotNull(pdf)
 
         // Uncomment this to open the PDF in the default viewer, for developing PDF
-        //openPdf(pdf, temp = false)
+        // openPdf(pdf, temp = false)
     }
 }
 

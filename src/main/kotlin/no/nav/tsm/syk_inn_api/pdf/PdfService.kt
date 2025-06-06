@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service
 @Service
 class PdfService(
     private val sykmeldingService: SykmeldingService,
-    private val personService: PersonService
+    private val personService: PersonService,
+    private val pdfGenerator: PdfGenerator
 ) {
     fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray?> {
         val sykmelding =
@@ -17,6 +18,12 @@ class PdfService(
         return personService
             .getPersonByIdent(sykmelding.pasientFnr)
             .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }
-            .map { html -> createPDFA(html) }
+            .map { html ->
+                val pdf = pdfGenerator.generatePDFA(html)
+
+                pdfGenerator.verifyPDFACompliance(pdf)
+
+                pdf
+            }
     }
 }

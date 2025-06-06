@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.pdf
 
 import java.util.*
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -12,7 +13,7 @@ class PdfController(private val pdfService: PdfService) {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping("/api/sykmelding/{sykmeldingId}/pdf", produces = ["application/pdf"])
+    @GetMapping("/api/sykmelding/{sykmeldingId}/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
     fun getSykmeldingPdf(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String
@@ -33,7 +34,7 @@ class PdfController(private val pdfService: PdfService) {
             },
         ) { error ->
             logger.error(
-                "Failed to create PDF for sykmeldingId: $sykmeldingId, error: ${error.message}"
+                "Failed to create PDF for sykmeldingId: $sykmeldingId, error: ${error.message}",
             )
             ResponseEntity.status(500).body("Internal server error")
         }

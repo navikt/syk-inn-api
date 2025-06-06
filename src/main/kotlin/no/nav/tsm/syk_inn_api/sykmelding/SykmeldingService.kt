@@ -88,6 +88,7 @@ class SykmeldingService(
         return sykmeldingResponse.right()
     }
 
+    // TODO: Faktisk implementer hpr-tilgangsstyring
     fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingResponse? =
         sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
