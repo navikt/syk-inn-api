@@ -65,7 +65,7 @@ enum class Kjonn {
     }
 }
 
-data class Navn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
+data class KafkaPersonNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
 data class PersonId(
     val id: String,
@@ -141,7 +141,7 @@ enum class RolleTilPasient {
 
 data class Helsepersonell(
     val ids: List<PersonId>,
-    val navn: Navn?,
+    val navn: KafkaPersonNavn?,
     val fodselsdato: LocalDate?,
     val kjonn: Kjonn?,
     val nasjonalitet: String?,

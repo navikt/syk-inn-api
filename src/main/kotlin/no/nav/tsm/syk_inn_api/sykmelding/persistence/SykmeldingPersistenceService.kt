@@ -1,12 +1,20 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import arrow.core.flatMap
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.person.PersonService
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonIdType
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Papirsykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.UtenlandskSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.XmlSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponseMapper
 import org.slf4j.LoggerFactory
@@ -15,6 +23,8 @@ import org.springframework.stereotype.Service
 @Service
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
+    private val personService: PersonService,
+    private val helsenettProxyService: HelsenettProxyService,
 ) {
     private val logger = LoggerFactory.getLogger(SykmeldingPersistenceService::class.java)
 
@@ -96,14 +106,19 @@ class SykmeldingPersistenceService(
         sykmeldingRecord: SykmeldingRecord,
         validertOk: Boolean
     ): SykmeldingDb {
+        val person = personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
+        //TODO noko anna error handling her?
+        val sykmelder = helsenettProxyService.getSykmelderByHpr(PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord), sykmeldingId).getOrThrow()
+
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
             pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
             sykmelderHpr = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
             sykmelding =
-                PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(sykmeldingRecord)
+                PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(sykmeldingRecord, person, sykmelder)
                     .toPGobject(),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
+            legekontorTlf = TODO(),
             validertOk = validertOk,
         )
     }

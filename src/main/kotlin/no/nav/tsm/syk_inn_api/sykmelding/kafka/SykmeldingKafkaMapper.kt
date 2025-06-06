@@ -13,7 +13,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.HelsepersonellKategori
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.MessageMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Navn
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonId
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonIdType
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
@@ -114,7 +114,7 @@ object SykmeldingKafkaMapper {
             behandler =
                 SykmeldingRecordBehandler(
                     navn =
-                        Navn(
+                        KafkaPersonNavn(
                             fornavn = sykmelder.fornavn,
                             mellomnavn = sykmelder.mellomnavn,
                             etternavn = sykmelder.etternavn,
