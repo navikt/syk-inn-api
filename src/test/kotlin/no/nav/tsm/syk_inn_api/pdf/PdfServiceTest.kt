@@ -77,10 +77,10 @@ class PdfServiceTest {
 
         val pdf = pdfService.createSykmeldingPdf(testSykmeldingUuid, "123456789").getOrThrow()
 
-        // Uncomment this to open the PDF in the default viewer, for developing PDF
-        // openPdf(pdf, temp = false)
-
         assertNotNull(pdf)
+
+        // Uncomment this to open the PDF in the default viewer, for developing PDF
+        //openPdf(pdf, temp = false)
     }
 }
 

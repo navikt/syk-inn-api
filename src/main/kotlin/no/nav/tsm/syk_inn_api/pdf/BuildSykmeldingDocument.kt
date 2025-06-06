@@ -41,7 +41,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingResponse, pasient: Person): String
                 meta(name = "description", "TODO")
                 meta(charset = "UTF-8")
 
-                style { +stylesheet }
+                style(type = "text/css") { unsafe { +stylesheet } }
             }
 
             body {
