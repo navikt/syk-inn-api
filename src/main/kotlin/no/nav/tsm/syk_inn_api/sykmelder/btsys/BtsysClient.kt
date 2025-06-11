@@ -16,13 +16,13 @@ interface IBtsysClient {
 
 @Profile("!local")
 @Component
-class BtsysCient(
+class BtsysClient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
     @Value("\${btsys.endpoint-url}") private val btsysEndpointUrl: String,
 ) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
-    private val logger = LoggerFactory.getLogger(BtsysCient::class.java)
+    private val logger = LoggerFactory.getLogger(BtsysClient::class.java)
 
     override fun checkSuspensionStatus(
         sykmelderFnr: String,
