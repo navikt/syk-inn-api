@@ -1,73 +1,62 @@
 # syk-inn-api
 
 ## Technologies used
+
 * Kotlin
 * Spring boot
 * Gradle
 
 ### Prerequisites
-#### Java
-Make sure you have the Java JDK 21 installed
-You can check which version you have installed using this command:
-``` bash
-java -version
-```
-#### Docker
-Make sure you have the Docker installed
-You can check which version you have installed using this command:
-``` bash
-docker --version
-```
-#### Docker compose
-Make sure you have the Docker-compose installed
-You can check which version you have installed using this command:
-``` bash
-docker-compose --version
-```
 
-Docker compose will deploy Kafka. To query the local Kafka instance you can use the following command to check for content in the topic::
-``` bash
- kcat -b localhost:9092 -t tsm.sykmeldinger-input -C -o beginning
-```
+(Use mise? `mise i` to install the required prerequisites)
+
+- Java 21
+
+You will also need docker installed for running the application locally, and running tests with testcontainers.
 
 ### Building the application
+
 To build locally and run the integration tests you can simply run
+
 ``` bash
 ./gradlew clean build
 ```
-or on windows
-`gradlew.bat clean build`
 
+This will run tests as well.
 
----
-> new stuff under here this is the stuff you should read
-# Run this application locally
+## Run this application locally
 
-external services are mocked so we are not calling pdl, btsys etc- 
+external services are mocked so we are not calling pdl, btsys etc-
 
 ``` bash
-docker compose up -d
-or 
-podman-compose up -d 
+docker compose up -d 
 ```
 
-## Initiate the database table 
-currently flyway is not enabled so before you send a create sykmelding you HAVE to create the sykmelding table. Start the db query console in your IDe and run this: 
+or
 
-``` sql
-CREATE TABLE sykmelding (
-                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                            sykmelding_id TEXT NOT NULL,
-                            pasient_fnr TEXT NOT NULL,
-                            sykmelder_hpr TEXT NOT NULL,
-                            sykmelding JSONB NOT NULL,
-                            legekontor_orgnr TEXT NOT NULL,
-                            validert_ok BOOLEAN NOT NULL DEFAULT FALSE
-);
+``` bash
+podman-compose up -d
 ```
 
+Run the application normally from IntelliJ, remember to set the profile `local` in your run configuration.
 
-### Contact
+Or run the application using Gradle:
+
+``` bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+### Inspecting topics
+
+Kafka will run in docker. To query the local Kafka instance you can use the following command to check for
+content in the topic::
+
+``` bash
+kcat -b localhost:9092 -t tsm.sykmeldinger-input -C -o beginning
+```
+
+## Contact
+
 This project is maintained by [navikt/tsm](CODEOWNERS)
 
 Questions and/or feature requests?

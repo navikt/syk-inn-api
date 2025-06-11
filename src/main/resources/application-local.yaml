@@ -24,3 +24,5 @@ spring:
     security:
       protocol: plaintext
 
+nais:
+  cluster: ${NAIS_CLUSTER:local}
