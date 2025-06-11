@@ -11,6 +11,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMapper
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -85,13 +86,16 @@ class SykmeldingPersistenceService(
     fun mapDatabaseEntityToSykmeldingResponse(dbObject: SykmeldingDb): SykmeldingDocument {
         return SykmeldingDocument(
             sykmeldingId = dbObject.sykmeldingId,
-            pasientFnr = dbObject.pasientIdent,
-            sykmelderHpr = dbObject.sykmelderHpr,
-            sykmelding =
+            meta =
+                SykmeldingDocumentMeta(
+                    pasientIdent = dbObject.pasientIdent,
+                    sykmelderHpr = dbObject.sykmelderHpr,
+                    legekontorOrgnr = dbObject.legekontorOrgnr,
+                ),
+            values =
                 SykmeldingDocumentMapper.mapPersistedSykmeldingToSykmeldingDokument(
                     dbObject.sykmelding.fromPGobject(),
                 ),
-            legekontorOrgnr = dbObject.legekontorOrgnr,
         )
     }
 
@@ -110,7 +114,7 @@ class SykmeldingPersistenceService(
                 PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
                         sykmeldingRecord,
                         person,
-                        sykmelder
+                        sykmelder,
                     )
                     .toPGobject(),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
@@ -142,7 +146,7 @@ class SykmeldingPersistenceService(
             helsenettProxyService
                 .getSykmelderByHpr(
                     PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
-                    sykmeldingId
+                    sykmeldingId,
                 )
                 .getOrThrow()
 
@@ -164,7 +168,7 @@ class SykmeldingPersistenceService(
                 logger.debug("Saved new sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             } catch (ex: Exception) {
                 logger.info(
-                    "Unable to map SykmeldingRecord to database entity for sykmeldingId=$sykmeldingId and will therefore be skipped and not saved"
+                    "Unable to map SykmeldingRecord to database entity for sykmeldingId=$sykmeldingId and will therefore be skipped and not saved",
                 )
                 logger.error(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",

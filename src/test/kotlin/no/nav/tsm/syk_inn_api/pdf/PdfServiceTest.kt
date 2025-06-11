@@ -17,12 +17,13 @@ import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentgMeldinger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -60,38 +61,41 @@ class PdfServiceTest {
         val simpleSykmelding =
             SykmeldingDocument(
                 sykmeldingId = "sykmeldingId",
-                pasientFnr = "12345678901",
-                sykmelderHpr = "123456789",
-                legekontorOrgnr = "123456789",
-                sykmelding =
-                    ExistingSykmelding(
+                meta =
+                    SykmeldingDocumentMeta(
+                        pasientIdent = "12345678901",
+                        sykmelderHpr = "123456789",
+                        legekontorOrgnr = "123456789",
+                    ),
+                values =
+                    SykmeldingDocumentValues(
                         hoveddiagnose =
-                            ExistingSykmeldingDiagnoseInfo(
+                            SykmeldingDocumentDiagnoseInfo(
                                 system = DiagnoseSystem.ICPC2,
                                 code = "X01",
                                 text = "Hodepine",
                             ),
                         aktivitet =
                             listOf(
-                                ExistingSykmeldingAktivitet.IkkeMulig(
+                                SykmeldingDocumentAktivitet.IkkeMulig(
                                     fom = "2023-01-01",
                                     tom = "2023-01-10",
-                                )
+                                ),
                             ),
                         bidiagnoser = emptyList(),
                         svangerskapsrelatert = false,
                         pasientenSkalSkjermes = false,
                         meldinger =
-                            ExistingSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
+                            SykmeldingDocumentgMeldinger(tilNav = null, tilArbeidsgiver = null),
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
                         regelResultat =
-                            ExistingSykmeldingRuleResult(
+                            SykmeldingDocumentRuleResult(
                                 result = "OK",
                                 melding = null,
                             ),
-                    )
+                    ),
             )
 
         every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid, "123456789") } returns

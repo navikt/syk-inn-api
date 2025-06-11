@@ -16,7 +16,7 @@ class PdfService(
             sykmeldingService.getSykmeldingById(sykmeldingId, hpr) ?: return Result.success(null)
 
         return personService
-            .getPersonByIdent(sykmelding.pasientFnr)
+            .getPersonByIdent(sykmelding.meta.pasientIdent)
             .map { pasient -> buildSykmeldingHtml(sykmelding, pasient) }
             .map { html ->
                 val pdf = pdfGenerator.generatePDFA(html)

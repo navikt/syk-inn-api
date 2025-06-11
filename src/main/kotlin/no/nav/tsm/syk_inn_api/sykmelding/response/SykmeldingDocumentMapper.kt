@@ -13,8 +13,8 @@ object SykmeldingDocumentMapper {
 
     fun mapPersistedSykmeldingToSykmeldingDokument(
         persistedSykmelding: PersistedSykmelding
-    ): ExistingSykmelding {
-        return ExistingSykmelding(
+    ): SykmeldingDocumentValues {
+        return SykmeldingDocumentValues(
             hoveddiagnose = persistedSykmelding.hoveddiagnose.toExistingSykmeldingDiagnoseInfo(),
             aktivitet =
                 persistedSykmelding.aktivitet
@@ -33,21 +33,21 @@ object SykmeldingDocumentMapper {
 
     private fun List<PersistedSykmeldingAktivitet>
         .toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet():
-        List<ExistingSykmeldingAktivitet> {
-        val aktiviteter = mutableListOf<ExistingSykmeldingAktivitet>()
+        List<SykmeldingDocumentAktivitet> {
+        val aktiviteter = mutableListOf<SykmeldingDocumentAktivitet>()
 
         this.forEach { aktivitet ->
             when (aktivitet) {
                 is PersistedSykmeldingAktivitet.IkkeMulig ->
                     aktiviteter.add(
-                        ExistingSykmeldingAktivitet.IkkeMulig(
+                        SykmeldingDocumentAktivitet.IkkeMulig(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
                         )
                     )
                 is PersistedSykmeldingAktivitet.Gradert ->
                     aktiviteter.add(
-                        ExistingSykmeldingAktivitet.Gradert(
+                        SykmeldingDocumentAktivitet.Gradert(
                             grad = aktivitet.grad,
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
@@ -56,7 +56,7 @@ object SykmeldingDocumentMapper {
                     )
                 is PersistedSykmeldingAktivitet.Behandlingsdager ->
                     aktiviteter.add(
-                        ExistingSykmeldingAktivitet.Behandlingsdager(
+                        SykmeldingDocumentAktivitet.Behandlingsdager(
                             antallBehandlingsdager = aktivitet.antallBehandlingsdager,
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
@@ -64,7 +64,7 @@ object SykmeldingDocumentMapper {
                     )
                 is PersistedSykmeldingAktivitet.Avventende ->
                     aktiviteter.add(
-                        ExistingSykmeldingAktivitet.Avventende(
+                        SykmeldingDocumentAktivitet.Avventende(
                             innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
@@ -72,7 +72,7 @@ object SykmeldingDocumentMapper {
                     )
                 is PersistedSykmeldingAktivitet.Reisetilskudd ->
                     aktiviteter.add(
-                        ExistingSykmeldingAktivitet.Reisetilskudd(
+                        SykmeldingDocumentAktivitet.Reisetilskudd(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
                         )
@@ -83,11 +83,11 @@ object SykmeldingDocumentMapper {
     }
 
     private fun List<PersistedSykmeldingDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
-        List<ExistingSykmeldingDiagnoseInfo> {
+        List<SykmeldingDocumentDiagnoseInfo> {
         if (this.isEmpty()) return emptyList()
 
         return this.map { diagnose ->
-            ExistingSykmeldingDiagnoseInfo(
+            SykmeldingDocumentDiagnoseInfo(
                 system = diagnose.system,
                 code = diagnose.code,
                 text = diagnose.text,
@@ -96,17 +96,17 @@ object SykmeldingDocumentMapper {
     }
 
     private fun PersistedSykmeldingRuleResult.toExistingSykmeldingRuleResult():
-        ExistingSykmeldingRuleResult {
-        return ExistingSykmeldingRuleResult(
+        SykmeldingDocumentRuleResult {
+        return SykmeldingDocumentRuleResult(
             result = this.result,
             melding = this.meldingTilSender,
         )
     }
 
     private fun PersistedSykmeldingTilbakedatering?.toExistingSykmeldingTilbakedatering():
-        ExistingSykmeldingTilbakedatering? {
+        SykmeldingDocumentTilbakedatering? {
         return this?.let {
-            ExistingSykmeldingTilbakedatering(
+            SykmeldingDocumentTilbakedatering(
                 startdato = it.startdato,
                 begrunnelse = it.begrunnelse,
             )
@@ -114,9 +114,9 @@ object SykmeldingDocumentMapper {
     }
 
     private fun PersistedSykmeldingArbeidsgiver?.toExistingSykmeldingArbeidsgiver():
-        ExistingSykmeldingArbeidsgiver? {
+        SykmeldingDocumentArbeidsgiver? {
         return this?.let {
-            ExistingSykmeldingArbeidsgiver(
+            SykmeldingDocumentArbeidsgiver(
                 harFlere = it.harFlere,
                 arbeidsgivernavn = it.arbeidsgivernavn,
             )
@@ -124,9 +124,9 @@ object SykmeldingDocumentMapper {
     }
 
     private fun PersistedSykmeldingYrkesskade?.toExistingSykmeldingYrkesskade():
-        ExistingSykmeldingYrkesskade? {
+        SykmeldingDocumentYrkesskade? {
         return this?.let {
-            ExistingSykmeldingYrkesskade(
+            SykmeldingDocumentYrkesskade(
                 yrkesskade = it.yrkesskade,
                 skadedato = it.skadedato,
             )
@@ -134,17 +134,17 @@ object SykmeldingDocumentMapper {
     }
 
     private fun PersistedSykmeldingMeldinger.toExistingSykmeldingMeldinger():
-        ExistingSykmeldingMeldinger {
-        return ExistingSykmeldingMeldinger(
+        SykmeldingDocumentgMeldinger {
+        return SykmeldingDocumentgMeldinger(
             tilNav = this.tilNav,
             tilArbeidsgiver = this.tilArbeidsgiver,
         )
     }
 
     private fun PersistedSykmeldingDiagnoseInfo?.toExistingSykmeldingDiagnoseInfo():
-        ExistingSykmeldingDiagnoseInfo? {
+        SykmeldingDocumentDiagnoseInfo? {
         return this?.let {
-            ExistingSykmeldingDiagnoseInfo(
+            SykmeldingDocumentDiagnoseInfo(
                 system = it.system,
                 code = it.code,
                 text = it.text,
