@@ -21,7 +21,7 @@ class SykmeldingController(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping
-    fun createSykmelding(@RequestBody payload: SykmeldingPayload): ResponseEntity<Any> {
+    fun createSykmelding(@RequestBody payload: OpprettSykmeldingPayload): ResponseEntity<Any> {
         logger.info("Received request to create sykmelding with payload: $payload")
         if (payload.meta.pasientIdent.isBlank() || payload.meta.sykmelderHpr.isBlank()) {
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")

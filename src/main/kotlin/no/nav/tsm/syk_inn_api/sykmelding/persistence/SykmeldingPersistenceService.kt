@@ -6,7 +6,7 @@ import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
@@ -29,7 +29,7 @@ class SykmeldingPersistenceService(
     }
 
     fun saveSykmeldingPayload(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         person: Person,
         sykmelder: HprSykmelder,
@@ -57,7 +57,7 @@ class SykmeldingPersistenceService(
     }
 
     private fun mapSykmeldingPayloadToDatabaseEntity(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         pasient: Person,
         sykmelder: HprSykmelder,

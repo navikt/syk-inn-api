@@ -64,7 +64,7 @@ data class ExistingSykmeldingDiagnoseInfo(
 
 data class ExistingSykmeldingRuleResult(
     val result: String,
-    val meldingTilSender: String?,
+    val melding: String?,
 )
 
 data class ExistingSykmeldingTilbakedatering(

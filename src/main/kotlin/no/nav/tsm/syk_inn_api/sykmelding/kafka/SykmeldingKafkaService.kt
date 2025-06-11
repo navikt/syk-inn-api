@@ -7,7 +7,7 @@ import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -31,7 +31,7 @@ class SykmeldingKafkaService(
     private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     fun send(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         person: Person,
         sykmelder: HprSykmelder,

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
-data class SykmeldingPayload(
+data class OpprettSykmeldingPayload(
     val meta: OpprettSykmeldingMetadata,
     val values: OpprettSykmelding,
 )

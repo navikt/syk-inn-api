@@ -89,7 +89,7 @@ class PdfServiceTest {
                         regelResultat =
                             ExistingSykmeldingRuleResult(
                                 result = "OK",
-                                meldingTilSender = null,
+                                melding = null,
                             ),
                     )
             )

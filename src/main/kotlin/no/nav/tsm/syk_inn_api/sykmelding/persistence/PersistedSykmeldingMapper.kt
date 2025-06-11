@@ -13,9 +13,9 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingArbeidsgiver
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EDIEmottak
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EmottakEnkel
@@ -47,7 +47,7 @@ object PersistedSykmeldingMapper {
     private val logger = LoggerFactory.getLogger(PersistedSykmeldingMapper::class.java)
 
     fun mapSykmeldingPayloadToPersistedSykmelding(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         pasient: Person,
         sykmelder: HprSykmelder,

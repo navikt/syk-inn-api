@@ -35,7 +35,7 @@ class SykmeldingService(
     }
 
     fun createSykmelding(
-        payload: SykmeldingPayload
+        payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
         val sykmeldingId = UUID.randomUUID().toString()
         val resources = result {

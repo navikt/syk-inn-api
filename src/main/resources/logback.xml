@@ -18,7 +18,8 @@
         <!-- Local development, redirect secure logs to console with nice colors -->
         <appender name="SECURE_LOG" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>%d{HH:mm:ss.SSS} %red(\(SECURELOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
+                <pattern>
+                    %d{HH:mm:ss.SSS} %red(\(SECURELOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
                 </pattern>
 
                 <outputPatternAsHeader>true</outputPatternAsHeader>
