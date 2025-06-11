@@ -12,6 +12,10 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
+  kafka:
+    bootstrap-servers: localhost:9092
+    security:
+      protocol: plaintext
 
 services:
   teamsykmelding:
@@ -26,3 +30,8 @@ services:
 nais:
   token_endpoint: "http://localhost:8084/nais/token"
   cluster: "test"
+
+kafka:
+  topics:
+    sykmeldinger-input: "foo-bar"
+    sykmeldinger: "baz-qux"
