@@ -112,7 +112,7 @@ tasks {
             showStackTraces = true
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
-        systemProperty("spring.profiles.active", "local")
+        systemProperty("spring.profiles.active", "test")
     }
 
     register<Exec>("addPreCommitGitHookOnBuild") {
