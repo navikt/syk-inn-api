@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>[%t, %d, %-5p, %C:%L, %X{Nav-Callid}] - %.-100000m%n</pattern>
+    <!-- Reduces the spammy logback logging during startup -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <root level="INFO">
+        <appender-ref ref="PRETTY-CONSOLE"/>
+    </root>
+
+    <logger name="securelog" level="INFO" additivity="false">
+        <appender-ref ref="SECURE_LOG"/>
+    </logger>
+
+    <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n
+            </pattern>
         </encoder>
     </appender>
 
-    <logger name="no.nav" level="INFO"/>
+    <appender name="SECURE_LOG" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %red(\(SECURELOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
 
-    <root level="info">
-        <appender-ref ref="CONSOLE"/>
-    </root>
+    <!-- Clean up the test logs -->
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.testcontainers" level="WARN"/>
+
 </configuration>
