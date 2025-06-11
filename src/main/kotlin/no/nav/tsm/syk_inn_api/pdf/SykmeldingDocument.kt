@@ -58,7 +58,13 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             TableInfo("Mottatt av Nav") { "TODO: Mangler i sykmelding" }
                         }
                         tr {
-                            TableInfo("Arbeidsgiver") { "TODO: Mangler i sykmelding" }
+                            TableInfo("Arbeidsgiver") {
+                                if (sykmelding.values.arbeidsgiver != null) {
+                                    sykmelding.values.arbeidsgiver.arbeidsgivernavn
+                                } else {
+                                    "Ingen arbeidsgiver oppgitt"
+                                }
+                            }
                             TableInfo("Periode") { "TODO: Formatter periode" }
                         }
                         tr {
@@ -71,14 +77,23 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         tr {
                             TableInfo("Diagnose") {
-                                "TODO tekst - ${sykmelding.values.hoveddiagnose?.code}"
+                                if (sykmelding.values.hoveddiagnose != null) {
+                                    "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.code})"
+                                } else {
+                                    "Ingen diagnose oppgitt"
+                                }
+
                             }
                             TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
                         }
-                        tr { TableInfo("Melding til Nav", colspan = "2") { "TODO: Melding" } }
+                        tr {
+                            TableInfo("Melding til Nav", colspan = "2") {
+                                sykmelding.values.meldinger.tilNav ?: ""
+                            }
+                        }
                         tr {
                             TableInfo("Innspill til arbeidsgiver", colspan = "2") {
-                                "TODO: Melding"
+                                sykmelding.values.meldinger.tilArbeidsgiver ?: ""
                             }
                         }
                     }
