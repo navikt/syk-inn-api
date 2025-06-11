@@ -106,7 +106,7 @@ class SykmeldingService(
         // at den får lov til å sjå ?
         val sykmeldinger: List<SykmeldingDocument> =
             sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
-                it.legekontorOrgnr == orgnr
+                it.meta.legekontorOrgnr == orgnr
             }
 
         if (sykmeldinger.isEmpty()) {

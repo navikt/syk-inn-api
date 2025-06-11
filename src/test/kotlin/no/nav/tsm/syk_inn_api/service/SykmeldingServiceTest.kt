@@ -36,12 +36,13 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.response.ExistingSykmeldingRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentgMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -109,7 +110,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                 tillegskompetanse = null,
                             ),
                         ),
-                )
+                ),
             )
 
         every { personService.getPersonByIdent(any()) } returns
@@ -124,28 +125,32 @@ class SykmeldingServiceTest : IntegrationTest() {
         val sykmeldingDocument =
             SykmeldingDocument(
                 sykmeldingId = sykmeldingId,
-                pasientFnr = "01019078901",
-                sykmelderHpr = behandlerHpr,
-                sykmelding =
-                    ExistingSykmelding(
+                meta =
+                    SykmeldingDocumentMeta(
+                        pasientIdent = "01019078901",
+                        sykmelderHpr = behandlerHpr,
+                        legekontorOrgnr = "987654321",
+                    ),
+                values =
+                    SykmeldingDocumentValues(
                         hoveddiagnose =
-                            ExistingSykmeldingDiagnoseInfo(
+                            SykmeldingDocumentDiagnoseInfo(
                                 system = DiagnoseSystem.ICD10,
                                 code = "Z01",
                                 text = "Ukjent diagnose",
                             ),
                         aktivitet =
                             listOf(
-                                ExistingSykmeldingAktivitet.IkkeMulig(
+                                SykmeldingDocumentAktivitet.IkkeMulig(
                                     fom = "2020-01-01",
                                     tom = "2020-01-30",
-                                )
+                                ),
                             ),
                         bidiagnoser = emptyList(),
                         svangerskapsrelatert = false,
                         pasientenSkalSkjermes = false,
                         meldinger =
-                            ExistingSykmeldingMeldinger(
+                            SykmeldingDocumentgMeldinger(
                                 tilNav = null,
                                 tilArbeidsgiver = null,
                             ),
@@ -153,12 +158,11 @@ class SykmeldingServiceTest : IntegrationTest() {
                         arbeidsgiver = null,
                         tilbakedatering = null,
                         regelResultat =
-                            ExistingSykmeldingRuleResult(
+                            SykmeldingDocumentRuleResult(
                                 result = "OK",
                                 melding = null,
                             ),
                     ),
-                legekontorOrgnr = "987654321",
             )
         every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
             sykmeldingDocument
@@ -203,7 +207,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                         OpprettSykmeldingAktivitet.IkkeMulig(
                                             fom = "2020-01-01",
                                             tom = "2020-01-30",
-                                        )
+                                        ),
                                     ),
                                 pasientenSkalSkjermes = false,
                                 bidiagnoser = emptyList(),
@@ -251,7 +255,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                 tillegskompetanse = null,
                             ),
                         ),
-                )
+                ),
             )
 
         every { personService.getPersonByIdent(any()) } returns
@@ -280,7 +284,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                                 pasientIdent = "12345678901",
                                 sykmelderHpr = "123456789",
                                 legekontorOrgnr = "987654321",
-                                legekontorTlf = "12345678"
+                                legekontorTlf = "12345678",
                             ),
                         values =
                             OpprettSykmelding(
@@ -294,26 +298,26 @@ class SykmeldingServiceTest : IntegrationTest() {
                                         OpprettSykmeldingAktivitet.IkkeMulig(
                                             fom = "2020-01-01",
                                             tom = "2020-01-30",
-                                        )
+                                        ),
                                     ),
                                 pasientenSkalSkjermes = false,
                                 bidiagnoser = emptyList(),
                                 meldinger =
                                     OpprettSykmeldingMeldinger(
                                         tilNav = null,
-                                        tilArbeidsgiver = null
+                                        tilArbeidsgiver = null,
                                     ),
                                 svangerskapsrelatert = false,
                                 yrkesskade = null,
                                 arbeidsgiver = null,
-                                tilbakedatering = null
+                                tilbakedatering = null,
                             ),
                     ),
             )
 
-        result.fold({
-            assertEquals(it, SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION)
-        }) {
+        result.fold(
+            { assertEquals(it, SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION) },
+        ) {
             fail("Expected rule validation error but got success: $it")
         }
     }
@@ -330,7 +334,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                     OpprettSykmeldingAktivitet.IkkeMulig(
                         fom = "2020-01-01",
                         tom = "2020-01-30",
-                    )
+                    ),
                 ),
             pasientenSkalSkjermes = false,
             bidiagnoser = emptyList(),
@@ -338,7 +342,7 @@ class SykmeldingServiceTest : IntegrationTest() {
             svangerskapsrelatert = false,
             yrkesskade = null,
             arbeidsgiver = null,
-            tilbakedatering = null
+            tilbakedatering = null,
         )
     }
 }

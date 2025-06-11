@@ -71,7 +71,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         tr {
                             TableInfo("Diagnose") {
-                                "TODO tekst - ${sykmelding.sykmelding.hoveddiagnose?.code}"
+                                "TODO tekst - ${sykmelding.values.hoveddiagnose?.code}"
                             }
                             TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
                         }
