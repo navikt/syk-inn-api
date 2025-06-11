@@ -121,8 +121,8 @@ object SykmeldingKafkaMapper {
                     fnr = payload.meta.pasientIdent,
                     kontaktinfo = emptyList(),
                 ),
-            sykmeldingRecordMedisinskVurdering = mapMedisinskVurdering(payload),
-            sykmeldingRecordAktivitet = mapAktivitet(payload),
+            medisinskVurdering = mapMedisinskVurdering(payload),
+            aktivitet = mapAktivitet(payload),
             behandler =
                 SykmeldingRecordBehandler(
                     navn =

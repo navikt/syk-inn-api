@@ -19,7 +19,7 @@ interface IHelsenettProxyClient {
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
-    @Value("\${syfohelsenettproxy.base-url}") private val baseUrl: String,
+    @Value("\${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
 ) : IHelsenettProxyClient {
     private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()

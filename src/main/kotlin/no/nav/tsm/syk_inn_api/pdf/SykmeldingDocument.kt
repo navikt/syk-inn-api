@@ -82,7 +82,6 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 } else {
                                     "Ingen diagnose oppgitt"
                                 }
-
                             }
                             TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
                         }

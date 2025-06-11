@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
+    <!-- Reduces the spammy logback logging during startup -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
     <!-- Both prod and local should provide their own secure log appender -->
     <logger name="securelog" level="INFO" additivity="false">
         <appender-ref ref="SECURE_LOG"/>
@@ -10,6 +13,8 @@
         <!-- Less spammy local development logging -->
         <logger name="org.apache.kafka" level="WARN"/>
         <logger name="org.springframework.kafka" level="WARN"/>
+        <logger name="ch.qos.logback" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
 
         <root level="INFO">
             <appender-ref ref="PRETTY-CONSOLE"/>
@@ -21,19 +26,16 @@
                 <pattern>
                     %d{HH:mm:ss.SSS} %red(\(SECURELOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
                 </pattern>
-
-                <outputPatternAsHeader>true</outputPatternAsHeader>
             </encoder>
-            <withJansi>true</withJansi>
         </appender>
 
         <!-- Pretty console appender for local development -->
         <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n</pattern>
-                <outputPatternAsHeader>true</outputPatternAsHeader>
+                <pattern>
+                    %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n
+                </pattern>
             </encoder>
-            <withJansi>true</withJansi>
         </appender>
     </springProfile>
 

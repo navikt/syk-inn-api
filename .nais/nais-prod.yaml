@@ -80,5 +80,5 @@ spec:
       value: http://tsm-pdl-cache
     - name: BTSYS_ENDPOINT_URL
       value: http://btsys-api.team-rocket
-    - name: SYFOHELSENETTPROXY_BASE_URL
+    - name: SYFOHELSENETTPROXY_URL
       value: http://syfohelsenettproxy.teamsykmelding

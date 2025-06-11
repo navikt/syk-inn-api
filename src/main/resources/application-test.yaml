@@ -1,22 +1,10 @@
-server:
-  port: 8080
-  shutdown: graceful
-  error:
-    whitelabel:
-      enabled: false
-
 spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-  main:
-    banner-mode: 'off'
   flyway:
     enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: update
   datasource:
     url: "jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true"
     username: myuser
@@ -25,17 +13,16 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
 
-syfohelsenettproxy:
-  base-url: "http://localhost:8081/syfohelsenettproxy"
-btsys:
-  endpoint-url: "http://localhost:8082/btsys"
-pdlcache:
-    endpoint-url: "http://localhost:8083/pdlcache"
-nais:
-  token:
-    endpoint: "http://localhost:8084/nais/token"
-  cluster: "dev-gcp"
+services:
+  teamsykmelding:
+    syfohelsenettproxy:
+      url: http://localhost:8081/syfohelsenettproxy
+    pdlcache:
+      url: "http://localhost:8083/pdlcache"
+  external:
+    btsys:
+      url: "http://localhost:8082/btsys"
 
-topics:
-  write: "tsm.sykmeldinger-input"
-  read: "tsm.sykmeldinger-input"
+nais:
+  token_endpoint: "http://localhost:8084/nais/token"
+  cluster: "test"

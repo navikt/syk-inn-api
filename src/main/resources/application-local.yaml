@@ -1,70 +1,26 @@
-
-server:
-  port: 8080
-  shutdown: graceful
-  error:
-    whitelabel:
-      enabled: false
-
 spring:
+  # Disable auth locally
   autoconfigure:
     exclude:
-#      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-  main:
-    banner-mode: 'off'
-  flyway:
-    enabled: true
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-    url: ${spring.datasource.url}
-  jpa:
-    hibernate:
-      ddl-auto: update
+  # Container'd postgres
   datasource:
-    url: "jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true"
-    username: myuser
-    password: mypassword
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true}
+    username: ${DB_USER:myuser}
+    password: ${DB_PASSWORD:mypassword}
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
-  security:
-    user:
-      name: myuser
-      password: secret123
+  # Flyway for local config
+  flyway:
+    enabled: true
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true}
+    user: ${DB_USER:myuser}
+    password: ${DB_PASSWORD:mypassword}
+  # Container'd kafka
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${BOOTSTRAP_SERVERS:localhost:9092}
     security:
       protocol: plaintext
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingRecordSerializer
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
 
-syfohelsenettproxy:
-  base-url: "http://localhost:8081/syfohelsenettproxy"
-btsys:
-  endpoint-url: "http://localhost:8082/btsys"
-pdlcache:
-    endpoint-url: "http://localhost:8083/pdlcache"
-nais:
-  token:
-    endpoint: "http://localhost:8084/nais/token"
-  cluster: "dev-gcp"
-topics:
-  write: "tsm.sykmeldinger-input"
-  read: "tsm.sykmeldinger-input"
-
-#logging:
-#  level:
-#    root: DEBUG
-#    org.springframework.boot.autoconfigure: DEBUG
-#    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: TRACE
-#    org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor: TRACE
-#    org.springframework.http.converter.json.MappingJackson2HttpMessageConverter: TRACE
-#    org.springframework.web.method.HandlerMethod: TRACE

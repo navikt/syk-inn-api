@@ -19,7 +19,7 @@ interface IBtsysClient {
 class BtsysClient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
-    @Value("\${btsys.endpoint-url}") private val btsysEndpointUrl: String,
+    @Value("\${services.external.btsys.url}") private val btsysEndpointUrl: String,
 ) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(BtsysClient::class.java)

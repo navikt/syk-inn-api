@@ -10,4 +10,4 @@ data class Person(
 )
 
 fun Person.displayName(): String =
-    "${navn.fornavn}${if (navn.mellomnavn != null) " ${navn.mellomnavn} " else ""}${navn.etternavn}"
+    "${navn.fornavn}${if (navn.mellomnavn != null) " ${navn.mellomnavn} " else " "}${navn.etternavn}"

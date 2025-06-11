@@ -1,5 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka
 
+import com.example.util.logger
+import com.example.util.secureLogger
 import java.time.LocalDate
 import java.time.Month
 import no.nav.tsm.regulus.regula.RegulaResult
@@ -14,8 +16,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceServic
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
@@ -24,11 +24,15 @@ import org.springframework.stereotype.Service
 class SykmeldingKafkaService(
     private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
-    @Value("\${nais.cluster}") private val clusterName: String,
 ) {
-    @Value("\${topics.write}") private lateinit var sykmeldingInputTopic: String
-    private val logger = LoggerFactory.getLogger(SykmeldingKafkaService::class.java)
-    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
+    @Value("\${nais.cluster}")
+    private lateinit var clusterName: String
+
+    @Value("\${kafka.topics.sykmeldinger-input}")
+    private lateinit var sykmeldingInputTopic: String
+
+    private val logger = logger()
+    private val secureLog = secureLogger()
 
     fun send(
         payload: OpprettSykmeldingPayload,
@@ -46,7 +50,7 @@ class SykmeldingKafkaService(
                             payload,
                             sykmeldingId,
                             person,
-                            sykmelder
+                            sykmelder,
                         ),
                     validation = SykmeldingKafkaMapper.mapValidationResult(regulaResult),
                 )
@@ -68,7 +72,7 @@ class SykmeldingKafkaService(
     }
 
     @KafkaListener(
-        topics = ["\${topics.read}"],
+        topics = ["\${kafka.topics.sykmeldinger}"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",
@@ -78,7 +82,7 @@ class SykmeldingKafkaService(
             secureLog.info(
                 "Consuming record: ${record.value()} from topic ${record.topic()}",
             )
-            val tom = record.value().sykmelding.sykmeldingRecordAktivitet.first().tom
+            val tom = record.value().sykmelding.aktivitet.first().tom
             if (isVeryOldSykmelding(tom)) {
                 return // Skip processing for sykmeldinger before 2024
             }
@@ -123,7 +127,7 @@ class SykmeldingKafkaService(
                 2024,
                 Month.JANUARY,
                 1,
-            )
+            ),
         )
     }
 }

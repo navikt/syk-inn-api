@@ -1,4 +1,3 @@
-
 server:
   port: 8080
   shutdown: graceful
@@ -9,51 +8,31 @@ server:
 spring:
   main:
     banner-mode: 'off'
-  profiles:
-    active: default
   flyway:
     enabled: true
-    user: ${db.username}
-    password: ${db.password}
     locations: classpath:db/migration
-    baseline-on-migrate: true
     url: "${DB_JDBC_URL}"
-  jpa:
-    hibernate:
-      ddl-auto: update
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    baseline-on-migrate: true
   kafka:
     bootstrap-servers: ${kafka.brokers}
     security:
       protocol: ssl
     ssl:
-      trust-store-location: file:${kafka.truststore.path}
       trust-store-type: JKS
+      trust-store-location: file:${kafka.truststore.path}
       trust-store-password: ${kafka.credstore.password}
-      key-store-location: file:${kafka.keystore.path}
       key-store-type: PKCS12
+      key-store-location: file:${kafka.keystore.path}
       key-store-password: ${kafka.credstore.password}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingRecordSerializer
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
   datasource:
     url: "${DB_JDBC_URL}"
-    username: ${db.username}
-    password: ${db.password}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
-  sql:
-      init:
-          platform: postgres
-  data:
-    jdbc:
-      repositories:
-        enabled: true
   security:
     oauth2:
       resourceserver:
@@ -92,9 +71,29 @@ spring:
           aad:
             issuer-uri: ${azure.openid.config.issuer}
 
+# Kafka topics that this syk-inn-api uses
+kafka:
+  topics:
+    sykmeldinger-input: "tsm.sykmeldinger-input"
+    sykmeldinger: "tsm.sykmeldinger"
 
-    bootstrap-servers: localhost:9092
+# External services that syk-inn-api interacts with
+services:
+  teamsykmelding:
+    syfohelsenettproxy:
+      url: ${SYFOHELSENETTPROXY_URL}
+    pdlcache:
+      url: ${TSM_PDL_ENDPOINT_URL}
+  external:
+    btsys:
+      url: ${BTSYS_ENDPOINT_URL}
 
+# Config for Texas
+nais:
+  token_endpoint: ${NAIS_TOKEN_ENDPOINT}
+  cluster: ${NAIS_CLUSTER_NAME}
+
+# Use spring for health checks
 management:
   endpoint:
     health.probes.enabled: true
@@ -105,25 +104,5 @@ management:
     base-path: "/internal"
     exposure.include: health,prometheus,mappings
   health:
-    livenessstate.enabled: true
+    livenessState.enabled: true
     readinessState.enabled: true
-
-logging.config: "classpath:logback.xml"
-
-logging:
-  level:
-    org.springframework.boot.context.properties: DEBUG
-
-syfohelsenettproxy:
-  base-url: ${SYFOHELSENETTPROXY_BASE_URL}
-btsys:
-  endpoint-url: ${BTSYS_ENDPOINT_URL}
-pdlcache:
-    endpoint-url: ${TSM_PDL_ENDPOINT_URL}
-nais:
-  token:
-    endpoint: ${NAIS_TOKEN_ENDPOINT}
-  cluster: ${NAIS_CLUSTER_NAME}
-topics:
-  write: "tsm.sykmeldinger-input"
-  read: "tsm.sykmeldinger"

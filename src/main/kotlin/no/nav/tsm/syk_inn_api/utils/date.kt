@@ -17,11 +17,7 @@ fun toReadableDatePeriod(fom: LocalDate, tom: LocalDate): String {
         fom.isEqual(tom) -> toReadableDate(fom)
         fom.month == tom.month && fom.year == tom.year ->
             "${fom.dayOfMonth}. - ${toReadableDate(tom)}"
-
-        fom.year == tom.year ->
-            "${toReadableDateNoYear(fom)} - ${toReadableDate(tom)}"
-
-        else ->
-            "${toReadableDate(fom)} - ${toReadableDate(tom)}"
+        fom.year == tom.year -> "${toReadableDateNoYear(fom)} - ${toReadableDate(tom)}"
+        else -> "${toReadableDate(fom)} - ${toReadableDate(tom)}"
     }
 }

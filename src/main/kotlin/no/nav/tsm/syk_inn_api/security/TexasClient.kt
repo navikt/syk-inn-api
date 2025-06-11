@@ -4,16 +4,18 @@ import java.nio.file.AccessDeniedException
 import javax.naming.AuthenticationException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 
 /** Texas = Token Exchange as a Service */
+@Profile("!local")
 @Component
 class TexasClient(
     webClientBuilder: WebClient.Builder,
-    @Value("\${nais.token.endpoint}") private val naisTokenEndpoint: String,
+    @Value("\${nais.token_endpoint}") private val naisTokenEndpoint: String,
     @Value("\${nais.cluster}") private val cluster: String,
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(naisTokenEndpoint).build()

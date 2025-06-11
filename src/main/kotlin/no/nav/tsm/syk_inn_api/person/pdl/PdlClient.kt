@@ -22,7 +22,7 @@ interface IPdlClient {
 class PdlClient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
-    @Value("\${pdlcache.endpoint-url}") private val pdlEndpointUrl: String,
+    @Value("\${services.teamsykmelding.pdlcache.url}") private val pdlEndpointUrl: String,
 ) : IPdlClient {
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = LoggerFactory.getLogger(IPdlClient::class.java)
