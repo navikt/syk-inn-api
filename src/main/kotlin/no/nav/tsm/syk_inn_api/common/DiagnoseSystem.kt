@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.helse.diagnosekoder.Diagnosekoder
 
-enum class DiagnoseSystem(val oid: String) {
-    //    ICPC2("2.16.578.1.12.4.1.1.7170"),
-    //    ICD10("2.16.578.1.12.4.1.1.7110");
+enum class DiagnoseSystem(val code: String) {
     ICPC2("ICPC2"),
     ICD10("ICD10");
 
@@ -14,11 +12,11 @@ enum class DiagnoseSystem(val oid: String) {
         @JvmStatic
         @JsonCreator
         fun fromOid(value: String): DiagnoseSystem =
-            values().find { it.oid == value }
-                ?: throw IllegalArgumentException("Unknown DiagnoseSystem OID: $value")
+            entries.find { it.code == value }
+                ?: throw IllegalArgumentException("Unknown DiagnoseSystem, code: $value")
     }
 
-    @JsonValue fun toJson(): String = oid
+    @JsonValue fun toJson(): String = code
 }
 
 object DiagnosekodeMapper {

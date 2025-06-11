@@ -11,9 +11,9 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingArbeidsgiver
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.HelsepersonellKategori
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
@@ -92,12 +92,12 @@ object SykmeldingKafkaMapper {
         return ValidationResult(status = rule.type, timestamp = OffsetDateTime.now(), rules = rules)
     }
 
-    fun mapMessageMetadata(payload: SykmeldingPayload): MessageMetadata {
+    fun mapMessageMetadata(payload: OpprettSykmeldingPayload): MessageMetadata {
         return Digital(orgnummer = payload.meta.legekontorOrgnr)
     }
 
     fun mapToDigitalSykmelding(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         person: Person,
         sykmelder: HprSykmelder
@@ -204,7 +204,9 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun mapMedisinskVurdering(payload: SykmeldingPayload): SykmeldingRecordMedisinskVurdering {
+    fun mapMedisinskVurdering(
+        payload: OpprettSykmeldingPayload
+    ): SykmeldingRecordMedisinskVurdering {
         return SykmeldingRecordMedisinskVurdering(
             hovedDiagnose = mapHoveddiagnose(payload.values.hoveddiagnose),
             biDiagnoser = payload.values.bidiagnoser.toSykmeldingRecordDiagnoseInfo(),
@@ -216,7 +218,7 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun mapAktivitet(payload: SykmeldingPayload): List<SykmeldingRecordAktivitet> {
+    fun mapAktivitet(payload: OpprettSykmeldingPayload): List<SykmeldingRecordAktivitet> {
         val aktiviteter = mutableListOf<SykmeldingRecordAktivitet>()
 
         payload.values.aktivitet.forEach { aktivitet ->

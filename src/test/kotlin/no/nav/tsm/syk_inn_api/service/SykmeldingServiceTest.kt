@@ -30,7 +30,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
@@ -155,7 +155,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                         regelResultat =
                             ExistingSykmeldingRuleResult(
                                 result = "OK",
-                                meldingTilSender = null,
+                                melding = null,
                             ),
                     ),
                 legekontorOrgnr = "987654321",
@@ -183,7 +183,7 @@ class SykmeldingServiceTest : IntegrationTest() {
         val result =
             sykmeldingService.createSykmelding(
                 payload =
-                    SykmeldingPayload(
+                    OpprettSykmeldingPayload(
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = "01019078901",
@@ -274,7 +274,7 @@ class SykmeldingServiceTest : IntegrationTest() {
         val result =
             sykmeldingService.createSykmelding(
                 payload =
-                    SykmeldingPayload(
+                    OpprettSykmeldingPayload(
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = "12345678901",

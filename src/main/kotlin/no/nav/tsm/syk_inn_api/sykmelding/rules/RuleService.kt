@@ -22,7 +22,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -31,7 +31,7 @@ class RuleService() {
     private val logger = LoggerFactory.getLogger(RuleService::class.java)
 
     fun validateRules(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         sykmelder: HprSykmelder,
         sykmelderSuspendert: Boolean,
@@ -39,18 +39,18 @@ class RuleService() {
     ): RegulaResult {
         return try {
             executeRegulaRules(
-                    ruleExecutionPayload =
-                        createRegulaPayload(
-                            payload = payload,
-                            sykmeldingId = sykmeldingId,
-                            sykmelder = sykmelder,
-                            sykmelderSuspendert = sykmelderSuspendert,
-                            foedselsdato = foedselsdato,
-                        ),
-                    mode = ExecutionMode.NORMAL,
-                )
+                ruleExecutionPayload =
+                    createRegulaPayload(
+                        payload = payload,
+                        sykmeldingId = sykmeldingId,
+                        sykmelder = sykmelder,
+                        sykmelderSuspendert = sykmelderSuspendert,
+                        foedselsdato = foedselsdato,
+                    ),
+                mode = ExecutionMode.NORMAL,
+            )
                 .also {
-                    logger.error(
+                    logger.info(
                         "Sykmelding med id=$sykmeldingId er validering ${it.status.name} mot regler",
                     )
                 }
@@ -63,7 +63,7 @@ class RuleService() {
     }
 
     private fun createRegulaPayload(
-        payload: SykmeldingPayload,
+        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         sykmelder: HprSykmelder,
         sykmelderSuspendert: Boolean,
@@ -84,7 +84,8 @@ class RuleService() {
             annenFravarsArsak = null,
             aktivitet = mapToSykmeldingAktivitet(payload.values.aktivitet.first()),
             utdypendeOpplysninger = emptyMap(),
-            tidligereSykmeldinger = emptyList(), //TODO her bør vi kanskje slå opp tidligere sykmeldinger? sende inn frå kallande service.
+            // TODO her bør vi kanskje slå opp tidligere sykmeldinger? sende inn frå kallande service.
+            tidligereSykmeldinger = emptyList(),
             kontaktPasientBegrunnelseIkkeKontakt = null,
             pasient =
                 RegulaPasient(
@@ -110,8 +111,10 @@ class RuleService() {
         )
     }
 
-    private fun mapToRegulaBidiagnoser(bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>?): List<Diagnose>? {
-        if(bidiagnoser.isNullOrEmpty()) {
+    private fun mapToRegulaBidiagnoser(
+        bidiagnoser: List<OpprettSykmeldingDiagnoseInfo>?
+    ): List<Diagnose>? {
+        if (bidiagnoser.isNullOrEmpty()) {
             return null
         }
 
@@ -182,12 +185,14 @@ class RuleService() {
                         fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
                         tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                     )
+
                 is OpprettSykmeldingAktivitet.Gradert ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
                         fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
                         tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                         grad = opprettSykmeldingAktivitet.grad,
                     )
+
                 is OpprettSykmeldingAktivitet.Avventende ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
                         avventendeInnspillTilArbeidsgiver =
@@ -195,18 +200,20 @@ class RuleService() {
                         fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
                         tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                     )
+
                 is OpprettSykmeldingAktivitet.Behandlingsdager ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
                         behandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
                         fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
                         tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                     )
+
                 is OpprettSykmeldingAktivitet.Reisetilskudd ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
                         fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
                         tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
                     )
-            }
+            },
         )
     }
 }

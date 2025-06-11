@@ -99,7 +99,7 @@ object SykmeldingDocumentMapper {
         ExistingSykmeldingRuleResult {
         return ExistingSykmeldingRuleResult(
             result = this.result,
-            meldingTilSender = this.meldingTilSender,
+            melding = this.meldingTilSender,
         )
     }
 
