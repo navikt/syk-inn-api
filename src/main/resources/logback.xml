@@ -1,40 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdcKeyName>x_request_id</includeMdcKeyName>
-        </encoder>
-    </appender>
+    <!-- Both prod and local should provide their own secure log appender -->
+    <logger name="securelog" level="INFO" additivity="false">
+        <appender-ref ref="SECURE_LOG"/>
+    </logger>
 
-    <!-- LOCAL profile -->
+    <!-- local profile -->
     <springProfile name="local">
-        <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${SECURELOGS_DIR:-./logs}/secure.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-                <fileNamePattern>${SECURELOGS_DIR:-./logs}/secure.log.%i</fileNamePattern>
-                <minIndex>1</minIndex>
-                <maxIndex>1</maxIndex>
-            </rollingPolicy>
-            <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                <maxFileSize>50MB</maxFileSize>
-            </triggeringPolicy>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-        </appender>
+        <!-- Less spammy local development logging -->
+        <logger name="org.apache.kafka" level="WARN"/>
+        <logger name="org.springframework.kafka" level="WARN"/>
 
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="PRETTY-CONSOLE"/>
         </root>
 
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        <!-- Local development, redirect secure logs to console with nice colors -->
+        <appender name="SECURE_LOG" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d{HH:mm:ss.SSS} %red(\(SECURELOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
+                </pattern>
+
+                <outputPatternAsHeader>true</outputPatternAsHeader>
             </encoder>
+            <withJansi>true</withJansi>
+        </appender>
+
+        <!-- Pretty console appender for local development -->
+        <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n</pattern>
+                <outputPatternAsHeader>true</outputPatternAsHeader>
+            </encoder>
+            <withJansi>true</withJansi>
         </appender>
     </springProfile>
 
-    <!-- NON-local (dev, prod, etc.) -->
+    <!-- non-local profile (dev, prod, etc.) -->
     <springProfile name="!local">
-        <appender name="secure_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <root level="INFO">
+            <appender-ref ref="STDOUT_JSON"/>
+        </root>
+
+        <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>x_request_id</includeMdcKeyName>
+            </encoder>
+        </appender>
+
+        <appender name="SECURE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${SECURELOGS_DIR:-/secure-logs}/secure.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
                 <fileNamePattern>${SECURELOGS_DIR:-/secure-logs}/secure.log.%i</fileNamePattern>
@@ -47,15 +61,4 @@
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>
     </springProfile>
-
-    <logger name="securelog" level="INFO" additivity="false">
-        <appender-ref ref="secure_log" />
-    </logger>
-
-    <root level="INFO">
-        <appender-ref ref="stdout_json"/>
-    </root>
-
-    <logger name="no.nav" level="INFO"/>
-<!--    <logger name="org.apache" level="DEBUG"/>-->
 </configuration>
