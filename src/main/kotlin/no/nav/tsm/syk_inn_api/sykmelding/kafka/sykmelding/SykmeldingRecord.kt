@@ -21,16 +21,16 @@ sealed interface ISykmelding {
     val id: String
     val metadata: SykmeldingMeta
     val pasient: SykmeldingRecordPasient
-    val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering
-    val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>
+    val medisinskVurdering: SykmeldingRecordMedisinskVurdering
+    val aktivitet: List<SykmeldingRecordAktivitet>
 }
 
 data class DigitalSykmelding(
     override val id: String,
     override val metadata: DigitalSykmeldingMetadata,
     override val pasient: SykmeldingRecordPasient,
-    override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
-    override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
+    override val medisinskVurdering: SykmeldingRecordMedisinskVurdering,
+    override val aktivitet: List<SykmeldingRecordAktivitet>,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
     val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
@@ -93,8 +93,8 @@ data class XmlSykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
     override val pasient: SykmeldingRecordPasient,
-    override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
-    override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
+    override val medisinskVurdering: SykmeldingRecordMedisinskVurdering,
+    override val aktivitet: List<SykmeldingRecordAktivitet>,
     val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
@@ -111,8 +111,8 @@ data class Papirsykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
     override val pasient: SykmeldingRecordPasient,
-    override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
-    override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
+    override val medisinskVurdering: SykmeldingRecordMedisinskVurdering,
+    override val aktivitet: List<SykmeldingRecordAktivitet>,
     val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
@@ -129,8 +129,8 @@ data class UtenlandskSykmelding(
     override val id: String,
     override val metadata: OldSykmeldingMetadata,
     override val pasient: SykmeldingRecordPasient,
-    override val sykmeldingRecordMedisinskVurdering: SykmeldingRecordMedisinskVurdering,
-    override val sykmeldingRecordAktivitet: List<SykmeldingRecordAktivitet>,
+    override val medisinskVurdering: SykmeldingRecordMedisinskVurdering,
+    override val aktivitet: List<SykmeldingRecordAktivitet>,
     val utenlandskInfo: UtenlandskInfo
 ) : ISykmelding {
     override val type = SykmeldingType.UTENLANDSK
