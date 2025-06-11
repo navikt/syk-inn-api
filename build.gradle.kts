@@ -4,38 +4,40 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val javaVersion = JvmTarget.JVM_21
 
+// Runtime deps
 val logstashLogbackEncoderVersion = "8.1"
-val ktfmtVersion = "0.44"
-val mockkVersion = "1.14.0"
-val testContainersVersion = "1.21.0"
 val openHtmlToPdfVersion = "1.1.28"
 val verapdfVersion = "1.28.1"
-val kotlinxHtmlVersion = "0.8.0"
+val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
+val regulaVersion = "40"
+
+// Dev deps
+val testContainersVersion = "1.21.1"
+val ktfmtVersion = "0.44"
+val mockkVersion = "1.14.2"
 
 plugins {
     kotlin("jvm") version "2.1.21"
     kotlin("plugin.spring") version "2.1.21"
-    id("org.springframework.boot") version "3.4.5"
+    id("org.springframework.boot") version "3.5.0"
+
+    // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "7.0.3"
+    id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 group = "no.nav.tsm"
 version = "1.0.0"
 
-
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
 }
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
+    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
 }
 
 dependencies {
@@ -49,14 +51,13 @@ dependencies {
     implementation("org.springframework:spring-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("no.nav.tsm.regulus:regula:40")
-
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.postgresql:postgresql")
 
+    implementation("no.nav.tsm.regulus:regula:$regulaVersion")
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
 
     // PDF generation dependencies:
@@ -66,6 +67,7 @@ dependencies {
     implementation("org.verapdf:validation-model-jakarta:$verapdfVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:${kotlinxHtmlVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-html:${kotlinxHtmlVersion}")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -73,18 +75,15 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.kafka:spring-kafka-test")
 //    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
-
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("io.mockk:mockk:${mockkVersion}")
-
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 }
 
 kotlin {
@@ -96,17 +95,14 @@ kotlin {
 
 tasks {
 
-    build {
-        dependsOn("bootJar")
-    }
+    build { dependsOn("bootJar") }
 
     withType<BootJar> {
         archiveFileName = "app.jar"
     }
 
     withType<Test> {
-        useJUnitPlatform {
-        }
+        useJUnitPlatform {}
         testLogging {
             events("skipped", "failed")
             showStackTraces = true
