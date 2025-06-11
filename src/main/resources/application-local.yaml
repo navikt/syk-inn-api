@@ -15,7 +15,10 @@ spring:
   main:
     banner-mode: 'off'
   flyway:
-    enabled: false
+    enabled: true
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    url: ${spring.datasource.url}
   jpa:
     hibernate:
       ddl-auto: update
