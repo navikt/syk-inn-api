@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.pdf
 
+import com.openhtmltopdf.extend.impl.FSDefaultCacheStore
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder
 import com.openhtmltopdf.pdfboxout.PDFontSupplier
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
@@ -27,6 +28,7 @@ class PdfGenerator() {
 
     companion object {
         private val FONT_CACHE: MutableMap<String, TrueTypeFont> = HashMap()
+        private val REAL_FONT_CACHE = FSDefaultCacheStore()
 
         val colorProfile: ByteArray
             get() {
@@ -47,7 +49,7 @@ class PdfGenerator() {
                 .apply { fontSuppliers(this) }
                 .useSVGDrawer(BatikSVGDrawer())
                 .useColorProfile(colorProfile)
-                .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_U)
+                .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_A)
                 .usePdfUaAccessibility(true)
                 .withHtmlContent(html, null)
                 .toStream(outputStream)

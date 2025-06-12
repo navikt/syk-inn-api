@@ -6,6 +6,7 @@ import kotlinx.html.stream.createHTML
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.displayName
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.utils.toReadableDate
 import org.intellij.lang.annotations.Language
 
 private object HtmlResources {
@@ -25,13 +26,22 @@ fun FlowContent.NavHeader(title: String) {
     }
 }
 
-fun TR.TableInfo(title: String, colspan: String? = null, value: () -> String) {
+fun TR.TableInfo(
+    title: String,
+    colspan: String? = null,
+    italic: Boolean = false,
+    value: () -> String
+) {
     td {
         if (colspan != null) {
             this.colSpan = colspan
         }
         div(classes = "title") { +title }
-        div(classes = "value") { +value() }
+        div(
+            classes = "value".let {
+                if (italic) "$it italic" else it
+            },
+        ) { +value() }
     }
 }
 
@@ -42,7 +52,14 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                 title("Sykmelding")
                 meta(name = "subject", "Sykmelding")
                 meta(name = "author", "syk-inn-api")
-                meta(name = "description", "TODO")
+                meta(
+                        name = "description",
+                        "Sykmelding for ${
+                            SykmeldingDocumentUtils.formatReadablePeriode(
+                                    sykmelding.values.aktivitet,
+                            )
+                        }",
+                )
                 meta(charset = "UTF-8")
 
                 style(type = "text/css") { unsafe { +stylesheet } }
@@ -55,7 +72,9 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                     table(classes = "info-table") {
                         tr {
                             TableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
-                            TableInfo("Mottatt av Nav") { "TODO: Mangler i sykmelding" }
+                            TableInfo("Mottatt av Nav") {
+                                toReadableDate(sykmelding.meta.mottatt.toLocalDate())
+                            }
                         }
                         tr {
                             TableInfo("Arbeidsgiver") {
@@ -65,14 +84,18 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     "Ingen arbeidsgiver oppgitt"
                                 }
                             }
-                            TableInfo("Periode") { "TODO: Formatter periode" }
+                            TableInfo("Periode") {
+                                SykmeldingDocumentUtils.formatReadablePeriode(
+                                    sykmelding.values.aktivitet,
+                                )
+                            }
                         }
                         tr {
                             TableInfo("Mulighet for arbeid") {
-                                "100% sykmeldt (TODO: dette er hardkoda)"
+                                "TODO"
                             }
                             TableInfo("Sykmeldingsgrad (%)") {
-                                "100% sykmeldt (TODO: dette er hardkoda"
+                                "TODO"
                             }
                         }
                         tr {
@@ -83,16 +106,25 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     "Ingen diagnose oppgitt"
                                 }
                             }
-                            TableInfo("Andre spørsmål") { "TODO: Er det svangerskapsrelatert" }
+                            TableInfo("Andre spørsmål") { "TODO (list?)" }
                         }
                         tr {
-                            TableInfo("Melding til Nav", colspan = "2") {
-                                sykmelding.values.meldinger.tilNav ?: ""
+                            TableInfo(
+                                "Melding til Nav",
+                                colspan = "2",
+                                italic = sykmelding.values.meldinger.tilNav == null,
+                            ) {
+                                sykmelding.values.meldinger.tilNav ?: "Ingen melding til Nav"
                             }
                         }
                         tr {
-                            TableInfo("Innspill til arbeidsgiver", colspan = "2") {
-                                sykmelding.values.meldinger.tilArbeidsgiver ?: ""
+                            TableInfo(
+                                "Innspill til arbeidsgiver",
+                                colspan = "2",
+                                italic = sykmelding.values.meldinger.tilArbeidsgiver == null,
+                            ) {
+                                sykmelding.values.meldinger.tilArbeidsgiver
+                                    ?: "Ingen melding til arbeidsgiver"
                             }
                         }
                     }
@@ -106,8 +138,11 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
 @Language("CSS")
 val stylesheet =
     """
-@page {
+* {
     font-family: 'Source Sans Pro', sans-serif;
+}
+
+@page {
     margin: 0;
 }
 
@@ -163,6 +198,11 @@ body {
 
 .info-table .value {
     margin-bottom: 0.75cm;
+}
+
+.info-table .value.italic {
+    color: #333;
+    font-style: italic;
 }
 """
         .trimIndent()

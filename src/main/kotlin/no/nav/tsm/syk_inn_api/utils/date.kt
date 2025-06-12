@@ -1,14 +1,16 @@
+package no.nav.tsm.syk_inn_api.utils
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 fun toReadableDate(date: LocalDate): String {
-    val formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale("nb"))
+    val formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("nb"))
     return date.format(formatter)
 }
 
 fun toReadableDateNoYear(date: LocalDate): String {
-    val formatter = DateTimeFormatter.ofPattern("d. MMMM", Locale("nb"))
+    val formatter = DateTimeFormatter.ofPattern("d. MMMM", Locale.forLanguageTag("nb"))
     return date.format(formatter)
 }
 
