@@ -1,5 +1,4 @@
-// src/main/kotlin/com/example/util/Logging.kt
-package com.example.util
+package no.nav.tsm.syk_inn_api.utils
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

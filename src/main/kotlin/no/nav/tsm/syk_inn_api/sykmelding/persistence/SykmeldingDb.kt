@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import java.time.OffsetDateTime
 import java.util.*
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.util.objectMapper
 import org.postgresql.util.PGobject
@@ -10,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Table
 data class SykmeldingDb(
     @Id val id: UUID? = null,
     val sykmeldingId: String,
+    val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,
     val sykmelding: PGobject,

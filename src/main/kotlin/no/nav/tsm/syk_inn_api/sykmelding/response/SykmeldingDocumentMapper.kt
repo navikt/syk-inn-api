@@ -134,8 +134,8 @@ object SykmeldingDocumentMapper {
     }
 
     private fun PersistedSykmeldingMeldinger.toExistingSykmeldingMeldinger():
-        SykmeldingDocumentgMeldinger {
-        return SykmeldingDocumentgMeldinger(
+        SykmeldingDocumentMeldinger {
+        return SykmeldingDocumentMeldinger(
             tilNav = this.tilNav,
             tilArbeidsgiver = this.tilArbeidsgiver,
         )

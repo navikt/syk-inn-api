@@ -1,7 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka
 
-import com.example.util.logger
-import com.example.util.secureLogger
 import java.time.LocalDate
 import java.time.Month
 import no.nav.tsm.regulus.regula.RegulaResult
@@ -9,10 +7,12 @@ import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -25,18 +25,16 @@ class SykmeldingKafkaService(
     private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
-    @Value("\${nais.cluster}")
-    private lateinit var clusterName: String
+    @Value("\${nais.cluster}") private lateinit var clusterName: String
 
-    @Value("\${kafka.topics.sykmeldinger-input}")
-    private lateinit var sykmeldingInputTopic: String
+    @Value("\${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
 
     private val logger = logger()
     private val secureLog = secureLogger()
 
     fun send(
-        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
+        sykmelding: SykmeldingDocument,
         person: Person,
         sykmelder: HprSykmelder,
         regulaResult: RegulaResult,
@@ -44,10 +42,10 @@ class SykmeldingKafkaService(
         try {
             val sykmeldingKafkaMessage =
                 SykmeldingRecord(
-                    metadata = SykmeldingKafkaMapper.mapMessageMetadata(payload),
+                    metadata = SykmeldingKafkaMapper.mapMessageMetadata(sykmelding.meta),
                     sykmelding =
                         SykmeldingKafkaMapper.mapToDigitalSykmelding(
-                            payload,
+                            sykmelding,
                             sykmeldingId,
                             person,
                             sykmelder,

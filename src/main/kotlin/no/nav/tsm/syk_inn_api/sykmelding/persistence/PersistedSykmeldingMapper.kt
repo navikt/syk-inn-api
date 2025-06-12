@@ -78,16 +78,13 @@ object PersistedSykmeldingMapper {
         person: Person,
         sykmelder: HprSykmelder,
     ): PersistedSykmelding {
-        val sykmeldingRecordMedisinskVurdering =
-            sykmeldingRecord.sykmelding.medisinskVurdering
+        val sykmeldingRecordMedisinskVurdering = sykmeldingRecord.sykmelding.medisinskVurdering
 
         return PersistedSykmelding(
             hoveddiagnose =
                 sykmeldingRecordMedisinskVurdering.hovedDiagnose
                     .toPersistedSykmeldingDiagnoseInfo(),
-            aktivitet =
-                sykmeldingRecord.sykmelding.aktivitet
-                    .toPersistedSykmeldingAktivitetList(),
+            aktivitet = sykmeldingRecord.sykmelding.aktivitet.toPersistedSykmeldingAktivitetList(),
             sykmeldingId = sykmeldingRecord.sykmelding.id,
             pasient = sykmeldingRecord.sykmelding.pasient.toPersistedSykmeldingPasient(person),
             sykmelder = mapSykmeldingRecordToPersistedSykmeldingSykmelder(sykmelder),
@@ -569,8 +566,7 @@ object PersistedSykmeldingMapper {
     private fun mapSykmeldingRecordToPersistedSykmeldingYrkesskade(
         sykmeldingRecord: SykmeldingRecord
     ): PersistedSykmeldingYrkesskade? {
-        val sykmeldingRecordMedisinskVurdering =
-            sykmeldingRecord.sykmelding.medisinskVurdering
+        val sykmeldingRecordMedisinskVurdering = sykmeldingRecord.sykmelding.medisinskVurdering
         return when (sykmeldingRecord.sykmelding) {
             is DigitalSykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)

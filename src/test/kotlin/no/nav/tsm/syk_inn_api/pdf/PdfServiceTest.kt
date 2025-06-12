@@ -9,6 +9,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -20,10 +21,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentgMeldinger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -63,6 +64,7 @@ class PdfServiceTest {
                 sykmeldingId = "sykmeldingId",
                 meta =
                     SykmeldingDocumentMeta(
+                        mottatt = OffsetDateTime.now(),
                         pasientIdent = "12345678901",
                         sykmelderHpr = "123456789",
                         legekontorOrgnr = "123456789",
@@ -86,7 +88,7 @@ class PdfServiceTest {
                         svangerskapsrelatert = false,
                         pasientenSkalSkjermes = false,
                         meldinger =
-                            SykmeldingDocumentgMeldinger(tilNav = null, tilArbeidsgiver = null),
+                            SykmeldingDocumentMeldinger(tilNav = null, tilArbeidsgiver = null),
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
