@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelder.hpr
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("local")
+@Profile("local", "test")
 @Component
 class MockHelsenettProxyClient : IHelsenettProxyClient {
     init {

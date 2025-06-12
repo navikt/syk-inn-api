@@ -13,7 +13,7 @@ interface IHelsenettProxyClient {
     fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<HprSykmelder>
 }
 
-@Profile("!local")
+@Profile("!local & !test")
 @Component
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,

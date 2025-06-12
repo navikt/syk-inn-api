@@ -15,7 +15,7 @@ interface IPdlClient {
     fun getPerson(fnr: String): Result<PdlPerson>
 }
 
-@Profile("!local")
+@Profile("!local & !test")
 @Component
 class PdlClient(
     webClientBuilder: WebClient.Builder,

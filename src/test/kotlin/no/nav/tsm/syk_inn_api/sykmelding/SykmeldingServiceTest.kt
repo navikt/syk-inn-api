@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.service
+package no.nav.tsm.syk_inn_api.sykmelding
 
 import io.mockk.Runs
 import io.mockk.every
@@ -20,19 +20,11 @@ import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.repository.IntegrationTest
 import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -50,7 +42,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class SykmeldingServiceTest : IntegrationTest() {
+class SykmeldingServiceTest {
     private lateinit var sykmeldingService: SykmeldingService
     private lateinit var helsenettProxyService: HelsenettProxyService
     private lateinit var ruleService: RuleService

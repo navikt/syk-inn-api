@@ -5,14 +5,10 @@ import no.nav.tsm.syk_inn_api.common.Navn
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("local")
+@Profile("local", "test")
 @Component
 class MockPdlClient : IPdlClient {
     override fun getPerson(fnr: String): Result<PdlPerson> {
-        if (true) {
-            throw IllegalStateException("MockPdlClient fake error")
-        }
-
         return Result.success(
             PdlPerson(
                 navn =

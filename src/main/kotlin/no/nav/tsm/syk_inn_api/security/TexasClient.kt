@@ -66,7 +66,10 @@ class TexasClient(
             )
             throw RuntimeException("HTTP error: ${ex.statusCode} - ${ex.responseBodyAsString}", ex)
         } catch (ex: Exception) {
-            logger.error("Unexpected error while requesting token: ${ex.message}", ex)
+            logger.error(
+                "Unexpected error while requesting token for ${namespace}:${otherApiAppName}",
+                ex
+            )
             throw RuntimeException("Unexpected error: ${ex.message}", ex)
         }
     }

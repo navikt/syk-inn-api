@@ -13,7 +13,7 @@ interface IBtsysClient {
     fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Suspendert>
 }
 
-@Profile("!local")
+@Profile("!local & !test")
 @Component
 class BtsysClient(
     webClientBuilder: WebClient.Builder,

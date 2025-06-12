@@ -55,7 +55,7 @@ class SykmeldingController(
         }
     }
 
-    @GetMapping("/")
+    @GetMapping
     fun getSykmeldingerByUserIdent(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("Orgnr") orgnr: String
