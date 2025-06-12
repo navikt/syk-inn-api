@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getPerson(fnr: String): Result<PdlPerson> {
+        if (true) {
+            throw IllegalStateException("MockPdlClient fake error")
+        }
+
         return Result.success(
             PdlPerson(
                 navn =

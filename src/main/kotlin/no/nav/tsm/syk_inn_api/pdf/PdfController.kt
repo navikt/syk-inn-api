@@ -19,6 +19,8 @@ class PdfController(private val pdfService: PdfService) {
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String
     ): ResponseEntity<Any> {
+        logger.info("Creating PDF for ID $sykmeldingId (HPR: $hpr)")
+
         val createdPdf =
             pdfService.createSykmeldingPdf(
                 sykmeldingId = sykmeldingId,

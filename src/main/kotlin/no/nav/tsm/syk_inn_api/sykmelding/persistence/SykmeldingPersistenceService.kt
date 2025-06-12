@@ -2,10 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
@@ -19,8 +16,6 @@ import org.springframework.stereotype.Service
 @Service
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
-    private val personService: PersonService,
-    private val helsenettProxyService: HelsenettProxyService,
 ) {
     private val logger = logger()
 
@@ -136,26 +131,13 @@ class SykmeldingPersistenceService(
         }
     }
 
-    fun updateSykmelding(sykmeldingId: String, sykmeldingRecord: SykmeldingRecord?) {
-        if (sykmeldingRecord == null) {
-            logger.info(
-                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId",
-            )
-            delete(sykmeldingId)
-            return
-        }
-
+    fun updateSykmelding(
+        sykmeldingId: String,
+        sykmeldingRecord: SykmeldingRecord,
+        person: Person,
+        sykmelder: HprSykmelder,
+    ) {
         val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
-        val person =
-            personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
-
-        val sykmelder =
-            helsenettProxyService
-                .getSykmelderByHpr(
-                    PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
-                    sykmeldingId,
-                )
-                .getOrThrow()
 
         val typeNotDigital = sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
         if (sykmeldingEntity == null && typeNotDigital) {
@@ -178,7 +160,7 @@ class SykmeldingPersistenceService(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
                     ex,
                 )
-                throw SykmeldingDBMappingException(
+                throw IllegalStateException(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
                     ex,
                 )
@@ -202,7 +184,7 @@ class SykmeldingPersistenceService(
         }
     }
 
-    private fun delete(sykmeldingId: String) {
+    fun deleteSykmelding(sykmeldingId: String) {
         sykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
         logger.info("Deleted sykmelding with id=$sykmeldingId")
     }

@@ -17,7 +17,6 @@ import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.exception.RuleHitException
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
@@ -56,7 +55,7 @@ class RuleService() {
                 }
         } catch (e: Exception) {
             logger.error("Error while executing Regula rules", e)
-            throw RuleHitException(
+            throw RuntimeException(
                 "Error while executing Regula rules for sykmeldingId=$sykmeldingId",
             )
         }

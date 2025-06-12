@@ -1,7 +1,5 @@
 package no.nav.tsm.syk_inn_api.person.pdl
 
-import no.nav.tsm.syk_inn_api.exception.PdlException
-import no.nav.tsm.syk_inn_api.exception.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
@@ -47,12 +45,13 @@ class PdlClient(
                         { response ->
                             response.bodyToMono<String>().defaultIfEmpty("").flatMap { body ->
                                 val ex =
-                                    PdlException(
-                                        "PDL responded with status: ${response.statusCode()} and body: $body"
+                                    IllegalStateException(
+                                        "PDL responded with status: ${response.statusCode()} and body: $body",
                                     )
+
                                 secureLog.error(
                                     "Error while fetching person with fnr $fnr from PDL cache",
-                                    ex
+                                    ex,
                                 )
                                 Mono.error(ex)
                             }
@@ -63,12 +62,12 @@ class PdlClient(
             if (response != null) {
                 Result.success(response)
             } else {
-                Result.failure(PdlException("Pdl cache did not return a person"))
+                Result.failure(IllegalStateException("Pdl cache did not return a person"))
             }
         } catch (e: HttpClientErrorException.NotFound) {
             secureLog.warn("Person with fnr $fnr not found in PDL cache", e)
             logger.warn("PDL person not found in PDL cache", e)
-            throw PersonNotFoundException("Could not find person in pdl cache")
+            throw IllegalStateException("Could not find person in pdl cache")
         } catch (e: Exception) {
             logger.error("Error while calling Pdl API", e)
             Result.failure(e)

@@ -7,13 +7,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -116,6 +116,8 @@ class BtsysClientTest {
         val result = client.checkSuspensionStatus("INVALID", "2025-04-10")
 
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is BtsysException)
+        assertThrows<IllegalStateException>("Missing or invalid Nav-Personident header") {
+            result.getOrThrow()
+        }
     }
 }

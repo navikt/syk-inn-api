@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
 import java.util.*
-import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
@@ -57,7 +56,7 @@ class BtsysClient(
                                     "Btsys responded with status: ${response.statusCode()}, body: $body",
                                 )
                                 Mono.error(
-                                    BtsysException(
+                                    IllegalStateException(
                                         "Btsys responded with status: ${response.statusCode()}, body: $body",
                                     ),
                                 )
@@ -70,7 +69,7 @@ class BtsysClient(
             if (response != null) {
                 Result.success(response)
             } else {
-                Result.failure(BtsysException("Btsys returned no suspension status"))
+                Result.failure(IllegalStateException("Btsys returned no suspension status"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling Btsys API", e)

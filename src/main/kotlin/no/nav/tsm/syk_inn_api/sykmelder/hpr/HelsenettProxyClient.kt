@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
-import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
@@ -61,7 +60,7 @@ class HelsenettProxyClient(
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$sykmeldingId"
                 logger.warn(msg)
                 secureLog.warn("$msg and hpr=$behandlerHpr")
-                Result.failure(HelsenettProxyException("HelsenettProxy returned no Sykmelder"))
+                Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$sykmeldingId", e)

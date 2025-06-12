@@ -23,9 +23,9 @@ import org.verapdf.pdfa.results.TestAssertion
 
 @Service
 class PdfGenerator() {
+    private val logger = logger()
 
     companion object {
-        private val logger = logger()
         private val FONT_CACHE: MutableMap<String, TrueTypeFont> = HashMap()
 
         val colorProfile: ByteArray
