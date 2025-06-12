@@ -1,14 +1,12 @@
 spring:
+  # Disable auth in tests
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
   flyway:
-    enabled: false
+    enabled: true
   datasource:
-    url: "jdbc:postgresql://localhost:5432/sykinnapi?reWriteBatchedInserts=true"
-    username: myuser
-    password: mypassword
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5

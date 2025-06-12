@@ -38,10 +38,10 @@ fun TR.TableInfo(
         }
         div(classes = "title") { +title }
         div(
-            classes = "value".let {
-                if (italic) "$it italic" else it
-            },
-        ) { +value() }
+            classes = "value".let { if (italic) "$it italic" else it },
+        ) {
+            +value()
+        }
     }
 }
 
@@ -53,8 +53,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                 meta(name = "subject", "Sykmelding")
                 meta(name = "author", "syk-inn-api")
                 meta(
-                        name = "description",
-                        "Sykmelding for ${
+                    name = "description",
+                    "Sykmelding for ${
                             SykmeldingDocumentUtils.formatReadablePeriode(
                                     sykmelding.values.aktivitet,
                             )
@@ -91,12 +91,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfo("Mulighet for arbeid") {
-                                "TODO"
-                            }
-                            TableInfo("Sykmeldingsgrad (%)") {
-                                "TODO"
-                            }
+                            TableInfo("Mulighet for arbeid") { "TODO" }
+                            TableInfo("Sykmeldingsgrad (%)") { "TODO" }
                         }
                         tr {
                             TableInfo("Diagnose") {

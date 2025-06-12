@@ -18,16 +18,20 @@ abstract class IntegrationTest {
                 withDatabaseName("testdb")
                 withUsername("test")
                 withPassword("test")
-                // TODO: Get flyway to run migrations or something
-                withInitScript("db/migration/V1__create_sykmelding_table.sql")
             }
 
         @JvmStatic
         @DynamicPropertySource
         fun configureProperties(registry: DynamicPropertyRegistry) {
+            // Spring DataSource
             registry.add("spring.datasource.url", postgres::getJdbcUrl)
             registry.add("spring.datasource.username", postgres::getUsername)
             registry.add("spring.datasource.password", postgres::getPassword)
+
+            // Flyway
+            registry.add("DB_JDBC_URL", postgres::getJdbcUrl)
+            registry.add("DB_USERNAME", postgres::getUsername)
+            registry.add("DB_PASSWORD", postgres::getPassword)
         }
     }
 }
