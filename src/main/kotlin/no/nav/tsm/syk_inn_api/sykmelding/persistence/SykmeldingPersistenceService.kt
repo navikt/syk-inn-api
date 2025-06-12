@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.exception.SykmeldingDBMappingException
 import no.nav.tsm.syk_inn_api.person.Person
@@ -25,13 +26,14 @@ class SykmeldingPersistenceService(
 
     fun getSykmeldingById(sykmeldingId: String): SykmeldingDocument? {
         return sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
-            mapDatabaseEntityToSykmeldingResponse(it)
+            mapDatabaseEntityToSykmeldingDocumentt(it)
         }
     }
 
     fun saveSykmeldingPayload(
-        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
+        mottatt: OffsetDateTime,
+        payload: OpprettSykmeldingPayload,
         person: Person,
         sykmelder: HprSykmelder,
         ruleResult: RegulaResult,
@@ -40,8 +42,9 @@ class SykmeldingPersistenceService(
         val savedEntity =
             sykmeldingRepository.save(
                 mapSykmeldingPayloadToDatabaseEntity(
-                    payload = payload,
                     sykmeldingId = sykmeldingId,
+                    mottatt = mottatt,
+                    payload = payload,
                     pasient = person,
                     sykmelder = sykmelder,
                     ruleResult = ruleResult,
@@ -54,12 +57,13 @@ class SykmeldingPersistenceService(
 
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
-        return mapDatabaseEntityToSykmeldingResponse(savedEntity)
+        return mapDatabaseEntityToSykmeldingDocumentt(savedEntity)
     }
 
     private fun mapSykmeldingPayloadToDatabaseEntity(
-        payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
+        mottatt: OffsetDateTime,
+        payload: OpprettSykmeldingPayload,
         pasient: Person,
         sykmelder: HprSykmelder,
         ruleResult: RegulaResult,
@@ -69,6 +73,7 @@ class SykmeldingPersistenceService(
             sykmeldingId = sykmeldingId,
             pasientIdent = payload.meta.pasientIdent,
             sykmelderHpr = payload.meta.sykmelderHpr,
+            mottatt = mottatt,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
                         payload,
@@ -83,11 +88,12 @@ class SykmeldingPersistenceService(
         )
     }
 
-    fun mapDatabaseEntityToSykmeldingResponse(dbObject: SykmeldingDb): SykmeldingDocument {
+    fun mapDatabaseEntityToSykmeldingDocumentt(dbObject: SykmeldingDb): SykmeldingDocument {
         return SykmeldingDocument(
             sykmeldingId = dbObject.sykmeldingId,
             meta =
                 SykmeldingDocumentMeta(
+                    mottatt = dbObject.mottatt,
                     pasientIdent = dbObject.pasientIdent,
                     sykmelderHpr = dbObject.sykmelderHpr,
                     legekontorOrgnr = dbObject.legekontorOrgnr,
@@ -108,6 +114,7 @@ class SykmeldingPersistenceService(
     ): SykmeldingDb {
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
+            mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
             pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
             sykmelderHpr = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
             sykmelding =
@@ -125,7 +132,7 @@ class SykmeldingPersistenceService(
 
     fun getSykmeldingerByIdent(ident: String): List<SykmeldingDocument> {
         return sykmeldingRepository.findAllByPasientIdent(ident).map {
-            mapDatabaseEntityToSykmeldingResponse(it)
+            mapDatabaseEntityToSykmeldingDocumentt(it)
         }
     }
 

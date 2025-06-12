@@ -3,6 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.response
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 
 /**
@@ -16,6 +17,7 @@ data class SykmeldingDocument(
 )
 
 data class SykmeldingDocumentMeta(
+    val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,
     val legekontorOrgnr: String,
@@ -27,7 +29,7 @@ data class SykmeldingDocumentValues(
     val bidiagnoser: List<SykmeldingDocumentDiagnoseInfo>,
     val svangerskapsrelatert: Boolean,
     val pasientenSkalSkjermes: Boolean,
-    val meldinger: SykmeldingDocumentgMeldinger,
+    val meldinger: SykmeldingDocumentMeldinger,
     val yrkesskade: SykmeldingDocumentYrkesskade?,
     val arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
     val tilbakedatering: SykmeldingDocumentTilbakedatering?,
@@ -45,23 +47,35 @@ data class SykmeldingDocumentValues(
     JsonSubTypes.Type(SykmeldingDocumentAktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed interface SykmeldingDocumentAktivitet {
-    data class IkkeMulig(val fom: String, val tom: String) : SykmeldingDocumentAktivitet
+sealed class SykmeldingDocumentAktivitet(open val fom: String, open val tom: String) {
+    data class IkkeMulig(
+        override val fom: String,
+        override val tom: String,
+    ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Gradert(
+        override val fom: String,
+        override val tom: String,
         val grad: Int,
-        val fom: String,
-        val tom: String,
         val reisetilskudd: Boolean
-    ) : SykmeldingDocumentAktivitet
+    ) : SykmeldingDocumentAktivitet(fom, tom)
 
-    data class Behandlingsdager(val antallBehandlingsdager: Int, val fom: String, val tom: String) :
-        SykmeldingDocumentAktivitet
+    data class Behandlingsdager(
+        override val fom: String,
+        override val tom: String,
+        val antallBehandlingsdager: Int
+    ) : SykmeldingDocumentAktivitet(fom, tom)
 
-    data class Avventende(val innspillTilArbeidsgiver: String, val fom: String, val tom: String) :
-        SykmeldingDocumentAktivitet
+    data class Avventende(
+        val innspillTilArbeidsgiver: String,
+        override val fom: String,
+        override val tom: String,
+    ) : SykmeldingDocumentAktivitet(fom, tom)
 
-    data class Reisetilskudd(val fom: String, val tom: String) : SykmeldingDocumentAktivitet
+    data class Reisetilskudd(
+        override val fom: String,
+        override val tom: String,
+    ) : SykmeldingDocumentAktivitet(fom, tom)
 }
 
 data class SykmeldingDocumentDiagnoseInfo(
@@ -90,7 +104,7 @@ data class SykmeldingDocumentYrkesskade(
     val skadedato: LocalDate?,
 )
 
-data class SykmeldingDocumentgMeldinger(
+data class SykmeldingDocumentMeldinger(
     val tilNav: String?,
     val tilArbeidsgiver: String?,
 )

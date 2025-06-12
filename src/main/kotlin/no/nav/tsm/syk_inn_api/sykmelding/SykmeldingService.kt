@@ -5,6 +5,8 @@ import arrow.core.left
 import arrow.core.raise.result
 import arrow.core.right
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -38,6 +40,8 @@ class SykmeldingService(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
         val sykmeldingId = UUID.randomUUID().toString()
+        val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
+
         val resources = result {
             val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
             val sykmelder =
@@ -79,11 +83,12 @@ class SykmeldingService(
 
         val sykmeldingResponse =
             sykmeldingPersistenceService.saveSykmeldingPayload(
-                payload,
-                sykmeldingId,
-                person,
-                sykmelder,
-                ruleResult
+                sykmeldingId = sykmeldingId,
+                mottatt = mottatt,
+                payload = payload,
+                person = person,
+                sykmelder = sykmelder,
+                ruleResult = ruleResult,
             )
 
         if (sykmeldingResponse == null) {
@@ -91,7 +96,13 @@ class SykmeldingService(
             return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
         }
 
-        sykmeldingKafkaService.send(payload, sykmeldingId, person, sykmelder, ruleResult)
+        sykmeldingKafkaService.send(
+            sykmeldingId = sykmeldingId,
+            sykmelding = sykmeldingResponse,
+            person = person,
+            sykmelder = sykmelder,
+            regulaResult = ruleResult,
+        )
 
         return sykmeldingResponse.right()
     }

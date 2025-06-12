@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.repository
 
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
@@ -34,6 +35,7 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                 pasientIdent = pasientIdent,
                 sykmelderHpr = sykmelderHpr,
                 legekontorOrgnr = "987654321",
+                mottatt = OffsetDateTime.now(),
                 sykmelding =
                     PersistedSykmelding(
                             hoveddiagnose =
@@ -88,7 +90,6 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                                 ),
                         )
                         .toPGobject(),
-                id = null,
                 legekontorTlf = "12345678",
                 validertOk = false,
             )
@@ -98,7 +99,7 @@ class SykmeldingRepositoryTest : IntegrationTest() {
         val found = sykmeldingRepository.findSykmeldingEntityBySykmeldingId("sykmelding-123")
 
         assertThat(found).isNotNull
-        assertThat(found?.id).isEqualTo(savedEntity.id)
+        assertThat(found?.sykmeldingId).isEqualTo(savedEntity.sykmeldingId)
         assertThat(found?.pasientIdent).isEqualTo(pasientIdent)
     }
 }

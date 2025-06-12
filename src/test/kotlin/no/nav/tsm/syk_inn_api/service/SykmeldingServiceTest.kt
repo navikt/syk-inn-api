@@ -6,6 +6,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -39,10 +40,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentgMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -127,6 +128,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                 sykmeldingId = sykmeldingId,
                 meta =
                     SykmeldingDocumentMeta(
+                        mottatt = OffsetDateTime.now(),
                         pasientIdent = "01019078901",
                         sykmelderHpr = behandlerHpr,
                         legekontorOrgnr = "987654321",
@@ -150,7 +152,7 @@ class SykmeldingServiceTest : IntegrationTest() {
                         svangerskapsrelatert = false,
                         pasientenSkalSkjermes = false,
                         meldinger =
-                            SykmeldingDocumentgMeldinger(
+                            SykmeldingDocumentMeldinger(
                                 tilNav = null,
                                 tilArbeidsgiver = null,
                             ),
@@ -164,16 +166,23 @@ class SykmeldingServiceTest : IntegrationTest() {
                             ),
                     ),
             )
-        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(any()) } returns
+        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(any()) } returns
             sykmeldingDocument
 
         every {
-            sykmeldingPersistenceService.saveSykmeldingPayload(any(), any(), any(), any(), any())
+            sykmeldingPersistenceService.saveSykmeldingPayload(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
         } returns
-            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingResponse(
+            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(
                 SykmeldingDb(
-                    id = UUID.randomUUID(),
                     sykmeldingId = sykmeldingId,
+                    mottatt = OffsetDateTime.now(),
                     pasientIdent = "01019078901",
                     sykmelderHpr = behandlerHpr,
                     legekontorOrgnr = "987654321",

@@ -18,7 +18,8 @@ abstract class IntegrationTest {
                 withDatabaseName("testdb")
                 withUsername("test")
                 withPassword("test")
-                withInitScript("db/init.sql")
+                // TODO: Get flyway to run migrations or something
+                withInitScript("db/migration/V1__create_sykmelding_table.sql")
             }
 
         @JvmStatic
