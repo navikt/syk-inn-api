@@ -16,7 +16,8 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,7 +29,8 @@ class SykmeldingService(
     private val personService: PersonService,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
-    private val logger = LoggerFactory.getLogger(SykmeldingService::class.java)
+    private val logger = logger()
+    private val securelog = secureLogger()
 
     enum class SykmeldingCreationErrors {
         RULE_VALIDATION,
@@ -112,7 +114,7 @@ class SykmeldingService(
         sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
     fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingDocument>> {
-        logger.info("Henter sykmeldinger for ident=$ident")
+        securelog.info("Henter sykmeldinger for ident=$ident")
         // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
         // at den får lov til å sjå ?
         val sykmeldinger: List<SykmeldingDocument> =

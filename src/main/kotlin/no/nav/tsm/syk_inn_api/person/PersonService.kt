@@ -3,16 +3,16 @@ package no.nav.tsm.syk_inn_api.person
 import no.nav.tsm.syk_inn_api.person.pdl.IDENT_GRUPPE
 import no.nav.tsm.syk_inn_api.person.pdl.IPdlClient
 import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.stereotype.Service
 
 @Service
 class PersonService(
     private val pdlClient: IPdlClient,
 ) {
-    private val logger = LoggerFactory.getLogger(PersonService::class.java)
-    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
+    private val logger = logger()
+    private val secureLog = secureLogger()
 
     fun getPersonByIdent(ident: String): Result<Person> {
         val person: PdlPerson =

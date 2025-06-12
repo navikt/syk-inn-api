@@ -3,7 +3,8 @@ package no.nav.tsm.syk_inn_api.exception
 import jakarta.servlet.http.HttpServletRequest
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
-    private val securelog = LoggerFactory.getLogger("securelog")
+    private val logger = logger()
+    private val securelog = secureLogger()
 
     @ExceptionHandler
     fun handleIllegalArgumentException(

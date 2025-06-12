@@ -2,8 +2,8 @@ package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import no.nav.tsm.syk_inn_api.exception.HelsenettProxyException
 import no.nav.tsm.syk_inn_api.security.TexasClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -21,9 +21,10 @@ class HelsenettProxyClient(
     private val texasClient: TexasClient,
     @Value("\${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
 ) : IHelsenettProxyClient {
-    private val logger = LoggerFactory.getLogger(HelsenettProxyClient::class.java)
+    private val logger = logger()
+    private val secureLog = secureLogger()
+
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
-    private val secureLog: Logger = LoggerFactory.getLogger("securelog")
 
     override fun getSykmelderByHpr(
         behandlerHpr: String,

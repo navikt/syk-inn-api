@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.security
 
 import java.nio.file.AccessDeniedException
 import javax.naming.AuthenticationException
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ class TexasClient(
     @Value("\${nais.cluster}") private val cluster: String,
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(naisTokenEndpoint).build()
-    private val logger = LoggerFactory.getLogger(TexasClient::class.java)
+    private val logger = logger()
 
     fun requestToken(namespace: String, otherApiAppName: String): TokenResponse {
         logger.info(

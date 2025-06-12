@@ -40,11 +40,11 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.InvalidRule
 import no.nav.tsm.syk_inn_api.sykmelding.rules.OKRule
 import no.nav.tsm.syk_inn_api.sykmelding.rules.PendingRule
 import no.nav.tsm.syk_inn_api.sykmelding.rules.ValidationResult
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
 
 object PersistedSykmeldingMapper {
 
-    private val logger = LoggerFactory.getLogger(PersistedSykmeldingMapper::class.java)
+    private val logger = logger()
 
     fun mapSykmeldingPayloadToPersistedSykmelding(
         payload: OpprettSykmeldingPayload,

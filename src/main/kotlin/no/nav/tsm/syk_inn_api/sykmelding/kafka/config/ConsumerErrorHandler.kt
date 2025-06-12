@@ -1,9 +1,9 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.config
 
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.slf4j.LoggerFactory
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
@@ -12,12 +12,14 @@ import org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS
 
 @Component
 class ConsumerErrorHandler :
-    DefaultErrorHandler(null, FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS)) {
+    DefaultErrorHandler(
+        null,
+        FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS),
+    ) {
     companion object {
+        private val appLog = logger()
         private const val BACKOFF_INTERVAL = 60_000L
     }
-
-    private val log = LoggerFactory.getLogger(ConsumerErrorHandler::class.java)
 
     override fun handleOne(
         thrownException: java.lang.Exception,
@@ -25,7 +27,7 @@ class ConsumerErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ): Boolean {
-        log.error(
+        appLog.error(
             """
             Feil i prosesseringen av record:
             - Topic: ${record.topic()}
@@ -35,7 +37,7 @@ class ConsumerErrorHandler :
             - Cause: ${thrownException.cause?.let { "${it::class.simpleName}: ${it.message}" } ?: "None"}
             """
                 .trimIndent(),
-            thrownException
+            thrownException,
         )
 
         return super.handleOne(thrownException, record, consumer, container)
@@ -47,7 +49,7 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
         batchListener: Boolean
     ) {
-        log.error("Feil i listener uten noen records", thrownException)
+        appLog.error("Feil i listener uten noen records", thrownException)
         super.handleOtherException(thrownException, consumer, container, batchListener)
     }
 
@@ -58,13 +60,13 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
     ) {
         records.forEach { record ->
-            log.error(
+            appLog.error(
                 "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
-                thrownException
+                thrownException,
             )
         }
         if (records.isEmpty()) {
-            log.error("Feil i listener uten noen records", thrownException)
+            appLog.error("Feil i listener uten noen records", thrownException)
         }
 
         super.handleRemaining(thrownException, records, consumer, container)
@@ -78,12 +80,12 @@ class ConsumerErrorHandler :
         invokeListener: Runnable,
     ) {
         if (data.isEmpty) {
-            log.error("Feil i listener uten noen records", thrownException)
+            appLog.error("Feil i listener uten noen records", thrownException)
         }
         data.forEach { record ->
-            log.error(
+            appLog.error(
                 "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
-                thrownException
+                thrownException,
             )
         }
         super.handleBatch(thrownException, data, consumer, container, invokeListener)

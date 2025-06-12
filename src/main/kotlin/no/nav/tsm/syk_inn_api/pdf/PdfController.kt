@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.pdf
 
 import java.util.*
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class PdfController(private val pdfService: PdfService) {
 
-    private val logger = org.slf4j.LoggerFactory.getLogger(this::class.java)
+    private val logger = logger()
 
     @GetMapping("/api/sykmelding/{sykmeldingId}/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
     fun getSykmeldingPdf(

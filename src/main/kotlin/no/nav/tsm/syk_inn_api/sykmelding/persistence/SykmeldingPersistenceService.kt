@@ -13,7 +13,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMapper
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,7 +22,7 @@ class SykmeldingPersistenceService(
     private val personService: PersonService,
     private val helsenettProxyService: HelsenettProxyService,
 ) {
-    private val logger = LoggerFactory.getLogger(SykmeldingPersistenceService::class.java)
+    private val logger = logger()
 
     fun getSykmeldingById(sykmeldingId: String): SykmeldingDocument? {
         return sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
@@ -139,7 +139,7 @@ class SykmeldingPersistenceService(
     fun updateSykmelding(sykmeldingId: String, sykmeldingRecord: SykmeldingRecord?) {
         if (sykmeldingRecord == null) {
             logger.info(
-                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId from syk-inn-api database",
+                "SykmeldingRecord is null, deleting sykmelding with id=$sykmeldingId",
             )
             delete(sykmeldingId)
             return
@@ -174,9 +174,6 @@ class SykmeldingPersistenceService(
                 sykmeldingRepository.save(entity)
                 logger.debug("Saved new sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             } catch (ex: Exception) {
-                logger.info(
-                    "Unable to map SykmeldingRecord to database entity for sykmeldingId=$sykmeldingId and will therefore be skipped and not saved",
-                )
                 logger.error(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
                     ex,

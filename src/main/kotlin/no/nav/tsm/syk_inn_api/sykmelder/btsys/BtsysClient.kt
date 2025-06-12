@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelder.btsys
 import java.util.*
 import no.nav.tsm.syk_inn_api.exception.BtsysException
 import no.nav.tsm.syk_inn_api.security.TexasClient
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -22,7 +22,7 @@ class BtsysClient(
     @Value("\${services.external.btsys.url}") private val btsysEndpointUrl: String,
 ) : IBtsysClient {
     private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
-    private val logger = LoggerFactory.getLogger(BtsysClient::class.java)
+    private val logger = logger()
 
     override fun checkSuspensionStatus(
         sykmelderFnr: String,

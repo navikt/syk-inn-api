@@ -7,6 +7,7 @@ import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import com.openhtmltopdf.util.XRLog
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.fontbox.ttf.TTFParser
 import org.apache.fontbox.ttf.TrueTypeFont
 import org.apache.pdfbox.io.RandomAccessReadBuffer
@@ -24,7 +25,7 @@ import org.verapdf.pdfa.results.TestAssertion
 class PdfGenerator() {
 
     companion object {
-        private val logger = org.slf4j.LoggerFactory.getLogger(PdfGenerator::class.java)
+        private val logger = logger()
         private val FONT_CACHE: MutableMap<String, TrueTypeFont> = HashMap()
 
         val colorProfile: ByteArray

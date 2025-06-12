@@ -23,12 +23,12 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import org.slf4j.LoggerFactory
+import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 
 @Service
 class RuleService() {
-    private val logger = LoggerFactory.getLogger(RuleService::class.java)
+    private val logger = logger()
 
     fun validateRules(
         payload: OpprettSykmeldingPayload,
