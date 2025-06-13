@@ -56,6 +56,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.postgresql:postgresql")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation("no.nav.tsm.regulus:regula:$regulaVersion")
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
