@@ -55,7 +55,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                 meta(
                     name = "description",
                     "Sykmelding for ${
-                            SykmeldingDocumentUtils.formatReadablePeriode(
+                            SykmeldingHTMLUtils.formatReadablePeriode(
                                     sykmelding.values.aktivitet,
                             )
                         }",
@@ -85,7 +85,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 }
                             }
                             TableInfo("Periode") {
-                                SykmeldingDocumentUtils.formatReadablePeriode(
+                                SykmeldingHTMLUtils.formatReadablePeriode(
                                     sykmelding.values.aktivitet,
                                 )
                             }
