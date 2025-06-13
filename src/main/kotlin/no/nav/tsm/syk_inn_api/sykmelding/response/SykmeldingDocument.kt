@@ -26,8 +26,8 @@ data class SykmeldingDocumentMeta(
 
 data class SykmeldingDocumentValues(
     val hoveddiagnose: SykmeldingDocumentDiagnoseInfo?,
+    val bidiagnoser: List<SykmeldingDocumentDiagnoseInfo>?,
     val aktivitet: List<SykmeldingDocumentAktivitet>,
-    val bidiagnoser: List<SykmeldingDocumentDiagnoseInfo>,
     val svangerskapsrelatert: Boolean,
     val pasientenSkalSkjermes: Boolean,
     val meldinger: SykmeldingDocumentMeldinger,

@@ -15,10 +15,10 @@ object SykmeldingDocumentMapper {
     ): SykmeldingDocumentValues {
         return SykmeldingDocumentValues(
             hoveddiagnose = persistedSykmelding.hoveddiagnose.toExistingSykmeldingDiagnoseInfo(),
+            bidiagnoser = persistedSykmelding.bidiagnoser.toExistingSykmeldingDiagnoseInfo(),
             aktivitet =
                 persistedSykmelding.aktivitet
                     .toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet(),
-            bidiagnoser = persistedSykmelding.bidiagnoser.toExistingSykmeldingDiagnoseInfo(),
             svangerskapsrelatert = persistedSykmelding.svangerskapsrelatert,
             pasientenSkalSkjermes = persistedSykmelding.pasientenSkalSkjermes,
             meldinger = persistedSykmelding.meldinger.toExistingSykmeldingMeldinger(),
@@ -81,8 +81,8 @@ object SykmeldingDocumentMapper {
     }
 
     private fun List<PersistedSykmeldingDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
-        List<SykmeldingDocumentDiagnoseInfo> {
-        if (this.isEmpty()) return emptyList()
+        List<SykmeldingDocumentDiagnoseInfo>? {
+        if (this.isEmpty()) return null
 
         return this.map { diagnose ->
             SykmeldingDocumentDiagnoseInfo(

@@ -209,7 +209,7 @@ object SykmeldingKafkaMapper {
     ): SykmeldingRecordMedisinskVurdering {
         return SykmeldingRecordMedisinskVurdering(
             hovedDiagnose = mapHoveddiagnose(sykmeldingValues.hoveddiagnose),
-            biDiagnoser = sykmeldingValues.bidiagnoser.toSykmeldingRecordDiagnoseInfo(),
+            biDiagnoser = sykmeldingValues.bidiagnoser?.toSykmeldingRecordDiagnoseInfo(),
             svangerskap = sykmeldingValues.svangerskapsrelatert,
             skjermetForPasient = sykmeldingValues.pasientenSkalSkjermes,
             yrkesskade = sykmeldingValues.yrkesskade.toSykmeldingRecordYrkesskade(),
