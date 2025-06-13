@@ -10,6 +10,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMapper
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 
@@ -84,6 +85,7 @@ class SykmeldingPersistenceService(
     }
 
     fun mapDatabaseEntityToSykmeldingDocumentt(dbObject: SykmeldingDb): SykmeldingDocument {
+        val persistedSykmelding = dbObject.sykmelding.fromPGobject<PersistedSykmelding>()
         return SykmeldingDocument(
             sykmeldingId = dbObject.sykmeldingId,
             meta =
@@ -95,8 +97,15 @@ class SykmeldingPersistenceService(
                 ),
             values =
                 SykmeldingDocumentMapper.mapPersistedSykmeldingToSykmeldingDokument(
-                    dbObject.sykmelding.fromPGobject(),
+                    persistedSykmelding,
                 ),
+            utfall =
+                persistedSykmelding.regelResultat.let {
+                    SykmeldingDocumentRuleResult(
+                        result = it.result,
+                        melding = it.meldingTilSender,
+                    )
+                },
         )
     }
 

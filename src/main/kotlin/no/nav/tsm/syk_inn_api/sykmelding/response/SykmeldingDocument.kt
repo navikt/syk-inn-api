@@ -14,6 +14,7 @@ data class SykmeldingDocument(
     val sykmeldingId: String,
     val meta: SykmeldingDocumentMeta,
     val values: SykmeldingDocumentValues,
+    val utfall: SykmeldingDocumentRuleResult,
 )
 
 data class SykmeldingDocumentMeta(
@@ -33,7 +34,6 @@ data class SykmeldingDocumentValues(
     val yrkesskade: SykmeldingDocumentYrkesskade?,
     val arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
     val tilbakedatering: SykmeldingDocumentTilbakedatering?,
-    val regelResultat: SykmeldingDocumentRuleResult,
 )
 
 @JsonSubTypes(

@@ -151,11 +151,11 @@ class SykmeldingServiceTest {
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
-                        regelResultat =
-                            SykmeldingDocumentRuleResult(
-                                result = "OK",
-                                melding = null,
-                            ),
+                    ),
+                utfall =
+                    SykmeldingDocumentRuleResult(
+                        result = "OK",
+                        melding = null,
                     ),
             )
         every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(any()) } returns
@@ -168,7 +168,7 @@ class SykmeldingServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns
             sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(

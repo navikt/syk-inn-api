@@ -92,11 +92,11 @@ class PdfServiceTest {
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
-                        regelResultat =
-                            SykmeldingDocumentRuleResult(
-                                result = "OK",
-                                melding = null,
-                            ),
+                    ),
+                utfall =
+                    SykmeldingDocumentRuleResult(
+                        result = "OK",
+                        melding = null,
                     ),
             )
 

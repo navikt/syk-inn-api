@@ -5,7 +5,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivite
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingArbeidsgiver
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 
@@ -27,7 +26,6 @@ object SykmeldingDocumentMapper {
             arbeidsgiver = persistedSykmelding.arbeidsgiver.toExistingSykmeldingArbeidsgiver(),
             tilbakedatering =
                 persistedSykmelding.tilbakedatering.toExistingSykmeldingTilbakedatering(),
-            regelResultat = persistedSykmelding.regelResultat.toExistingSykmeldingRuleResult(),
         )
     }
 
@@ -43,7 +41,7 @@ object SykmeldingDocumentMapper {
                         SykmeldingDocumentAktivitet.IkkeMulig(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
-                        )
+                        ),
                     )
                 is PersistedSykmeldingAktivitet.Gradert ->
                     aktiviteter.add(
@@ -52,7 +50,7 @@ object SykmeldingDocumentMapper {
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
                             reisetilskudd = aktivitet.reisetilskudd,
-                        )
+                        ),
                     )
                 is PersistedSykmeldingAktivitet.Behandlingsdager ->
                     aktiviteter.add(
@@ -60,7 +58,7 @@ object SykmeldingDocumentMapper {
                             antallBehandlingsdager = aktivitet.antallBehandlingsdager,
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
-                        )
+                        ),
                     )
                 is PersistedSykmeldingAktivitet.Avventende ->
                     aktiviteter.add(
@@ -68,14 +66,14 @@ object SykmeldingDocumentMapper {
                             innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
-                        )
+                        ),
                     )
                 is PersistedSykmeldingAktivitet.Reisetilskudd ->
                     aktiviteter.add(
                         SykmeldingDocumentAktivitet.Reisetilskudd(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
-                        )
+                        ),
                     )
             }
         }
@@ -93,14 +91,6 @@ object SykmeldingDocumentMapper {
                 text = diagnose.text,
             )
         }
-    }
-
-    private fun PersistedSykmeldingRuleResult.toExistingSykmeldingRuleResult():
-        SykmeldingDocumentRuleResult {
-        return SykmeldingDocumentRuleResult(
-            result = this.result,
-            melding = this.meldingTilSender,
-        )
     }
 
     private fun PersistedSykmeldingTilbakedatering?.toExistingSykmeldingTilbakedatering():
