@@ -58,9 +58,9 @@ class SykmeldingController(
     @GetMapping
     fun getSykmeldingerByUserIdent(
         @RequestHeader("Ident") ident: String,
-        @RequestHeader("Orgnr") orgnr: String
+        @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<Any> =
-        sykmeldingService.getSykmeldingerByIdent(ident, orgnr).fold(
+        sykmeldingService.getSykmeldingerByIdent(ident, hpr).fold(
             { ResponseEntity.ok(it) },
         ) {
             ResponseEntity.internalServerError().build()

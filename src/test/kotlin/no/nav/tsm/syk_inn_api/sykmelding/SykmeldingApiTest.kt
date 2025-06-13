@@ -46,7 +46,7 @@ class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullInt
                 HttpEntity<Void>(
                     HttpHeaders().apply {
                         set("Ident", "21037712323")
-                        set("Orgnr", "123456789")
+                        set("HPR", "123456789")
                     }
                 )
             )
@@ -66,7 +66,7 @@ class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullInt
                 HttpEntity<Void>(
                     HttpHeaders().apply {
                         set("Ident", "21037712323")
-                        set("Orgnr", "123456789")
+                        set("HPR", "123456789")
                     }
                 )
             )

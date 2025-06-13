@@ -109,18 +109,21 @@ class SykmeldingService(
         return sykmeldingResponse.right()
     }
 
-    // TODO: Faktisk implementer hpr-tilgangsstyring
-    fun getSykmeldingById(sykmeldingId: UUID, hpr: String): SykmeldingDocument? =
-        sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
+    fun getSykmeldingById(
+        sykmeldingId: UUID,
+        // TODO: Faktisk implementer hpr-tilgangsstyring
+        hpr: String
+    ): SykmeldingDocument? = sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
-    fun getSykmeldingerByIdent(ident: String, orgnr: String): Result<List<SykmeldingDocument>> {
+    fun getSykmeldingerByIdent(
+        ident: String,
+        // TODO: Faktisk implementer hpr-tilgangsstyring
+        hpr: String
+    ): Result<List<SykmeldingDocument>> {
         securelog.info("Henter sykmeldinger for ident=$ident")
-        // TODO bør vi ha en kul sjekk på om lege har en tilknytning til gitt legekontor orgnr slik
-        // at den får lov til å sjå ?
+
         val sykmeldinger: List<SykmeldingDocument> =
-            sykmeldingPersistenceService.getSykmeldingerByIdent(ident).filter {
-                it.meta.legekontorOrgnr == orgnr
-            }
+            sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
 
         if (sykmeldinger.isEmpty()) {
             return Result.success(emptyList())
