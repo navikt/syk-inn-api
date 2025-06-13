@@ -8,6 +8,9 @@
         <appender-ref ref="SECURE_LOG"/>
     </logger>
 
+    <!-- Stuff we wanna squelch, use sparingly -->
+    <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR" />
+
     <!-- local profile -->
     <springProfile name="local">
         <!-- Less spammy local development logging -->
