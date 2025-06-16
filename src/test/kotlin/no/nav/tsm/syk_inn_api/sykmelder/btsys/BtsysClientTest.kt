@@ -3,6 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelder.btsys
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -66,7 +67,7 @@ class BtsysClientTest {
                 .setResponseCode(200)
         mockWebServer.enqueue(response)
 
-        val result = client.checkSuspensionStatus("12345678901", "2025-04-10")
+        val result = client.checkSuspensionStatus("12345678901", LocalDate.parse("2025-04-10"))
         val request = mockWebServer.takeRequest()
 
         assertEquals("/api/v1/suspensjon/status?oppslagsdato=2025-04-10", request.path)
@@ -92,7 +93,7 @@ class BtsysClientTest {
 
         mockWebServer.enqueue(response)
 
-        val result = client.checkSuspensionStatus("12345678901", "2025-04-10")
+        val result = client.checkSuspensionStatus("12345678901", LocalDate.parse("2025-04-10"))
 
         assertTrue(result.isFailure)
     }
@@ -113,7 +114,7 @@ class BtsysClientTest {
 
         mockWebServer.enqueue(response)
 
-        val result = client.checkSuspensionStatus("INVALID", "2025-04-10")
+        val result = client.checkSuspensionStatus("INVALID", LocalDate.parse("2025-04-10"))
 
         assertTrue(result.isFailure)
         assertThrows<IllegalStateException>("Missing or invalid Nav-Personident header") {

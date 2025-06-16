@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.Month
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
+import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
-    private val helsenettProxyService: HelsenettProxyService,
+    private val sykmelderService: SykmelderService,
     @Value("\${nais.cluster}") private val clusterName: String
 ) {
     private val logger = logger()
@@ -72,8 +72,8 @@ class SykmeldingConsumer(
                 }
 
             val sykmelder =
-                helsenettProxyService
-                    .getSykmelderByHpr(
+                sykmelderService
+                    .sykmelder(
                         PersistedSykmeldingMapper.mapHprNummer(value),
                         sykmeldingId,
                     )

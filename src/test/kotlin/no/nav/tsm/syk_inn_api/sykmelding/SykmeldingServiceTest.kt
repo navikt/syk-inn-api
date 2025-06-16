@@ -20,11 +20,10 @@ import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
-import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -44,11 +43,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 class SykmeldingServiceTest {
     private lateinit var sykmeldingService: SykmeldingService
-    private lateinit var helsenettProxyService: HelsenettProxyService
+    private lateinit var sykmelderService: SykmelderService
     private lateinit var ruleService: RuleService
     private lateinit var sykmeldingInputProducer: SykmeldingInputProducer
     private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
-    private lateinit var btsysService: BtsysService
     private lateinit var personService: PersonService
 
     val behandlerHpr = "123456789"
@@ -58,18 +56,16 @@ class SykmeldingServiceTest {
 
     @BeforeEach
     fun setup() {
-        helsenettProxyService = mockk()
         ruleService = mockk()
         sykmeldingPersistenceService = mockk()
         sykmeldingInputProducer = mockk()
         personService = mockk()
-        btsysService = mockk()
+        sykmelderService = mockk()
         sykmeldingService =
             SykmeldingService(
                 sykmeldingPersistenceService = sykmeldingPersistenceService,
                 ruleService = ruleService,
-                helsenettProxyService = helsenettProxyService,
-                btsysService = btsysService,
+                sykmelderService = sykmelderService,
                 sykmeldingInputProducer = sykmeldingInputProducer,
                 personService = personService,
             )
@@ -77,14 +73,17 @@ class SykmeldingServiceTest {
 
     @Test
     fun `create sykmelding with valid data`() {
-        every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+        every { sykmelderService.sykmelderMedSuspensjon(behandlerHpr, any(), any()) } returns
             Result.success(
-                HprSykmelder(
-                    hprNummer = behandlerHpr,
-                    fnr = "01019078901",
-                    fornavn = "Ola",
-                    mellomnavn = null,
-                    etternavn = "Nordmann",
+                Sykmelder.MedSuspensjon(
+                    hpr = behandlerHpr,
+                    ident = "01019078901",
+                    navn =
+                        Navn(
+                            fornavn = "Ola",
+                            mellomnavn = null,
+                            etternavn = "Nordmann",
+                        ),
                     godkjenninger =
                         listOf(
                             HprGodkjenning(
@@ -103,17 +102,16 @@ class SykmeldingServiceTest {
                                 tillegskompetanse = null,
                             ),
                         ),
+                    suspendert = false,
                 ),
             )
 
         every { personService.getPersonByIdent(any()) } returns
             Result.success(Person(navn = navn, fodselsdato = foedselsdato, ident = "123"))
-        every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
+        every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult.Ok(
                 emptyList(),
             )
-
-        every { btsysService.isSuspended(any(), any()) } returns Result.success(false)
 
         val sykmeldingDocument =
             SykmeldingDocument(
@@ -230,14 +228,17 @@ class SykmeldingServiceTest {
 
     @Test
     fun `failing to create sykmelding because of rule tree hit`() {
-        every { helsenettProxyService.getSykmelderByHpr(behandlerHpr, any()) } returns
+        every { sykmelderService.sykmelderMedSuspensjon(behandlerHpr, any(), any()) } returns
             Result.success(
-                HprSykmelder(
-                    hprNummer = behandlerHpr,
-                    fnr = "12345678901",
-                    fornavn = "Ola",
-                    mellomnavn = null,
-                    etternavn = "Nordmann",
+                Sykmelder.MedSuspensjon(
+                    hpr = behandlerHpr,
+                    ident = "12345678901",
+                    navn =
+                        Navn(
+                            fornavn = "Ola",
+                            mellomnavn = null,
+                            etternavn = "Nordmann",
+                        ),
                     godkjenninger =
                         listOf(
                             HprGodkjenning(
@@ -256,13 +257,14 @@ class SykmeldingServiceTest {
                                 tillegskompetanse = null,
                             ),
                         ),
+                    suspendert = false,
                 ),
             )
 
         every { personService.getPersonByIdent(any()) } returns
             Result.success(Person(navn = navn, fodselsdato = foedselsdato, ident = "123"))
 
-        every { ruleService.validateRules(any(), any(), any(), any(), foedselsdato) } returns
+        every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
             RegulaResult.NotOk(
                 status = RegulaStatus.INVALID,
                 outcome =
@@ -273,8 +275,6 @@ class SykmeldingServiceTest {
                     ),
                 results = emptyList(),
             )
-
-        every { btsysService.isSuspended(any(), any()) } returns Result.success(false)
 
         val result =
             sykmeldingService.createSykmelding(

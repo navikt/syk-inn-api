@@ -17,8 +17,8 @@ import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
 import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 import no.nav.tsm.regulus.regula.payload.Diagnose
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
@@ -32,8 +32,7 @@ class RuleService() {
     fun validateRules(
         payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: HprSykmelder,
-        sykmelderSuspendert: Boolean,
+        sykmelder: Sykmelder.MedSuspensjon,
         foedselsdato: LocalDate
     ): RegulaResult {
         return try {
@@ -43,7 +42,6 @@ class RuleService() {
                             payload = payload,
                             sykmeldingId = sykmeldingId,
                             sykmelder = sykmelder,
-                            sykmelderSuspendert = sykmelderSuspendert,
                             foedselsdato = foedselsdato,
                         ),
                     mode = ExecutionMode.NORMAL,
@@ -64,8 +62,7 @@ class RuleService() {
     private fun createRegulaPayload(
         payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
-        sykmelder: HprSykmelder,
-        sykmelderSuspendert: Boolean,
+        sykmelder: Sykmelder.MedSuspensjon,
         foedselsdato: LocalDate
     ): RegulaPayload {
         return RegulaPayload(
@@ -98,14 +95,14 @@ class RuleService() {
                 ),
             behandler =
                 RegulaBehandler.Finnes(
-                    suspendert = sykmelderSuspendert,
+                    suspendert = sykmelder.suspendert,
                     godkjenninger = sykmelder.godkjenninger.map { it.toSykmelderGodkjenning() },
                     legekontorOrgnr = payload.meta.legekontorOrgnr,
-                    fnr = sykmelder.fnr,
+                    fnr = sykmelder.ident,
                 ), // TODO bør vi også forholde oss til RegulaBehandler.FinnesIkke?
             avsender =
                 RegulaAvsender.Finnes(
-                    fnr = sykmelder.fnr,
+                    fnr = sykmelder.ident,
                 ), // TODO Bør vi også forholde oss til Avsender.FinnesIkke ?
             behandletTidspunkt = LocalDateTime.now(),
         )

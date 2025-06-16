@@ -10,10 +10,7 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
         println("MockHelsenettProxyClient initialized")
     }
 
-    override fun getSykmelderByHpr(
-        behandlerHpr: String,
-        sykmeldingId: String
-    ): Result<HprSykmelder> {
+    override fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder> {
         return Result.success(
             HprSykmelder(
                 godkjenninger =

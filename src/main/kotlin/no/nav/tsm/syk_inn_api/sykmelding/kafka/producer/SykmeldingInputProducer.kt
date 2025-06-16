@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -23,7 +23,7 @@ class SykmeldingInputProducer(
         sykmeldingId: String,
         sykmelding: SykmeldingDocument,
         person: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
         regulaResult: RegulaResult,
     ) {
         val sykmeldingKafkaMessage =

@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
@@ -31,7 +31,7 @@ class SykmeldingPersistenceService(
         mottatt: OffsetDateTime,
         payload: OpprettSykmeldingPayload,
         person: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
         ruleResult: RegulaResult,
     ): SykmeldingDocument? {
         logger.info("Lagrer sykmelding med id=${sykmeldingId}")
@@ -61,7 +61,7 @@ class SykmeldingPersistenceService(
         mottatt: OffsetDateTime,
         payload: OpprettSykmeldingPayload,
         pasient: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
         ruleResult: RegulaResult,
     ): SykmeldingDb {
         logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
@@ -114,7 +114,7 @@ class SykmeldingPersistenceService(
         sykmeldingRecord: SykmeldingRecord,
         validertOk: Boolean,
         person: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
     ): SykmeldingDb {
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
@@ -144,7 +144,7 @@ class SykmeldingPersistenceService(
         sykmeldingId: String,
         sykmeldingRecord: SykmeldingRecord,
         person: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
     ) {
         val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
 

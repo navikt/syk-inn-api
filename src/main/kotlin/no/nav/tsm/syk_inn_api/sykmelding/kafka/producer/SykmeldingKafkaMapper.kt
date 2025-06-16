@@ -6,7 +6,7 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.HelsepersonellKategori
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
@@ -101,10 +101,19 @@ object SykmeldingKafkaMapper {
         sykmelding: SykmeldingDocument,
         sykmeldingId: String,
         person: Person,
-        sykmelder: HprSykmelder
+        sykmelder: Sykmelder
     ): DigitalSykmelding {
-        requireNotNull(sykmelder.fornavn)
-        requireNotNull(sykmelder.etternavn)
+        val sykmelderNavn: KafkaPersonNavn? =
+            sykmelder.navn?.let {
+                KafkaPersonNavn(
+                    fornavn = it.fornavn,
+                    mellomnavn = it.mellomnavn,
+                    etternavn = it.etternavn,
+                )
+            }
+
+        requireNotNull(sykmelderNavn) { "Sykmelder must have a name" }
+
         // TODO is it ok to use the first godkjenning?
         val helsepersonellKategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
         requireNotNull(helsepersonellKategoriKode)
@@ -126,12 +135,7 @@ object SykmeldingKafkaMapper {
             aktivitet = sykmelding.values.aktivitet.map { toRecordAktivitet(it) },
             behandler =
                 SykmeldingRecordBehandler(
-                    navn =
-                        KafkaPersonNavn(
-                            fornavn = sykmelder.fornavn,
-                            mellomnavn = sykmelder.mellomnavn,
-                            etternavn = sykmelder.etternavn,
-                        ),
+                    navn = sykmelderNavn,
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     kontaktinfo = emptyList(),
                 ),
@@ -194,16 +198,14 @@ object SykmeldingKafkaMapper {
         return IngenArbeidsgiver()
     }
 
-    private fun mapPersonIdsForSykmelder(sykmelder: HprSykmelder): List<PersonId> {
-        requireNotNull(sykmelder.hprNummer)
-        requireNotNull(sykmelder.fnr)
+    private fun mapPersonIdsForSykmelder(sykmelder: Sykmelder): List<PersonId> {
         return listOf(
             PersonId(
-                id = sykmelder.hprNummer,
+                id = sykmelder.hpr,
                 type = PersonIdType.HPR,
             ),
             PersonId(
-                id = sykmelder.fnr,
+                id = sykmelder.ident,
                 type = PersonIdType.FNR,
             ),
         )

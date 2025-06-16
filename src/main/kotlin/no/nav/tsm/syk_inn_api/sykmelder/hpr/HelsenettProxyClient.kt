@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 
 interface IHelsenettProxyClient {
-    fun getSykmelderByHpr(behandlerHpr: String, sykmeldingId: String): Result<HprSykmelder>
+    fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder>
 }
 
 @Profile("!local & !test")
@@ -27,12 +27,13 @@ class HelsenettProxyClient(
 
     override fun getSykmelderByHpr(
         behandlerHpr: String,
-        sykmeldingId: String
+        // TODO: Use MDC?
+        callId: String
     ): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
         logger.info(
-            "Getting sykmelder for hpr=$behandlerHpr, sykmeldingId=$sykmeldingId",
+            "Getting sykmelder for hpr=$behandlerHpr, sykmeldingId=$callId",
         )
 
         return try {
@@ -42,7 +43,7 @@ class HelsenettProxyClient(
                     .uri { uriBuilder -> uriBuilder.path("/api/v2/behandlerMedHprNummer").build() }
                     .headers {
                         it.set("Content-Type", "application/json")
-                        it.set("Nav-CallId", sykmeldingId)
+                        it.set("Nav-CallId", callId)
                         it.set("hprNummer", behandlerHpr)
                         it.set("Authorization", "Bearer $accessToken")
                     }
@@ -53,18 +54,18 @@ class HelsenettProxyClient(
 
             if (response != null) {
                 logger.info(
-                    "Response from HelsenettProxy was successful for sykmeldingId=$sykmeldingId"
+                    "Response from HelsenettProxy was successful for sykmeldingId=$callId",
                 )
                 Result.success(response)
             } else {
-                val msg = "HelsenettProxy returned null response for sykmeldingId=$sykmeldingId"
+                val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
                 logger.warn(msg)
                 secureLog.warn("$msg and hpr=$behandlerHpr")
                 Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
-            logger.error("Error while calling HelsenettProxy API for sykmeldingId=$sykmeldingId", e)
-            secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$sykmeldingId", e)
+            logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
+            secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
             Result.failure(e)
         }
     }

@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
+import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -10,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 interface IBtsysClient {
-    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: String): Result<Suspendert>
+    fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: LocalDate): Result<Suspendert>
 }
 
 @Profile("!local & !test")
@@ -25,7 +26,7 @@ class BtsysClient(
 
     override fun checkSuspensionStatus(
         sykmelderFnr: String,
-        oppslagsdato: String
+        oppslagsdato: LocalDate
     ): Result<Suspendert> {
         val (accessToken) = this.getToken()
 
@@ -37,7 +38,7 @@ class BtsysClient(
                     .uri { uriBuilder ->
                         uriBuilder
                             .path("/api/v1/suspensjon/status")
-                            .queryParam("oppslagsdato", oppslagsdato)
+                            .queryParam("oppslagsdato", oppslagsdato.toString())
                             .build()
                     }
                     .headers {

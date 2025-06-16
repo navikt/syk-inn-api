@@ -4,10 +4,10 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
 import no.nav.tsm.syk_inn_api.person.Person
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGyldighetsPeriode
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprTilleggskompetanse
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingArbeidsgiver
@@ -53,7 +53,7 @@ object PersistedSykmeldingMapper {
         payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         pasient: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
         ruleResult: RegulaResult
     ): PersistedSykmelding {
         return PersistedSykmelding(
@@ -79,7 +79,7 @@ object PersistedSykmeldingMapper {
     fun mapSykmeldingRecordToPersistedSykmelding(
         sykmeldingRecord: SykmeldingRecord,
         person: Person,
-        sykmelder: HprSykmelder,
+        sykmelder: Sykmelder,
     ): PersistedSykmelding {
         val sykmeldingRecordMedisinskVurdering = sykmeldingRecord.sykmelding.medisinskVurdering
 
@@ -191,16 +191,16 @@ object PersistedSykmeldingMapper {
         )
     }
 
-    private fun HprSykmelder.toPersistedSykmeldingSykmelder(
+    private fun Sykmelder.toPersistedSykmeldingSykmelder(
         hprNummer: String
     ): PersistedSykmeldingSykmelder {
         return PersistedSykmeldingSykmelder(
             godkjenninger = godkjenninger.toPersistedSykmeldingHprGodkjenning(),
-            ident = this.fnr,
+            ident = this.ident,
             hprNummer = hprNummer,
-            fornavn = this.fornavn,
-            mellomnavn = this.mellomnavn,
-            etternavn = this.etternavn,
+            fornavn = this.navn?.fornavn,
+            mellomnavn = this.navn?.mellomnavn,
+            etternavn = this.navn?.etternavn,
         )
     }
 
@@ -550,30 +550,15 @@ object PersistedSykmeldingMapper {
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingSykmelder(
-        sykmelder: HprSykmelder
+        sykmelder: Sykmelder
     ): PersistedSykmeldingSykmelder {
-        requireNotNull(sykmelder.hprNummer) { "Sykmelder HPR number is required" }
         return PersistedSykmeldingSykmelder(
             godkjenninger = sykmelder.godkjenninger.toPersistedSykmeldingHprGodkjenning(),
-            ident = sykmelder.fnr,
-            hprNummer = sykmelder.hprNummer,
-            fornavn = sykmelder.fornavn,
-            mellomnavn = sykmelder.mellomnavn,
-            etternavn = sykmelder.etternavn,
-        )
-    }
-
-    private fun createPersistedSykmeldingSykmelder(
-        sykmelder: HprSykmelder
-    ): PersistedSykmeldingSykmelder {
-        requireNotNull(sykmelder.hprNummer) { "Sykmelder HPR number is required" }
-        return PersistedSykmeldingSykmelder(
-            godkjenninger = sykmelder.godkjenninger.toPersistedSykmeldingHprGodkjenning(),
-            ident = sykmelder.fnr,
-            hprNummer = sykmelder.hprNummer,
-            fornavn = sykmelder.fornavn,
-            mellomnavn = sykmelder.mellomnavn,
-            etternavn = sykmelder.etternavn,
+            ident = sykmelder.ident,
+            hprNummer = sykmelder.hpr,
+            fornavn = sykmelder.navn?.fornavn,
+            mellomnavn = sykmelder.navn?.mellomnavn,
+            etternavn = sykmelder.navn?.etternavn,
         )
     }
 
