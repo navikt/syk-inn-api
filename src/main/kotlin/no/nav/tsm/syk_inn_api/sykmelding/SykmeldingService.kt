@@ -12,7 +12,7 @@ import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.btsys.BtsysService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
@@ -25,7 +25,7 @@ class SykmeldingService(
     private val ruleService: RuleService,
     private val helsenettProxyService: HelsenettProxyService,
     private val btsysService: BtsysService,
-    private val sykmeldingKafkaService: SykmeldingKafkaService,
+    private val sykmeldingInputProducer: SykmeldingInputProducer,
     private val personService: PersonService,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
@@ -83,21 +83,22 @@ class SykmeldingService(
             return SykmeldingCreationErrors.RULE_VALIDATION.left()
         }
 
-        val sykmeldingDocument = sykmeldingPersistenceService.saveSykmeldingPayload(
-            sykmeldingId = sykmeldingId,
-            mottatt = mottatt,
-            payload = payload,
-            person = person,
-            sykmelder = sykmelder,
-            ruleResult = ruleResult,
-        )
+        val sykmeldingDocument =
+            sykmeldingPersistenceService.saveSykmeldingPayload(
+                sykmeldingId = sykmeldingId,
+                mottatt = mottatt,
+                payload = payload,
+                person = person,
+                sykmelder = sykmelder,
+                ruleResult = ruleResult,
+            )
 
         if (sykmeldingDocument == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
         }
 
-        sykmeldingKafkaService.send(
+        sykmeldingInputProducer.send(
             sykmeldingId = sykmeldingId,
             sykmelding = sykmeldingDocument,
             person = person,

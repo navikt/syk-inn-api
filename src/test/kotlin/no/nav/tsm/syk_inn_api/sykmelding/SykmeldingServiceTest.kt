@@ -25,7 +25,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.SykmeldingKafkaService
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
@@ -46,7 +46,7 @@ class SykmeldingServiceTest {
     private lateinit var sykmeldingService: SykmeldingService
     private lateinit var helsenettProxyService: HelsenettProxyService
     private lateinit var ruleService: RuleService
-    private lateinit var sykmeldingKafkaService: SykmeldingKafkaService
+    private lateinit var sykmeldingInputProducer: SykmeldingInputProducer
     private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
     private lateinit var btsysService: BtsysService
     private lateinit var personService: PersonService
@@ -61,7 +61,7 @@ class SykmeldingServiceTest {
         helsenettProxyService = mockk()
         ruleService = mockk()
         sykmeldingPersistenceService = mockk()
-        sykmeldingKafkaService = mockk()
+        sykmeldingInputProducer = mockk()
         personService = mockk()
         btsysService = mockk()
         sykmeldingService =
@@ -70,7 +70,7 @@ class SykmeldingServiceTest {
                 ruleService = ruleService,
                 helsenettProxyService = helsenettProxyService,
                 btsysService = btsysService,
-                sykmeldingKafkaService = sykmeldingKafkaService,
+                sykmeldingInputProducer = sykmeldingInputProducer,
                 personService = personService,
             )
     }
@@ -183,7 +183,7 @@ class SykmeldingServiceTest {
                 ),
             )
 
-        every { sykmeldingKafkaService.send(any(), any(), any(), any(), any()) } just Runs
+        every { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(

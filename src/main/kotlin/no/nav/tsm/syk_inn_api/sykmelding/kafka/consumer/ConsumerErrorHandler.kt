@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelding.kafka.config
+package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.kafka.clients.consumer.Consumer
@@ -8,13 +8,12 @@ import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.FixedBackOff
-import org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS
 
 @Component
 class ConsumerErrorHandler :
     DefaultErrorHandler(
         null,
-        FixedBackOff(BACKOFF_INTERVAL, UNLIMITED_ATTEMPTS),
+        FixedBackOff(BACKOFF_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS),
     ) {
     companion object {
         private val appLog = logger()

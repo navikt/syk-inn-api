@@ -18,15 +18,12 @@ abstract class FullIntegrationTest {
                 withDatabaseName("testdb")
                 withUsername("test")
                 withPassword("test")
-                // TODO: Get flyway to run migrations or something
-                withInitScript("db/migration/V1__create_sykmelding_table.sql")
             }
 
         @Container
         private val kafka =
             ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")).also {
                 it.start()
-                System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
 
         @JvmStatic
@@ -43,7 +40,9 @@ abstract class FullIntegrationTest {
             registry.add("DB_PASSWORD", postgres::getPassword)
 
             // Kafka
-            registry.add("kafka.bootstrap-servers", kafka::getBootstrapServers)
+            registry.add("kafka.brokers", kafka::getBootstrapServers)
+
+            println("I AM IN DA PROPERTY THINGY ${kafka.bootstrapServers}")
         }
     }
 }

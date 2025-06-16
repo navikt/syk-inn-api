@@ -1,24 +1,21 @@
-package no.nav.tsm.syk_inn_api.sykmelding.kafka.config
+package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingDeserializer
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingRecordSerializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 
 @Configuration
+@EnableKafka
 @EnableConfigurationProperties
-class KafkaConfig {
-
+class ConsumerConfig {
     @Bean
     fun kafkaListenerContainerFactory(
         props: KafkaProperties,
@@ -27,32 +24,20 @@ class KafkaConfig {
         val consumerFactory =
             DefaultKafkaConsumerFactory(
                 props.buildConsumerProperties(null).apply {
-                    put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+                    put(
+                        org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                        "earliest",
+                    )
+                    put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
                 },
                 StringDeserializer(),
-                SykmeldingDeserializer()
+                SykmeldingDeserializer(),
             )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
         factory.consumerFactory = consumerFactory
         factory.setCommonErrorHandler(errorHandler)
         return factory
-    }
-
-    @Bean
-    fun kafkaProducer(props: KafkaProperties): KafkaProducer<String, SykmeldingRecord> {
-        val producer =
-            KafkaProducer(
-                props.buildProducerProperties(null).apply {
-                    put(ProducerConfig.ACKS_CONFIG, "all")
-                    put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip")
-                    put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE)
-                },
-                StringSerializer(),
-                SykmeldingRecordSerializer()
-            )
-        return producer
     }
 }

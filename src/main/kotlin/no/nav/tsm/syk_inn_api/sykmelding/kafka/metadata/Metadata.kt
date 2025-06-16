@@ -1,8 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata
 
-import no.nav.tsm.syk_inn_api.common.Navn
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import no.nav.tsm.syk_inn_api.common.Navn
 
 enum class MetadataType {
     DIGITAL,
@@ -128,7 +128,7 @@ data class MottakenhetBlokk(
     val ebAction: String,
 )
 
-data class EDIMottakPasient (
+data class EDIMottakPasient(
     val ids: List<PersonId>,
     val navn: Navn?,
     val fodselsdato: LocalDate?,

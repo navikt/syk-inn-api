@@ -8,9 +8,11 @@ import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.test.IntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
+@DataJdbcTest
 class SykmeldingRepositoryTest : IntegrationTest() {
 
     @Autowired lateinit var sykmeldingRepository: SykmeldingRepository
@@ -33,14 +35,14 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                                 PersistedSykmeldingDiagnoseInfo(
                                     DiagnoseSystem.ICD10,
                                     "R99",
-                                    "Ukjent diagnose"
+                                    "Ukjent diagnose",
                                 ),
                             aktivitet =
                                 listOf(
                                     PersistedSykmeldingAktivitet.IkkeMulig(
                                         "2024-04-01",
-                                        "2024-04-10"
-                                    )
+                                        "2024-04-10",
+                                    ),
                                 ),
                             pasientenSkalSkjermes = false,
                             bidiagnoser = emptyList(),
@@ -59,10 +61,10 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                                         Navn(
                                             fornavn = "Ola",
                                             mellomnavn = "Norman",
-                                            etternavn = "Nordmann"
+                                            etternavn = "Nordmann",
                                         ),
                                     ident = pasientIdent,
-                                    fodselsdato = LocalDate.of(1990, 1, 1)
+                                    fodselsdato = LocalDate.of(1990, 1, 1),
                                 ),
                             sykmelder =
                                 PersistedSykmeldingSykmelder(
@@ -71,7 +73,7 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                                     hprNummer = sykmelderHpr,
                                     fornavn = "Nicky",
                                     mellomnavn = "D",
-                                    etternavn = "Angel"
+                                    etternavn = "Angel",
                                 ),
                             tilbakedatering = null,
                             regelResultat =

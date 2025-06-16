@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.test
 
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
@@ -8,7 +7,6 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
-@SpringBootTest
 abstract class IntegrationTest {
 
     companion object {

@@ -11,7 +11,6 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
   kafka:
-    bootstrap-servers: localhost:9092
     security:
       protocol: plaintext
 

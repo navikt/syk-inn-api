@@ -1,78 +1,30 @@
-package no.nav.tsm.syk_inn_api.sykmelding.kafka
+package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import java.time.LocalDate
 import java.time.Month
-import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HelsenettProxyService
-import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class SykmeldingKafkaService(
-    private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
+@Component
+class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
     private val helsenettProxyService: HelsenettProxyService,
+    @Value("\${nais.cluster}") private val clusterName: String
 ) {
-    @Value("\${nais.cluster}")
-    private lateinit var clusterName: String
-
-    @Value("\${kafka.topics.sykmeldinger-input}")
-    private lateinit var sykmeldingInputTopic: String
-
     private val logger = logger()
     private val secureLog = secureLogger()
-
-    fun send(
-        sykmeldingId: String,
-        sykmelding: SykmeldingDocument,
-        person: Person,
-        sykmelder: HprSykmelder,
-        regulaResult: RegulaResult,
-    ) {
-        try {
-            val sykmeldingKafkaMessage =
-                SykmeldingRecord(
-                    metadata = SykmeldingKafkaMapper.mapMessageMetadata(sykmelding.meta),
-                    sykmelding =
-                        SykmeldingKafkaMapper.mapToDigitalSykmelding(
-                            sykmelding,
-                            sykmeldingId,
-                            person,
-                            sykmelder,
-                        ),
-                    validation = SykmeldingKafkaMapper.mapValidationResult(regulaResult),
-                )
-            kafkaProducer
-                .send(
-                    ProducerRecord(
-                        sykmeldingInputTopic,
-                        sykmeldingId,
-                        sykmeldingKafkaMessage,
-                    ),
-                )
-                .get()
-
-            logger.info("Sent sykmelding with id=$sykmeldingId to Kafka")
-        } catch (e: Exception) {
-            logger.error("Failed to send sykmelding with id=$sykmeldingId to Kafka")
-            e.printStackTrace()
-        }
-    }
 
     @KafkaListener(
         topics = ["\${kafka.topics.sykmeldinger}"],
@@ -87,10 +39,7 @@ class SykmeldingKafkaService(
         secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
 
         if (value == null) {
-            logger.info(
-                "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${record.key()}",
-            )
-            sykmeldingPersistenceService.deleteSykmelding(record.key())
+            handleTombstone(sykmeldingId)
             return
         }
 
@@ -167,6 +116,13 @@ class SykmeldingKafkaService(
             // Don't eat the exception, we don't want to commit on unexpected errors
             throw e
         }
+    }
+
+    private fun handleTombstone(sykmeldingId: String) {
+        logger.info(
+            "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
+        )
+        sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
     }
 
     private fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {

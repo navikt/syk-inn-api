@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelding.kafka
+package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -57,7 +57,6 @@ object SykmeldingKafkaMapper {
                         validationType = ValidationType.AUTOMATIC,
                     )
                 }
-
                 is RegulaResult.NotOk -> {
                     when (regulaResult.outcome.status) {
                         RegulaOutcomeStatus.MANUAL_PROCESSING ->
@@ -71,7 +70,6 @@ object SykmeldingKafkaMapper {
                                 timestamp = OffsetDateTime.now(),
                                 validationType = ValidationType.MANUAL,
                             )
-
                         RegulaOutcomeStatus.INVALID ->
                             InvalidRule(
                                 name = RuleType.INVALID.name,
@@ -94,7 +92,9 @@ object SykmeldingKafkaMapper {
     fun mapMessageMetadata(meta: SykmeldingDocumentMeta): MessageMetadata =
         Digital(
             orgnummer = meta.legekontorOrgnr
-                ?: throw IllegalArgumentException("A freshly created sykmelding must have a legekontorOrgnr, as it is required in the payload. This should be impossible."),
+                    ?: throw IllegalArgumentException(
+                        "A freshly created sykmelding must have a legekontorOrgnr, as it is required in the payload. This should be impossible."
+                    ),
         )
 
     fun mapToDigitalSykmelding(
@@ -233,7 +233,6 @@ object SykmeldingKafkaMapper {
                     reisetilskudd = aktivitet.reisetilskudd,
                 )
             }
-
             is SykmeldingDocumentAktivitet.IkkeMulig -> {
                 SykmeldingRecordAktivitet.AktivitetIkkeMulig(
                     fom = LocalDate.parse(aktivitet.fom),
@@ -242,7 +241,6 @@ object SykmeldingKafkaMapper {
                     arbeidsrelatertArsak = null,
                 )
             }
-
             is SykmeldingDocumentAktivitet.Avventende -> {
                 SykmeldingRecordAktivitet.Avventende(
                     innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
@@ -250,7 +248,6 @@ object SykmeldingKafkaMapper {
                     tom = LocalDate.parse(aktivitet.tom),
                 )
             }
-
             is SykmeldingDocumentAktivitet.Behandlingsdager -> {
                 SykmeldingRecordAktivitet.Behandlingsdager(
                     antallBehandlingsdager = aktivitet.antallBehandlingsdager,
@@ -258,7 +255,6 @@ object SykmeldingKafkaMapper {
                     tom = LocalDate.parse(aktivitet.tom),
                 )
             }
-
             is SykmeldingDocumentAktivitet.Reisetilskudd -> {
                 SykmeldingRecordAktivitet.Reisetilskudd(
                     fom = LocalDate.parse(aktivitet.fom),
