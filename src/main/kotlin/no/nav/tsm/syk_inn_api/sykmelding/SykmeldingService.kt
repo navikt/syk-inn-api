@@ -83,30 +83,29 @@ class SykmeldingService(
             return SykmeldingCreationErrors.RULE_VALIDATION.left()
         }
 
-        val sykmeldingResponse =
-            sykmeldingPersistenceService.saveSykmeldingPayload(
-                sykmeldingId = sykmeldingId,
-                mottatt = mottatt,
-                payload = payload,
-                person = person,
-                sykmelder = sykmelder,
-                ruleResult = ruleResult,
-            )
+        val sykmeldingDocument = sykmeldingPersistenceService.saveSykmeldingPayload(
+            sykmeldingId = sykmeldingId,
+            mottatt = mottatt,
+            payload = payload,
+            person = person,
+            sykmelder = sykmelder,
+            ruleResult = ruleResult,
+        )
 
-        if (sykmeldingResponse == null) {
+        if (sykmeldingDocument == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
             return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
         }
 
         sykmeldingKafkaService.send(
             sykmeldingId = sykmeldingId,
-            sykmelding = sykmeldingResponse,
+            sykmelding = sykmeldingDocument,
             person = person,
             sykmelder = sykmelder,
             regulaResult = ruleResult,
         )
 
-        return sykmeldingResponse.right()
+        return sykmeldingDocument.right()
     }
 
     fun getSykmeldingById(

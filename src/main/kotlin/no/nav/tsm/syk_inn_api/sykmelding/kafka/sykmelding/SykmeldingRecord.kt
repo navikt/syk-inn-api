@@ -33,7 +33,7 @@ data class DigitalSykmelding(
     override val aktivitet: List<SykmeldingRecordAktivitet>,
     val behandler: SykmeldingRecordBehandler,
     val sykmelder: SykmeldingRecordSykmelder,
-    val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo,
+    val arbeidsgiver: SykmeldingRecordArbeidsgiverInfo?,
     val tilbakedatering: SykmeldingRecordTilbakedatering?,
     val meldinger: SykmeldingRecordMeldinger,
 ) : ISykmelding {
@@ -53,7 +53,6 @@ data class SykmeldingRecordPasient(
 
 data class SykmeldingRecordBehandler(
     val navn: KafkaPersonNavn,
-    //    val adresse: Adresse?,
     val ids: List<PersonId>,
     val kontaktinfo: List<Kontaktinfo>,
 )

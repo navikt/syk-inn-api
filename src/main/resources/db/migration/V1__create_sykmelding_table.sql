@@ -8,7 +8,7 @@ CREATE TABLE sykmelding
     pasient_ident    TEXT        NOT NULL,
     sykmelder_hpr    TEXT        NOT NULL,
     sykmelding       JSONB       NOT NULL,
-    legekontor_orgnr TEXT        NOT NULL,
+    legekontor_orgnr TEXT,
     legekontor_tlf   TEXT,
     validert_ok      BOOLEAN     NOT NULL DEFAULT FALSE
 );

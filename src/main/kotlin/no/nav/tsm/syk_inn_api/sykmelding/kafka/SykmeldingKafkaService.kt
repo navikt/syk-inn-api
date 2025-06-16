@@ -28,9 +28,11 @@ class SykmeldingKafkaService(
     private val personService: PersonService,
     private val helsenettProxyService: HelsenettProxyService,
 ) {
-    @Value("\${nais.cluster}") private lateinit var clusterName: String
+    @Value("\${nais.cluster}")
+    private lateinit var clusterName: String
 
-    @Value("\${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
+    @Value("\${kafka.topics.sykmeldinger-input}")
+    private lateinit var sykmeldingInputTopic: String
 
     private val logger = logger()
     private val secureLog = secureLogger()
@@ -78,32 +80,38 @@ class SykmeldingKafkaService(
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord>) {
+    fun consume(record: ConsumerRecord<String, SykmeldingRecord?>) {
+        val sykmeldingId = record.key()
+        val value: SykmeldingRecord? = record.value()
+
+        secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
+
+        if (value == null) {
+            logger.info(
+                "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${record.key()}",
+            )
+            sykmeldingPersistenceService.deleteSykmelding(record.key())
+            return
+        }
+
         try {
-            secureLog.info("Consuming record: ${record.value()} from topic ${record.topic()}")
-
-            val tom = record.value().sykmelding.aktivitet.first().tom
-            if (isVeryOldSykmelding(tom)) {
-                return // Skip processing for sykmeldinger before 2024
-            }
-
-            if (record.value().sykmelding.type == SykmeldingType.UTENLANDSK) {
-                return // skip processing for utenlandske sykmeldinger
-            }
-
-            if (record.value() == null) {
-                logger.info(
-                    "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${record.key()}",
+            if (value.sykmelding.aktivitet.isEmpty()) {
+                logger.warn(
+                    "SykmeldingRecord with id=${record.key()} has no activity, skipping processing",
                 )
-                sykmeldingPersistenceService.deleteSykmelding(record.key())
                 return
             }
 
-            val sykmeldingRecord = record.value()
-            val sykmeldingId = record.key()
+            if (value.isBeforeYear(2024)) {
+                return // Skip processing for sykmeldinger before 2024
+            }
+
+            if (value.sykmelding.type == SykmeldingType.UTENLANDSK) {
+                return // skip processing for utenlandske sykmeldinger
+            }
 
             val person: Person =
-                personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrElse {
+                personService.getPersonByIdent(value.sykmelding.pasient.fnr).getOrElse {
                     logger.error(
                         "Kafka consumer failed, key: ${record.key()} - Person not found in Pdl Exception",
                         it,
@@ -117,7 +125,7 @@ class SykmeldingKafkaService(
             val sykmelder =
                 helsenettProxyService
                     .getSykmelderByHpr(
-                        PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord),
+                        PersistedSykmeldingMapper.mapHprNummer(value),
                         sykmeldingId,
                     )
                     .getOrElse {
@@ -134,7 +142,7 @@ class SykmeldingKafkaService(
             try {
                 sykmeldingPersistenceService.updateSykmelding(
                     sykmeldingId = sykmeldingId,
-                    sykmeldingRecord = sykmeldingRecord,
+                    sykmeldingRecord = value,
                     person = person,
                     sykmelder = sykmelder,
                 )
@@ -152,16 +160,20 @@ class SykmeldingKafkaService(
                 e,
             )
             secureLog.error(
-                "Kafka consumer failed, key: ${record.key()} - Error processing record, data: ${record.value()}",
+                "Kafka consumer failed, key: ${record.key()} - Error processing record, data: $value",
                 e,
             )
+
+            // Don't eat the exception, we don't want to commit on unexpected errors
+            throw e
         }
     }
 
-    private fun isVeryOldSykmelding(tom: LocalDate): Boolean {
+    private fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
+        val tom = this.sykmelding.aktivitet.first().tom
         return tom.isBefore(
             LocalDate.of(
-                2024,
+                year,
                 Month.JANUARY,
                 1,
             ),

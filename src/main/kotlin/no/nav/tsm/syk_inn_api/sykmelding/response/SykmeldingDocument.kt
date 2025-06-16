@@ -21,7 +21,7 @@ data class SykmeldingDocumentMeta(
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,
-    val legekontorOrgnr: String,
+    val legekontorOrgnr: String?,
 )
 
 data class SykmeldingDocumentValues(

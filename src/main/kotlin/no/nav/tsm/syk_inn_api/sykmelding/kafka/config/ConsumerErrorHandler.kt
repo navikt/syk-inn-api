@@ -43,16 +43,6 @@ class ConsumerErrorHandler :
         return super.handleOne(thrownException, record, consumer, container)
     }
 
-    override fun handleOtherException(
-        thrownException: java.lang.Exception,
-        consumer: Consumer<*, *>,
-        container: MessageListenerContainer,
-        batchListener: Boolean
-    ) {
-        appLog.error("Feil i listener uten noen records", thrownException)
-        super.handleOtherException(thrownException, consumer, container, batchListener)
-    }
-
     override fun handleRemaining(
         thrownException: Exception,
         records: MutableList<ConsumerRecord<*, *>>,

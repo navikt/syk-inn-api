@@ -48,3 +48,6 @@ build/
 secure.log
 
 .junie/
+
+# Used for local development
+src/main/resources/application-dev-kafka.yaml

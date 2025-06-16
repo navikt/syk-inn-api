@@ -15,7 +15,7 @@ data class SykmeldingDb(
     val pasientIdent: String,
     val sykmelderHpr: String,
     val sykmelding: PGobject,
-    val legekontorOrgnr: String,
+    val legekontorOrgnr: String?,
     val legekontorTlf: String?,
     val validertOk: Boolean = false,
 )
