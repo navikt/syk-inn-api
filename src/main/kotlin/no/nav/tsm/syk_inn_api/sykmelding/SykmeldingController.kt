@@ -73,7 +73,12 @@ object CreateSykmelding {
      * Rule outcomes that are NotOk are does not error the response completely, but rather return a
      * well formatted reason to the frontend.
      */
-    data class RuleOutcome(val status: String, val message: String, val rule: String)
+    data class RuleOutcome(
+        val status: String,
+        val message: String,
+        val rule: String,
+        val tree: String
+    )
 
     /**
      * Handles all error cases for SykmeldingCreationErrors, and maps them to appropriate HTTP
@@ -88,6 +93,7 @@ object CreateSykmelding {
                             status = this.result.outcome.status.name,
                             message = this.result.outcome.reason.sykmelder,
                             rule = this.result.outcome.rule,
+                            tree = this.result.outcome.tree,
                         ),
                     )
             }

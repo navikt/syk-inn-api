@@ -10,7 +10,7 @@ val openHtmlToPdfVersion = "1.1.28"
 val verapdfVersion = "1.28.1"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
-val regulaVersion = "40"
+val regulaVersion = "41"
 
 // Dev deps
 val testContainersVersion = "1.21.1"

@@ -270,6 +270,7 @@ class SykmeldingServiceTest {
                 status = RegulaStatus.INVALID,
                 outcome =
                     RegulaOutcome(
+                        tree = "Test tree",
                         status = RegulaOutcomeStatus.INVALID,
                         rule = "the rule that failed",
                         reason = RegulaOutcomeReason("validation failed", "message for sender"),
