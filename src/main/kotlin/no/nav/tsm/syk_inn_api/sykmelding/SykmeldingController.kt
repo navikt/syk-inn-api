@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
+import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.http.HttpStatus
@@ -67,20 +68,36 @@ class SykmeldingController(
         }
 }
 
-/**
- * Handles all error cases for SykmeldingCreationErrors, and maps them to appropriate HTTP
- * responses.
- */
-private fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
-    when (this) {
-        SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION ->
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rule validation failed")
-        SykmeldingService.SykmeldingCreationErrors.PERSISTENCE_ERROR ->
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to persist sykmelding")
-        SykmeldingService.SykmeldingCreationErrors.RESOURCE_ERROR ->
-            ResponseEntity.status(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                )
-                .body("Failed to fetch required resources")
-    }
+object CreateSykmelding {
+    /**
+     * Rule outcomes that are NotOk are does not error the response completely, but rather return a
+     * well formatted reason to the frontend.
+     */
+    data class RuleOutcome(val status: String, val message: String, val rule: String)
+
+    /**
+     * Handles all error cases for SykmeldingCreationErrors, and maps them to appropriate HTTP
+     * responses.
+     */
+    fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
+        when (this) {
+            is SykmeldingService.SykmeldingCreationErrors.RuleValidation -> {
+                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(
+                        RuleOutcome(
+                            status = this.result.outcome.status.name,
+                            message = this.result.outcome.reason.sykmelder,
+                            rule = this.result.outcome.rule,
+                        ),
+                    )
+            }
+            is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to persist sykmelding")
+            is SykmeldingService.SykmeldingCreationErrors.ResourceError ->
+                ResponseEntity.status(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                    )
+                    .body("Failed to fetch required resources")
+        }
+}

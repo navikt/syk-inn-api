@@ -11,6 +11,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.http.*
+import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullIntegrationTest() {
@@ -24,8 +25,8 @@ class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullInt
                     fullExampleSykmeldingPayload,
                     HttpHeaders().apply {
                         set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    }
-                )
+                    },
+                ),
             )
 
         val created = requireNotNull(response.body)
@@ -47,14 +48,34 @@ class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullInt
                     HttpHeaders().apply {
                         set("Ident", "21037712323")
                         set("HPR", "123456789")
-                    }
-                )
+                    },
+                ),
             )
 
         assertEquals(HttpStatus.OK, allResponse.statusCode)
 
         val allSykmeldinger = requireNotNull(allResponse.body)
         assertEquals(1, allSykmeldinger.size)
+    }
+
+    @Test
+    fun `rule hits should return why`() {
+        val response =
+            restTemplate.postForEntity<CreateSykmelding.RuleOutcome>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload.replace("L73", "Bad"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        val created = requireNotNull(response.body)
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        assertEquals(created.status, "INVALID")
+        assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
     }
 
     @Test
@@ -67,8 +88,8 @@ class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullInt
                     HttpHeaders().apply {
                         set("Ident", "21037712323")
                         set("HPR", "123456789")
-                    }
-                )
+                    },
+                ),
             )
 
         assertEquals(HttpStatus.OK, allResponse.statusCode)
@@ -98,8 +119,8 @@ private val fullExampleSykmeldingPayload =
     |    "aktivitet": [
     |      {
     |        "type": "AKTIVITET_IKKE_MULIG",
-    |        "fom": "2025-06-12",
-    |        "tom": "2025-06-12"
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}"
     |      }
     |    ],
     |    "meldinger": {

@@ -7,7 +7,7 @@ import arrow.core.right
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
-import no.nav.tsm.regulus.regula.RegulaStatus
+import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
@@ -29,10 +29,12 @@ class SykmeldingService(
     private val logger = logger()
     private val securelog = secureLogger()
 
-    enum class SykmeldingCreationErrors {
-        RULE_VALIDATION,
-        PERSISTENCE_ERROR,
-        RESOURCE_ERROR
+    sealed class SykmeldingCreationErrors {
+        data class RuleValidation(val result: RegulaResult.NotOk) : SykmeldingCreationErrors()
+
+        object PersistenceError : SykmeldingCreationErrors()
+
+        object ResourceError : SykmeldingCreationErrors()
     }
 
     fun createSykmelding(
@@ -60,11 +62,11 @@ class SykmeldingService(
                 { it },
                 {
                     logger.error("Feil ved henting av eksterne ressurser: $it")
-                    return SykmeldingCreationErrors.RESOURCE_ERROR.left()
+                    return SykmeldingCreationErrors.ResourceError.left()
                 },
             )
 
-        val ruleResult =
+        val ruleResult: RegulaResult =
             ruleService.validateRules(
                 payload = payload,
                 sykmeldingId = sykmeldingId,
@@ -72,8 +74,8 @@ class SykmeldingService(
                 foedselsdato = person.fodselsdato,
             )
 
-        if (ruleResult.status != RegulaStatus.OK) {
-            return SykmeldingCreationErrors.RULE_VALIDATION.left()
+        if (ruleResult is RegulaResult.NotOk) {
+            return SykmeldingCreationErrors.RuleValidation(ruleResult).left()
         }
 
         val sykmeldingDocument =
@@ -88,7 +90,7 @@ class SykmeldingService(
 
         if (sykmeldingDocument == null) {
             logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
-            return SykmeldingCreationErrors.PERSISTENCE_ERROR.left()
+            return SykmeldingCreationErrors.PersistenceError.left()
         }
 
         sykmeldingInputProducer.send(

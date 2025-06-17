@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import no.nav.tsm.regulus.regula.RegulaOutcome
@@ -317,7 +318,10 @@ class SykmeldingServiceTest {
             )
 
         result.fold(
-            { assertEquals(it, SykmeldingService.SykmeldingCreationErrors.RULE_VALIDATION) },
+            {
+                assertIs<SykmeldingService.SykmeldingCreationErrors.RuleValidation>(it)
+                assertEquals(it.result.outcome.rule, "the rule that failed")
+            },
         ) {
             fail("Expected rule validation error but got success: $it")
         }
