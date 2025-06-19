@@ -13,7 +13,7 @@ val arrowVersion = "2.1.2"
 val regulaVersion = "41"
 
 // Dev deps
-val testContainersVersion = "1.21.1"
+val testContainersVersion = "1.21.2"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.2"
 
