@@ -3,10 +3,13 @@ package no.nav.tsm.syk_inn_api.pdf
 import java.util.Base64
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
+import no.nav.tsm.syk_inn_api.pdf.SykmeldingHTMLUtils.svangerskapsrelatertText
+import no.nav.tsm.syk_inn_api.pdf.SykmeldingHTMLUtils.yrkesskadeText
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.displayName
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.utils.toReadableDate
+import no.nav.tsm.syk_inn_api.utils.toReadableDatePeriod
 import org.intellij.lang.annotations.Language
 
 private object HtmlResources {
@@ -45,7 +48,33 @@ fun TR.TableInfo(
     }
 }
 
+fun TR.TableInfoMultiRow(
+    title: String,
+    colspan: String? = null,
+    italic: Boolean = false,
+    value: () -> List<String>
+) {
+    td {
+        if (colspan != null) {
+            this.colSpan = colspan
+        }
+        div(classes = "title") { +title }
+        div(
+            classes = "value".let { if (italic) "$it italic" else it },
+        ) {
+            value().map { line -> div { +line } }
+        }
+    }
+}
+
 fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String {
+    val andreSporsmalTexts: List<String>? =
+        listOfNotNull(
+                svangerskapsrelatertText(sykmelding.values.svangerskapsrelatert),
+                yrkesskadeText(sykmelding.values.yrkesskade),
+            )
+            .ifEmpty { null }
+
     val htmlContent =
         createHTML(prettyPrint = true, xhtmlCompatible = true).html {
             head {
@@ -54,11 +83,12 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                 meta(name = "author", "syk-inn-api")
                 meta(
                     name = "description",
-                    "Sykmelding for ${
-                            SykmeldingHTMLUtils.formatReadablePeriode(
-                                    sykmelding.values.aktivitet,
-                            )
-                        }",
+                    "Sykmelding i perioden ${
+                        toReadableDatePeriod(
+                            sykmelding.values.aktivitet.first().fom,
+                            sykmelding.values.aktivitet.last().tom,
+                        )
+                    }",
                 )
                 meta(charset = "UTF-8")
 
@@ -77,22 +107,23 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfo("Arbeidsgiver") {
+                            TableInfo(
+                                "Arbeidsgiver",
+                                italic = sykmelding.values.arbeidsgiver == null,
+                            ) {
                                 if (sykmelding.values.arbeidsgiver != null) {
                                     sykmelding.values.arbeidsgiver.arbeidsgivernavn
                                 } else {
-                                    "Ingen arbeidsgiver oppgitt"
+                                    "Ingen arbeidsgiver"
                                 }
-                            }
-                            TableInfo("Periode") {
-                                SykmeldingHTMLUtils.formatReadablePeriode(
-                                    sykmelding.values.aktivitet,
-                                )
                             }
                         }
                         tr {
-                            TableInfo("Mulighet for arbeid") { "TODO" }
-                            TableInfo("Sykmeldingsgrad (%)") { "TODO" }
+                            TableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
+                                sykmelding.values.aktivitet.map {
+                                    SykmeldingHTMLUtils.formatReadablePeriode(it)
+                                }
+                            }
                         }
                         tr {
                             TableInfo("Diagnose") {
@@ -102,7 +133,14 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     "Ingen diagnose oppgitt"
                                 }
                             }
-                            TableInfo("Andre spørsmål") { "TODO (list?)" }
+                            TableInfo("Bidiagnoser", italic = true) { "Ingen bidiagnoser" }
+                        }
+                        if (andreSporsmalTexts != null) {
+                            tr {
+                                TableInfoMultiRow("Andre spørsmål", colspan = "2") {
+                                    andreSporsmalTexts
+                                }
+                            }
                         }
                         tr {
                             TableInfo(

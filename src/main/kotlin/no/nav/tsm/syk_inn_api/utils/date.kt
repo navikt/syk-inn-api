@@ -14,6 +14,12 @@ fun toReadableDateNoYear(date: LocalDate): String {
     return date.format(formatter)
 }
 
+fun toReadableDatePeriod(fom: String, tom: String): String {
+    val fomDate = LocalDate.parse(fom)
+    val tomDate = LocalDate.parse(tom)
+    return toReadableDatePeriod(fomDate, tomDate)
+}
+
 fun toReadableDatePeriod(fom: LocalDate, tom: LocalDate): String {
     return when {
         fom.isEqual(tom) -> toReadableDate(fom)

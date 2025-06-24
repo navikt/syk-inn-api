@@ -25,6 +25,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -83,13 +84,27 @@ class PdfServiceTest {
                                     fom = "2023-01-01",
                                     tom = "2023-01-10",
                                 ),
+                                SykmeldingDocumentAktivitet.Gradert(
+                                    fom = "2023-01-11",
+                                    tom = "2023-01-15",
+                                    grad = 60,
+                                    reisetilskudd = false
+                                ),
                             ),
                         bidiagnoser = emptyList(),
-                        svangerskapsrelatert = false,
+                        svangerskapsrelatert = true,
+                        yrkesskade =
+                            SykmeldingDocumentYrkesskade(
+                                yrkesskade = true,
+                                skadedato = LocalDate.parse("1989-06-07"),
+                            ),
                         pasientenSkalSkjermes = false,
                         meldinger =
-                            SykmeldingDocumentMeldinger(tilNav = null, tilArbeidsgiver = null),
-                        yrkesskade = null,
+                            SykmeldingDocumentMeldinger(
+                                tilNav = null,
+                                tilArbeidsgiver =
+                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                            ),
                         arbeidsgiver = null,
                         tilbakedatering = null,
                     ),
