@@ -14,7 +14,8 @@ import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.http.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class SykmeldingApiTest(@Autowired val restTemplate: TestRestTemplate) : FullIntegrationTest() {
+class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
+    FullIntegrationTest() {
 
     @Test
     fun `sanity test - simple create test`() {

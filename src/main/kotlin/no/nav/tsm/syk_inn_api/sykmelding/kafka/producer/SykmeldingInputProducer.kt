@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 class SykmeldingInputProducer(
     private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
 ) {
-    @Value("\${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
+    @Value($$"${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
 
     private val logger = logger()
 

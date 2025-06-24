@@ -21,7 +21,7 @@ class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
-    @Value("\${nais.cluster}") private val clusterName: String
+    @param:Value($$"${nais.cluster}") private val clusterName: String
 ) {
     private val logger = logger()
     private val secureLog = secureLogger()

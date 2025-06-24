@@ -18,7 +18,7 @@ interface IHelsenettProxyClient {
 class HelsenettProxyClient(
     webClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
-    @Value("\${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
+    @param:Value($$"${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
 ) : IHelsenettProxyClient {
     private val logger = logger()
     private val secureLog = secureLogger()

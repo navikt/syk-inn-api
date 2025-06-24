@@ -15,8 +15,8 @@ import reactor.core.publisher.Mono
 @Component
 class TexasClient(
     webClientBuilder: WebClient.Builder,
-    @Value("\${nais.token_endpoint}") private val naisTokenEndpoint: String,
-    @Value("\${nais.cluster}") private val cluster: String,
+    @param:Value($$"${nais.token_endpoint}") private val naisTokenEndpoint: String,
+    @param:Value($$"${nais.cluster}") private val cluster: String,
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(naisTokenEndpoint).build()
     private val logger = logger()
