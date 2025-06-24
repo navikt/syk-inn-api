@@ -83,7 +83,7 @@ class RuleService() {
             // TODO her bør vi kanskje slå opp tidligere sykmeldinger? sende inn frå kallande
             // service.
             tidligereSykmeldinger = emptyList(),
-            kontaktPasientBegrunnelseIkkeKontakt = null,
+            kontaktPasientBegrunnelseIkkeKontakt = payload.values.tilbakedatering?.begrunnelse,
             pasient =
                 RegulaPasient(
                     ident = payload.meta.pasientIdent,
