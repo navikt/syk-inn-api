@@ -25,7 +25,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
@@ -46,7 +46,7 @@ class SykmeldingServiceTest {
     private lateinit var sykmeldingService: SykmeldingService
     private lateinit var sykmelderService: SykmelderService
     private lateinit var ruleService: RuleService
-    private lateinit var sykmeldingInputProducer: SykmeldingInputProducer
+    private lateinit var sykmeldingInputProducer: SykmeldingProducer
     private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
     private lateinit var personService: PersonService
 

@@ -5,46 +5,51 @@ import java.time.OffsetDateTime
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper.findTextFromDiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.HelsepersonellKategori
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.parseHelsepersonellKategori
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingArbeidsgiver
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.MessageMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonId
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.PersonIdType
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.EnArbeidsgiver
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.FlereArbeidsgivere
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.IngenArbeidsgiver
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaDiagnoseSystem
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.KafkaYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordArbeidsgiverInfo
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordBehandler
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordMedisinskVurdering
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordPasient
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecordTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsgiver
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.rules.InvalidRule
-import no.nav.tsm.syk_inn_api.sykmelding.rules.OKRule
-import no.nav.tsm.syk_inn_api.sykmelding.rules.PendingRule
-import no.nav.tsm.syk_inn_api.sykmelding.rules.Reason
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleType
-import no.nav.tsm.syk_inn_api.sykmelding.rules.ValidationResult
-import no.nav.tsm.syk_inn_api.sykmelding.rules.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.Aktivitet
+import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
+import no.nav.tsm.sykmelding.input.core.model.Avventende
+import no.nav.tsm.sykmelding.input.core.model.Behandler
+import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
+import no.nav.tsm.sykmelding.input.core.model.BistandNav
+import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
+import no.nav.tsm.sykmelding.input.core.model.DigitalSykmeldingMetadata
+import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
+import no.nav.tsm.sykmelding.input.core.model.Gradert
+import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.OKRule
+import no.nav.tsm.sykmelding.input.core.model.Pasient
+import no.nav.tsm.sykmelding.input.core.model.PendingRule
+import no.nav.tsm.sykmelding.input.core.model.Reason
+import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
+import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
+import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
+import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
+import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
+import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
+import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
+import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 
 object SykmeldingKafkaMapper {
     fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
@@ -89,16 +94,11 @@ object SykmeldingKafkaMapper {
         return ValidationResult(status = rule.type, timestamp = OffsetDateTime.now(), rules = rules)
     }
 
-    fun mapMessageMetadata(meta: SykmeldingDocumentMeta): MessageMetadata =
-        Digital(
-            orgnummer = meta.legekontorOrgnr
-                    ?: throw IllegalArgumentException(
-                        "A freshly created sykmelding must have a legekontorOrgnr, as it is required in the payload. This should be impossible."
-                    ),
-        )
+    fun mapMessageMetadata(meta: OpprettSykmeldingMetadata): MessageMetadata =
+        Digital(orgnummer = meta.legekontorOrgnr)
 
     fun mapToDigitalSykmelding(
-        sykmelding: SykmeldingDocument,
+        sykmelding: OpprettSykmeldingPayload,
         sykmeldingId: String,
         person: Person,
         sykmelder: Sykmelder
@@ -126,26 +126,37 @@ object SykmeldingKafkaMapper {
                     genDate = OffsetDateTime.now(),
                 ),
             pasient =
-                SykmeldingRecordPasient(
-                    navn = person.navn,
-                    fnr = sykmelding.meta.pasientIdent,
-                    kontaktinfo = emptyList(),
+                Pasient(
+                    navn =
+                        Navn(
+                            fornavn = person.navn.fornavn,
+                            mellomnavn = person.navn.mellomnavn,
+                            etternavn = person.navn.etternavn,
+                        ),
+                    navKontor = null,
+                    navnFastlege = null,
+                    fnr = person.ident,
+                    kontaktinfo = emptyList()
                 ),
             medisinskVurdering = mapMedisinskVurdering(sykmelding.values),
             aktivitet = sykmelding.values.aktivitet.map { toRecordAktivitet(it) },
             behandler =
-                SykmeldingRecordBehandler(
-                    navn = sykmelderNavn,
+                Behandler(
+                    navn =
+                        Navn(
+                            fornavn = sykmelderNavn.fornavn,
+                            mellomnavn = sykmelderNavn.mellomnavn,
+                            etternavn = sykmelderNavn.etternavn,
+                        ),
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     kontaktinfo = emptyList(),
+                    adresse = null,
                 ),
             sykmelder =
-                SykmeldingRecordSykmelder(
+                no.nav.tsm.sykmelding.input.core.model.Sykmelder(
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     helsepersonellKategori =
-                        HelsepersonellKategori.parse(
-                            helsepersonellKategoriKode.verdi,
-                        ), // TODO er det rett verdi ??
+                        parseHelsepersonellKategori(helsepersonellKategoriKode.verdi),
                 ),
             arbeidsgiver =
                 mapArbeidsgiver(
@@ -153,36 +164,36 @@ object SykmeldingKafkaMapper {
                     sykmelding.values.meldinger,
                 ),
             tilbakedatering = mapTilbakedatering(sykmelding.values.tilbakedatering),
-            meldinger = mapMeldinger(sykmelding.values.meldinger),
+            bistandNav = mapBistandNav(sykmelding.values.meldinger),
         )
     }
 
-    private fun mapMeldinger(meldinger: SykmeldingDocumentMeldinger): SykmeldingRecordMeldinger {
-        return SykmeldingRecordMeldinger(
-            tilNav = meldinger.tilNav,
-            tilArbeidsgiver = meldinger.tilArbeidsgiver,
-        )
+    private fun mapBistandNav(meldinger: OpprettSykmeldingMeldinger): BistandNav? {
+        return BistandNav(bistandUmiddelbart = false, beskrivBistand = meldinger.tilNav)
     }
 
     private fun mapTilbakedatering(
-        tilbakedatering: SykmeldingDocumentTilbakedatering?
-    ): SykmeldingRecordTilbakedatering? {
+        tilbakedatering: OpprettSykmeldingTilbakedatering?
+    ): Tilbakedatering? {
         if (tilbakedatering == null) return null
 
-        return SykmeldingRecordTilbakedatering(
+        return Tilbakedatering(
             kontaktDato = tilbakedatering.startdato,
             begrunnelse = tilbakedatering.begrunnelse,
         )
     }
 
     private fun mapArbeidsgiver(
-        arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
-        meldinger: SykmeldingDocumentMeldinger
-    ): SykmeldingRecordArbeidsgiverInfo {
+        arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
+        meldinger: OpprettSykmeldingMeldinger
+    ): ArbeidsgiverInfo {
         if (arbeidsgiver == null) {
             return EnArbeidsgiver(
                 meldingTilArbeidsgiver = meldinger.tilArbeidsgiver,
                 tiltakArbeidsplassen = null,
+                navn = null,
+                yrkesbetegnelse = null,
+                stillingsprosent = null,
             )
         }
 
@@ -212,9 +223,9 @@ object SykmeldingKafkaMapper {
     }
 
     fun mapMedisinskVurdering(
-        sykmeldingValues: SykmeldingDocumentValues
-    ): SykmeldingRecordMedisinskVurdering {
-        return SykmeldingRecordMedisinskVurdering(
+        sykmeldingValues: OpprettSykmelding,
+    ): MedisinskVurdering {
+        return MedisinskVurdering(
             hovedDiagnose = mapHoveddiagnose(sykmeldingValues.hoveddiagnose),
             biDiagnoser = sykmeldingValues.bidiagnoser?.toSykmeldingRecordDiagnoseInfo(),
             svangerskap = sykmeldingValues.svangerskapsrelatert,
@@ -225,40 +236,40 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun toRecordAktivitet(aktivitet: SykmeldingDocumentAktivitet): SykmeldingRecordAktivitet {
+    fun toRecordAktivitet(aktivitet: OpprettSykmeldingAktivitet): Aktivitet {
         return when (aktivitet) {
-            is SykmeldingDocumentAktivitet.Gradert -> {
-                SykmeldingRecordAktivitet.Gradert(
+            is OpprettSykmeldingAktivitet.Gradert -> {
+                Gradert(
                     grad = aktivitet.grad,
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                     reisetilskudd = aktivitet.reisetilskudd,
                 )
             }
-            is SykmeldingDocumentAktivitet.IkkeMulig -> {
-                SykmeldingRecordAktivitet.AktivitetIkkeMulig(
+            is OpprettSykmeldingAktivitet.IkkeMulig -> {
+                AktivitetIkkeMulig(
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                     medisinskArsak = null,
                     arbeidsrelatertArsak = null,
                 )
             }
-            is SykmeldingDocumentAktivitet.Avventende -> {
-                SykmeldingRecordAktivitet.Avventende(
+            is OpprettSykmeldingAktivitet.Avventende -> {
+                Avventende(
                     innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                 )
             }
-            is SykmeldingDocumentAktivitet.Behandlingsdager -> {
-                SykmeldingRecordAktivitet.Behandlingsdager(
+            is OpprettSykmeldingAktivitet.Behandlingsdager -> {
+                Behandlingsdager(
                     antallBehandlingsdager = aktivitet.antallBehandlingsdager,
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                 )
             }
-            is SykmeldingDocumentAktivitet.Reisetilskudd -> {
-                SykmeldingRecordAktivitet.Reisetilskudd(
+            is OpprettSykmeldingAktivitet.Reisetilskudd -> {
+                Reisetilskudd(
                     fom = LocalDate.parse(aktivitet.fom),
                     tom = LocalDate.parse(aktivitet.tom),
                 )
@@ -267,42 +278,46 @@ object SykmeldingKafkaMapper {
     }
 }
 
-fun mapHoveddiagnose(hoveddiagnose: SykmeldingDocumentDiagnoseInfo?): KafkaDiagnoseInfo? {
+fun mapHoveddiagnose(hoveddiagnose: OpprettSykmeldingDiagnoseInfo): DiagnoseInfo? {
     if (hoveddiagnose == null) return null
 
-    return KafkaDiagnoseInfo(
+    return DiagnoseInfo(
         system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
         kode = hoveddiagnose.code,
+        tekst =
+            findTextFromDiagnoseSystem(system = hoveddiagnose.system, code = hoveddiagnose.code),
     )
 }
 
-private fun DiagnoseSystem.toKafkaDiagnoseSystem(): KafkaDiagnoseSystem {
+private fun DiagnoseSystem.toKafkaDiagnoseSystem():
+    no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem {
     return when (this) {
-        DiagnoseSystem.ICPC2 -> KafkaDiagnoseSystem.ICPC2
-        DiagnoseSystem.ICD10 -> KafkaDiagnoseSystem.ICD10
+        DiagnoseSystem.ICPC2 -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICPC2
+        DiagnoseSystem.ICD10 -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICD10
     }
 }
 
-private fun SykmeldingDocumentYrkesskade?.toSykmeldingRecordYrkesskade(): KafkaYrkesskade? {
+private fun OpprettSykmeldingYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkesskade? {
     if (this == null) return null
 
     if (!this.yrkesskade) {
         return null
     }
 
-    return KafkaYrkesskade(yrkesskadeDato = this.skadedato)
+    return Yrkesskade(yrkesskadeDato = this.skadedato)
 }
 
-private fun List<SykmeldingDocumentDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
-    List<KafkaDiagnoseInfo>? {
+private fun List<OpprettSykmeldingDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
+    List<DiagnoseInfo>? {
     if (this.isEmpty()) {
         return null
     }
 
     return this.map { diagnose ->
-        KafkaDiagnoseInfo(
+        DiagnoseInfo(
             system = diagnose.system.toKafkaDiagnoseSystem(),
             kode = diagnose.code,
+            tekst = findTextFromDiagnoseSystem(system = diagnose.system, code = diagnose.code)
         )
     }
 }

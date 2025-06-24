@@ -3,25 +3,26 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper.mapValidationResult
 import no.nav.tsm.syk_inn_api.utils.logger
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class SykmeldingInputProducer(
-    private val kafkaProducer: KafkaProducer<String, SykmeldingRecord>,
+class SykmeldingProducer(
+    private val kafkaProducer: SykmeldingInputProducer,
 ) {
-    @Value($$"${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
+    @Value("\${kafka.topics.sykmeldinger-input}")
+    private lateinit var sykmeldingInputTopic: String // TODO delete - where is it supplied now ?
 
     private val logger = logger()
 
     fun send(
         sykmeldingId: String,
-        sykmelding: SykmeldingDocument,
+        sykmelding: OpprettSykmeldingPayload,
         person: Person,
         sykmelder: Sykmelder,
         regulaResult: RegulaResult,
@@ -36,17 +37,9 @@ class SykmeldingInputProducer(
                         person,
                         sykmelder,
                     ),
-                validation = SykmeldingKafkaMapper.mapValidationResult(regulaResult),
+                validation = mapValidationResult(regulaResult),
             )
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    sykmeldingInputTopic,
-                    sykmeldingId,
-                    sykmeldingKafkaMessage,
-                ),
-            )
-            .get()
+        kafkaProducer.sendSykmelding(sykmeldingKafkaMessage)
 
         logger.info("Sent sykmelding with id=$sykmeldingId to Kafka")
     }

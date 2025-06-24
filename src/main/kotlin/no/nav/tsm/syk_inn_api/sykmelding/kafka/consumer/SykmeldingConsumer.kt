@@ -1,13 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
-import java.time.LocalDate
-import java.time.Month
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
@@ -28,13 +26,15 @@ class SykmeldingConsumer(
 
     @KafkaListener(
         topics = ["\${kafka.topics.sykmeldinger}"],
-        groupId = "syk-inn-api-consumer",
+        groupId = "syk-inn-api-consumer-jaf2",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord?>) {
+    fun consume(
+        record: ConsumerRecord<String, no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord?>
+    ) {
         val sykmeldingId = record.key()
-        val value: SykmeldingRecord? = record.value()
+        val value: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord? = record.value()
 
         secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
 
@@ -55,7 +55,10 @@ class SykmeldingConsumer(
                 return // Skip processing for sykmeldinger before 2024
             }
 
-            if (value.sykmelding.type == SykmeldingType.UTENLANDSK) {
+            if (
+                value.sykmelding.type ==
+                    no.nav.tsm.sykmelding.input.core.model.SykmeldingType.UTENLANDSK
+            ) {
                 return // skip processing for utenlandske sykmeldinger
             }
 
@@ -123,16 +126,5 @@ class SykmeldingConsumer(
             "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
         )
         sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
-    }
-
-    private fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
-        val tom = this.sykmelding.aktivitet.first().tom
-        return tom.isBefore(
-            LocalDate.of(
-                year,
-                Month.JANUARY,
-                1,
-            ),
-        )
     }
 }

@@ -22,7 +22,7 @@ spring:
   kafka:
     bootstrap-servers: ${BOOTSTRAP_SERVERS:localhost:9092}
     security:
-      protocol: plaintext
+      protocol: PLAINTEXT
 
 nais:
   cluster: ${NAIS_CLUSTER:local}

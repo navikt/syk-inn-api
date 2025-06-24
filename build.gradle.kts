@@ -11,6 +11,7 @@ val verapdfVersion = "1.28.1"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
 val regulaVersion = "41"
+val sykmeldingInputVersion = "9"
 
 // Dev deps
 val testContainersVersion = "1.21.2"
@@ -59,6 +60,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation("no.nav.tsm.regulus:regula:$regulaVersion")
+    implementation("no.nav.tsm.sykmelding", "input", sykmeldingInputVersion)
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
 
     // PDF generation dependencies:

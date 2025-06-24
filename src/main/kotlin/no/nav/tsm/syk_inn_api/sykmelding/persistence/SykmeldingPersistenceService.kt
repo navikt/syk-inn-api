@@ -111,7 +111,7 @@ class SykmeldingPersistenceService(
 
     fun mapSykmeldingRecordToSykmeldingDatabaseEntity(
         sykmeldingId: String,
-        sykmeldingRecord: SykmeldingRecord,
+        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord,
         validertOk: Boolean,
         person: Person,
         sykmelder: Sykmelder,
@@ -142,13 +142,15 @@ class SykmeldingPersistenceService(
 
     fun updateSykmelding(
         sykmeldingId: String,
-        sykmeldingRecord: SykmeldingRecord,
+        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord,
         person: Person,
         sykmelder: Sykmelder,
     ) {
         val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
 
-        val typeNotDigital = sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
+        val typeNotDigital =
+            sykmeldingRecord.sykmelding.type !=
+                no.nav.tsm.sykmelding.input.core.model.SykmeldingType.DIGITAL
         if (sykmeldingEntity == null && typeNotDigital) {
             logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
             try {
@@ -176,7 +178,10 @@ class SykmeldingPersistenceService(
             }
         }
 
-        if (sykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
+        if (
+            sykmeldingRecord.sykmelding.type ==
+                no.nav.tsm.sykmelding.input.core.model.SykmeldingType.DIGITAL
+        ) {
             val updatedEntity = sykmeldingEntity?.copy(validertOk = true)
             logger.info("Updating sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             sykmeldingRepository.save(
