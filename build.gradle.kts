@@ -13,14 +13,14 @@ val arrowVersion = "2.1.2"
 val regulaVersion = "41"
 
 // Dev deps
-val testContainersVersion = "1.21.1"
+val testContainersVersion = "1.21.2"
 val ktfmtVersion = "0.44"
-val mockkVersion = "1.14.2"
+val mockkVersion = "1.14.4"
 
 plugins {
-    kotlin("jvm") version "2.1.21"
-    kotlin("plugin.spring") version "2.1.21"
-    id("org.springframework.boot") version "3.5.0"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.spring") version "2.2.0"
+    id("org.springframework.boot") version "3.5.3"
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
