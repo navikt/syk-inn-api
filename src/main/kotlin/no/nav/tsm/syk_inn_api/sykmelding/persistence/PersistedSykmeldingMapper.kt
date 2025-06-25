@@ -18,17 +18,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Digital
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EDIEmottak
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Egenmeldt
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.EmottakEnkel
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KontaktinfoType
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Papir
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.Utenlandsk
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.DigitalSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.Papirsykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.XmlSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleType
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -37,11 +26,23 @@ import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
 import no.nav.tsm.sykmelding.input.core.model.Avventende
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
+import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
+import no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak
+import no.nav.tsm.sykmelding.input.core.model.metadata.Egenmeldt
+import no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel
+import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
+import no.nav.tsm.sykmelding.input.core.model.metadata.Papir
+import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
+import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
 
 object PersistedSykmeldingMapper {
 
@@ -75,7 +76,7 @@ object PersistedSykmeldingMapper {
     }
 
     fun mapSykmeldingRecordToPersistedSykmelding(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord,
+        sykmeldingRecord: SykmeldingRecord,
         person: Person,
         sykmelder: Sykmelder,
     ): PersistedSykmelding {
@@ -105,94 +106,67 @@ object PersistedSykmeldingMapper {
         )
     }
 
-    fun mapLegekontorOrgnr(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-    ): String? {
+    fun mapLegekontorOrgnr(sykmeldingRecord: SykmeldingRecord): String? {
         return when (val metadata = sykmeldingRecord.metadata) {
-            is no.nav.tsm.sykmelding.input.core.model.metadata.Digital -> metadata.orgnummer
-            is no.nav.tsm.sykmelding.input.core.model.metadata.Papir ->
-                metadata.sender.ids.firstOrNull().let { it?.id }
-            is no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel ->
-                metadata.sender.ids.firstOrNull().let { it?.id }
+            is Digital -> metadata.orgnummer
+            is Papir -> metadata.sender.ids.firstOrNull().let { it?.id }
+            is EmottakEnkel -> metadata.sender.ids.firstOrNull().let { it?.id }
                     ?: error("No orgnr found in sender object (EmottakEnkel)")
-            is no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak ->
-                metadata.sender.ids.firstOrNull().let { it?.id }
+            is EDIEmottak -> metadata.sender.ids.firstOrNull().let { it?.id }
                     ?: error("No orgnr found in sender object (EDIEmottak)")
-            is no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk -> null
-            is no.nav.tsm.sykmelding.input.core.model.metadata.Egenmeldt -> null
+            is Utenlandsk -> null
+            is Egenmeldt -> null
         }
     }
 
-    fun mapLegekontorTlf(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-    ): String? {
+    fun mapLegekontorTlf(sykmeldingRecord: SykmeldingRecord): String? {
         return when (val sykmelding = sykmeldingRecord.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
+            is DigitalSykmelding -> {
                 sykmelding.behandler.kontaktinfo
-                    .firstOrNull() {
-                        it.type ==
-                            no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType.TLF
-                    }
+                    .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
+            is Papirsykmelding -> {
                 sykmelding.behandler.kontaktinfo
-                    .firstOrNull() {
-                        it.type ==
-                            no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType.TLF
-                    }
+                    .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
+            is XmlSykmelding -> {
                 sykmelding.behandler.kontaktinfo
-                    .firstOrNull() {
-                        it.type ==
-                            no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType.TLF
-                    }
+                    .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
             else -> null
         }
     }
 
-    fun mapHprNummer(value: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord): String {
+    fun mapHprNummer(value: SykmeldingRecord): String? {
         return when (val sykmelding = value.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
-                sykmelding.sykmelder.ids
-                    .find {
-                        it.type == no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType.HPR
-                    }
-                    ?.id
-                    ?: error(
-                        "No HPR number found in Sykmelder-object. sykmelder id type \n ${sykmelding.sykmelder.ids.first().type.name}"
-                    )
-            }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
-                sykmelding.sykmelder.ids
-                    .find {
-                        it.type == no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType.HPR
-                    }
-                    ?.id
-                    ?: error(
-                        "No HPR number found in Sykmelder-object. sykmelder id type \n ${sykmelding.sykmelder.ids.first().type.name}"
-                    )
-            }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
-                sykmelding.sykmelder.ids
-                    .find {
-                        it.type == no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType.HPR
-                    }
-                    ?.id
-                //                    ?: error("No HPR number found in Sykmelder-object")
-                ?: error(
-                        "No HPR number found in Sykmelder-object. sykmelder id type \n ${sykmelding.sykmelder.ids.first().type.name}"
-                    )
-            }
-            else -> {
-                logger.warn("Sykmelding type is not SykInnSykmelding, cannot map HPR number")
-                return "No sykmelder exists as this must be a utenlandsk sykmelding"
-            }
+            is DigitalSykmelding -> mapFromSykmelder(sykmelding.sykmelder)
+            is Papirsykmelding -> mapFromSykmelder(sykmelding.sykmelder)
+            is XmlSykmelding -> mapFromSykmelder(sykmelding.sykmelder)
+            else -> error("Unable to map hpr number for sykmelding ${value.sykmelding.id}")
         }
+    }
+
+    private fun mapFromSykmelder(
+        sykmelder: no.nav.tsm.sykmelding.input.core.model.Sykmelder
+    ): String? {
+        val hprId = sykmelder.ids.find { it.type == PersonIdType.HPR }?.id
+        if (hprId != null) {
+            return hprId
+        }
+
+        val hasFnr = sykmelder.ids.any { it.type == PersonIdType.FNR }
+        if (hasFnr) {
+            return null
+        }
+
+        error(
+            "No HPR or FNR found in Sykmelder-object. First id type: ${
+                sykmelder.ids.firstOrNull()?.type?.name ?: "none"
+            }"
+        )
     }
 
     private fun OpprettSykmeldingDiagnoseInfo.toPersistedSykmeldingDiagnoseInfo():
@@ -511,18 +485,18 @@ object PersistedSykmeldingMapper {
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingArbeidsgiver(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+        sykmeldingRecord: SykmeldingRecord
     ): PersistedSykmeldingArbeidsgiver? {
         return when (val value = sykmeldingRecord.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
+            is DigitalSykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver ?: return null
 
                 getArbeidsgiverInfo(arbeidsgiver)
             }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
+            is Papirsykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)
             }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
+            is XmlSykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)
             }
             else -> {
@@ -596,17 +570,17 @@ object PersistedSykmeldingMapper {
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingYrkesskade(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+        sykmeldingRecord: SykmeldingRecord
     ): PersistedSykmeldingYrkesskade? {
         val sykmeldingRecordMedisinskVurdering = sykmeldingRecord.sykmelding.medisinskVurdering
         return when (sykmeldingRecord.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
+            is DigitalSykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
+            is Papirsykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
+            is XmlSykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
             else -> {
@@ -628,16 +602,16 @@ object PersistedSykmeldingMapper {
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingTilbakedatering(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+        sykmeldingRecord: SykmeldingRecord
     ): PersistedSykmeldingTilbakedatering? {
         return when (val value = sykmeldingRecord.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
+            is DigitalSykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
+            is Papirsykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
+            is XmlSykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
             else -> {
@@ -680,20 +654,20 @@ object PersistedSykmeldingMapper {
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingMeldinger(
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+        sykmeldingRecord: SykmeldingRecord
     ): PersistedSykmeldingMeldinger {
         return when (val value = sykmeldingRecord.sykmelding) {
-            is no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding -> {
+            is DigitalSykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
             }
-            is no.nav.tsm.sykmelding.input.core.model.Papirsykmelding -> {
+            is Papirsykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
             }
-            is no.nav.tsm.sykmelding.input.core.model.XmlSykmelding -> {
+            is XmlSykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
@@ -708,7 +682,7 @@ object PersistedSykmeldingMapper {
         }
     }
 
-    fun no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord.isBeforeYear(year: Int): Boolean {
+    fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
         val tom = this.sykmelding.aktivitet.first().tom
         return tom.isBefore(
             LocalDate.of(

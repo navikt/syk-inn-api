@@ -18,7 +18,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.metadata.KafkaPersonNavn
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
@@ -103,9 +102,9 @@ object SykmeldingKafkaMapper {
         person: Person,
         sykmelder: Sykmelder
     ): DigitalSykmelding {
-        val sykmelderNavn: KafkaPersonNavn? =
+        val sykmelderNavn: Navn? =
             sykmelder.navn?.let {
-                KafkaPersonNavn(
+                Navn(
                     fornavn = it.fornavn,
                     mellomnavn = it.mellomnavn,
                     etternavn = it.etternavn,

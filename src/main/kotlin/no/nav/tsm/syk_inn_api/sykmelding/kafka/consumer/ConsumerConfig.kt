@@ -1,8 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.util.SykmeldingDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -20,7 +19,7 @@ class ConsumerConfig {
     fun kafkaListenerContainerFactory(
         props: KafkaProperties,
         errorHandler: ConsumerErrorHandler
-    ): ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord> {
+    ): ConcurrentKafkaListenerContainerFactory<String, ByteArray> {
         val consumerFactory =
             DefaultKafkaConsumerFactory(
                 props.buildConsumerProperties(null).apply {
@@ -32,10 +31,10 @@ class ConsumerConfig {
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
                 },
                 StringDeserializer(),
-                SykmeldingDeserializer(),
+                ByteArrayDeserializer(),
             )
 
-        val factory = ConcurrentKafkaListenerContainerFactory<String, SykmeldingRecord>()
+        val factory = ConcurrentKafkaListenerContainerFactory<String, ByteArray>()
         factory.consumerFactory = consumerFactory
         factory.setCommonErrorHandler(errorHandler)
         return factory

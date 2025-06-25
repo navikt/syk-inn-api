@@ -157,7 +157,7 @@ class SykmeldingServiceTest {
                         melding = null,
                     ),
             )
-        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(any()) } returns
+        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(any()) } returns
             sykmeldingDocument
 
         every {
@@ -170,7 +170,7 @@ class SykmeldingServiceTest {
                 any(),
             )
         } returns
-            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocumentt(
+            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
                 SykmeldingDb(
                     sykmeldingId = sykmeldingId,
                     mottatt = OffsetDateTime.now(),
