@@ -21,7 +21,7 @@ class MockPdlClient : IPdlClient {
                 identer =
                     listOf(
                         Ident(
-                            ident = "12345678901",
+                            ident = fnr,
                             gruppe = IDENT_GRUPPE.FOLKEREGISTERIDENT,
                             historisk = false,
                         ),

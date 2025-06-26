@@ -63,13 +63,6 @@ data class PersistedSykmeldingTilbakedatering(
     val begrunnelse: String,
 )
 
-data class PersistedSykmeldingMeta( // TODO delete?
-    val pasientIdent: String,
-    val sykmelderHpr: String,
-    val legekontorOrgnr: String,
-    val legekontorTlf: String,
-)
-
 @JsonSubTypes(
     JsonSubTypes.Type(PersistedSykmeldingAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
     JsonSubTypes.Type(PersistedSykmeldingAktivitet.Gradert::class, name = "GRADERT"),

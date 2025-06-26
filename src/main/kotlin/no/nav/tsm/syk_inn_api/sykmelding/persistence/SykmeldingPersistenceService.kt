@@ -9,7 +9,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMapper
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import org.springframework.stereotype.Service
 
 @Service
@@ -89,9 +92,16 @@ class SykmeldingPersistenceService(
             meta =
                 SykmeldingDocumentMeta(
                     mottatt = dbObject.mottatt,
-                    pasientIdent = dbObject.pasientIdent,
-                    sykmelderHpr = dbObject.sykmelderHpr,
+                    pasientIdent = persistedSykmelding.pasient.ident,
+                    sykmelder =
+                        SykmeldingDocumentSykmelder(
+                            hprNummer = persistedSykmelding.sykmelder.hprNummer,
+                            fornavn = persistedSykmelding.sykmelder.fornavn,
+                            mellomnavn = persistedSykmelding.sykmelder.mellomnavn,
+                            etternavn = persistedSykmelding.sykmelder.etternavn,
+                        ),
                     legekontorOrgnr = dbObject.legekontorOrgnr,
+                    legekontorTlf = dbObject.legekontorTlf,
                 ),
             values =
                 SykmeldingDocumentMapper.mapPersistedSykmeldingToSykmeldingDokument(
@@ -109,7 +119,7 @@ class SykmeldingPersistenceService(
 
     fun mapSykmeldingRecordToSykmeldingDatabaseEntity(
         sykmeldingId: String,
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord,
+        sykmeldingRecord: SykmeldingRecord,
         validertOk: Boolean,
         person: Person,
         sykmelder: Sykmelder,
@@ -140,20 +150,18 @@ class SykmeldingPersistenceService(
 
     fun updateSykmelding(
         sykmeldingId: String,
-        sykmeldingRecord: no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord,
+        sykmeldingRecord: SykmeldingRecord,
         person: Person,
         sykmelder: Sykmelder,
     ) {
         val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
 
-        val typeNotDigital =
-            sykmeldingRecord.sykmelding.type !=
-                no.nav.tsm.sykmelding.input.core.model.SykmeldingType.DIGITAL
+        val typeNotDigital = sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
         if (sykmeldingEntity == null && typeNotDigital) {
             logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
             try {
                 // TODO skal sjekke om den faktisk er avvist eller ikkje før en kan sette validert
-                // ok.
+                // ok?
                 val entity =
                     mapSykmeldingRecordToSykmeldingDatabaseEntity(
                         sykmeldingId = sykmeldingId,
@@ -176,10 +184,7 @@ class SykmeldingPersistenceService(
             }
         }
 
-        if (
-            sykmeldingRecord.sykmelding.type ==
-                no.nav.tsm.sykmelding.input.core.model.SykmeldingType.DIGITAL
-        ) {
+        if (sykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
             val updatedEntity = sykmeldingEntity?.copy(validertOk = true)
             logger.info("Updating sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             sykmeldingRepository.save(

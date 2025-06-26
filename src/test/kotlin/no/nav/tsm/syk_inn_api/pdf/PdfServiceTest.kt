@@ -24,6 +24,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import org.junit.jupiter.api.BeforeEach
@@ -67,8 +68,15 @@ class PdfServiceTest {
                     SykmeldingDocumentMeta(
                         mottatt = OffsetDateTime.now(),
                         pasientIdent = "12345678901",
-                        sykmelderHpr = "123456789",
+                        sykmelder =
+                            SykmeldingDocumentSykmelder(
+                                hprNummer = "123456789",
+                                fornavn = "Magnar",
+                                mellomnavn = null,
+                                etternavn = "Koman",
+                            ),
                         legekontorOrgnr = "123456789",
+                        legekontorTlf = "12345678",
                     ),
                 values =
                     SykmeldingDocumentValues(
@@ -123,7 +131,7 @@ class PdfServiceTest {
         assertNotNull(pdf)
 
         // Uncomment this to open the PDF in the default viewer, for developing PDF
-        // openPdf(pdf, temp = false)
+        //        openPdf(pdf, temp = false)
     }
 }
 

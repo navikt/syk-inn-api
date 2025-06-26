@@ -34,7 +34,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(created.meta.pasientIdent, "21037712323")
-        assertEquals(created.meta.sykmelderHpr, "9144889")
+        assertEquals(created.meta.sykmelder.hprNummer, "9144889")
         assertEquals(created.meta.legekontorOrgnr, "123456789")
 
         // Diagnose
