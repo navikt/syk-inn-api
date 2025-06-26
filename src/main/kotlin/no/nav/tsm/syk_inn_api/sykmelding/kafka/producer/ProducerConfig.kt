@@ -27,7 +27,7 @@ class ProducerConfig {
     }
 
     @Bean
-    @Profile("local", "dev-kafka")
+    @Profile("local", "dev-kafka", "test")
     fun kafkaProducerLocal(props: KafkaProperties): SykmeldingInputProducer {
         val producer =
             KafkaProducer(
