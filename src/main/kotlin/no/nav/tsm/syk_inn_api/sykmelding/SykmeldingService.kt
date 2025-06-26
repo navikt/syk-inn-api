@@ -10,7 +10,7 @@ import java.util.*
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingInputProducer
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
@@ -23,7 +23,7 @@ class SykmeldingService(
     private val ruleService: RuleService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
-    private val sykmeldingInputProducer: SykmeldingInputProducer,
+    private val sykmeldingInputProducer: SykmeldingProducer,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = logger()
@@ -95,7 +95,7 @@ class SykmeldingService(
 
         sykmeldingInputProducer.send(
             sykmeldingId = sykmeldingId,
-            sykmelding = sykmeldingDocument,
+            sykmelding = payload,
             person = person,
             sykmelder = sykmelder,
             regulaResult = ruleResult,

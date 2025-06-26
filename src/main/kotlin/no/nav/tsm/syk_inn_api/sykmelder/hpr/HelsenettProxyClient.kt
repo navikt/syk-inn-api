@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient
 
 interface IHelsenettProxyClient {
     fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder>
+
+    fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder>
 }
 
 @Profile("!local & !test")
@@ -66,6 +68,49 @@ class HelsenettProxyClient(
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
             secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
+            Result.failure(e)
+        }
+    }
+
+    override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
+        val (accessToken) = getToken()
+
+        logger.info(
+            "Getting sykmelder for fnr=$behandlerFnr, sykmeldingId=$callId",
+        )
+
+        return try {
+            val response =
+                webClient
+                    .get()
+                    .uri { uriBuilder ->
+                        uriBuilder.path("/api/v2/behandlerMedFnrNummer").build()
+                    } // TODO need to verify url and header
+                    .headers {
+                        it.set("Content-Type", "application/json")
+                        it.set("Nav-CallId", callId)
+                        it.set("fnrNummer", behandlerFnr)
+                        it.set("Authorization", "Bearer $accessToken")
+                    }
+                    .retrieve()
+                    .onStatus({ it.isError }) { res -> onStatusError(res) }
+                    .bodyToMono(HprSykmelder::class.java)
+                    .block()
+
+            if (response != null) {
+                logger.info(
+                    "Response from HelsenettProxy was successful for sykmeldingId=$callId",
+                )
+                Result.success(response)
+            } else {
+                val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
+                logger.warn(msg)
+                secureLog.warn("$msg and hpr=$behandlerFnr")
+                Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
+            }
+        } catch (e: Exception) {
+            logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
+            secureLog.error("Exception with hpr=$behandlerFnr for sykmeldingId=$callId", e)
             Result.failure(e)
         }
     }

@@ -39,6 +39,33 @@ class SykmelderService(
         return sykmelder
     }
 
+    fun sykmelderByFnr(fnr: String, callId: String): Result<Sykmelder.Enkel> {
+        val sykmelder =
+            helsenettProxyClient.getSykmelderByFnr(fnr, callId).mapCatching {
+                Sykmelder.Enkel(
+                    hpr = it.hprNummer
+                            ?: throw java.lang.IllegalStateException(
+                                "Sykmelder looked up with fnr is missing hpr number "
+                            ),
+                    navn =
+                        it.fornavn?.let { fornavn ->
+                            Navn(
+                                fornavn = fornavn,
+                                mellomnavn = it.mellomnavn,
+                                etternavn = it.etternavn
+                                        ?: throw IllegalStateException(
+                                            "Has fornavn, but no etternavn. Seems weird."
+                                        ),
+                            )
+                        },
+                    ident = it.fnr,
+                    godkjenninger = it.godkjenninger,
+                )
+            }
+
+        return sykmelder
+    }
+
     fun sykmelderMedSuspensjon(
         hpr: String,
         signaturDato: LocalDate,

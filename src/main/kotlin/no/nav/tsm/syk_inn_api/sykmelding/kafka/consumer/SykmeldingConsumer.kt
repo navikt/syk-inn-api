@@ -1,16 +1,20 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
-import java.time.LocalDate
-import java.time.Month
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingRecord
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.sykmelding.SykmeldingType
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
+import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
+import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
+import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
@@ -21,7 +25,7 @@ class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
-    @param:Value($$"${nais.cluster}") private val clusterName: String
+    @Value("\${nais.cluster}") private val clusterName: String,
 ) {
     private val logger = logger()
     private val secureLog = secureLogger()
@@ -32,9 +36,9 @@ class SykmeldingConsumer(
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",
     )
-    fun consume(record: ConsumerRecord<String, SykmeldingRecord?>) {
+    fun consume(record: ConsumerRecord<String, ByteArray?>) {
         val sykmeldingId = record.key()
-        val value: SykmeldingRecord? = record.value()
+        val value: ByteArray? = record.value()
 
         secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
 
@@ -44,23 +48,27 @@ class SykmeldingConsumer(
         }
 
         try {
-            if (value.sykmelding.aktivitet.isEmpty()) {
+            val sykmeldingRecord = sykmeldingObjectMapper.readValue<SykmeldingRecord>(value)
+            if (sykmeldingRecord.sykmelding.aktivitet.isEmpty()) {
                 logger.warn(
                     "SykmeldingRecord with id=${record.key()} has no activity, skipping processing",
                 )
                 return
             }
 
-            if (value.isBeforeYear(2024)) {
+            if (sykmeldingRecord.isBeforeYear(2024)) {
                 return // Skip processing for sykmeldinger before 2024
             }
 
-            if (value.sykmelding.type == SykmeldingType.UTENLANDSK) {
+            if (
+                sykmeldingRecord.sykmelding.type ==
+                    no.nav.tsm.sykmelding.input.core.model.SykmeldingType.UTENLANDSK
+            ) {
                 return // skip processing for utenlandske sykmeldinger
             }
 
             val person: Person =
-                personService.getPersonByIdent(value.sykmelding.pasient.fnr).getOrElse {
+                personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrElse {
                     logger.error(
                         "Kafka consumer failed, key: ${record.key()} - Person not found in Pdl Exception",
                         it,
@@ -74,7 +82,7 @@ class SykmeldingConsumer(
             val sykmelder =
                 sykmelderService
                     .sykmelder(
-                        PersistedSykmeldingMapper.mapHprNummer(value),
+                        findHprNumber(sykmeldingRecord),
                         sykmeldingId,
                     )
                     .getOrElse {
@@ -91,7 +99,7 @@ class SykmeldingConsumer(
             try {
                 sykmeldingPersistenceService.updateSykmelding(
                     sykmeldingId = sykmeldingId,
-                    sykmeldingRecord = value,
+                    sykmeldingRecord = sykmeldingRecord,
                     person = person,
                     sykmelder = sykmelder,
                 )
@@ -125,14 +133,39 @@ class SykmeldingConsumer(
         sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
     }
 
-    private fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
-        val tom = this.sykmelding.aktivitet.first().tom
-        return tom.isBefore(
-            LocalDate.of(
-                year,
-                Month.JANUARY,
-                1,
-            ),
-        )
+    private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): String {
+        val hprNummer = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord)
+        if (hprNummer != null) {
+            return hprNummer
+        }
+
+        val sykmelding = sykmeldingRecord.sykmelding
+
+        val (sykmelderFnr, sykmeldingId) =
+            when (sykmelding) {
+                is DigitalSykmelding ->
+                    sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
+                        sykmelding.id
+                is Papirsykmelding ->
+                    sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
+                        sykmelding.id
+                is XmlSykmelding ->
+                    sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
+                        sykmelding.id
+                else -> null to null
+            }
+
+        requireNotNull(sykmelderFnr) { "Sykmelder not found in Helsenett Proxy" }
+
+        return sykmelderService
+            .sykmelderByFnr(sykmelderFnr, requireNotNull(sykmeldingId))
+            .getOrElse {
+                logger.error(
+                    "Failed to get sykmelder hpr from a fnr - Sykmelder not found in Helsenett Proxy Exception",
+                    it,
+                )
+                throw it
+            }
+            .hpr
     }
 }
