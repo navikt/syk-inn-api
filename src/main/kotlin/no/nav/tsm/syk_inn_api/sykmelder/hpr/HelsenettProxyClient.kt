@@ -83,7 +83,9 @@ class HelsenettProxyClient(
             val response =
                 webClient
                     .get()
-                    .uri { uriBuilder -> uriBuilder.path("/api/v2/behandlerMedFnrNummer").build() } //TODO need to verify url and header
+                    .uri { uriBuilder ->
+                        uriBuilder.path("/api/v2/behandlerMedFnrNummer").build()
+                    } // TODO need to verify url and header
                     .headers {
                         it.set("Content-Type", "application/json")
                         it.set("Nav-CallId", callId)

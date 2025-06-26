@@ -8,15 +8,12 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper.ma
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingProducer(
     private val kafkaProducer: SykmeldingInputProducer,
 ) {
-    @Value("\${kafka.topics.sykmeldinger-input}")
-    private lateinit var sykmeldingInputTopic: String // TODO delete - where is it supplied now ?
 
     private val logger = logger()
 

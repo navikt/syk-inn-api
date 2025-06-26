@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -19,6 +20,7 @@ import org.springframework.kafka.annotation.EnableKafka
 @EnableKafka
 @EnableConfigurationProperties
 class ProducerConfig {
+    @Value("\${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
 
     @Bean
     @Profile("default")
@@ -40,7 +42,7 @@ class ProducerConfig {
             override fun sendSykmelding(sykmelding: SykmeldingRecord) {
                 producer.send(
                     ProducerRecord(
-                        "tsm.sykmelding-input", //TODO ta in prop
+                        sykmeldingInputTopic,
                         sykmelding.sykmelding.id,
                         sykmeldingObjectMapper.writeValueAsBytes(sykmelding),
                     ),
@@ -48,11 +50,7 @@ class ProducerConfig {
             }
 
             override fun tombstoneSykmelding(sykmeldingId: String) {
-                producer.send(ProducerRecord(
-                    "tsm.sykmelding-input",
-                    sykmeldingId,
-                    null
-                ))
+                producer.send(ProducerRecord(sykmeldingInputTopic, sykmeldingId, null))
             }
         }
 

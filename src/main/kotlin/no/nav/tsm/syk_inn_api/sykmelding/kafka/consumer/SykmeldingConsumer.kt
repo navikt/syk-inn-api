@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
@@ -27,14 +26,13 @@ class SykmeldingConsumer(
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     @Value("\${nais.cluster}") private val clusterName: String,
-    private val sykmeldingService: SykmeldingService
 ) {
     private val logger = logger()
     private val secureLog = secureLogger()
 
     @KafkaListener(
         topics = ["\${kafka.topics.sykmeldinger}"],
-        groupId = "syk-inn-api-consumer-jaf221",
+        groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",
     )
