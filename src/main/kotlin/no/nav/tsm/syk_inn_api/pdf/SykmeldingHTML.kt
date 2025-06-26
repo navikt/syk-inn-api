@@ -107,6 +107,20 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
+                            TableInfoMultiRow("Sykmelder", colspan = "2") {
+                                listOf(
+                                    "${sykmelding.meta.sykmelder.fornavn} ${sykmelding.meta.sykmelder.mellomnavn ?: ""} ${sykmelding.meta.sykmelder.etternavn}",
+                                    "HPR-nr: ${sykmelding.meta.sykmelder.hprNummer}",
+                                )
+                            }
+                            TableInfoMultiRow("Legekontor", colspan = "2") {
+                                listOf(
+                                    "Org.nr.: ${sykmelding.meta.legekontorOrgnr ?: "Ikke oppgitt"}",
+                                    "Tlf: ${sykmelding.meta.legekontorTlf ?: "Ikke oppgitt"}",
+                                )
+                            }
+                        }
+                        tr {
                             TableInfo(
                                 "Arbeidsgiver",
                                 italic = sykmelding.values.arbeidsgiver == null,

@@ -20,8 +20,9 @@ data class SykmeldingDocument(
 data class SykmeldingDocumentMeta(
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
-    val sykmelderHpr: String,
+    val sykmelder: SykmeldingDocumentSykmelder,
     val legekontorOrgnr: String?,
+    val legekontorTlf: String?,
 )
 
 data class SykmeldingDocumentValues(
@@ -107,4 +108,11 @@ data class SykmeldingDocumentYrkesskade(
 data class SykmeldingDocumentMeldinger(
     val tilNav: String?,
     val tilArbeidsgiver: String?,
+)
+
+data class SykmeldingDocumentSykmelder(
+    val hprNummer: String,
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
 )

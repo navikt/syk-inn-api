@@ -35,6 +35,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import org.junit.jupiter.api.BeforeEach
@@ -121,8 +122,15 @@ class SykmeldingServiceTest {
                     SykmeldingDocumentMeta(
                         mottatt = OffsetDateTime.now(),
                         pasientIdent = "01019078901",
-                        sykmelderHpr = behandlerHpr,
+                        sykmelder =
+                            SykmeldingDocumentSykmelder(
+                                hprNummer = behandlerHpr,
+                                fornavn = "Magnar",
+                                mellomnavn = null,
+                                etternavn = "Koman"
+                            ),
                         legekontorOrgnr = "987654321",
+                        legekontorTlf = "12345678",
                     ),
                 values =
                     SykmeldingDocumentValues(
