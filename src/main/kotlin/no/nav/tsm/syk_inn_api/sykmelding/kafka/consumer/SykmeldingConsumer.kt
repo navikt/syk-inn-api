@@ -7,6 +7,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.utils.PoisonPills
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
@@ -25,6 +26,7 @@ class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
+    private val poisonPills: PoisonPills,
     @param:Value($$"${nais.cluster}") private val clusterName: String,
 ) {
     private val logger = logger()
@@ -38,6 +40,11 @@ class SykmeldingConsumer(
     )
     fun consume(record: ConsumerRecord<String, ByteArray?>) {
         val sykmeldingId = record.key()
+        if (poisonPills.isPoisoned(sykmeldingId)) {
+            logger.warn("Sykmelding with id=$sykmeldingId is poisoned, skipping processing")
+            return
+        }
+
         val value: ByteArray? = record.value()
 
         secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
