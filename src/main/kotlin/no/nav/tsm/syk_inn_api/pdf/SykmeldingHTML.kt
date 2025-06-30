@@ -107,7 +107,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfoMultiRow("Sykmelder", colspan = "2") {
+                            TableInfoMultiRow("Sykmelder") {
                                 listOf(
                                     "${sykmelding.meta.sykmelder.fornavn} ${sykmelding.meta.sykmelder.mellomnavn ?: ""} ${sykmelding.meta.sykmelder.etternavn}",
                                     "HPR-nr: ${sykmelding.meta.sykmelder.hprNummer}",
@@ -237,6 +237,7 @@ body {
 }
 
 .info-table td {
+    vertical-align: top;
     width: 50%;
 }
 
