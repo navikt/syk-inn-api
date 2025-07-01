@@ -60,7 +60,7 @@ class PoisonPills(
             "7e4deb04-256c-47af-a4b3-469dbb610ea4",
             "0ac286a1-2141-4154-85dd-a941768ff245",
             "3705b862-cecc-4aa5-b98a-a3259a33a010",
-            )
+        )
 
     fun isPoisoned(sykmeldingId: String): Boolean {
         return when (cluster) {

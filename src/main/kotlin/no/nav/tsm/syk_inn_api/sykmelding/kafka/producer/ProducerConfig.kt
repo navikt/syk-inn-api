@@ -24,7 +24,7 @@ class ProducerConfig {
 
     @Bean
     @Profile("default")
-    fun kafkaProducer(props: KafkaProperties): SykmeldingInputProducer {
+    fun kafkaProducer(): SykmeldingInputProducer {
         return SykmeldingInputKafkaInputFactory.create()
     }
 
@@ -39,18 +39,52 @@ class ProducerConfig {
             )
 
         class Producer : SykmeldingInputProducer {
+
+            private val sourceNamespace = "tsm"
+            private val sourceApp = "syk-inn-api"
+            private val SOURCE_NAMESPACE_HEADER = "source-namespace"
+            private val SOURCE_APP_HEADER = "source-app"
+
             override fun sendSykmelding(sykmelding: SykmeldingRecord) {
-                producer.send(
+                val record =
                     ProducerRecord(
                         sykmeldingInputTopic,
                         sykmelding.sykmelding.id,
                         sykmeldingObjectMapper.writeValueAsBytes(sykmelding),
-                    ),
-                )
+                    )
+                record.headers().add(SOURCE_NAMESPACE_HEADER, sourceNamespace.toByteArray())
+                record.headers().add(SOURCE_APP_HEADER, sourceApp.toByteArray())
+                producer
+                    .send(
+                        record,
+                    )
+                    .get()
+            }
+
+            override fun sendSykmelding(
+                sykmeldingRecord: SykmeldingRecord,
+                sourceApp: String,
+                sourceNamespace: String,
+                additionalHeaders: Map<String, String>
+            ) {
+                TODO("Not yet implemented")
             }
 
             override fun tombstoneSykmelding(sykmeldingId: String) {
-                producer.send(ProducerRecord(sykmeldingInputTopic, sykmeldingId, null))
+                val record =
+                    ProducerRecord<String, ByteArray>(sykmeldingInputTopic, sykmeldingId, null)
+                record.headers().add(SOURCE_NAMESPACE_HEADER, sourceNamespace.toByteArray())
+                record.headers().add(SOURCE_APP_HEADER, sourceApp.toByteArray())
+                producer.send(record).get()
+            }
+
+            override fun tombstoneSykmelding(
+                sykmeldingId: String,
+                sourceApp: String,
+                sourceNamespace: String,
+                additionalHeaders: Map<String, String>
+            ) {
+                TODO("Not yet implemented")
             }
         }
 

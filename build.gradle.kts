@@ -11,7 +11,7 @@ val verapdfVersion = "1.28.1"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
 val regulaVersion = "41"
-val sykmeldingInputVersion = "10"
+val sykmeldingInputVersion = "13"
 
 // Dev deps
 val testContainersVersion = "1.21.2"
