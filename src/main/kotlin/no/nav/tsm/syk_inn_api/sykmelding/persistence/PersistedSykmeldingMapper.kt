@@ -18,7 +18,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleType
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
@@ -28,12 +27,15 @@ import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.Gradert
+import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
 import no.nav.tsm.sykmelding.input.core.model.Pasient
+import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
 import no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak
@@ -204,11 +206,11 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmeldingSykmelder {
         return PersistedSykmeldingSykmelder(
             godkjenninger = godkjenninger.toPersistedSykmeldingHprGodkjenning(),
-            ident = this.ident,
+            ident = ident,
             hprNummer = hprNummer,
-            fornavn = this.navn?.fornavn,
-            mellomnavn = this.navn?.mellomnavn,
-            etternavn = this.navn?.etternavn,
+            fornavn = navn?.fornavn,
+            mellomnavn = navn?.mellomnavn,
+            etternavn = navn?.etternavn,
         )
     }
 
@@ -453,35 +455,17 @@ object PersistedSykmeldingMapper {
         )
     }
 
-    private fun no.nav.tsm.sykmelding.input.core.model.ValidationResult
-        .toPersistedSykmeldingResult(): PersistedSykmeldingRuleResult {
-        if (this.status === no.nav.tsm.sykmelding.input.core.model.RuleType.OK) {
-            return PersistedSykmeldingRuleResult(
-                result = RuleType.OK.name,
-                meldingTilSender = null,
-            )
-        }
-
-        return when (val rule = rules.first()) {
-            is no.nav.tsm.sykmelding.input.core.model.InvalidRule -> {
-                PersistedSykmeldingRuleResult(
-                    result = status.name,
-                    meldingTilSender = rule.reason.sykmelder,
-                )
+    private fun ValidationResult.toPersistedSykmeldingResult(): PersistedSykmeldingRuleResult {
+        val meldingTilSender =
+            when (val latestRule = rules.maxByOrNull { it.timestamp }) {
+                is InvalidRule -> latestRule.reason.sykmelder
+                is PendingRule -> latestRule.reason.sykmelder
+                else -> null
             }
-            is no.nav.tsm.sykmelding.input.core.model.PendingRule -> {
-                PersistedSykmeldingRuleResult(
-                    result = status.name,
-                    meldingTilSender = rule.reason.sykmelder,
-                )
-            }
-            is no.nav.tsm.sykmelding.input.core.model.OKRule -> {
-                PersistedSykmeldingRuleResult(
-                    result = status.name,
-                    meldingTilSender = null,
-                )
-            }
-        }
+        return PersistedSykmeldingRuleResult(
+            result = status.name,
+            meldingTilSender = meldingTilSender,
+        )
     }
 
     private fun mapSykmeldingRecordToPersistedSykmeldingArbeidsgiver(
@@ -534,11 +518,10 @@ object PersistedSykmeldingMapper {
 
     private fun List<DiagnoseInfo>?.toPersistedSykmeldingDiagnoseInfoList():
         List<PersistedSykmeldingDiagnoseInfo> {
-        if (this == null) return emptyList()
-        if (this.isEmpty()) return emptyList()
+        if (isNullOrEmpty()) return emptyList()
         val diagnoseInfo = mutableListOf<PersistedSykmeldingDiagnoseInfo>()
 
-        this.forEach { info ->
+        forEach { info ->
             diagnoseInfo.add(
                 PersistedSykmeldingDiagnoseInfo(
                     system = info.system.toDiagnoseSystem(),
@@ -683,7 +666,7 @@ object PersistedSykmeldingMapper {
     }
 
     fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
-        val tom = this.sykmelding.aktivitet.first().tom
+        val tom = sykmelding.aktivitet.maxBy { it.tom }.tom
         return tom.isBefore(
             LocalDate.of(
                 year,

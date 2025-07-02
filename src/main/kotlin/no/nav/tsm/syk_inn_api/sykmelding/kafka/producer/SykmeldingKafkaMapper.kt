@@ -2,8 +2,10 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper.findTextFromDiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
@@ -18,7 +20,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
-import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
@@ -35,16 +36,18 @@ import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
-import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
 import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
+import no.nav.tsm.sykmelding.input.core.model.metadata.Kontaktinfo
+import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
@@ -52,45 +55,35 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 
 object SykmeldingKafkaMapper {
     fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
-        val rule =
+        val ruleTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
+        val status =
+            when (regulaResult.status) {
+                RegulaStatus.OK -> RuleType.OK
+                RegulaStatus.INVALID -> RuleType.INVALID
+                RegulaStatus.MANUAL_PROCESSING -> RuleType.PENDING
+            }
+        val validation =
             when (regulaResult) {
-                is RegulaResult.Ok -> {
-                    OKRule(
-                        name = RuleType.OK.name,
-                        timestamp = OffsetDateTime.now(),
-                        validationType = ValidationType.AUTOMATIC,
-                    )
-                }
+                is RegulaResult.Ok -> ValidationResult(RuleType.OK, ruleTimestamp, emptyList())
                 is RegulaResult.NotOk -> {
-                    when (regulaResult.outcome.status) {
-                        RegulaOutcomeStatus.MANUAL_PROCESSING ->
-                            PendingRule(
-                                name = RuleType.PENDING.name,
-                                reason =
-                                    Reason(
-                                        sykmeldt = regulaResult.outcome.reason.sykmeldt,
-                                        sykmelder = regulaResult.outcome.reason.sykmelder,
-                                    ),
-                                timestamp = OffsetDateTime.now(),
-                                validationType = ValidationType.MANUAL,
-                            )
-                        RegulaOutcomeStatus.INVALID ->
-                            InvalidRule(
-                                name = RuleType.INVALID.name,
-                                reason =
-                                    Reason(
-                                        sykmeldt = regulaResult.outcome.reason.sykmeldt,
-                                        sykmelder = regulaResult.outcome.reason.sykmelder,
-                                    ),
-                                timestamp = OffsetDateTime.now(),
-                                validationType = ValidationType.AUTOMATIC,
-                            )
-                    }
+                    val name = regulaResult.outcome.rule
+                    val validationType = ValidationType.AUTOMATIC
+                    val reason =
+                        Reason(
+                            sykmeldt = regulaResult.outcome.reason.sykmeldt,
+                            sykmelder = regulaResult.outcome.reason.sykmelder,
+                        )
+                    val rule =
+                        when (regulaResult.outcome.status) {
+                            RegulaOutcomeStatus.INVALID ->
+                                InvalidRule(name, validationType, ruleTimestamp, reason)
+                            RegulaOutcomeStatus.MANUAL_PROCESSING ->
+                                PendingRule(name, ruleTimestamp, validationType, reason)
+                        }
+                    ValidationResult(status, ruleTimestamp, rules = listOf(rule))
                 }
             }
-
-        val rules = listOf(rule)
-        return ValidationResult(status = rule.type, timestamp = OffsetDateTime.now(), rules = rules)
+        return validation
     }
 
     fun mapMessageMetadata(meta: OpprettSykmeldingMetadata): MessageMetadata =
@@ -148,7 +141,13 @@ object SykmeldingKafkaMapper {
                             etternavn = sykmelderNavn.etternavn,
                         ),
                     ids = mapPersonIdsForSykmelder(sykmelder),
-                    kontaktinfo = emptyList(),
+                    kontaktinfo =
+                        listOf(
+                            Kontaktinfo(
+                                type = KontaktinfoType.TLF,
+                                value = sykmelding.meta.legekontorTlf,
+                            )
+                        ),
                     adresse = null,
                 ),
             sykmelder =
