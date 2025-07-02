@@ -37,7 +37,6 @@ class SykmeldingController(
             logger.info(
                 "Sykmelding created successfully with ID: ${sykmelding.sykmeldingId}",
             )
-
             ResponseEntity.status(HttpStatus.CREATED).body(sykmelding)
         }
     }
