@@ -14,7 +14,7 @@ val regulaVersion = "41"
 val sykmeldingInputVersion = "13"
 
 // Dev deps
-val testContainersVersion = "1.21.2"
+val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.4"
 
