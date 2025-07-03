@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
-import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
@@ -13,6 +12,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,7 +33,7 @@ class SykmeldingPersistenceService(
         payload: OpprettSykmeldingPayload,
         person: Person,
         sykmelder: Sykmelder,
-        ruleResult: RegulaResult,
+        ruleResult: ValidationResult,
     ): SykmeldingDocument? {
         logger.info("Lagrer sykmelding med id=${sykmeldingId}")
         val savedEntity =
@@ -63,7 +63,7 @@ class SykmeldingPersistenceService(
         payload: OpprettSykmeldingPayload,
         pasient: Person,
         sykmelder: Sykmelder,
-        ruleResult: RegulaResult,
+        ruleResult: ValidationResult,
     ): SykmeldingDb {
         logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
         return SykmeldingDb(

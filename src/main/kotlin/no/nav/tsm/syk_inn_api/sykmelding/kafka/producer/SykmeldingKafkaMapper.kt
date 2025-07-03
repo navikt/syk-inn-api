@@ -42,6 +42,7 @@ import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
@@ -66,13 +67,19 @@ object SykmeldingKafkaMapper {
             when (regulaResult) {
                 is RegulaResult.Ok -> ValidationResult(RuleType.OK, ruleTimestamp, emptyList())
                 is RegulaResult.NotOk -> {
-                    val name = regulaResult.outcome.rule
+                    val name =
+                        when {
+                            isManualTilbakedatering(regulaResult) ->
+                                TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name
+                            else -> regulaResult.outcome.rule
+                        }
                     val validationType = ValidationType.AUTOMATIC
                     val reason =
                         Reason(
                             sykmeldt = regulaResult.outcome.reason.sykmeldt,
                             sykmelder = regulaResult.outcome.reason.sykmelder,
                         )
+
                     val rule =
                         when (regulaResult.outcome.status) {
                             RegulaOutcomeStatus.INVALID ->
@@ -85,6 +92,10 @@ object SykmeldingKafkaMapper {
             }
         return validation
     }
+
+    private fun isManualTilbakedatering(regulaResult: RegulaResult.NotOk): Boolean =
+        regulaResult.outcome.status == RegulaOutcomeStatus.MANUAL_PROCESSING &&
+            regulaResult.outcome.tree == "Tilbakedatering"
 
     fun mapMessageMetadata(meta: OpprettSykmeldingMetadata): MessageMetadata =
         Digital(orgnummer = meta.legekontorOrgnr)

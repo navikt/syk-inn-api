@@ -2,7 +2,6 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.LocalDate
 import java.time.Month
-import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
 import no.nav.tsm.syk_inn_api.person.Person
@@ -55,7 +54,7 @@ object PersistedSykmeldingMapper {
         sykmeldingId: String,
         pasient: Person,
         sykmelder: Sykmelder,
-        ruleResult: RegulaResult
+        validation: ValidationResult,
     ): PersistedSykmelding {
         return PersistedSykmelding(
             sykmeldingId = sykmeldingId,
@@ -73,7 +72,7 @@ object PersistedSykmeldingMapper {
             yrkesskade = payload.values.yrkesskade.toPersistedSykmeldingYrkesskade(),
             arbeidsgiver = payload.values.arbeidsgiver.toPersistedSykmeldingArbeidsgiver(),
             tilbakedatering = payload.values.tilbakedatering.toPersistedSykmeldingTilbakedatering(),
-            regelResultat = ruleResult.toPersistedSykmeldingRuleResult(),
+            regelResultat = validation.toPersistedSykmeldingResult(),
         )
     }
 
@@ -345,21 +344,6 @@ object PersistedSykmeldingMapper {
         }
 
         return hprGodkjenninger
-    }
-
-    private fun RegulaResult.toPersistedSykmeldingRuleResult(): PersistedSykmeldingRuleResult {
-        return when (this) {
-            is RegulaResult.Ok ->
-                PersistedSykmeldingRuleResult(
-                    result = this.status.name,
-                    meldingTilSender = null,
-                )
-            is RegulaResult.NotOk ->
-                PersistedSykmeldingRuleResult(
-                    result = this.status.name,
-                    meldingTilSender = outcome.reason.sykmelder,
-                )
-        }
     }
 
     private fun List<HprTilleggskompetanse>?.toPersistedSykmeldingTilleggskompetanse():

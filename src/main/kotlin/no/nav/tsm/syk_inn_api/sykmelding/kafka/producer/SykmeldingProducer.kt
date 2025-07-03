@@ -1,12 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
-import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper.mapValidationResult
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.stereotype.Component
 
@@ -22,7 +21,7 @@ class SykmeldingProducer(
         sykmelding: OpprettSykmeldingPayload,
         person: Person,
         sykmelder: Sykmelder,
-        regulaResult: RegulaResult,
+        validationResult: ValidationResult,
     ) {
         val sykmeldingKafkaMessage =
             SykmeldingRecord(
@@ -34,7 +33,7 @@ class SykmeldingProducer(
                         person,
                         sykmelder,
                     ),
-                validation = mapValidationResult(regulaResult),
+                validation = validationResult,
             )
         kafkaProducer.sendSykmelding(sykmeldingKafkaMessage)
 

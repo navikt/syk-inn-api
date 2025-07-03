@@ -11,6 +11,7 @@ import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
+import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
@@ -78,6 +79,7 @@ class SykmeldingService(
         if (ruleResult is RegulaResult.NotOk && ruleResult.status == RegulaStatus.INVALID) {
             return SykmeldingCreationErrors.RuleValidation(ruleResult).left()
         }
+        val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
 
         val sykmeldingDocument =
             sykmeldingPersistenceService.saveSykmeldingPayload(
@@ -86,7 +88,7 @@ class SykmeldingService(
                 payload = payload,
                 person = person,
                 sykmelder = sykmelder,
-                ruleResult = ruleResult,
+                ruleResult = validation,
             )
 
         if (sykmeldingDocument == null) {
@@ -99,7 +101,7 @@ class SykmeldingService(
             sykmelding = payload,
             person = person,
             sykmelder = sykmelder,
-            regulaResult = ruleResult,
+            validationResult = validation,
         )
 
         return sykmeldingDocument.right()
