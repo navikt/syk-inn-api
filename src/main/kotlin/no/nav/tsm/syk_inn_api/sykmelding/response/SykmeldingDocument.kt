@@ -92,7 +92,7 @@ data class ArbeidsrelatertArsak(
     val annenArbeidsrelatertArsak: String?
 )
 
-enum class ArbeidsrelertArsakType()  {
+enum class ArbeidsrelertArsakType  {
     TILRETTELEGGING_IKKE_MULIG, ANNET
 }
 
