@@ -43,6 +43,8 @@ spec:
     enabled: true
     path: /internal/prometheus
   resources:
+    limits:
+      memory: 1Gi
     requests:
       cpu: 30m
       memory: 512Mi
