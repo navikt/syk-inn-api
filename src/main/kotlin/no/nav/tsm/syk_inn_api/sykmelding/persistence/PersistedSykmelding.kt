@@ -6,6 +6,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelertArsakType
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
 data class PersistedSykmelding(
     val sykmeldingId: String,
@@ -75,7 +77,7 @@ data class PersistedSykmeldingTilbakedatering(
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface PersistedSykmeldingAktivitet {
-    data class IkkeMulig(val fom: String, val tom: String) : PersistedSykmeldingAktivitet
+    data class IkkeMulig(val fom: String, val tom: String, val medisinskArsak: PersistedSykmeldingMedisinskArsak, val arbeidsrelatertArsak: PersistedSykmeldingArbeidsrelatertArsak) : PersistedSykmeldingAktivitet
 
     data class Gradert(
         val grad: Int,
@@ -92,6 +94,14 @@ sealed interface PersistedSykmeldingAktivitet {
 
     data class Reisetilskudd(val fom: String, val tom: String) : PersistedSykmeldingAktivitet
 }
+
+data class PersistedSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)
+
+data class PersistedSykmeldingArbeidsrelatertArsak(
+    val isArbeidsrelatertArsak: Boolean,
+    val arbeidsrelaterteArsaker: List<ArbeidsrelertArsakType>,
+    val annenArbeidsrelatertArsak: String?,
+)
 
 data class PersistedSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,

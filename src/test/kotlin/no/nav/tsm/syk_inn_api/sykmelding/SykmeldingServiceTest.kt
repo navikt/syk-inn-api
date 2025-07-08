@@ -29,6 +29,8 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
+import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelaterteArsaker
+import no.nav.tsm.syk_inn_api.sykmelding.response.MedisinskeArsaker
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
@@ -145,6 +147,8 @@ class SykmeldingServiceTest {
                                 SykmeldingDocumentAktivitet.IkkeMulig(
                                     fom = "2020-01-01",
                                     tom = "2020-01-30",
+                                    medisinskeArsaker = MedisinskeArsaker(isMedisinskArsak = true),
+                                    arbeidsrelaterteArsaker = ArbeidsrelaterteArsaker(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), andreArbeidsrelaterteArsaker = null)
                                 ),
                             ),
                         bidiagnoser = emptyList(),
@@ -215,6 +219,9 @@ class SykmeldingServiceTest {
                                         OpprettSykmeldingAktivitet.IkkeMulig(
                                             fom = "2020-01-01",
                                             tom = "2020-01-30",
+                                            medisinskeArsaker = OpprettSykmeldingMedisinskeArsaker(isMedisinskArsak = true),
+                                            arbeidsrelaterteArsaker = OpprettSykmeldingArbeidsrelaterteArsaker(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), andreArbeidsrelaterteArsaker = null)
+
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -309,6 +316,8 @@ class SykmeldingServiceTest {
                                         OpprettSykmeldingAktivitet.IkkeMulig(
                                             fom = "2020-01-01",
                                             tom = "2020-01-30",
+                                            medisinskeArsaker = OpprettSykmeldingMedisinskeArsaker(isMedisinskArsak = true),
+                                            arbeidsrelaterteArsaker = OpprettSykmeldingArbeidsrelaterteArsaker(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), andreArbeidsrelaterteArsaker = null)
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -348,6 +357,8 @@ class SykmeldingServiceTest {
                     OpprettSykmeldingAktivitet.IkkeMulig(
                         fom = "2020-01-01",
                         tom = "2020-01-30",
+                        medisinskeArsaker = OpprettSykmeldingMedisinskeArsaker(isMedisinskArsak = true),
+                        arbeidsrelaterteArsaker = OpprettSykmeldingArbeidsrelaterteArsaker(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), andreArbeidsrelaterteArsaker = null)
                     ),
                 ),
             pasientenSkalSkjermes = false,

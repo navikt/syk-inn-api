@@ -283,6 +283,12 @@ object PersistedSykmeldingMapper {
                         PersistedSykmeldingAktivitet.IkkeMulig(
                             fom = opprettSykmeldingAktivitet.fom,
                             tom = opprettSykmeldingAktivitet.tom,
+                            medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = opprettSykmeldingAktivitet.medisinskArsak.isMedisinskArsak),
+                            arbeidsrelatertArsak = PersistedSykmeldingArbeidsrelatertArsak(
+                                isArbeidsrelatertArsak = opprettSykmeldingAktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak,
+                                arbeidsrelaterteArsaker = opprettSykmeldingAktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+                                annenArbeidsrelatertArsak = opprettSykmeldingAktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak
+                            )
                         ),
                     )
                 is OpprettSykmeldingAktivitet.Gradert ->
