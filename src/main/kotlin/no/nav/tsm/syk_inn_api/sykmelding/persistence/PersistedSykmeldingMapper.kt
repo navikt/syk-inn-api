@@ -25,7 +25,10 @@ import no.nav.tsm.sykmelding.input.core.model.Avventende
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
+import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
 import no.nav.tsm.sykmelding.input.core.model.Gradert
+import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
@@ -403,6 +406,8 @@ object PersistedSykmeldingMapper {
                     PersistedSykmeldingAktivitet.IkkeMulig(
                         fom = sykmeldingRecordAktivitet.fom.toString(),
                         tom = sykmeldingRecordAktivitet.tom.toString(),
+                        medisinskArsak = TODO(),
+                        arbeidsrelatertArsak = TODO(),
                     )
                 is Gradert ->
                     PersistedSykmeldingAktivitet.Gradert(
@@ -483,16 +488,16 @@ object PersistedSykmeldingMapper {
         arbeidsgiver: ArbeidsgiverInfo
     ): PersistedSykmeldingArbeidsgiver? {
         return when (arbeidsgiver) {
-            is no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver -> {
+            is EnArbeidsgiver -> {
                 null
             }
-            is no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere -> {
+            is FlereArbeidsgivere -> {
                 PersistedSykmeldingArbeidsgiver(
                     harFlere = true,
                     arbeidsgivernavn = arbeidsgiver.navn ?: "Manglende arbeidsgivernavn",
                 )
             }
-            is no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver -> {
+            is IngenArbeidsgiver -> {
                 null
             }
         }
@@ -614,7 +619,7 @@ object PersistedSykmeldingMapper {
         arbeidsgiver: ArbeidsgiverInfo?,
         bistandNav: String?
     ): PersistedSykmeldingMeldinger {
-        if (arbeidsgiver is no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere) {
+        if (arbeidsgiver is FlereArbeidsgivere) {
             return PersistedSykmeldingMeldinger(
                 tilNav = bistandNav,
                 tilArbeidsgiver = arbeidsgiver.meldingTilArbeidsgiver,

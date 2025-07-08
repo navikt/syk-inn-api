@@ -34,8 +34,8 @@ object SykmeldingHTMLUtils {
                 if (aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak) {
                     periode.add("Arbeidsrelaterte årsaker forhindrer aktivitet")
                     periode.add(aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker.joinToString(", "))
-                    if (aktivitet.arbeidsrelatertArsak.andreArbeidsrelaterteArsaker != null) {
-                        periode.add(aktivitet.arbeidsrelatertArsak.andreArbeidsrelaterteArsaker)
+                    if (aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak != null) {
+                        periode.add(aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak)
                     }
                 }
 
