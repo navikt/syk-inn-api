@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.pdf
 
+import arrow.core.some
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
@@ -7,7 +8,8 @@ import no.nav.tsm.syk_inn_api.utils.toReadableDate
 import no.nav.tsm.syk_inn_api.utils.toReadableDatePeriod
 
 object SykmeldingHTMLUtils {
-    fun formatReadablePeriode(aktivitet: SykmeldingDocumentAktivitet): String {
+    fun formatReadablePeriode(aktivitet: SykmeldingDocumentAktivitet): List<String> {
+        val periode = mutableListOf<String>()
         val timePeriodLabel =
             toReadableDatePeriod(LocalDate.parse(aktivitet.fom), LocalDate.parse(aktivitet.tom))
 
@@ -22,7 +24,25 @@ object SykmeldingHTMLUtils {
                 is SykmeldingDocumentAktivitet.Reisetilskudd -> TODO()
             }
 
-        return "$timePeriodLabel - $aktivitetsLabel"
+        periode.add("$timePeriodLabel - $aktivitetsLabel")
+
+        when (aktivitet) {
+            is SykmeldingDocumentAktivitet.IkkeMulig -> {
+                if (aktivitet.medisinskArsak.isMedisinskArsak) {
+                    periode.add("Medisinske årsaker forhindrer aktivetet")
+                }
+                if (aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak) {
+                    periode.add("Arbeidsrelaterte årsaker forhindrer aktivitet")
+                    periode.add(aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker.joinToString(", "))
+                    if (aktivitet.arbeidsrelatertArsak.andreArbeidsrelaterteArsaker != null) {
+                        periode.add(aktivitet.arbeidsrelatertArsak.andreArbeidsrelaterteArsaker)
+                    }
+                }
+
+            } else -> null
+        }
+
+        return periode
     }
 
     fun yrkesskadeText(yrkesskade: SykmeldingDocumentYrkesskade?): String? {

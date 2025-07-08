@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelertArsakType
 
 data class OpprettSykmeldingPayload(
     val meta: OpprettSykmeldingMetadata,
@@ -55,13 +56,18 @@ data class OpprettSykmeldingTilbakedatering(
     JsonSubTypes.Type(OpprettSykmeldingAktivitet.Avventende::class, name = "AVVENTENDE"),
     JsonSubTypes.Type(
         OpprettSykmeldingAktivitet.Behandlingsdager::class,
-        name = "BEHANDLINGSDAGER"
+        name = "BEHANDLINGSDAGER",
     ),
     JsonSubTypes.Type(OpprettSykmeldingAktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface OpprettSykmeldingAktivitet {
-    data class IkkeMulig(val fom: String, val tom: String) : OpprettSykmeldingAktivitet
+    data class IkkeMulig(
+        val fom: String,
+        val tom: String,
+        val medisinskArsak: OpprettSykmeldingMedisinskArsak,
+        val arbeidsrelatertArsak: OpprettSykmeldingArbeidsrelatertArsak
+    ) : OpprettSykmeldingAktivitet
 
     data class Gradert(
         val grad: Int,
@@ -78,6 +84,16 @@ sealed interface OpprettSykmeldingAktivitet {
 
     data class Reisetilskudd(val fom: String, val tom: String) : OpprettSykmeldingAktivitet
 }
+
+data class OpprettSykmeldingMedisinskArsak(
+    val isMedisinskArsak: Boolean
+)
+
+data class OpprettSykmeldingArbeidsrelatertArsak(
+    val isArbeidsrelatertArsak: Boolean,
+    val arbeidsrelaterteArsaker: List<ArbeidsrelertArsakType>,
+    val annenArbeidsrelatertArsak: String?
+)
 
 data class OpprettSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,

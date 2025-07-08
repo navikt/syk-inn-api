@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
 /**
  * The primary data class for exposing to syk-inn through APIs. Also used for other functional
@@ -52,6 +53,8 @@ sealed class SykmeldingDocumentAktivitet(open val fom: String, open val tom: Str
     data class IkkeMulig(
         override val fom: String,
         override val tom: String,
+        val medisinskArsak: MedisinskArsak,
+        val arbeidsrelatertArsak: ArbeidsrelatertArsak
     ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Gradert(
@@ -77,6 +80,20 @@ sealed class SykmeldingDocumentAktivitet(open val fom: String, open val tom: Str
         override val fom: String,
         override val tom: String,
     ) : SykmeldingDocumentAktivitet(fom, tom)
+}
+
+data class MedisinskArsak(
+    val isMedisinskArsak: Boolean
+)
+
+data class ArbeidsrelatertArsak(
+    val isArbeidsrelatertArsak: Boolean,
+    val arbeidsrelaterteArsaker: List<ArbeidsrelertArsakType>,
+    val annenArbeidsrelatertArsak: String?
+)
+
+enum class ArbeidsrelertArsakType()  {
+    TILRETTELEGGING_IKKE_MULIG, ANNET
 }
 
 data class SykmeldingDocumentDiagnoseInfo(

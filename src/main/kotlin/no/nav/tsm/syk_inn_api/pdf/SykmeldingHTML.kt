@@ -134,7 +134,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         tr {
                             TableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
-                                sykmelding.values.aktivitet.map {
+                                sykmelding.values.aktivitet.flatMap {
                                     SykmeldingHTMLUtils.formatReadablePeriode(it)
                                 }
                             }
