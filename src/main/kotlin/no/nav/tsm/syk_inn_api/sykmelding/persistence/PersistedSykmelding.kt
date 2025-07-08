@@ -6,8 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
-import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelertArsakType
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 
 data class PersistedSykmelding(
     val sykmeldingId: String,
@@ -99,7 +98,7 @@ data class PersistedSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)
 
 data class PersistedSykmeldingArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,
-    val arbeidsrelaterteArsaker: List<ArbeidsrelertArsakType>,
+    val arbeidsrelaterteArsaker: List<SykInnArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?,
 )
 

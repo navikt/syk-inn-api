@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelertArsakType
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 
 data class OpprettSykmeldingPayload(
     val meta: OpprettSykmeldingMetadata,
@@ -91,7 +91,7 @@ data class OpprettSykmeldingMedisinskArsak(
 
 data class OpprettSykmeldingArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,
-    val arbeidsrelaterteArsaker: List<ArbeidsrelertArsakType>,
+    val arbeidsrelaterteArsaker: List<SykInnArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?
 )
 
