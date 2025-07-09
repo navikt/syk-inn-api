@@ -42,6 +42,8 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                                     PersistedSykmeldingAktivitet.IkkeMulig(
                                         "2024-04-01",
                                         "2024-04-10",
+                                        medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
+                                        arbeidsrelatertArsak = PersistedSykmeldingArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
                                     ),
                                 ),
                             pasientenSkalSkjermes = false,

@@ -20,6 +20,7 @@ import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelatertArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.MedisinskArsak
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
@@ -29,7 +30,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -96,8 +96,8 @@ class PdfServiceTest {
                                     tom = "2023-01-10",
                                     medisinskArsak = MedisinskArsak(isMedisinskArsak = true),
                                     arbeidsrelatertArsak = ArbeidsrelatertArsak(isArbeidsrelatertArsak = true, arbeidsrelaterteArsaker = listOf(
-                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
-                                        ArbeidsrelatertArsakType.ANNET), andreArbeidsrelaterteArsaker = "Test")
+                                        SykInnArbeidsrelatertArsakType.TILRETTELEGGING_IKKE_MULIG,
+                                        SykInnArbeidsrelatertArsakType.ANNET), annenArbeidsrelatertArsak = "Test")
                                 ),
                                 SykmeldingDocumentAktivitet.Gradert(
                                     fom = "2023-01-11",
@@ -138,7 +138,7 @@ class PdfServiceTest {
         assertNotNull(pdf)
 
         // Uncomment this to open the PDF in the default viewer, for developing PDF
-        openPdf(pdf, temp = false)
+        // openPdf(pdf, temp = false)
     }
 }
 
