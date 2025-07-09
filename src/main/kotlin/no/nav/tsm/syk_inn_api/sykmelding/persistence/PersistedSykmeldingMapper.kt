@@ -291,7 +291,7 @@ object PersistedSykmeldingMapper {
                             medisinskArsak =
                                 PersistedSykmeldingMedisinskArsak(
                                     isMedisinskArsak =
-                                        opprettSykmeldingAktivitet.medisinskArsak.isMedisinskArsak
+                                        opprettSykmeldingAktivitet.medisinskArsak.isMedisinskArsak,
                                 ),
                             arbeidsrelatertArsak =
                                 PersistedSykmeldingArbeidsrelatertArsak(
@@ -409,11 +409,8 @@ object PersistedSykmeldingMapper {
     }
 
     private fun List<Aktivitet>.toPersistedSykmeldingAktivitetList():
-        List<PersistedSykmeldingAktivitet> {
-        if (this.isEmpty()) return emptyList()
-
-        val aktiviteter = mutableListOf<PersistedSykmeldingAktivitet>()
-        this.forEach { sykmeldingRecordAktivitet ->
+        List<PersistedSykmeldingAktivitet> =
+        this.map { sykmeldingRecordAktivitet ->
             when (sykmeldingRecordAktivitet) {
                 is AktivitetIkkeMulig ->
                     PersistedSykmeldingAktivitet.IkkeMulig(
@@ -423,8 +420,8 @@ object PersistedSykmeldingMapper {
                             PersistedSykmeldingMedisinskArsak(
                                 isMedisinskArsak =
                                     sykmeldingRecordAktivitet.medisinskArsak?.arsak.let {
-                                        if (it.isNullOrEmpty()) false else true
-                                    }
+                                        !it.isNullOrEmpty()
+                                    },
                             ),
                         arbeidsrelatertArsak =
                             sykmeldingRecordAktivitet.arbeidsrelatertArsak?.let {
@@ -441,7 +438,7 @@ object PersistedSykmeldingMapper {
                                                 ArbeidsrelatertArsakType.ANNET ->
                                                     SykInnArbeidsrelatertArsakType.ANNET
                                             }
-                                        }
+                                        },
                                 )
                             }
                                 ?: PersistedSykmeldingArbeidsrelatertArsak(
@@ -476,8 +473,6 @@ object PersistedSykmeldingMapper {
                     )
             }
         }
-        return aktiviteter
-    }
 
     private fun DiagnoseInfo?.toPersistedSykmeldingDiagnoseInfo():
         PersistedSykmeldingDiagnoseInfo? {
@@ -509,7 +504,7 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmeldingArbeidsgiver? {
         return when (val value = sykmeldingRecord.sykmelding) {
             is DigitalSykmelding -> {
-                val arbeidsgiver = value.arbeidsgiver ?: return null
+                val arbeidsgiver = value.arbeidsgiver
 
                 getArbeidsgiverInfo(arbeidsgiver)
             }
