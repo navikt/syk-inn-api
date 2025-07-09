@@ -19,6 +19,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.secureLogger
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingService(
@@ -39,6 +40,7 @@ class SykmeldingService(
         object ResourceError : SykmeldingCreationErrors()
     }
 
+    @Transactional
     fun createSykmelding(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
