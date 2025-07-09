@@ -117,11 +117,9 @@ object PersistedSykmeldingMapper {
             is Digital -> metadata.orgnummer
             is Papir -> metadata.sender.ids.firstOrNull().let { it?.id }
             is EmottakEnkel -> metadata.sender.ids.firstOrNull().let { it?.id }
-                ?: error("No orgnr found in sender object (EmottakEnkel)")
-
+                    ?: error("No orgnr found in sender object (EmottakEnkel)")
             is EDIEmottak -> metadata.sender.ids.firstOrNull().let { it?.id }
-                ?: error("No orgnr found in sender object (EDIEmottak)")
-
+                    ?: error("No orgnr found in sender object (EDIEmottak)")
             is Utenlandsk -> null
             is Egenmeldt -> null
         }
@@ -134,19 +132,16 @@ object PersistedSykmeldingMapper {
                     .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
-
             is Papirsykmelding -> {
                 sykmelding.behandler.kontaktinfo
                     .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
-
             is XmlSykmelding -> {
                 sykmelding.behandler.kontaktinfo
                     .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
             }
-
             else -> null
         }
     }
@@ -186,7 +181,7 @@ object PersistedSykmeldingMapper {
             system = system,
             code = code,
             text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system, code)
-                ?: "Unknown diagnosis code: $code",
+                    ?: "Unknown diagnosis code: $code",
         )
     }
 
@@ -261,7 +256,8 @@ object PersistedSykmeldingMapper {
         )
     }
 
-    private fun List<OpprettSykmeldingDiagnoseInfo>.fromOpprettSykmeldingToPersistedSykmeldingDiagnoseInfoList():
+    private fun List<OpprettSykmeldingDiagnoseInfo>
+        .fromOpprettSykmeldingToPersistedSykmeldingDiagnoseInfoList():
         List<PersistedSykmeldingDiagnoseInfo> {
         if (this.isEmpty()) return emptyList()
         val diagnoseInfo = mutableListOf<PersistedSykmeldingDiagnoseInfo>()
@@ -272,14 +268,15 @@ object PersistedSykmeldingMapper {
                     system = info.system,
                     code = info.code,
                     text = DiagnosekodeMapper.findTextFromDiagnoseSystem(info.system, info.code)
-                        ?: "Unknown diagnosis code: $info.code",
+                            ?: "Unknown diagnosis code: $info.code",
                 ),
             )
         }
         return diagnoseInfo
     }
 
-    private fun List<OpprettSykmeldingAktivitet>.fromOpprettSykmeldingToPersistedSykmeldingAktivitetList():
+    private fun List<OpprettSykmeldingAktivitet>
+        .fromOpprettSykmeldingToPersistedSykmeldingAktivitetList():
         List<PersistedSykmeldingAktivitet> {
         if (this.isEmpty()) return emptyList()
 
@@ -291,15 +288,25 @@ object PersistedSykmeldingMapper {
                         PersistedSykmeldingAktivitet.IkkeMulig(
                             fom = opprettSykmeldingAktivitet.fom,
                             tom = opprettSykmeldingAktivitet.tom,
-                            medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = opprettSykmeldingAktivitet.medisinskArsak.isMedisinskArsak),
-                            arbeidsrelatertArsak = PersistedSykmeldingArbeidsrelatertArsak(
-                                isArbeidsrelatertArsak = opprettSykmeldingAktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak,
-                                arbeidsrelaterteArsaker = opprettSykmeldingAktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
-                                annenArbeidsrelatertArsak = opprettSykmeldingAktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
-                            ),
+                            medisinskArsak =
+                                PersistedSykmeldingMedisinskArsak(
+                                    isMedisinskArsak =
+                                        opprettSykmeldingAktivitet.medisinskArsak.isMedisinskArsak
+                                ),
+                            arbeidsrelatertArsak =
+                                PersistedSykmeldingArbeidsrelatertArsak(
+                                    isArbeidsrelatertArsak =
+                                        opprettSykmeldingAktivitet.arbeidsrelatertArsak
+                                            .isArbeidsrelatertArsak,
+                                    arbeidsrelaterteArsaker =
+                                        opprettSykmeldingAktivitet.arbeidsrelatertArsak
+                                            .arbeidsrelaterteArsaker,
+                                    annenArbeidsrelatertArsak =
+                                        opprettSykmeldingAktivitet.arbeidsrelatertArsak
+                                            .annenArbeidsrelatertArsak,
+                                ),
                         ),
                     )
-
                 is OpprettSykmeldingAktivitet.Gradert ->
                     aktivitet.add(
                         PersistedSykmeldingAktivitet.Gradert(
@@ -309,7 +316,6 @@ object PersistedSykmeldingMapper {
                             reisetilskudd = opprettSykmeldingAktivitet.reisetilskudd,
                         ),
                     )
-
                 is OpprettSykmeldingAktivitet.Avventende ->
                     aktivitet.add(
                         PersistedSykmeldingAktivitet.Avventende(
@@ -319,7 +325,6 @@ object PersistedSykmeldingMapper {
                             tom = opprettSykmeldingAktivitet.tom,
                         ),
                     )
-
                 is OpprettSykmeldingAktivitet.Behandlingsdager ->
                     aktivitet.add(
                         PersistedSykmeldingAktivitet.Behandlingsdager(
@@ -329,7 +334,6 @@ object PersistedSykmeldingMapper {
                             tom = opprettSykmeldingAktivitet.tom,
                         ),
                     )
-
                 is OpprettSykmeldingAktivitet.Reisetilskudd ->
                     aktivitet.add(
                         PersistedSykmeldingAktivitet.Reisetilskudd(
@@ -413,54 +417,62 @@ object PersistedSykmeldingMapper {
             when (sykmeldingRecordAktivitet) {
                 is AktivitetIkkeMulig ->
                     PersistedSykmeldingAktivitet.IkkeMulig(
-                        fom = sykmeldingRecordAktivitet.fom.toString(),
-                        tom = sykmeldingRecordAktivitet.tom.toString(),
-                        medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = sykmeldingRecordAktivitet.medisinskArsak?.arsak.let { if (it.isNullOrEmpty()) false else true }),
-                        arbeidsrelatertArsak = sykmeldingRecordAktivitet.arbeidsrelatertArsak?.let {
-                            PersistedSykmeldingArbeidsrelatertArsak(
-                                isArbeidsrelatertArsak = !it.arsak.isEmpty(),
-                                annenArbeidsrelatertArsak = it.beskrivelse,
-                                arbeidsrelaterteArsaker = it.arsak.map { arsak ->
-                                    when (arsak) {
-                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> SykInnArbeidsrelatertArsakType.TILRETTELEGGING_IKKE_MULIG
-                                        ArbeidsrelatertArsakType.ANNET -> SykInnArbeidsrelatertArsakType.ANNET
+                        fom = sykmeldingRecordAktivitet.fom,
+                        tom = sykmeldingRecordAktivitet.tom,
+                        medisinskArsak =
+                            PersistedSykmeldingMedisinskArsak(
+                                isMedisinskArsak =
+                                    sykmeldingRecordAktivitet.medisinskArsak?.arsak.let {
+                                        if (it.isNullOrEmpty()) false else true
                                     }
-                                }
-
-                            )
-                        } ?: PersistedSykmeldingArbeidsrelatertArsak(
-                            isArbeidsrelatertArsak = false,
-                            arbeidsrelaterteArsaker = emptyList(),
-                            annenArbeidsrelatertArsak = null,
-                        ),
+                            ),
+                        arbeidsrelatertArsak =
+                            sykmeldingRecordAktivitet.arbeidsrelatertArsak?.let {
+                                PersistedSykmeldingArbeidsrelatertArsak(
+                                    isArbeidsrelatertArsak = !it.arsak.isEmpty(),
+                                    annenArbeidsrelatertArsak = it.beskrivelse,
+                                    arbeidsrelaterteArsaker =
+                                        it.arsak.map { arsak ->
+                                            when (arsak) {
+                                                ArbeidsrelatertArsakType
+                                                    .MANGLENDE_TILRETTELEGGING ->
+                                                    SykInnArbeidsrelatertArsakType
+                                                        .TILRETTELEGGING_IKKE_MULIG
+                                                ArbeidsrelatertArsakType.ANNET ->
+                                                    SykInnArbeidsrelatertArsakType.ANNET
+                                            }
+                                        }
+                                )
+                            }
+                                ?: PersistedSykmeldingArbeidsrelatertArsak(
+                                    isArbeidsrelatertArsak = false,
+                                    arbeidsrelaterteArsaker = emptyList(),
+                                    annenArbeidsrelatertArsak = null,
+                                ),
                     )
-
                 is Gradert ->
                     PersistedSykmeldingAktivitet.Gradert(
                         grad = sykmeldingRecordAktivitet.grad,
-                        fom = sykmeldingRecordAktivitet.fom.toString(),
-                        tom = sykmeldingRecordAktivitet.tom.toString(),
+                        fom = sykmeldingRecordAktivitet.fom,
+                        tom = sykmeldingRecordAktivitet.tom,
                         reisetilskudd = sykmeldingRecordAktivitet.reisetilskudd,
                     )
-
                 is Avventende ->
                     PersistedSykmeldingAktivitet.Avventende(
                         innspillTilArbeidsgiver = sykmeldingRecordAktivitet.innspillTilArbeidsgiver,
-                        fom = sykmeldingRecordAktivitet.fom.toString(),
-                        tom = sykmeldingRecordAktivitet.tom.toString(),
+                        fom = sykmeldingRecordAktivitet.fom,
+                        tom = sykmeldingRecordAktivitet.tom,
                     )
-
                 is Behandlingsdager ->
                     PersistedSykmeldingAktivitet.Behandlingsdager(
                         antallBehandlingsdager = sykmeldingRecordAktivitet.antallBehandlingsdager,
-                        fom = sykmeldingRecordAktivitet.fom.toString(),
-                        tom = sykmeldingRecordAktivitet.tom.toString(),
+                        fom = sykmeldingRecordAktivitet.fom,
+                        tom = sykmeldingRecordAktivitet.tom,
                     )
-
                 is Reisetilskudd ->
                     PersistedSykmeldingAktivitet.Reisetilskudd(
-                        fom = sykmeldingRecordAktivitet.fom.toString(),
-                        tom = sykmeldingRecordAktivitet.tom.toString(),
+                        fom = sykmeldingRecordAktivitet.fom,
+                        tom = sykmeldingRecordAktivitet.tom,
                     )
             }
         }
@@ -475,7 +487,7 @@ object PersistedSykmeldingMapper {
             system = system.toDiagnoseSystem(),
             code = kode,
             text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toDiagnoseSystem(), kode)
-                ?: "Unknown diagnosis code: $kode",
+                    ?: "Unknown diagnosis code: $kode",
         )
     }
 
@@ -501,15 +513,12 @@ object PersistedSykmeldingMapper {
 
                 getArbeidsgiverInfo(arbeidsgiver)
             }
-
             is Papirsykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)
             }
-
             is XmlSykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)
             }
-
             else -> {
                 return null
             }
@@ -523,14 +532,12 @@ object PersistedSykmeldingMapper {
             is EnArbeidsgiver -> {
                 null
             }
-
             is FlereArbeidsgivere -> {
                 PersistedSykmeldingArbeidsgiver(
                     harFlere = true,
                     arbeidsgivernavn = arbeidsgiver.navn ?: "Manglende arbeidsgivernavn",
                 )
             }
-
             is IngenArbeidsgiver -> {
                 null
             }
@@ -589,15 +596,12 @@ object PersistedSykmeldingMapper {
             is DigitalSykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
-
             is Papirsykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
-
             is XmlSykmelding -> {
                 createPersistedSykmeldingYrkesskade(sykmeldingRecordMedisinskVurdering)
             }
-
             else -> {
                 return null
             }
@@ -623,15 +627,12 @@ object PersistedSykmeldingMapper {
             is DigitalSykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
-
             is Papirsykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
-
             is XmlSykmelding -> {
                 createPersistedSykmeldingTilbakedatering(value.tilbakedatering)
             }
-
             else -> {
                 return null
             }
@@ -680,19 +681,16 @@ object PersistedSykmeldingMapper {
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
             }
-
             is Papirsykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
             }
-
             is XmlSykmelding -> {
                 val arbeidsgiver = value.arbeidsgiver
                 val bistandNav = value.bistandNav?.beskrivBistand
                 mapToPersistedSykmeldingMeldinger(arbeidsgiver, bistandNav)
             }
-
             else -> {
                 // How should we handle this for other cases such as Utenlandsk? Empty objects?
                 PersistedSykmeldingMeldinger(

@@ -29,11 +29,11 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
-import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelatertArsak
-import no.nav.tsm.syk_inn_api.sykmelding.response.MedisinskArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsrelatertArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMedisinskArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
@@ -145,10 +145,16 @@ class SykmeldingServiceTest {
                         aktivitet =
                             listOf(
                                 SykmeldingDocumentAktivitet.IkkeMulig(
-                                    fom = "2020-01-01",
-                                    tom = "2020-01-30",
-                                    medisinskArsak = MedisinskArsak(isMedisinskArsak = true),
-                                    arbeidsrelatertArsak = ArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
+                                    fom = LocalDate.parse("2020-01-01"),
+                                    tom = LocalDate.parse("2020-01-30"),
+                                    medisinskArsak =
+                                        SykmeldingDocumentMedisinskArsak(isMedisinskArsak = true),
+                                    arbeidsrelatertArsak =
+                                        SykmeldingDocumentArbeidsrelatertArsak(
+                                            isArbeidsrelatertArsak = false,
+                                            arbeidsrelaterteArsaker = emptyList(),
+                                            annenArbeidsrelatertArsak = null
+                                        )
                                 ),
                             ),
                         bidiagnoser = emptyList(),
@@ -217,11 +223,18 @@ class SykmeldingServiceTest {
                                 aktivitet =
                                     listOf(
                                         OpprettSykmeldingAktivitet.IkkeMulig(
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-30",
-                                            medisinskArsak = OpprettSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                                            arbeidsrelatertArsak = OpprettSykmeldingArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
-
+                                            fom = LocalDate.parse("2020-01-01"),
+                                            tom = LocalDate.parse("2020-01-30"),
+                                            medisinskArsak =
+                                                OpprettSykmeldingMedisinskArsak(
+                                                    isMedisinskArsak = true
+                                                ),
+                                            arbeidsrelatertArsak =
+                                                OpprettSykmeldingArbeidsrelatertArsak(
+                                                    isArbeidsrelatertArsak = false,
+                                                    arbeidsrelaterteArsaker = emptyList(),
+                                                    annenArbeidsrelatertArsak = null
+                                                )
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -314,10 +327,18 @@ class SykmeldingServiceTest {
                                 aktivitet =
                                     listOf(
                                         OpprettSykmeldingAktivitet.IkkeMulig(
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-30",
-                                            medisinskArsak = OpprettSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                                            arbeidsrelatertArsak = OpprettSykmeldingArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
+                                            fom = LocalDate.parse("2020-01-01"),
+                                            tom = LocalDate.parse("2020-01-30"),
+                                            medisinskArsak =
+                                                OpprettSykmeldingMedisinskArsak(
+                                                    isMedisinskArsak = true
+                                                ),
+                                            arbeidsrelatertArsak =
+                                                OpprettSykmeldingArbeidsrelatertArsak(
+                                                    isArbeidsrelatertArsak = false,
+                                                    arbeidsrelaterteArsaker = emptyList(),
+                                                    annenArbeidsrelatertArsak = null
+                                                )
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -355,10 +376,15 @@ class SykmeldingServiceTest {
             aktivitet =
                 listOf(
                     OpprettSykmeldingAktivitet.IkkeMulig(
-                        fom = "2020-01-01",
-                        tom = "2020-01-30",
+                        fom = LocalDate.parse("2020-01-01"),
+                        tom = LocalDate.parse("2020-01-30"),
                         medisinskArsak = OpprettSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                        arbeidsrelatertArsak = OpprettSykmeldingArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
+                        arbeidsrelatertArsak =
+                            OpprettSykmeldingArbeidsrelatertArsak(
+                                isArbeidsrelatertArsak = false,
+                                arbeidsrelaterteArsaker = emptyList(),
+                                annenArbeidsrelatertArsak = null
+                            )
                     ),
                 ),
             pasientenSkalSkjermes = false,

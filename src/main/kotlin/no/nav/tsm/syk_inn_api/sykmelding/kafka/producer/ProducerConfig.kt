@@ -45,12 +45,12 @@ class ProducerConfig {
             private val SOURCE_NAMESPACE_HEADER = "source-namespace"
             private val SOURCE_APP_HEADER = "source-app"
 
-            override fun sendSykmelding(sykmelding: SykmeldingRecord) {
+            override fun sendSykmelding(sykmeldingRecord: SykmeldingRecord) {
                 val record =
                     ProducerRecord(
                         sykmeldingInputTopic,
-                        sykmelding.sykmelding.id,
-                        sykmeldingObjectMapper.writeValueAsBytes(sykmelding),
+                        sykmeldingRecord.sykmelding.id,
+                        sykmeldingObjectMapper.writeValueAsBytes(sykmeldingRecord),
                     )
                 record.headers().add(SOURCE_NAMESPACE_HEADER, sourceNamespace.toByteArray())
                 record.headers().add(SOURCE_APP_HEADER, sourceApp.toByteArray())

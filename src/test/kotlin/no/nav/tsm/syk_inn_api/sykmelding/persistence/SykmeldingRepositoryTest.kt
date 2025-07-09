@@ -40,10 +40,18 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                             aktivitet =
                                 listOf(
                                     PersistedSykmeldingAktivitet.IkkeMulig(
-                                        "2024-04-01",
-                                        "2024-04-10",
-                                        medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                                        arbeidsrelatertArsak = PersistedSykmeldingArbeidsrelatertArsak(isArbeidsrelatertArsak = false, arbeidsrelaterteArsaker = emptyList(), annenArbeidsrelatertArsak = null)
+                                        LocalDate.parse("2024-04-01"),
+                                        LocalDate.parse("2024-04-10"),
+                                        medisinskArsak =
+                                            PersistedSykmeldingMedisinskArsak(
+                                                isMedisinskArsak = true
+                                            ),
+                                        arbeidsrelatertArsak =
+                                            PersistedSykmeldingArbeidsrelatertArsak(
+                                                isArbeidsrelatertArsak = false,
+                                                arbeidsrelaterteArsaker = emptyList(),
+                                                annenArbeidsrelatertArsak = null
+                                            )
                                     ),
                                 ),
                             pasientenSkalSkjermes = false,

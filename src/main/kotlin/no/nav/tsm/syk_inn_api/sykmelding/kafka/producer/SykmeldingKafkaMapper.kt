@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
@@ -250,15 +249,15 @@ object SykmeldingKafkaMapper {
             is OpprettSykmeldingAktivitet.Gradert -> {
                 Gradert(
                     grad = aktivitet.grad,
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = aktivitet.fom,
+                    tom = aktivitet.tom,
                     reisetilskudd = aktivitet.reisetilskudd,
                 )
             }
             is OpprettSykmeldingAktivitet.IkkeMulig -> {
                 AktivitetIkkeMulig(
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = aktivitet.fom,
+                    tom = aktivitet.tom,
                     medisinskArsak = null,
                     arbeidsrelatertArsak = null,
                 )
@@ -266,21 +265,21 @@ object SykmeldingKafkaMapper {
             is OpprettSykmeldingAktivitet.Avventende -> {
                 Avventende(
                     innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = aktivitet.fom,
+                    tom = aktivitet.tom,
                 )
             }
             is OpprettSykmeldingAktivitet.Behandlingsdager -> {
                 Behandlingsdager(
                     antallBehandlingsdager = aktivitet.antallBehandlingsdager,
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = aktivitet.fom,
+                    tom = aktivitet.tom,
                 )
             }
             is OpprettSykmeldingAktivitet.Reisetilskudd -> {
                 Reisetilskudd(
-                    fom = LocalDate.parse(aktivitet.fom),
-                    tom = LocalDate.parse(aktivitet.tom),
+                    fom = aktivitet.fom,
+                    tom = aktivitet.tom,
                 )
             }
         }

@@ -179,32 +179,32 @@ class RuleService() {
             when (opprettSykmeldingAktivitet) {
                 is OpprettSykmeldingAktivitet.IkkeMulig ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.IkkeMulig(
-                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        fom = opprettSykmeldingAktivitet.fom,
+                        tom = opprettSykmeldingAktivitet.tom,
                     )
                 is OpprettSykmeldingAktivitet.Gradert ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Gradert(
-                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        fom = opprettSykmeldingAktivitet.fom,
+                        tom = opprettSykmeldingAktivitet.tom,
                         grad = opprettSykmeldingAktivitet.grad,
                     )
                 is OpprettSykmeldingAktivitet.Avventende ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Avventende(
                         avventendeInnspillTilArbeidsgiver =
                             opprettSykmeldingAktivitet.innspillTilArbeidsgiver,
-                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        fom = opprettSykmeldingAktivitet.fom,
+                        tom = opprettSykmeldingAktivitet.tom,
                     )
                 is OpprettSykmeldingAktivitet.Behandlingsdager ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Behandlingsdager(
                         behandlingsdager = opprettSykmeldingAktivitet.antallBehandlingsdager,
-                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        fom = opprettSykmeldingAktivitet.fom,
+                        tom = opprettSykmeldingAktivitet.tom,
                     )
                 is OpprettSykmeldingAktivitet.Reisetilskudd ->
                     no.nav.tsm.regulus.regula.payload.Aktivitet.Reisetilskudd(
-                        fom = LocalDate.parse(opprettSykmeldingAktivitet.fom),
-                        tom = LocalDate.parse(opprettSykmeldingAktivitet.tom),
+                        fom = opprettSykmeldingAktivitet.fom,
+                        tom = opprettSykmeldingAktivitet.tom,
                     )
             },
         )

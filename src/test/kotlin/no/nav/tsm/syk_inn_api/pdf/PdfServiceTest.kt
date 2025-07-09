@@ -18,12 +18,12 @@ import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
-import no.nav.tsm.syk_inn_api.sykmelding.response.ArbeidsrelatertArsak
-import no.nav.tsm.syk_inn_api.sykmelding.response.MedisinskArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsrelatertArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMedisinskArsak
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
@@ -92,16 +92,25 @@ class PdfServiceTest {
                         aktivitet =
                             listOf(
                                 SykmeldingDocumentAktivitet.IkkeMulig(
-                                    fom = "2023-01-01",
-                                    tom = "2023-01-10",
-                                    medisinskArsak = MedisinskArsak(isMedisinskArsak = true),
-                                    arbeidsrelatertArsak = ArbeidsrelatertArsak(isArbeidsrelatertArsak = true, arbeidsrelaterteArsaker = listOf(
-                                        SykInnArbeidsrelatertArsakType.TILRETTELEGGING_IKKE_MULIG,
-                                        SykInnArbeidsrelatertArsakType.ANNET), annenArbeidsrelatertArsak = "Test")
+                                    fom = LocalDate.parse("2023-01-01"),
+                                    tom = LocalDate.parse("2023-01-10"),
+                                    medisinskArsak =
+                                        SykmeldingDocumentMedisinskArsak(isMedisinskArsak = true),
+                                    arbeidsrelatertArsak =
+                                        SykmeldingDocumentArbeidsrelatertArsak(
+                                            isArbeidsrelatertArsak = true,
+                                            arbeidsrelaterteArsaker =
+                                                listOf(
+                                                    SykInnArbeidsrelatertArsakType
+                                                        .TILRETTELEGGING_IKKE_MULIG,
+                                                    SykInnArbeidsrelatertArsakType.ANNET
+                                                ),
+                                            annenArbeidsrelatertArsak = "Test"
+                                        )
                                 ),
                                 SykmeldingDocumentAktivitet.Gradert(
-                                    fom = "2023-01-11",
-                                    tom = "2023-01-15",
+                                    fom = LocalDate.parse("2023-01-11"),
+                                    tom = LocalDate.parse("2023-01-15"),
                                     grad = 60,
                                     reisetilskudd = false
                                 ),

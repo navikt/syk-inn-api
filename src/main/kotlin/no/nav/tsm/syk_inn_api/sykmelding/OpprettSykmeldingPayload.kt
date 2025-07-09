@@ -63,31 +63,35 @@ data class OpprettSykmeldingTilbakedatering(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface OpprettSykmeldingAktivitet {
     data class IkkeMulig(
-        val fom: String,
-        val tom: String,
+        val fom: LocalDate,
+        val tom: LocalDate,
         val medisinskArsak: OpprettSykmeldingMedisinskArsak,
         val arbeidsrelatertArsak: OpprettSykmeldingArbeidsrelatertArsak
     ) : OpprettSykmeldingAktivitet
 
     data class Gradert(
         val grad: Int,
-        val fom: String,
-        val tom: String,
+        val fom: LocalDate,
+        val tom: LocalDate,
         val reisetilskudd: Boolean
     ) : OpprettSykmeldingAktivitet
 
-    data class Behandlingsdager(val antallBehandlingsdager: Int, val fom: String, val tom: String) :
-        OpprettSykmeldingAktivitet
+    data class Behandlingsdager(
+        val antallBehandlingsdager: Int,
+        val fom: LocalDate,
+        val tom: LocalDate
+    ) : OpprettSykmeldingAktivitet
 
-    data class Avventende(val innspillTilArbeidsgiver: String, val fom: String, val tom: String) :
-        OpprettSykmeldingAktivitet
+    data class Avventende(
+        val innspillTilArbeidsgiver: String,
+        val fom: LocalDate,
+        val tom: LocalDate
+    ) : OpprettSykmeldingAktivitet
 
-    data class Reisetilskudd(val fom: String, val tom: String) : OpprettSykmeldingAktivitet
+    data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : OpprettSykmeldingAktivitet
 }
 
-data class OpprettSykmeldingMedisinskArsak(
-    val isMedisinskArsak: Boolean
-)
+data class OpprettSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)
 
 data class OpprettSykmeldingArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,

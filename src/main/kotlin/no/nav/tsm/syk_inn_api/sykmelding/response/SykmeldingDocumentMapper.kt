@@ -29,7 +29,8 @@ object SykmeldingDocumentMapper {
         )
     }
 
-    private fun List<PersistedSykmeldingAktivitet>.toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet():
+    private fun List<PersistedSykmeldingAktivitet>
+        .toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet():
         List<SykmeldingDocumentAktivitet> {
         val aktiviteter = mutableListOf<SykmeldingDocumentAktivitet>()
 
@@ -40,15 +41,21 @@ object SykmeldingDocumentMapper {
                         SykmeldingDocumentAktivitet.IkkeMulig(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
-                            medisinskArsak = MedisinskArsak(isMedisinskArsak = aktivitet.medisinskArsak.isMedisinskArsak),
-                            arbeidsrelatertArsak = ArbeidsrelatertArsak(
-                                isArbeidsrelatertArsak = aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak,
-                                arbeidsrelaterteArsaker = aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
-                                annenArbeidsrelatertArsak = aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
-                            ),
+                            medisinskArsak =
+                                SykmeldingDocumentMedisinskArsak(
+                                    isMedisinskArsak = aktivitet.medisinskArsak.isMedisinskArsak
+                                ),
+                            arbeidsrelatertArsak =
+                                SykmeldingDocumentArbeidsrelatertArsak(
+                                    isArbeidsrelatertArsak =
+                                        aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak,
+                                    arbeidsrelaterteArsaker =
+                                        aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+                                    annenArbeidsrelatertArsak =
+                                        aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+                                ),
                         ),
                     )
-
                 is PersistedSykmeldingAktivitet.Gradert ->
                     aktiviteter.add(
                         SykmeldingDocumentAktivitet.Gradert(
@@ -58,7 +65,6 @@ object SykmeldingDocumentMapper {
                             reisetilskudd = aktivitet.reisetilskudd,
                         ),
                     )
-
                 is PersistedSykmeldingAktivitet.Behandlingsdager ->
                     aktiviteter.add(
                         SykmeldingDocumentAktivitet.Behandlingsdager(
@@ -67,7 +73,6 @@ object SykmeldingDocumentMapper {
                             tom = aktivitet.tom,
                         ),
                     )
-
                 is PersistedSykmeldingAktivitet.Avventende ->
                     aktiviteter.add(
                         SykmeldingDocumentAktivitet.Avventende(
@@ -76,7 +81,6 @@ object SykmeldingDocumentMapper {
                             tom = aktivitet.tom,
                         ),
                     )
-
                 is PersistedSykmeldingAktivitet.Reisetilskudd ->
                     aktiviteter.add(
                         SykmeldingDocumentAktivitet.Reisetilskudd(

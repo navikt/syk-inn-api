@@ -48,51 +48,50 @@ data class SykmeldingDocumentValues(
     JsonSubTypes.Type(SykmeldingDocumentAktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class SykmeldingDocumentAktivitet(open val fom: String, open val tom: String) {
+sealed class SykmeldingDocumentAktivitet(open val fom: LocalDate, open val tom: LocalDate) {
     data class IkkeMulig(
-        override val fom: String,
-        override val tom: String,
-        val medisinskArsak: MedisinskArsak,
-        val arbeidsrelatertArsak: ArbeidsrelatertArsak
+        override val fom: LocalDate,
+        override val tom: LocalDate,
+        val medisinskArsak: SykmeldingDocumentMedisinskArsak,
+        val arbeidsrelatertArsak: SykmeldingDocumentArbeidsrelatertArsak
     ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Gradert(
-        override val fom: String,
-        override val tom: String,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
         val grad: Int,
         val reisetilskudd: Boolean
     ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Behandlingsdager(
-        override val fom: String,
-        override val tom: String,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
         val antallBehandlingsdager: Int
     ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Avventende(
         val innspillTilArbeidsgiver: String,
-        override val fom: String,
-        override val tom: String,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
     ) : SykmeldingDocumentAktivitet(fom, tom)
 
     data class Reisetilskudd(
-        override val fom: String,
-        override val tom: String,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
     ) : SykmeldingDocumentAktivitet(fom, tom)
 }
 
-data class MedisinskArsak(
-    val isMedisinskArsak: Boolean
-)
+data class SykmeldingDocumentMedisinskArsak(val isMedisinskArsak: Boolean)
 
-data class ArbeidsrelatertArsak(
+data class SykmeldingDocumentArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,
     val arbeidsrelaterteArsaker: List<SykInnArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?
 )
 
-enum class SykInnArbeidsrelatertArsakType  {
-    TILRETTELEGGING_IKKE_MULIG, ANNET
+enum class SykInnArbeidsrelatertArsakType {
+    TILRETTELEGGING_IKKE_MULIG,
+    ANNET
 }
 
 data class SykmeldingDocumentDiagnoseInfo(
