@@ -147,7 +147,15 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     "Ingen diagnose oppgitt"
                                 }
                             }
-                            TableInfo("Bidiagnoser", italic = true) { "Ingen bidiagnoser" }
+                            TableInfoMultiRow("Bidiagnoser") {
+                                if (sykmelding.values.bidiagnoser?.isNotEmpty() == true) {
+                                    sykmelding.values.bidiagnoser.map {
+                                        "${it.code}: ${it.text} (${it.system.code})"
+                                    }
+                                } else {
+                                    listOf("Ingen bidiagnoser oppgitt")
+                                }
+                            }
                         }
                         if (andreSporsmalTexts != null) {
                             tr {
