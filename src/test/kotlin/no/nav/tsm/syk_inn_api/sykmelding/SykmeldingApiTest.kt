@@ -121,7 +121,9 @@ private val fullExampleSykmeldingPayload =
     |      {
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
-    |        "tom": "${LocalDate.now()}"
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
     |    "meldinger": {
