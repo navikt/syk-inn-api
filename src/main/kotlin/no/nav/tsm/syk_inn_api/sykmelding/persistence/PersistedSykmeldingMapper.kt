@@ -418,15 +418,12 @@ object PersistedSykmeldingMapper {
                         tom = sykmeldingRecordAktivitet.tom,
                         medisinskArsak =
                             PersistedSykmeldingMedisinskArsak(
-                                isMedisinskArsak =
-                                    sykmeldingRecordAktivitet.medisinskArsak?.arsak.let {
-                                        !it.isNullOrEmpty()
-                                    },
+                                isMedisinskArsak = sykmeldingRecordAktivitet.medisinskArsak != null,
                             ),
                         arbeidsrelatertArsak =
                             sykmeldingRecordAktivitet.arbeidsrelatertArsak?.let {
                                 PersistedSykmeldingArbeidsrelatertArsak(
-                                    isArbeidsrelatertArsak = !it.arsak.isEmpty(),
+                                    isArbeidsrelatertArsak = true,
                                     annenArbeidsrelatertArsak = it.beskrivelse,
                                     arbeidsrelaterteArsaker =
                                         it.arsak.map { arsak ->

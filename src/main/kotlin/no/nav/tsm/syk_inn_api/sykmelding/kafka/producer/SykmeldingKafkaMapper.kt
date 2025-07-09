@@ -19,9 +19,12 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.Avventende
 import no.nav.tsm.sykmelding.input.core.model.Behandler
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
@@ -34,6 +37,7 @@ import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
 import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
@@ -138,7 +142,7 @@ object SykmeldingKafkaMapper {
                     navKontor = null,
                     navnFastlege = null,
                     fnr = person.ident,
-                    kontaktinfo = emptyList()
+                    kontaktinfo = emptyList(),
                 ),
             medisinskVurdering = mapMedisinskVurdering(sykmelding.values),
             aktivitet = sykmelding.values.aktivitet.map { toRecordAktivitet(it) },
@@ -156,7 +160,7 @@ object SykmeldingKafkaMapper {
                             Kontaktinfo(
                                 type = KontaktinfoType.TLF,
                                 value = sykmelding.meta.legekontorTlf,
-                            )
+                            ),
                         ),
                     adresse = null,
                 ),
@@ -258,8 +262,30 @@ object SykmeldingKafkaMapper {
                 AktivitetIkkeMulig(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
-                    medisinskArsak = null,
-                    arbeidsrelatertArsak = null,
+                    medisinskArsak =
+                        if (aktivitet.medisinskArsak.isMedisinskArsak)
+                            MedisinskArsak(
+                                arsak = listOf(),
+                                beskrivelse = null,
+                            )
+                        else null,
+                    arbeidsrelatertArsak =
+                        if (aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak)
+                            ArbeidsrelatertArsak(
+                                arsak =
+                                    aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker.map {
+                                        when (it) {
+                                            SykInnArbeidsrelatertArsakType
+                                                .TILRETTELEGGING_IKKE_MULIG ->
+                                                ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING
+                                            SykInnArbeidsrelatertArsakType.ANNET ->
+                                                ArbeidsrelatertArsakType.ANNET
+                                        }
+                                    },
+                                beskrivelse =
+                                    aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+                            )
+                        else null,
                 )
             }
             is OpprettSykmeldingAktivitet.Avventende -> {
@@ -287,8 +313,6 @@ object SykmeldingKafkaMapper {
 }
 
 fun mapHoveddiagnose(hoveddiagnose: OpprettSykmeldingDiagnoseInfo): DiagnoseInfo? {
-    if (hoveddiagnose == null) return null
-
     return DiagnoseInfo(
         system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
         kode = hoveddiagnose.code,
@@ -325,7 +349,7 @@ private fun List<OpprettSykmeldingDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo()
         DiagnoseInfo(
             system = diagnose.system.toKafkaDiagnoseSystem(),
             kode = diagnose.code,
-            tekst = findTextFromDiagnoseSystem(system = diagnose.system, code = diagnose.code)
+            tekst = findTextFromDiagnoseSystem(system = diagnose.system, code = diagnose.code),
         )
     }
 }
