@@ -24,6 +24,15 @@ To build locally and run the integration tests you can simply run
 
 This will run tests as well.
 
+#### Colima sidenote
+
+Ensure Testcontainers has access to Docker by adding this to your configuration
+```
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
+export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
+```
+
 ## Run this application locally
 
 external services are mocked so we are not calling pdl, btsys etc-
