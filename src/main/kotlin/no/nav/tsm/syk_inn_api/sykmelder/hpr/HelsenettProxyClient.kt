@@ -75,7 +75,7 @@ class HelsenettProxyClient(
     override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
-        logger.info(
+        secureLog.info(
             "Getting sykmelder for fnr=$behandlerFnr, sykmeldingId=$callId",
         )
 
@@ -83,13 +83,11 @@ class HelsenettProxyClient(
             val response =
                 webClient
                     .get()
-                    .uri { uriBuilder ->
-                        uriBuilder.path("/api/v2/behandlerMedFnrNummer").build()
-                    } // TODO need to verify url and header
+                    .uri { uriBuilder -> uriBuilder.path("/api/v2/behandler").build() }
                     .headers {
                         it.set("Content-Type", "application/json")
                         it.set("Nav-CallId", callId)
-                        it.set("fnrNummer", behandlerFnr)
+                        it.set("behandlerFnr", behandlerFnr)
                         it.set("Authorization", "Bearer $accessToken")
                     }
                     .retrieve()
