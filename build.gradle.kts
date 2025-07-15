@@ -14,7 +14,7 @@ val regulaVersion = "41"
 val sykmeldingInputVersion = "13"
 
 // Dev deps
-val testContainersVersion = "1.21.2"
+val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.4"
 
@@ -25,7 +25,7 @@ plugins {
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.0.4"
+    id("com.diffplug.spotless") version "7.1.0"
     id("com.github.ben-manes.versions") version "0.52.0"
 }
 
@@ -85,7 +85,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.1.0")
     testImplementation("io.mockk:mockk:${mockkVersion}")
 }
 
