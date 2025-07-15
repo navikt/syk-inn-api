@@ -98,6 +98,83 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         val allSykmeldinger = requireNotNull(allResponse.body)
         assertEquals(0, allSykmeldinger.size)
     }
+
+
+    @Test
+    fun `Broken input data - should fail with 400 due to invalid DiagnoseSystem`() {
+        val response = restTemplate.postForEntity<String>(
+            "/api/sykmelding",
+            HttpEntity(
+                brokenExampleSykmeldingPayloadBadDiagnoseSystem,
+                HttpHeaders().apply {
+                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                },
+            ),
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+    }
+
+
+    @Test
+    fun `Broken input data - should fail with 400 due to unknown Aktivitet type`() {
+        val response = restTemplate.postForEntity<String>(
+            "/api/sykmelding",
+            HttpEntity(
+                brokenExampleSykmeldingPayloadUnknownAktivitet,
+                HttpHeaders().apply {
+                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                },
+            ),
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+    }
+
+    @Test
+    fun `Broken input data - should fail with 500 due to invalid sykmelderHpr`() {
+        val response = restTemplate.postForEntity<String>(
+            "/api/sykmelding",
+            HttpEntity(
+                brokenExampleSykmeldingPayloadInvalidSykmelderHpr,
+                HttpHeaders().apply {
+                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                },
+            ),
+        )
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
+    }
+
+    @Test
+    fun `Broken input data - should fail with 500 due to invalid sykmelderFnr`() {
+        val response = restTemplate.postForEntity<String>(
+            "/api/sykmelding",
+            HttpEntity(
+                brokenExampleSykmeldingPayloadValidHprButBrokenFnr,
+                HttpHeaders().apply {
+                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                },
+            ),
+        )
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
+    }
+
+    @Test
+    fun `Broken input data - rule hit - should fail with 422 due to sykmelder being suspended`() {
+        val response = restTemplate.postForEntity<String>(
+            "/api/sykmelding",
+            HttpEntity(
+                brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
+                HttpHeaders().apply {
+                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                },
+            ),
+        )
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+    }
 }
 
 @Language("JSON")
@@ -107,6 +184,202 @@ private val fullExampleSykmeldingPayload =
     |  "meta": {
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
+    |    "legekontorOrgnr": "123456789",
+    |    "legekontorTlf": "12345678"
+    |  },
+    |  "values": {
+    |    "pasientenSkalSkjermes": false,
+    |    "hoveddiagnose": {
+    |      "system": "ICPC2",
+    |      "code": "L73"
+    |    },
+    |    "bidiagnoser": [],
+    |    "aktivitet": [
+    |      {
+    |        "type": "AKTIVITET_IKKE_MULIG",
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
+    |      }
+    |    ],
+    |    "meldinger": {
+    |      "tilNav": null,
+    |      "tilArbeidsgiver": null
+    |    },
+    |    "svangerskapsrelatert": false,
+    |    "yrkesskade": null,
+    |    "arbeidsgiver": null,
+    |    "tilbakedatering": null
+    |  }
+    |}
+"""
+        .trimMargin()
+
+@Language("JSON")
+private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
+    """
+    |{
+    |  "meta": {
+    |    "pasientIdent": "21037712323",
+    |    "sykmelderHpr": "9144889",
+    |    "legekontorOrgnr": "123456789",
+    |    "legekontorTlf": "12345678"
+    |  },
+    |  "values": {
+    |    "pasientenSkalSkjermes": false,
+    |    "hoveddiagnose": {
+    |      "system": "ICPC69",
+    |      "code": "L73"
+    |    },
+    |    "bidiagnoser": [],
+    |    "aktivitet": [
+    |      {
+    |        "type": "AKTIVITET_IKKE_MULIG",
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
+    |      }
+    |    ],
+    |    "meldinger": {
+    |      "tilNav": null,
+    |      "tilArbeidsgiver": null
+    |    },
+    |    "svangerskapsrelatert": false,
+    |    "yrkesskade": null,
+    |    "arbeidsgiver": null,
+    |    "tilbakedatering": null
+    |  }
+    |}
+"""
+        .trimMargin()
+
+@Language("JSON")
+private val brokenExampleSykmeldingPayloadUnknownAktivitet =
+    """
+    |{
+    |  "meta": {
+    |    "pasientIdent": "21037712323",
+    |    "sykmelderHpr": "9144889",
+    |    "legekontorOrgnr": "123456789",
+    |    "legekontorTlf": "12345678"
+    |  },
+    |  "values": {
+    |    "pasientenSkalSkjermes": false,
+    |    "hoveddiagnose": {
+    |      "system": "ICPC2",
+    |      "code": "L73"
+    |    },
+    |    "bidiagnoser": [],
+    |    "aktivitet": [
+    |      {
+    |        "type": "DENNE TYPEN AKTIVITET FINNES IKKE",
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
+    |      }
+    |    ],
+    |    "meldinger": {
+    |      "tilNav": null,
+    |      "tilArbeidsgiver": null
+    |    },
+    |    "svangerskapsrelatert": false,
+    |    "yrkesskade": null,
+    |    "arbeidsgiver": null,
+    |    "tilbakedatering": null
+    |  }
+    |}
+"""
+        .trimMargin()
+
+
+@Language("JSON")
+private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
+    """
+    |{
+    |  "meta": {
+    |    "pasientIdent": "21037712323",
+    |    "sykmelderHpr": "brokenHpr",
+    |    "legekontorOrgnr": "123456789",
+    |    "legekontorTlf": "12345678"
+    |  },
+    |  "values": {
+    |    "pasientenSkalSkjermes": false,
+    |    "hoveddiagnose": {
+    |      "system": "ICPC2",
+    |      "code": "L73"
+    |    },
+    |    "bidiagnoser": [],
+    |    "aktivitet": [
+    |      {
+    |        "type": "AKTIVITET_IKKE_MULIG",
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
+    |      }
+    |    ],
+    |    "meldinger": {
+    |      "tilNav": null,
+    |      "tilArbeidsgiver": null
+    |    },
+    |    "svangerskapsrelatert": false,
+    |    "yrkesskade": null,
+    |    "arbeidsgiver": null,
+    |    "tilbakedatering": null
+    |  }
+    |}
+"""
+        .trimMargin()
+
+@Language("JSON")
+private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
+    """
+    |{
+    |  "meta": {
+    |    "pasientIdent": "21037712323",
+    |    "sykmelderHpr": "hprButHasBrokenFnrAndNoGodkjenninger",
+    |    "legekontorOrgnr": "123456789",
+    |    "legekontorTlf": "12345678"
+    |  },
+    |  "values": {
+    |    "pasientenSkalSkjermes": false,
+    |    "hoveddiagnose": {
+    |      "system": "ICPC2",
+    |      "code": "L73"
+    |    },
+    |    "bidiagnoser": [],
+    |    "aktivitet": [
+    |      {
+    |        "type": "AKTIVITET_IKKE_MULIG",
+    |        "fom": "${LocalDate.now()}",
+    |        "tom": "${LocalDate.now()}",
+    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
+    |      }
+    |    ],
+    |    "meldinger": {
+    |      "tilNav": null,
+    |      "tilArbeidsgiver": null
+    |    },
+    |    "svangerskapsrelatert": false,
+    |    "yrkesskade": null,
+    |    "arbeidsgiver": null,
+    |    "tilbakedatering": null
+    |  }
+    |}
+"""
+        .trimMargin()
+
+@Language("JSON")
+private val brokenExampleSykmeldingPayloadValidHprButSuspendedFnr =
+    """
+    |{
+    |  "meta": {
+    |    "pasientIdent": "21037712323",
+    |    "sykmelderHpr": "hprButFnrIsSuspended",
     |    "legekontorOrgnr": "123456789",
     |    "legekontorTlf": "12345678"
     |  },

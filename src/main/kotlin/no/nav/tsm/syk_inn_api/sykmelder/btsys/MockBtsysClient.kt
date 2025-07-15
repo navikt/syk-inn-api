@@ -11,6 +11,14 @@ class MockBtsysClient : IBtsysClient {
         sykmelderFnr: String,
         oppslagsdato: LocalDate
     ): Result<Suspendert> {
+        if (sykmelderFnr == "brokenFnr") {
+            return Result.failure(
+                IllegalStateException("MockBtsysClient: Simulated failure for brokenFnr")
+            )
+        }
+        if(sykmelderFnr == "suspendertFnr") {
+            return Result.success(Suspendert(suspendert = true))
+        }
         return Result.success(Suspendert(suspendert = false))
     }
 }
