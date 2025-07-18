@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -251,6 +252,8 @@ class SykmeldingServiceTest {
                             ),
                     ),
             )
+
+        verify(exactly = 1) { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) }
 
         result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
