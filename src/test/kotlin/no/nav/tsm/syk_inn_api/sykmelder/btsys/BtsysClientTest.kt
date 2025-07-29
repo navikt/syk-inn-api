@@ -8,10 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.junit5.StartStop
 import no.nav.tsm.syk_inn_api.security.TexasClient
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,7 +21,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @ExtendWith(MockKExtension::class)
 class BtsysClientTest {
 
-    private lateinit var mockWebServer: MockWebServer
+    @StartStop val mockWebServer: MockWebServer = MockWebServer()
+
     private lateinit var client: BtsysClient
 
     private val token = "mocked-token"
@@ -30,24 +31,13 @@ class BtsysClientTest {
 
     @BeforeEach
     fun setup() {
-        mockWebServer = MockWebServer()
-        mockWebServer.start()
-
-        val baseUrl = mockWebServer.url("/").toString()
-
         texasClient = mockk()
-
         client =
             BtsysClient(
                 webClientBuilder = WebClient.builder(),
-                btsysEndpointUrl = baseUrl,
+                btsysEndpointUrl = mockWebServer.url("/").toString(),
                 texasClient = texasClient,
             )
-    }
-
-    @AfterEach
-    fun teardown() {
-        mockWebServer.shutdown()
     }
 
     @Test
@@ -61,19 +51,22 @@ class BtsysClientTest {
             )
 
         val response =
-            MockResponse()
+            MockResponse.Builder()
                 .setHeader("Content-Type", "application/json")
-                .setBody("""{ "suspendert": false }""")
-                .setResponseCode(200)
+                .body("""{ "suspendert": false }""")
+                .code(200)
+                .build()
+
         mockWebServer.enqueue(response)
 
         val result = client.checkSuspensionStatus("12345678901", LocalDate.parse("2025-04-10"))
         val request = mockWebServer.takeRequest()
 
-        assertEquals("/api/v1/suspensjon/status?oppslagsdato=2025-04-10", request.path)
-        assertEquals("Bearer $token", request.getHeader("Authorization"))
-        assertEquals("syk-inn-api", request.getHeader("Nav-Consumer-Id"))
-        assertEquals("12345678901", request.getHeader("Nav-Personident"))
+        assertEquals("/api/v1/suspensjon/status", request.url.encodedPath)
+        assertEquals("oppslagsdato=2025-04-10", request.url.query)
+        assertEquals("Bearer $token", request.headers["Authorization"])
+        assertEquals("syk-inn-api", request.headers["Nav-Consumer-Id"])
+        assertEquals("12345678901", request.headers["Nav-Personident"])
 
         result.fold({ assertFalse(it.suspendert) }) {
             fail("Expected success but got failure: $it")
@@ -89,7 +82,7 @@ class BtsysClientTest {
                 token_type = "Bearer",
             )
 
-        val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
+        val response = MockResponse.Builder().code(401).body("Unauthorized").build()
 
         mockWebServer.enqueue(response)
 
@@ -108,9 +101,10 @@ class BtsysClientTest {
             )
 
         val response =
-            MockResponse()
-                .setResponseCode(400)
-                .setBody("Bad request: Missing or invalid Nav-Personident header")
+            MockResponse.Builder()
+                .code(400)
+                .body("Bad request: Missing or invalid Nav-Personident header")
+                .build()
 
         mockWebServer.enqueue(response)
 

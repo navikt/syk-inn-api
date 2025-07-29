@@ -17,6 +17,7 @@ val sykmeldingInputVersion = "13"
 val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.5"
+val mockwebserverVersion = "5.1.0"
 
 plugins {
     kotlin("jvm") version "2.2.0"
@@ -75,18 +76,18 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.kafka:spring-kafka-test")
-//    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:$mockwebserverVersion")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("io.mockk:mockk:${mockkVersion}")
+
 }
 
 kotlin {

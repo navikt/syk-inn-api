@@ -6,9 +6,10 @@ import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.junit5.StartStop
 import no.nav.tsm.syk_inn_api.security.TexasClient
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,26 +18,21 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @ExtendWith(MockKExtension::class)
 class PdlClientTest {
-    private lateinit var mockWebServer: MockWebServer
+
+    @StartStop val mockWebServer: MockWebServer = MockWebServer()
+
     private lateinit var client: PdlClient
+    private lateinit var texasClient: TexasClient
 
     private val token = "mocked-token"
 
-    private lateinit var texasClient: TexasClient
-
     @BeforeEach
     fun setup() {
-        mockWebServer = MockWebServer()
-        mockWebServer.start()
-
-        val baseUrl = mockWebServer.url("/").toString()
-
         texasClient = mockk()
-
         client =
             PdlClient(
                 webClientBuilder = WebClient.builder(),
-                pdlEndpointUrl = baseUrl,
+                pdlEndpointUrl = mockWebServer.url("/").toString(),
                 texasClient = texasClient,
             )
     }
@@ -65,7 +61,11 @@ class PdlClientTest {
                 .trimMargin()
 
         val response =
-            MockResponse().setHeader("Content-Type", "application/json").setBody(responseJson)
+            MockResponse.Builder()
+                .setHeader("Content-Type", "application/json")
+                .body(responseJson)
+                .build()
+
         mockWebServer.enqueue(response)
 
         val result = client.getPerson("01010078901")
@@ -84,7 +84,7 @@ class PdlClientTest {
             )
 
         val response =
-            MockResponse().setHeader("Content-Type", "application/json").setResponseCode(401)
+            MockResponse.Builder().setHeader("Content-Type", "application/json").code(401).build()
         mockWebServer.enqueue(response)
 
         val result = client.getPerson("01010078901")
@@ -102,7 +102,7 @@ class PdlClientTest {
             )
 
         val response =
-            MockResponse().setHeader("Content-Type", "application/json").setResponseCode(400)
+            MockResponse.Builder().setHeader("Content-Type", "application/json").code(400).build()
         mockWebServer.enqueue(response)
 
         val result = client.getPerson("")

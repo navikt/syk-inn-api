@@ -6,10 +6,10 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.junit5.StartStop
 import no.nav.tsm.syk_inn_api.security.TexasClient
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,7 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @ExtendWith(MockKExtension::class)
 class HelsenettProxyTest {
 
-    private lateinit var mockWebServer: MockWebServer
+    @StartStop val mockWebServer: MockWebServer = MockWebServer()
+
     private lateinit var client: HelsenettProxyClient
     private lateinit var texasClient: TexasClient
 
@@ -28,24 +29,13 @@ class HelsenettProxyTest {
 
     @BeforeEach
     fun setup() {
-        mockWebServer = MockWebServer()
-        mockWebServer.start()
-
-        val baseUrl = mockWebServer.url("/").toString()
-
         texasClient = mockk()
-
         client =
             HelsenettProxyClient(
                 webClientBuilder = WebClient.builder(),
-                baseUrl = baseUrl,
+                baseUrl = mockWebServer.url("/").toString(),
                 texasClient = texasClient
             )
-    }
-
-    @AfterEach
-    fun teardown() {
-        mockWebServer.shutdown()
     }
 
     @Test
@@ -56,19 +46,20 @@ class HelsenettProxyTest {
         val sykmelder = getSykmelderTestData()
 
         val response =
-            MockResponse()
+            MockResponse.Builder()
                 .setHeader("Content-Type", "application/json")
-                .setBody(objectMapper.writeValueAsString(sykmelder))
-                .setResponseCode(200)
+                .body(objectMapper.writeValueAsString(sykmelder))
+                .code(200)
+                .build()
         mockWebServer.enqueue(response)
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
         val request = mockWebServer.takeRequest()
-        assertEquals("/api/v2/behandlerMedHprNummer", request.path)
-        assertEquals("Bearer $token", request.getHeader("Authorization"))
-        assertEquals("application/json", request.getHeader("Content-Type"))
-        assertEquals("sykmeldingId", request.getHeader("Nav-CallId"))
-        assertEquals("123456", request.getHeader("hprNummer"))
+        assertEquals("/api/v2/behandlerMedHprNummer", request.url.encodedPath)
+        assertEquals("Bearer $token", request.headers["Authorization"])
+        assertEquals("application/json", request.headers["Content-Type"])
+        assertEquals("sykmeldingId", request.headers["Nav-CallId"])
+        assertEquals("123456", request.headers["hprNummer"])
 
         assertTrue(result.isSuccess)
     }
@@ -78,7 +69,7 @@ class HelsenettProxyTest {
         every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("invalid-token", expires_in = 1000, token_type = "Bearer")
 
-        val response = MockResponse().setResponseCode(401).setBody("Unauthorized")
+        val response = MockResponse.Builder().code(401).body("Unauthorized").build()
 
         mockWebServer.enqueue(response)
 
@@ -93,9 +84,10 @@ class HelsenettProxyTest {
             TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
         val response =
-            MockResponse()
-                .setResponseCode(400)
-                .setBody("Bad request: missing or invalid hprNummer header")
+            MockResponse.Builder()
+                .code(400)
+                .body("Bad request: missing or invalid hprNummer header")
+                .build()
 
         mockWebServer.enqueue(response)
 
