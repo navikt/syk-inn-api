@@ -11,12 +11,12 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
     }
 
     override fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder> {
-        if(behandlerHpr == "brokenHpr") {
+        if (behandlerHpr == "brokenHpr") {
             return Result.failure(
                 IllegalStateException("MockHelsenettProxyClient: Simulated failure for brokenHpr")
             )
         }
-        if(behandlerHpr == "hprButHasBrokenFnrAndNoGodkjenninger") {
+        if (behandlerHpr == "hprButHasBrokenFnrAndNoGodkjenninger") {
             return Result.success(
                 HprSykmelder(
                     godkjenninger = emptyList(),
@@ -28,7 +28,7 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
                 )
             )
         }
-        if(behandlerHpr == "hprButFnrIsSuspended") {
+        if (behandlerHpr == "hprButFnrIsSuspended") {
             return Result.success(
                 HprSykmelder(
                     godkjenninger = emptyList(),
@@ -60,7 +60,7 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
     }
 
     override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
-        if(behandlerFnr == "brokenFnr") {
+        if (behandlerFnr == "brokenFnr") {
             return Result.failure(
                 IllegalStateException("MockHelsenettProxyClient: Simulated failure for brokenFnr")
             )

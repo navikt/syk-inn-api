@@ -16,7 +16,7 @@ class MockBtsysClient : IBtsysClient {
                 IllegalStateException("MockBtsysClient: Simulated failure for brokenFnr")
             )
         }
-        if(sykmelderFnr == "suspendertFnr") {
+        if (sykmelderFnr == "suspendertFnr") {
             return Result.success(Suspendert(suspendert = true))
         }
         return Result.success(Suspendert(suspendert = false))

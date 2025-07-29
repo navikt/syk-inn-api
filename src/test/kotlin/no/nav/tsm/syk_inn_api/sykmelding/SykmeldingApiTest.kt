@@ -99,79 +99,82 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(0, allSykmeldinger.size)
     }
 
-
     @Test
     fun `Broken input data - should fail with 400 due to invalid DiagnoseSystem`() {
-        val response = restTemplate.postForEntity<String>(
-            "/api/sykmelding",
-            HttpEntity(
-                brokenExampleSykmeldingPayloadBadDiagnoseSystem,
-                HttpHeaders().apply {
-                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                },
-            ),
-        )
+        val response =
+            restTemplate.postForEntity<String>(
+                "/api/sykmelding",
+                HttpEntity(
+                    brokenExampleSykmeldingPayloadBadDiagnoseSystem,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
     }
 
-
     @Test
     fun `Broken input data - should fail with 400 due to unknown Aktivitet type`() {
-        val response = restTemplate.postForEntity<String>(
-            "/api/sykmelding",
-            HttpEntity(
-                brokenExampleSykmeldingPayloadUnknownAktivitet,
-                HttpHeaders().apply {
-                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                },
-            ),
-        )
+        val response =
+            restTemplate.postForEntity<String>(
+                "/api/sykmelding",
+                HttpEntity(
+                    brokenExampleSykmeldingPayloadUnknownAktivitet,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
     }
 
     @Test
     fun `Broken input data - should fail with 500 due to invalid sykmelderHpr`() {
-        val response = restTemplate.postForEntity<String>(
-            "/api/sykmelding",
-            HttpEntity(
-                brokenExampleSykmeldingPayloadInvalidSykmelderHpr,
-                HttpHeaders().apply {
-                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                },
-            ),
-        )
+        val response =
+            restTemplate.postForEntity<String>(
+                "/api/sykmelding",
+                HttpEntity(
+                    brokenExampleSykmeldingPayloadInvalidSykmelderHpr,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
     }
 
     @Test
     fun `Broken input data - should fail with 500 due to invalid sykmelderFnr`() {
-        val response = restTemplate.postForEntity<String>(
-            "/api/sykmelding",
-            HttpEntity(
-                brokenExampleSykmeldingPayloadValidHprButBrokenFnr,
-                HttpHeaders().apply {
-                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                },
-            ),
-        )
+        val response =
+            restTemplate.postForEntity<String>(
+                "/api/sykmelding",
+                HttpEntity(
+                    brokenExampleSykmeldingPayloadValidHprButBrokenFnr,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
     }
 
     @Test
     fun `Broken input data - rule hit - should fail with 422 due to sykmelder being suspended`() {
-        val response = restTemplate.postForEntity<String>(
-            "/api/sykmelding",
-            HttpEntity(
-                brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
-                HttpHeaders().apply {
-                    set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                },
-            ),
-        )
+        val response =
+            restTemplate.postForEntity<String>(
+                "/api/sykmelding",
+                HttpEntity(
+                    brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
     }
@@ -293,7 +296,6 @@ private val brokenExampleSykmeldingPayloadUnknownAktivitet =
     |}
 """
         .trimMargin()
-
 
 @Language("JSON")
 private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
