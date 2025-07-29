@@ -85,7 +85,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka:$testContainersVersion")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.1.0")
     testImplementation("io.mockk:mockk:${mockkVersion}")
 }
 
