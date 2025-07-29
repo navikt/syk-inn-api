@@ -50,14 +50,13 @@ class BtsysClientTest {
                 token_type = "Bearer",
             )
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder()
                 .setHeader("Content-Type", "application/json")
                 .body("""{ "suspendert": false }""")
                 .code(200)
-                .build()
-
-        mockWebServer.enqueue(response)
+                .build(),
+        )
 
         val result = client.checkSuspensionStatus("12345678901", LocalDate.parse("2025-04-10"))
         val request = mockWebServer.takeRequest()
@@ -82,9 +81,7 @@ class BtsysClientTest {
                 token_type = "Bearer",
             )
 
-        val response = MockResponse.Builder().code(401).body("Unauthorized").build()
-
-        mockWebServer.enqueue(response)
+        mockWebServer.enqueue(MockResponse.Builder().code(401).body("Unauthorized").build())
 
         val result = client.checkSuspensionStatus("12345678901", LocalDate.parse("2025-04-10"))
 
@@ -100,13 +97,12 @@ class BtsysClientTest {
                 token_type = "Bearer",
             )
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder()
                 .code(400)
                 .body("Bad request: Missing or invalid Nav-Personident header")
                 .build()
-
-        mockWebServer.enqueue(response)
+        )
 
         val result = client.checkSuspensionStatus("INVALID", LocalDate.parse("2025-04-10"))
 

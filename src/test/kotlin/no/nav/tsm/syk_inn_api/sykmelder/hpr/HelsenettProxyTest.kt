@@ -34,7 +34,7 @@ class HelsenettProxyTest {
             HelsenettProxyClient(
                 webClientBuilder = WebClient.builder(),
                 baseUrl = mockWebServer.url("/").toString(),
-                texasClient = texasClient
+                texasClient = texasClient,
             )
     }
 
@@ -45,13 +45,13 @@ class HelsenettProxyTest {
 
         val sykmelder = getSykmelderTestData()
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder()
                 .setHeader("Content-Type", "application/json")
                 .body(objectMapper.writeValueAsString(sykmelder))
                 .code(200)
-                .build()
-        mockWebServer.enqueue(response)
+                .build(),
+        )
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
         val request = mockWebServer.takeRequest()
@@ -69,9 +69,7 @@ class HelsenettProxyTest {
         every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("invalid-token", expires_in = 1000, token_type = "Bearer")
 
-        val response = MockResponse.Builder().code(401).body("Unauthorized").build()
-
-        mockWebServer.enqueue(response)
+        mockWebServer.enqueue(MockResponse.Builder().code(401).body("Unauthorized").build())
 
         val result = client.getSykmelderByHpr("123456", "sykmeldingId")
 
@@ -83,13 +81,12 @@ class HelsenettProxyTest {
         every { texasClient.requestToken("teamsykmelding", "syfohelsenettproxy") } returns
             TexasClient.TokenResponse("mocked-token", expires_in = 1000, token_type = "Bearer")
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder()
                 .code(400)
                 .body("Bad request: missing or invalid hprNummer header")
                 .build()
-
-        mockWebServer.enqueue(response)
+        )
 
         val result = client.getSykmelderByHpr("INVALID", "sykmeldingId")
 
@@ -103,14 +100,14 @@ class HelsenettProxyTest {
                     HprGodkjenning(
                         helsepersonellkategori = HprKode(aktiv = true, oid = 0, verdi = "LE"),
                         autorisasjon = HprKode(aktiv = true, oid = 7704, verdi = "1"),
-                        tillegskompetanse = null
-                    )
+                        tillegskompetanse = null,
+                    ),
                 ),
             fnr = "09099012345",
             hprNummer = "123456789",
             fornavn = "James",
             mellomnavn = "007",
-            etternavn = "Bond"
+            etternavn = "Bond",
         )
     }
 }

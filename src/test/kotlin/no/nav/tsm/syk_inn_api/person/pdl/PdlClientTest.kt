@@ -60,13 +60,12 @@ class PdlClientTest {
                 |}"""
                 .trimMargin()
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder()
                 .setHeader("Content-Type", "application/json")
                 .body(responseJson)
                 .build()
-
-        mockWebServer.enqueue(response)
+        )
 
         val result = client.getPerson("01010078901")
 
@@ -83,9 +82,9 @@ class PdlClientTest {
                 token_type = "Bearer",
             )
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder().setHeader("Content-Type", "application/json").code(401).build()
-        mockWebServer.enqueue(response)
+        )
 
         val result = client.getPerson("01010078901")
 
@@ -101,9 +100,9 @@ class PdlClientTest {
                 token_type = "Bearer",
             )
 
-        val response =
+        mockWebServer.enqueue(
             MockResponse.Builder().setHeader("Content-Type", "application/json").code(400).build()
-        mockWebServer.enqueue(response)
+        )
 
         val result = client.getPerson("")
 
