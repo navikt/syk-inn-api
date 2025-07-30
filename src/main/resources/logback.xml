@@ -9,7 +9,7 @@
     </logger>
 
     <!-- Stuff we wanna squelch, use sparingly -->
-    <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR" />
+    <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR"/>
 
     <!-- local profile -->
     <springProfile name="local">
@@ -51,6 +51,8 @@
         <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeMdcKeyName>x_request_id</includeMdcKeyName>
+                <includeMdcKeyName>trace_id</includeMdcKeyName>
+                <includeMdcKeyName>span_id</includeMdcKeyName>
             </encoder>
         </appender>
 
