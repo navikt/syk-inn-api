@@ -9,7 +9,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.i
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.utils.PoisonPills
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -30,7 +30,7 @@ class SykmeldingConsumer(
     @param:Value($$"${nais.cluster}") private val clusterName: String,
 ) {
     private val logger = logger()
-    private val secureLog = secureLogger()
+    private val teamLogger = teamLogger()
 
     @KafkaListener(
         topics = ["\${kafka.topics.sykmeldinger}"],
@@ -47,7 +47,7 @@ class SykmeldingConsumer(
 
         val value: ByteArray? = record.value()
 
-        secureLog.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
+        teamLogger.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
 
         if (value == null) {
             handleTombstone(sykmeldingId)
@@ -123,7 +123,7 @@ class SykmeldingConsumer(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record",
                 e,
             )
-            secureLog.error(
+            teamLogger.error(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record, data: $value",
                 e,
             )

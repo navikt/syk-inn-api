@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -23,7 +23,7 @@ class HelsenettProxyClient(
     @param:Value($$"${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
 ) : IHelsenettProxyClient {
     private val logger = logger()
-    private val secureLog = secureLogger()
+    private val teamLogger = teamLogger()
 
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
 
@@ -62,12 +62,12 @@ class HelsenettProxyClient(
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
                 logger.warn(msg)
-                secureLog.warn("$msg and hpr=$behandlerHpr")
+                teamLogger.warn("$msg and hpr=$behandlerHpr")
                 Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
-            secureLog.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
+            teamLogger.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
             Result.failure(e)
         }
     }
@@ -75,7 +75,7 @@ class HelsenettProxyClient(
     override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
-        secureLog.info(
+        teamLogger.info(
             "Getting sykmelder for fnr=$behandlerFnr, sykmeldingId=$callId",
         )
 
@@ -103,12 +103,12 @@ class HelsenettProxyClient(
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
                 logger.warn(msg)
-                secureLog.warn("$msg and hpr=$behandlerFnr")
+                teamLogger.warn("$msg and hpr=$behandlerFnr")
                 Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
-            secureLog.error("Exception with hpr=$behandlerFnr for sykmeldingId=$callId", e)
+            teamLogger.error("Exception with hpr=$behandlerFnr for sykmeldingId=$callId", e)
             Result.failure(e)
         }
     }

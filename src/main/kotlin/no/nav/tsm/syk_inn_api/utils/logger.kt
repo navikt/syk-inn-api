@@ -5,5 +5,5 @@ import org.slf4j.LoggerFactory
 
 inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
-inline fun <reified T> T.secureLogger(): Logger =
-    LoggerFactory.getLogger("securelog.${T::class.java.name}")
+inline fun <reified T> T.teamLogger(): Logger =
+    LoggerFactory.getLogger("teamlog.${T::class.java.name}")

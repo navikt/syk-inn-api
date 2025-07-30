@@ -68,28 +68,22 @@ spec:
         - application: syk-inn
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: syfohelsenettproxy
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: syfosmregler
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: syfosmregister
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: smpdfgen
           namespace: teamsykmelding
-          cluster: dev-gcp
         - application: tsm-pdl-cache
           namespace: tsm
-          cluster: dev-gcp
         - application: btsys-api
           namespace: team-rocket
-          cluster: dev-gcp
   ingresses:
     - "https://syk-inn-api.intern.dev.nav.no"
-  secureLogs:
-    enabled: true
   env:
     - name: SYFOHELSENETTPROXY_SCOPE
       value: api://dev-gcp.teamsykmelding.syfohelsenettproxy/.default
@@ -109,4 +103,3 @@ spec:
       value: http://btsys-api.team-rocket
     - name: SYFOHELSENETTPROXY_URL
       value: http://syfohelsenettproxy.teamsykmelding
-

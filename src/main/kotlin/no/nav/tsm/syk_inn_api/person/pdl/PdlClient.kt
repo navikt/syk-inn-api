@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.person.pdl
 
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -24,7 +24,7 @@ class PdlClient(
 ) : IPdlClient {
     private val webClient = webClientBuilder.baseUrl(pdlEndpointUrl).build()
     private val logger = logger()
-    private val secureLog = secureLogger()
+    private val teamLogger = teamLogger()
 
     override fun getPerson(fnr: String): Result<PdlPerson> {
         val (accessToken) = getToken()
@@ -49,7 +49,7 @@ class PdlClient(
                                         "PDL responded with status: ${response.statusCode()} and body: $body",
                                     )
 
-                                secureLog.error(
+                                teamLogger.error(
                                     "Error while fetching person with fnr $fnr from PDL cache",
                                     ex,
                                 )
@@ -65,7 +65,7 @@ class PdlClient(
                 Result.failure(IllegalStateException("Pdl cache did not return a person"))
             }
         } catch (e: HttpClientErrorException.NotFound) {
-            secureLog.warn("Person with fnr $fnr not found in PDL cache", e)
+            teamLogger.warn("Person with fnr $fnr not found in PDL cache", e)
             logger.warn("PDL person not found in PDL cache", e)
             throw IllegalStateException("Could not find person in pdl cache")
         } catch (e: Exception) {

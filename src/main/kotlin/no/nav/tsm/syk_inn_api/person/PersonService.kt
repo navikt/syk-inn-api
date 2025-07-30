@@ -4,7 +4,7 @@ import no.nav.tsm.syk_inn_api.person.pdl.IDENT_GRUPPE
 import no.nav.tsm.syk_inn_api.person.pdl.IPdlClient
 import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,12 +12,12 @@ class PersonService(
     private val pdlClient: IPdlClient,
 ) {
     private val logger = logger()
-    private val secureLog = secureLogger()
+    private val teamLog = teamLogger()
 
     fun getPersonByIdent(ident: String): Result<Person> {
         val person: PdlPerson =
             pdlClient.getPerson(ident).fold({ it }) {
-                secureLog.error("Error while fetching person info for fnr=$ident", it)
+                teamLog.error("Error while fetching person info for fnr=$ident", it)
                 logger.error("Error while fetching person info from PDL, check secure logs")
                 return Result.failure(it)
             }

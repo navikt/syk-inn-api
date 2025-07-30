@@ -3,7 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelding
 import java.util.*
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,11 +20,11 @@ class SykmeldingController(
     private val sykmeldingService: SykmeldingService,
 ) {
     private val logger = logger()
-    private val securelog = secureLogger()
+    private val teamLogger = teamLogger()
 
     @PostMapping
     fun createSykmelding(@RequestBody payload: OpprettSykmeldingPayload): ResponseEntity<Any> {
-        securelog.info("Received request to create sykmelding with payload: $payload")
+        teamLogger.info("Received request to create sykmelding with payload: $payload")
         if (payload.meta.pasientIdent.isBlank() || payload.meta.sykmelderHpr.isBlank()) {
             return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
         }

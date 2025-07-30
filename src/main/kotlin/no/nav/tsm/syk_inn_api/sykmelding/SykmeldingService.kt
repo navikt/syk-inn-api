@@ -17,7 +17,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceServic
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.syk_inn_api.utils.secureLogger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,7 +30,7 @@ class SykmeldingService(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = logger()
-    private val securelog = secureLogger()
+    private val teamLogger = teamLogger()
 
     sealed class SykmeldingCreationErrors {
         data class RuleValidation(val result: RegulaResult.NotOk) : SykmeldingCreationErrors()
@@ -120,7 +120,7 @@ class SykmeldingService(
         // TODO: Faktisk implementer hpr-tilgangsstyring
         hpr: String
     ): Result<List<SykmeldingDocument>> {
-        securelog.info("Henter sykmeldinger for ident=$ident")
+        teamLogger.info("Henter sykmeldinger for ident=$ident")
 
         val sykmeldinger: List<SykmeldingDocument> =
             sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
