@@ -41,6 +41,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -172,7 +173,7 @@ class SykmeldingServiceTest {
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(
-                        result = "OK",
+                        result = RuleType.OK,
                         melding = null,
                     ),
             )

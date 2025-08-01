@@ -48,7 +48,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
                 HttpEntity<Void>(
                     HttpHeaders().apply {
                         set("Ident", "21037712323")
-                        set("HPR", "123456789")
+                        set("HPR", "9144889")
                     },
                 ),
             )

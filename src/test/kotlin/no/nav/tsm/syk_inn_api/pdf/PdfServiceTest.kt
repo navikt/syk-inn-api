@@ -30,6 +30,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -134,12 +135,12 @@ class PdfServiceTest {
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(
-                        result = "OK",
+                        result = RuleType.OK,
                         melding = null,
                     ),
             )
 
-        every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid, "123456789") } returns
+        every { sykmeldingServiceMock.getSykmeldingById(testSykmeldingUuid) } returns
             simpleSykmelding
 
         val pdf = pdfService.createSykmeldingPdf(testSykmeldingUuid, "123456789").getOrThrow()
