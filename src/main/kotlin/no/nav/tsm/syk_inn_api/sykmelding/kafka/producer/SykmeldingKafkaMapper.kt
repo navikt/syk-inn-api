@@ -10,16 +10,16 @@ import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper.findTextFromDiagnoseSyst
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.parseHelsepersonellKategori
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingArbeidsgiver
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMetadata
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsgiver
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
@@ -100,11 +100,16 @@ object SykmeldingKafkaMapper {
         regulaResult.outcome.status == RegulaOutcomeStatus.MANUAL_PROCESSING &&
             regulaResult.outcome.tree == "Tilbakedatering"
 
-    fun mapMessageMetadata(meta: OpprettSykmeldingMetadata): MessageMetadata =
-        Digital(orgnummer = meta.legekontorOrgnr)
+    fun mapMessageMetadata(meta: SykmeldingDocumentMeta): MessageMetadata =
+        Digital(
+            orgnummer = meta.legekontorOrgnr
+                    ?: throw IllegalStateException(
+                        "Unable to create sykmelding without legekontorOrgnr"
+                    )
+        )
 
     fun mapToDigitalSykmelding(
-        sykmelding: OpprettSykmeldingPayload,
+        sykmelding: SykmeldingDocument,
         sykmeldingId: String,
         person: Person,
         sykmelder: Sykmelder
@@ -156,12 +161,14 @@ object SykmeldingKafkaMapper {
                         ),
                     ids = mapPersonIdsForSykmelder(sykmelder),
                     kontaktinfo =
-                        listOf(
-                            Kontaktinfo(
-                                type = KontaktinfoType.TLF,
-                                value = sykmelding.meta.legekontorTlf,
-                            ),
-                        ),
+                        if (sykmelding.meta.legekontorTlf != null)
+                            listOf(
+                                Kontaktinfo(
+                                    type = KontaktinfoType.TLF,
+                                    value = sykmelding.meta.legekontorTlf,
+                                ),
+                            )
+                        else emptyList(),
                     adresse = null,
                 ),
             sykmelder =
@@ -180,12 +187,12 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    private fun mapBistandNav(meldinger: OpprettSykmeldingMeldinger): BistandNav? {
+    private fun mapBistandNav(meldinger: SykmeldingDocumentMeldinger): BistandNav? {
         return BistandNav(bistandUmiddelbart = false, beskrivBistand = meldinger.tilNav)
     }
 
     private fun mapTilbakedatering(
-        tilbakedatering: OpprettSykmeldingTilbakedatering?
+        tilbakedatering: SykmeldingDocumentTilbakedatering?
     ): Tilbakedatering? {
         if (tilbakedatering == null) return null
 
@@ -196,8 +203,8 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapArbeidsgiver(
-        arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
-        meldinger: OpprettSykmeldingMeldinger
+        arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
+        meldinger: SykmeldingDocumentMeldinger
     ): ArbeidsgiverInfo {
         if (arbeidsgiver == null) {
             return EnArbeidsgiver(
@@ -235,7 +242,7 @@ object SykmeldingKafkaMapper {
     }
 
     fun mapMedisinskVurdering(
-        sykmeldingValues: OpprettSykmelding,
+        sykmeldingValues: SykmeldingDocumentValues,
     ): MedisinskVurdering {
         return MedisinskVurdering(
             hovedDiagnose = mapHoveddiagnose(sykmeldingValues.hoveddiagnose),
@@ -248,9 +255,9 @@ object SykmeldingKafkaMapper {
         )
     }
 
-    fun toRecordAktivitet(aktivitet: OpprettSykmeldingAktivitet): Aktivitet {
+    fun toRecordAktivitet(aktivitet: SykmeldingDocumentAktivitet): Aktivitet {
         return when (aktivitet) {
-            is OpprettSykmeldingAktivitet.Gradert -> {
+            is SykmeldingDocumentAktivitet.Gradert -> {
                 Gradert(
                     grad = aktivitet.grad,
                     fom = aktivitet.fom,
@@ -258,7 +265,7 @@ object SykmeldingKafkaMapper {
                     reisetilskudd = aktivitet.reisetilskudd,
                 )
             }
-            is OpprettSykmeldingAktivitet.IkkeMulig -> {
+            is SykmeldingDocumentAktivitet.IkkeMulig -> {
                 AktivitetIkkeMulig(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
@@ -288,21 +295,21 @@ object SykmeldingKafkaMapper {
                         else null,
                 )
             }
-            is OpprettSykmeldingAktivitet.Avventende -> {
+            is SykmeldingDocumentAktivitet.Avventende -> {
                 Avventende(
                     innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
                 )
             }
-            is OpprettSykmeldingAktivitet.Behandlingsdager -> {
+            is SykmeldingDocumentAktivitet.Behandlingsdager -> {
                 Behandlingsdager(
                     antallBehandlingsdager = aktivitet.antallBehandlingsdager,
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
                 )
             }
-            is OpprettSykmeldingAktivitet.Reisetilskudd -> {
+            is SykmeldingDocumentAktivitet.Reisetilskudd -> {
                 Reisetilskudd(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
@@ -312,7 +319,9 @@ object SykmeldingKafkaMapper {
     }
 }
 
-fun mapHoveddiagnose(hoveddiagnose: OpprettSykmeldingDiagnoseInfo): DiagnoseInfo? {
+fun mapHoveddiagnose(hoveddiagnose: SykmeldingDocumentDiagnoseInfo?): DiagnoseInfo? {
+    if (hoveddiagnose == null) return null
+
     return DiagnoseInfo(
         system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
         kode = hoveddiagnose.code,
@@ -329,7 +338,7 @@ private fun DiagnoseSystem.toKafkaDiagnoseSystem():
     }
 }
 
-private fun OpprettSykmeldingYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkesskade? {
+private fun SykmeldingDocumentYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkesskade? {
     if (this == null) return null
 
     if (!this.yrkesskade) {
@@ -339,7 +348,7 @@ private fun OpprettSykmeldingYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkessk
     return Yrkesskade(yrkesskadeDato = this.skadedato)
 }
 
-private fun List<OpprettSykmeldingDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
+private fun List<SykmeldingDocumentDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
     List<DiagnoseInfo>? {
     if (this.isEmpty()) {
         return null

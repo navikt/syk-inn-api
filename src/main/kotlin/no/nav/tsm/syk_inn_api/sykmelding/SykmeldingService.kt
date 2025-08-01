@@ -100,7 +100,7 @@ class SykmeldingService(
 
         sykmeldingInputProducer.send(
             sykmeldingId = sykmeldingId,
-            sykmelding = payload,
+            sykmelding = sykmeldingDocument,
             person = person,
             sykmelder = sykmelder,
             validationResult = validation,
