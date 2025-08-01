@@ -5,10 +5,10 @@ import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMapper
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
+import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentSykmelder
+import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
@@ -93,20 +93,11 @@ class SykmeldingPersistenceService(
                 SykmeldingDocumentMeta(
                     mottatt = dbObject.mottatt,
                     pasientIdent = persistedSykmelding.pasient.ident,
-                    sykmelder =
-                        SykmeldingDocumentSykmelder(
-                            hprNummer = persistedSykmelding.sykmelder.hprNummer,
-                            fornavn = persistedSykmelding.sykmelder.fornavn,
-                            mellomnavn = persistedSykmelding.sykmelder.mellomnavn,
-                            etternavn = persistedSykmelding.sykmelder.etternavn,
-                        ),
+                    sykmelder = persistedSykmelding.sykmelder.toSykmeldingDocumentSykmelder(),
                     legekontorOrgnr = dbObject.legekontorOrgnr,
                     legekontorTlf = dbObject.legekontorTlf,
                 ),
-            values =
-                SykmeldingDocumentMapper.mapPersistedSykmeldingToSykmeldingDokument(
-                    persistedSykmelding,
-                ),
+            values = persistedSykmelding.toSykmeldingDocumentValues(),
             utfall =
                 persistedSykmelding.regelResultat.let {
                     SykmeldingDocumentRuleResult(
