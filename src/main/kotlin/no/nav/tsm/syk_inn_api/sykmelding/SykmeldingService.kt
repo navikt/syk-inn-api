@@ -109,17 +109,10 @@ class SykmeldingService(
         return sykmeldingDocument.right()
     }
 
-    fun getSykmeldingById(
-        sykmeldingId: UUID,
-        // TODO: Faktisk implementer hpr-tilgangsstyring
-        hpr: String
-    ): SykmeldingDocument? = sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
+    fun getSykmeldingById(sykmeldingId: UUID): SykmeldingDocument? =
+        sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
-    fun getSykmeldingerByIdent(
-        ident: String,
-        // TODO: Faktisk implementer hpr-tilgangsstyring
-        hpr: String
-    ): Result<List<SykmeldingDocument>> {
+    fun getSykmeldingerByIdent(ident: String): Result<List<SykmeldingDocument>> {
         teamLogger.info("Henter sykmeldinger for ident=$ident")
 
         val sykmeldinger: List<SykmeldingDocument> =

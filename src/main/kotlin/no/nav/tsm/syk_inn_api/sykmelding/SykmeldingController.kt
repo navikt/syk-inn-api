@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
+import no.nav.tsm.syk_inn_api.sykmelding.response.toLightSykmelding
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.http.HttpStatus
@@ -46,13 +47,25 @@ class SykmeldingController(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<Any> {
-        val sykmelding = sykmeldingService.getSykmeldingById(sykmeldingId, hpr)
+        val sykmelding = sykmeldingService.getSykmeldingById(sykmeldingId)
+        if (sykmelding == null) return ResponseEntity.notFound().build()
 
-        return if (sykmelding == null) {
-            ResponseEntity.notFound().build()
-        } else {
-            ResponseEntity.ok(sykmelding)
+        if (sykmelding.meta.sykmelder.hprNummer == hpr) {
+            return ResponseEntity.ok(sykmelding)
         }
+
+        val lightSykmelding = sykmelding.toLightSykmelding()
+        if (lightSykmelding == null) {
+            logger.info(
+                "Sykmelding was found, but when reduced was not available to HPR $hpr, returning 404"
+            )
+            return ResponseEntity.notFound().build()
+        }
+
+        logger.info(
+            "Sykmelding with ID: $sykmeldingId is not owned by HPR: $hpr, returning light version",
+        )
+        return ResponseEntity.ok(lightSykmelding)
     }
 
     @GetMapping
@@ -60,8 +73,18 @@ class SykmeldingController(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<Any> =
-        sykmeldingService.getSykmeldingerByIdent(ident, hpr).fold(
-            { ResponseEntity.ok(it) },
+        sykmeldingService.getSykmeldingerByIdent(ident).fold(
+            { sykmeldingList ->
+                ResponseEntity.ok(
+                    sykmeldingList.mapNotNull { sykmelding ->
+                        if (sykmelding.meta.sykmelder.hprNummer != hpr) {
+                            sykmelding.toLightSykmelding()
+                        } else {
+                            sykmelding
+                        }
+                    },
+                )
+            },
         ) {
             ResponseEntity.internalServerError().build()
         }
