@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 data class PersistedSykmelding(
     val sykmeldingId: String,
@@ -25,7 +26,7 @@ data class PersistedSykmelding(
 )
 
 data class PersistedSykmeldingRuleResult(
-    val result: String,
+    val result: RuleType,
     val meldingTilSender: String?,
 )
 

@@ -6,6 +6,7 @@ import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.Navn
 import no.nav.tsm.syk_inn_api.test.IntegrationTest
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -88,7 +89,7 @@ class SykmeldingRepositoryTest : IntegrationTest() {
                             tilbakedatering = null,
                             regelResultat =
                                 PersistedSykmeldingRuleResult(
-                                    result = "OK",
+                                    result = RuleType.OK,
                                     meldingTilSender = null,
                                 ),
                         )
