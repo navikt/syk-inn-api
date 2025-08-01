@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 /**
  * The primary data class for exposing to syk-inn through APIs. Also used for other functional
@@ -101,7 +102,7 @@ data class SykmeldingDocumentDiagnoseInfo(
 )
 
 data class SykmeldingDocumentRuleResult(
-    val result: String,
+    val result: RuleType,
     val melding: String?,
 )
 

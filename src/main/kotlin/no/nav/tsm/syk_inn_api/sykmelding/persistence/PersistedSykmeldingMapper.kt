@@ -491,7 +491,7 @@ object PersistedSykmeldingMapper {
                 else -> null
             }
         return PersistedSykmeldingRuleResult(
-            result = status.name,
+            result = status,
             meldingTilSender = meldingTilSender,
         )
     }

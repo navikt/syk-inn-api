@@ -13,7 +13,13 @@ class PdfService(
 ) {
     fun createSykmeldingPdf(sykmeldingId: UUID, hpr: String): Result<ByteArray?> {
         val sykmelding =
-            sykmeldingService.getSykmeldingById(sykmeldingId, hpr) ?: return Result.success(null)
+            sykmeldingService.getSykmeldingById(sykmeldingId) ?: return Result.success(null)
+
+        if (sykmelding.meta.sykmelder.hprNummer != hpr) {
+            return Result.failure(
+                IllegalStateException("Sykmelding $sykmeldingId not belong to hpr=$hpr")
+            )
+        }
 
         return personService
             .getPersonByIdent(sykmelding.meta.pasientIdent)

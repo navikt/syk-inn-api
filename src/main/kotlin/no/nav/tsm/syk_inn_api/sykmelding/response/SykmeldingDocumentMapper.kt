@@ -8,6 +8,37 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinge
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
+import no.nav.tsm.sykmelding.input.core.model.RuleType
+
+fun SykmeldingDocument.toLightSykmelding(): SykmeldingDocumentLight? {
+    if (this.utfall.result != RuleType.OK) return null
+
+    return SykmeldingDocumentLight(
+        sykmeldingId = this.sykmeldingId,
+        meta = this.meta,
+        values =
+            SykmeldingDocumentLightValues(
+                aktivitet =
+                    this.values.aktivitet.map { aktivitet ->
+                        SykmeldingDocumentLightAktivitet(
+                            fom = aktivitet.fom,
+                            tom = aktivitet.tom,
+                            type =
+                                when (aktivitet) {
+                                    is SykmeldingDocumentAktivitet.IkkeMulig ->
+                                        "AKTIVITET_IKKE_MULIG"
+                                    is SykmeldingDocumentAktivitet.Gradert -> "GRADERT"
+                                    is SykmeldingDocumentAktivitet.Behandlingsdager ->
+                                        "BEHANDLINGSDAGER"
+                                    is SykmeldingDocumentAktivitet.Avventende -> "AVVENTENDE"
+                                    is SykmeldingDocumentAktivitet.Reisetilskudd -> "REISETILSKUDD"
+                                },
+                        )
+                    },
+            ),
+        utfall = this.utfall,
+    )
+}
 
 fun PersistedSykmeldingSykmelder.toSykmeldingDocumentSykmelder(): SykmeldingDocumentSykmelder {
     return SykmeldingDocumentSykmelder(
