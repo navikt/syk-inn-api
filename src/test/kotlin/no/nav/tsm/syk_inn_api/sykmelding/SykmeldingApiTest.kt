@@ -1,9 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
-import java.time.LocalDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentLight
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
@@ -13,7 +9,15 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.boot.test.web.client.postForEntity
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import java.time.LocalDate
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
