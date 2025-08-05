@@ -8,11 +8,8 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinge
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
-import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-fun SykmeldingDocument.toLightSykmelding(): SykmeldingDocumentLight? {
-    if (this.utfall.result != RuleType.OK) return null
-
+fun SykmeldingDocument.toLightSykmelding(): SykmeldingDocumentLight {
     return SykmeldingDocumentLight(
         sykmeldingId = this.sykmeldingId,
         meta = this.meta,

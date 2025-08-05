@@ -16,7 +16,7 @@ data class SykmeldingDocument(
     val meta: SykmeldingDocumentMeta,
     val values: SykmeldingDocumentValues,
     val utfall: SykmeldingDocumentRuleResult,
-)
+) : SykmeldingResponse
 
 data class SykmeldingDocumentMeta(
     val mottatt: OffsetDateTime,

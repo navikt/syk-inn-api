@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
-import no.nav.tsm.syk_inn_api.sykmelding.response.toLightSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.http.HttpStatus
@@ -46,44 +46,27 @@ class SykmeldingController(
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<SykmeldingResponse> {
         val sykmelding = sykmeldingService.getSykmeldingById(sykmeldingId)
         if (sykmelding == null) return ResponseEntity.notFound().build()
 
-        if (sykmelding.meta.sykmelder.hprNummer == hpr) {
-            return ResponseEntity.ok(sykmelding)
-        }
+        val sykmeldingAccessControlled = sykmeldingAccessControl(hpr, sykmelding)
+        if (sykmeldingAccessControlled == null) return ResponseEntity.notFound().build()
 
-        val lightSykmelding = sykmelding.toLightSykmelding()
-        if (lightSykmelding == null) {
-            logger.info(
-                "Sykmelding was found, but when reduced was not available to HPR $hpr, returning 404"
-            )
-            return ResponseEntity.notFound().build()
-        }
-
-        logger.info(
-            "Sykmelding with ID: $sykmeldingId is not owned by HPR: $hpr, returning light version",
-        )
-        return ResponseEntity.ok(lightSykmelding)
+        return ResponseEntity.ok(sykmeldingAccessControlled)
     }
 
     @GetMapping
     fun getSykmeldingerByUserIdent(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("HPR") hpr: String,
-    ): ResponseEntity<Any> =
+    ): ResponseEntity<List<SykmeldingResponse>> =
         sykmeldingService.getSykmeldingerByIdent(ident).fold(
             { sykmeldingList ->
-                ResponseEntity.ok(
-                    sykmeldingList.mapNotNull { sykmelding ->
-                        if (sykmelding.meta.sykmelder.hprNummer != hpr) {
-                            sykmelding.toLightSykmelding()
-                        } else {
-                            sykmelding
-                        }
-                    },
-                )
+                val accessControlledList: List<SykmeldingResponse> =
+                    sykmeldingList.mapNotNull { sykmeldingAccessControl(hpr, it) }
+
+                ResponseEntity.ok(accessControlledList)
             },
         ) {
             ResponseEntity.internalServerError().build()
