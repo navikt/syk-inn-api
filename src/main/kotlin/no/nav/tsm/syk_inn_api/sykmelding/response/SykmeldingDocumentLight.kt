@@ -7,7 +7,7 @@ data class SykmeldingDocumentLight(
     val meta: SykmeldingDocumentMeta,
     val values: SykmeldingDocumentLightValues,
     val utfall: SykmeldingDocumentRuleResult,
-)
+) : SykmeldingResponse
 
 data class SykmeldingDocumentLightValues(
     val aktivitet: List<SykmeldingDocumentLightAktivitet>,

@@ -3,7 +3,9 @@ package no.nav.tsm.syk_inn_api.sykmelding
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentLight
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,6 +59,77 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 
         val allSykmeldinger = requireNotNull(allResponse.body)
         assertEquals(1, allSykmeldinger.size)
+    }
+
+    @Test
+    fun `fetching list of sykmeldinger not written by you should return 'Light' version`() {
+        val response =
+            restTemplate.postForEntity<SykmeldingDocument>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload.replace("9144889", "someone-else"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        val created = requireNotNull(response.body)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
+
+        val allResponse =
+            restTemplate.exchange<List<SykmeldingDocumentLight>>(
+                "/api/sykmelding",
+                HttpMethod.GET,
+                HttpEntity<Void>(
+                    HttpHeaders().apply {
+                        set("Ident", "21037712323")
+                        set("HPR", "9144889")
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.OK, allResponse.statusCode)
+
+        val allSykmeldinger = requireNotNull(allResponse.body)
+        assertEquals(1, allSykmeldinger.size)
+
+        val first = allSykmeldinger.first()
+        assertIs<SykmeldingDocumentLight>(first)
+    }
+
+    @Test
+    fun `fetching single sykmelding not written by you should return 'Light' version`() {
+        val response =
+            restTemplate.postForEntity<SykmeldingDocument>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload.replace("9144889", "someone-else"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        val created = requireNotNull(response.body)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
+
+        val specificSykmeldingResponse =
+            restTemplate.exchange<SykmeldingDocumentLight>(
+                "/api/sykmelding/${created.sykmeldingId}",
+                HttpMethod.GET,
+                HttpEntity<Void>(
+                    HttpHeaders().apply {
+                        set("Ident", "21037712323")
+                        set("HPR", "9144889")
+                    },
+                ),
+            )
+
+        val specificSykmelding = requireNotNull(specificSykmeldingResponse.body)
+        assertIs<SykmeldingDocumentLight>(specificSykmelding)
     }
 
     @Test
