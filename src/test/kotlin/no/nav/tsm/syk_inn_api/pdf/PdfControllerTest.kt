@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(PdfController::class)
-class PdfControllerSimpleTest {
+class PdfControllerTest {
 
     @Autowired private lateinit var mockMvc: MockMvc
 
