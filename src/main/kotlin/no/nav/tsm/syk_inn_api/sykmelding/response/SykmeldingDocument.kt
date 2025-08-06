@@ -7,6 +7,9 @@ import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
+/** This sealed interface allows both "Full" and "Redacted" versions of the sykmelding response. */
+sealed interface SykmeldingResponse
+
 /**
  * The primary data class for exposing to syk-inn through APIs. Also used for other functional
  * features within syk-inn-api, such as PDF generation.
