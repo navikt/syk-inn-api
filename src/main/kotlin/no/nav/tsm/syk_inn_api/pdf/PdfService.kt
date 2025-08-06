@@ -17,7 +17,9 @@ class PdfService(
 
         if (sykmelding.meta.sykmelder.hprNummer != hpr) {
             return Result.failure(
-                IllegalStateException("Sykmelding $sykmeldingId not belong to hpr=$hpr")
+                IllegalStateException(
+                    "Sykmelding $sykmeldingId does not belong to HPR-number $hpr"
+                ),
             )
         }
 

@@ -2,9 +2,10 @@ package no.nav.tsm.syk_inn_api.sykmelding
 
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
-import no.nav.tsm.syk_inn_api.sykmelding.response.toLightSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.response.toRedactedSykmelding
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
+/** Any sykmelding returned to user should always be access controlled through this */
 fun sykmeldingAccessControl(
     hpr: String,
     sykmelding: SykmeldingDocument,
@@ -15,11 +16,11 @@ fun sykmeldingAccessControl(
     }
 
     /**
-     * "Light" sykmelding should only ever be OK, other behandlere are unable to see invalid
+     * "Redacted" sykmelding should only ever be OK, other behandlere are unable to see invalid
      * sykmeldinger.
      */
     if (sykmelding.utfall.result != RuleType.OK) return null
 
-    /** Any other scenario, you only see a "Light" version. */
-    return sykmelding.toLightSykmelding()
+    /** Any other scenario, you only see a "Redacted" version. */
+    return sykmelding.toRedactedSykmelding()
 }

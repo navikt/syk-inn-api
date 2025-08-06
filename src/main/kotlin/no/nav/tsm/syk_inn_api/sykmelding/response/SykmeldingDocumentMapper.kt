@@ -9,15 +9,15 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelde
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 
-fun SykmeldingDocument.toLightSykmelding(): SykmeldingDocumentLight {
-    return SykmeldingDocumentLight(
+fun SykmeldingDocument.toRedactedSykmelding(): SykmeldingDocumentRedacted {
+    return SykmeldingDocumentRedacted(
         sykmeldingId = this.sykmeldingId,
         meta = this.meta,
         values =
-            SykmeldingDocumentLightValues(
+            SykmeldingDocumentRedactedValues(
                 aktivitet =
                     this.values.aktivitet.map { aktivitet ->
-                        SykmeldingDocumentLightAktivitet(
+                        SykmeldingDocumentRedactedAktivitet(
                             fom = aktivitet.fom,
                             tom = aktivitet.tom,
                             type =

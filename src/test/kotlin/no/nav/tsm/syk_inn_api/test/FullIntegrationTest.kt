@@ -11,23 +11,22 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
 
-
 @Testcontainers
 abstract class FullIntegrationTest {
 
-    @Autowired
-    lateinit var jdbcTemplate: JdbcTemplate
+    @Autowired lateinit var jdbcTemplate: JdbcTemplate
 
     @BeforeEach
     fun cleanDatabase() {
-        val tables = jdbcTemplate.queryForList(
-            "SELECT tablename FROM pg_tables WHERE schemaname='public'",
-            String::class.java
-        )
+        val tables =
+            jdbcTemplate.queryForList(
+                "SELECT tablename FROM pg_tables WHERE schemaname='public'",
+                String::class.java
+            )
 
         jdbcTemplate.execute("SET session_replication_role = 'replica';")
         tables.forEach { table ->
-            jdbcTemplate.execute("TRUNCATE TABLE \"$table\" RESTART IDENTITY CASCADE;")
+            jdbcTemplate.execute("""TRUNCATE TABLE "$table" RESTART IDENTITY CASCADE;""")
         }
         jdbcTemplate.execute("SET session_replication_role = 'origin';")
     }

@@ -1,7 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import java.time.LocalDate
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentLight
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRedacted
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,10 +18,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import java.time.LocalDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
@@ -66,7 +66,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `fetching list of sykmeldinger not written by you should return 'Light' version`() {
+    fun `fetching list of sykmeldinger not written by you should return 'Redacted' version`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(
                 "/api/sykmelding",
@@ -83,7 +83,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
 
         val allResponse =
-            restTemplate.exchange<List<SykmeldingDocumentLight>>(
+            restTemplate.exchange<List<SykmeldingDocumentRedacted>>(
                 "/api/sykmelding",
                 HttpMethod.GET,
                 HttpEntity<Void>(
@@ -100,11 +100,11 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(1, allSykmeldinger.size)
 
         val first = allSykmeldinger.first()
-        assertIs<SykmeldingDocumentLight>(first)
+        assertIs<SykmeldingDocumentRedacted>(first)
     }
 
     @Test
-    fun `fetching single sykmelding not written by you should return 'Light' version`() {
+    fun `fetching single sykmelding not written by you should return 'Redacted' version`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(
                 "/api/sykmelding",
@@ -121,7 +121,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
 
         val specificSykmeldingResponse =
-            restTemplate.exchange<SykmeldingDocumentLight>(
+            restTemplate.exchange<SykmeldingDocumentRedacted>(
                 "/api/sykmelding/${created.sykmeldingId}",
                 HttpMethod.GET,
                 HttpEntity<Void>(
@@ -133,7 +133,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
             )
 
         val specificSykmelding = requireNotNull(specificSykmeldingResponse.body)
-        assertIs<SykmeldingDocumentLight>(specificSykmelding)
+        assertIs<SykmeldingDocumentRedacted>(specificSykmelding)
     }
 
     @Test

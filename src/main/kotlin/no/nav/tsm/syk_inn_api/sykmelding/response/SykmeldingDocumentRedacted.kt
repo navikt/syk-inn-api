@@ -2,18 +2,18 @@ package no.nav.tsm.syk_inn_api.sykmelding.response
 
 import java.time.LocalDate
 
-data class SykmeldingDocumentLight(
+data class SykmeldingDocumentRedacted(
     val sykmeldingId: String,
     val meta: SykmeldingDocumentMeta,
-    val values: SykmeldingDocumentLightValues,
+    val values: SykmeldingDocumentRedactedValues,
     val utfall: SykmeldingDocumentRuleResult,
 ) : SykmeldingResponse
 
-data class SykmeldingDocumentLightValues(
-    val aktivitet: List<SykmeldingDocumentLightAktivitet>,
+data class SykmeldingDocumentRedactedValues(
+    val aktivitet: List<SykmeldingDocumentRedactedAktivitet>,
 )
 
-data class SykmeldingDocumentLightAktivitet(
+data class SykmeldingDocumentRedactedAktivitet(
     val fom: LocalDate,
     val tom: LocalDate,
     val type: String,
