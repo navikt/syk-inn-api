@@ -17,6 +17,7 @@ val sykmeldingInputVersion = "13"
 val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.5"
+val mockkSpringVersion = "4.0.2"
 val mockwebserverVersion = "5.1.0"
 
 plugins {
@@ -85,6 +86,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:$mockwebserverVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("com.ninja-squad:springmockk:${mockkSpringVersion}")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
