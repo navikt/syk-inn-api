@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.pdf
 
 import com.ninjasquad.springmockk.MockkBean
+import java.util.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -9,16 +10,13 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.*
 
 @WebMvcTest(PdfController::class)
 class PdfControllerSimpleTest {
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
+    @Autowired private lateinit var mockMvc: MockMvc
 
-    @MockkBean
-    private lateinit var pdfService: PdfService
+    @MockkBean private lateinit var pdfService: PdfService
 
     @Test
     fun `should fail GET pdf when missing HPR value`() {

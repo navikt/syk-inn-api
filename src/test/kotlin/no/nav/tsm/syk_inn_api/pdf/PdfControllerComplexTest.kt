@@ -1,5 +1,7 @@
 package no.nav.tsm.syk_inn_api.pdf
 
+import java.util.*
+import kotlin.test.assertEquals
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,8 +13,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import java.util.*
-import kotlin.test.assertEquals
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PdfControllerComplexTest(@param:Autowired private val restTemplate: TestRestTemplate) :
