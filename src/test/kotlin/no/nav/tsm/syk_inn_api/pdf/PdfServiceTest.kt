@@ -123,7 +123,7 @@ class PdfServiceTest {
                                 yrkesskade = true,
                                 skadedato = LocalDate.parse("1989-06-07"),
                             ),
-                        pasientenSkalSkjermes = false,
+                        pasientenSkalSkjermes = true,
                         meldinger =
                             SykmeldingDocumentMeldinger(
                                 tilNav = null,
