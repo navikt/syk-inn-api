@@ -6,7 +6,7 @@ val javaVersion = JvmTarget.JVM_21
 
 // Runtime deps
 val logstashLogbackEncoderVersion = "8.1"
-val openHtmlToPdfVersion = "1.1.29"
+val openHtmlToPdfVersion = "1.1.30"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
