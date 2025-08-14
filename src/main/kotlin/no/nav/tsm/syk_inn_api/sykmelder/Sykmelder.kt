@@ -1,6 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelder
 
-import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 
 sealed interface Sykmelder {

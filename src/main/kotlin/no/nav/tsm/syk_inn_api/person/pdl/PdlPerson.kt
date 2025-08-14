@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.person.pdl
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.person.Navn
 
 data class PdlPerson(
     val navn: Navn?,
