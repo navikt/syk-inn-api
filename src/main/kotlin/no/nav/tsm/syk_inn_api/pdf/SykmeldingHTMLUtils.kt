@@ -41,7 +41,7 @@ object SykmeldingHTMLUtils {
                     }
                 }
             }
-            else -> null
+            else -> return emptyList()
         }
 
         return periode
