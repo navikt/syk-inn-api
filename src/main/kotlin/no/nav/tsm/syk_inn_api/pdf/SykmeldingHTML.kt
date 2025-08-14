@@ -19,7 +19,7 @@ private object HtmlResources {
         }
 }
 
-fun FlowContent.NavHeader(title: String) {
+fun FlowContent.navHeader(title: String) {
     div(classes = "header") {
         img {
             src = "data:image/svg+xml;base64,${HtmlResources.b64Logo}"
@@ -29,7 +29,7 @@ fun FlowContent.NavHeader(title: String) {
     }
 }
 
-fun TR.TableInfo(
+fun TR.tableInfo(
     title: String,
     colspan: String? = null,
     italic: Boolean = false,
@@ -48,7 +48,7 @@ fun TR.TableInfo(
     }
 }
 
-fun TR.TableInfoMultiRow(
+fun TR.tableInfoMultiRow(
     title: String,
     colspan: String? = null,
     italic: Boolean = false,
@@ -96,24 +96,24 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
             }
 
             body {
-                NavHeader(title = "Innsendt sykmelding")
+                navHeader(title = "Innsendt sykmelding")
 
                 div(classes = "content") {
                     table(classes = "info-table") {
                         tr {
-                            TableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
-                            TableInfo("Mottatt av Nav") {
+                            tableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
+                            tableInfo("Mottatt av Nav") {
                                 toReadableDate(sykmelding.meta.mottatt.toLocalDate())
                             }
                         }
                         tr {
-                            TableInfoMultiRow("Sykmelder") {
+                            tableInfoMultiRow("Sykmelder") {
                                 listOf(
                                     "${sykmelding.meta.sykmelder.fornavn} ${sykmelding.meta.sykmelder.mellomnavn ?: ""} ${sykmelding.meta.sykmelder.etternavn}",
                                     "HPR-nr: ${sykmelding.meta.sykmelder.hprNummer}",
                                 )
                             }
-                            TableInfoMultiRow("Legekontor", colspan = "2") {
+                            tableInfoMultiRow("Legekontor", colspan = "2") {
                                 listOf(
                                     "Org.nr.: ${sykmelding.meta.legekontorOrgnr ?: "Ikke oppgitt"}",
                                     "Tlf: ${sykmelding.meta.legekontorTlf ?: "Ikke oppgitt"}",
@@ -121,7 +121,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfo(
+                            tableInfo(
                                 "Arbeidsgiver",
                                 italic = sykmelding.values.arbeidsgiver == null,
                             ) {
@@ -133,21 +133,21 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
+                            tableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
                                 sykmelding.values.aktivitet.flatMap {
                                     SykmeldingHTMLUtils.formatReadablePeriode(it)
                                 }
                             }
                         }
                         tr {
-                            TableInfo("Diagnose") {
+                            tableInfo("Diagnose") {
                                 if (sykmelding.values.hoveddiagnose != null) {
                                     "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.code})"
                                 } else {
                                     "Ingen diagnose oppgitt"
                                 }
                             }
-                            TableInfoMultiRow("Bidiagnoser") {
+                            tableInfoMultiRow("Bidiagnoser") {
                                 if (sykmelding.values.bidiagnoser?.isNotEmpty() == true) {
                                     sykmelding.values.bidiagnoser.map {
                                         "${it.code}: ${it.text} (${it.system.code})"
@@ -159,13 +159,13 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         if (andreSporsmalTexts != null) {
                             tr {
-                                TableInfoMultiRow("Andre spørsmål", colspan = "2") {
+                                tableInfoMultiRow("Andre spørsmål", colspan = "2") {
                                     andreSporsmalTexts
                                 }
                             }
                         }
                         tr {
-                            TableInfo(
+                            tableInfo(
                                 "Melding til Nav",
                                 colspan = "2",
                                 italic = sykmelding.values.meldinger.tilNav == null,
@@ -174,7 +174,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         tr {
-                            TableInfo(
+                            tableInfo(
                                 "Innspill til arbeidsgiver",
                                 colspan = "2",
                                 italic = sykmelding.values.meldinger.tilArbeidsgiver == null,
@@ -185,7 +185,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         if (sykmelding.values.pasientenSkalSkjermes) {
                             tr {
-                                TableInfo(
+                                tableInfo(
                                     "Pasienten er skjermet for medisinske opplysninger",
                                     colspan = "2",
                                     italic = false
