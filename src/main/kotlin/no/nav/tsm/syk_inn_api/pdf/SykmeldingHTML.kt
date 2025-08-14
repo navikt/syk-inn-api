@@ -185,7 +185,11 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                         if (sykmelding.values.pasientenSkalSkjermes) {
                             tr {
-                                TableInfo("Pasienten er skjermet for medisinske opplysninger", colspan = "2", italic = false) {
+                                TableInfo(
+                                    "Pasienten er skjermet for medisinske opplysninger",
+                                    colspan = "2",
+                                    italic = false
+                                ) {
                                     "Ja"
                                 }
                             }
