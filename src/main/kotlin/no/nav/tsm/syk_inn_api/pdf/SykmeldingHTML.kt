@@ -13,7 +13,7 @@ import no.nav.tsm.syk_inn_api.utils.toReadableDatePeriod
 import org.intellij.lang.annotations.Language
 
 private object HtmlResources {
-    val b64Logo =
+    val b64Logo: String? =
         this.javaClass.getResourceAsStream("/pdf/logo.svg").use { stream ->
             stream.readBytes().let { bytes -> Base64.getEncoder().encodeToString(bytes) }
         }
