@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.test.IntegrationTest
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.assertj.core.api.Assertions.assertThat

@@ -14,7 +14,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService

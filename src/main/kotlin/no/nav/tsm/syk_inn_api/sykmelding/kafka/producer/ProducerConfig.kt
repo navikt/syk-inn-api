@@ -20,7 +20,7 @@ import org.springframework.kafka.annotation.EnableKafka
 @EnableKafka
 @EnableConfigurationProperties
 class ProducerConfig {
-    @Value("\${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
+    @Value($$"${kafka.topics.sykmeldinger-input}") private lateinit var sykmeldingInputTopic: String
 
     @Bean
     @Profile("default")

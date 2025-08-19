@@ -2,7 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelder
 
 import arrow.core.flatMap
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.common.Navn
+import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.sykmelder.btsys.IBtsysClient
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.IHelsenettProxyClient
 import no.nav.tsm.syk_inn_api.utils.logger

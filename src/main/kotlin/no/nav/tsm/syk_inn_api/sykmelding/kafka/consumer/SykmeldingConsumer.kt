@@ -33,7 +33,7 @@ class SykmeldingConsumer(
     private val teamLogger = teamLogger()
 
     @KafkaListener(
-        topics = ["\${kafka.topics.sykmeldinger}"],
+        topics = [$$"${kafka.topics.sykmeldinger}"],
         groupId = "syk-inn-api-consumer",
         containerFactory = "kafkaListenerContainerFactory",
         batch = "false",

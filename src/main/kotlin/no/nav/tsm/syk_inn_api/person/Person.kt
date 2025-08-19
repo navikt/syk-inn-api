@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.person
 
 import java.time.LocalDate
-import no.nav.tsm.syk_inn_api.common.Navn
 
 data class Person(
     val navn: Navn,
@@ -11,3 +10,9 @@ data class Person(
 
 fun Person.displayName(): String =
     "${navn.fornavn}${if (navn.mellomnavn != null) " ${navn.mellomnavn} " else " "}${navn.etternavn}"
+
+data class Navn(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+)
