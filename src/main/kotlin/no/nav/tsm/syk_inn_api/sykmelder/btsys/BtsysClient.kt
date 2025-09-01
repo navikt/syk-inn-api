@@ -7,8 +7,8 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
 
 interface IBtsysClient {
     fun checkSuspensionStatus(sykmelderFnr: String, oppslagsdato: LocalDate): Result<Suspendert>
@@ -17,11 +17,11 @@ interface IBtsysClient {
 @Profile("!local & !test")
 @Component
 class BtsysClient(
-    webClientBuilder: WebClient.Builder,
+    restClientBuilder: RestClient.Builder,
     private val texasClient: TexasClient,
     @param:Value($$"${services.external.btsys.url}") private val btsysEndpointUrl: String,
 ) : IBtsysClient {
-    private val webClient: WebClient = webClientBuilder.baseUrl(btsysEndpointUrl).build()
+    private val restClient: RestClient = restClientBuilder.baseUrl(btsysEndpointUrl).build()
     private val logger = logger()
 
     override fun checkSuspensionStatus(
@@ -33,7 +33,7 @@ class BtsysClient(
         val loggId = UUID.randomUUID().toString()
         return try {
             val response =
-                webClient
+                restClient
                     .get()
                     .uri { uriBuilder ->
                         uriBuilder
@@ -49,29 +49,20 @@ class BtsysClient(
                         it.set("Accept", "application/json")
                     }
                     .retrieve()
-                    .onStatus(
-                        { status -> status.isError },
-                        { response ->
-                            response.bodyToMono(String::class.java).flatMap { body ->
-                                logger.error(
-                                    "Btsys responded with status: ${response.statusCode()}, body: $body",
-                                )
-                                Mono.error(
-                                    IllegalStateException(
-                                        "Btsys responded with status: ${response.statusCode()}, body: $body",
-                                    ),
-                                )
-                            }
-                        },
-                    )
-                    .bodyToMono(Suspendert::class.java)
-                    .block()
+                    .body(Suspendert::class.java)
 
             if (response != null) {
                 Result.success(response)
             } else {
                 Result.failure(IllegalStateException("Btsys returned no suspension status"))
             }
+        } catch (e: RestClientResponseException) {
+            val status = e.statusCode
+            val body = e.responseBodyAsString
+            logger.error("BtsysClient request failed with ${status.value()} and body: $body", e)
+            Result.failure(
+                IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
+            )
         } catch (e: Exception) {
             logger.error("Error while calling Btsys API", e)
             Result.failure(e)

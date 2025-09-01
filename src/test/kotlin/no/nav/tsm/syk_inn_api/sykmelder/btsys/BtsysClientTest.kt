@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.client.RestClient
 
 @ExtendWith(MockKExtension::class)
 class BtsysClientTest {
@@ -34,9 +34,9 @@ class BtsysClientTest {
         texasClient = mockk()
         client =
             BtsysClient(
-                webClientBuilder = WebClient.builder(),
-                btsysEndpointUrl = mockWebServer.url("/").toString(),
+                restClientBuilder = RestClient.builder(),
                 texasClient = texasClient,
+                btsysEndpointUrl = mockWebServer.url("/").toString(),
             )
     }
 

@@ -13,7 +13,7 @@ import no.nav.tsm.syk_inn_api.security.TexasClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.client.RestClient
 
 @ExtendWith(MockKExtension::class)
 class HelsenettProxyTest {
@@ -32,9 +32,9 @@ class HelsenettProxyTest {
         texasClient = mockk()
         client =
             HelsenettProxyClient(
-                webClientBuilder = WebClient.builder(),
-                baseUrl = mockWebServer.url("/").toString(),
+                restClientBuilder = RestClient.builder(),
                 texasClient = texasClient,
+                baseUrl = mockWebServer.url("/").toString(),
             )
     }
 
