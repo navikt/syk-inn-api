@@ -42,6 +42,19 @@ class SykmeldingController(
         }
     }
 
+    @PostMapping("/verify")
+    fun verifySykmelding(@RequestBody payload: OpprettSykmeldingPayload): ResponseEntity<Any> {
+        teamLogger.info("Received request to verify sykmelding with payload: $payload")
+
+        val verificationResult = sykmeldingService.verifySykmelding(payload)
+
+        return verificationResult.fold(
+            { error -> error.toResponseEntity() },
+        ) { verification ->
+            ResponseEntity.status(HttpStatus.OK).body(verification)
+        }
+    }
+
     @GetMapping("/{sykmeldingId}")
     fun getSykmeldingById(
         @PathVariable sykmeldingId: UUID,

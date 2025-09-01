@@ -124,4 +124,44 @@ class SykmeldingService(
 
         return Result.success(sykmeldinger)
     }
+
+    fun verifySykmelding(
+        payload: OpprettSykmeldingPayload
+    ): Either<SykmeldingCreationErrors.ResourceError, RegulaResult> {
+        val sykmeldingId = UUID.randomUUID().toString()
+        val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
+
+        val resources = result {
+            val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
+            val sykmelder =
+                sykmelderService
+                    .sykmelderMedSuspensjon(
+                        hpr = payload.meta.sykmelderHpr,
+                        signaturDato = mottatt.toLocalDate(),
+                        callId = sykmeldingId,
+                    )
+                    .bind()
+
+            person to sykmelder
+        }
+
+        val (person, sykmelder) =
+            resources.fold(
+                { it },
+                {
+                    logger.warn("Feil ved henting av eksterne ressurser for regelvalidering: $it")
+                    return SykmeldingCreationErrors.ResourceError.left()
+                },
+            )
+
+        val ruleResult: RegulaResult =
+            ruleService.validateRules(
+                payload = payload,
+                sykmeldingId = sykmeldingId,
+                sykmelder = sykmelder,
+                foedselsdato = person.fodselsdato,
+            )
+
+        return ruleResult.right()
+    }
 }
