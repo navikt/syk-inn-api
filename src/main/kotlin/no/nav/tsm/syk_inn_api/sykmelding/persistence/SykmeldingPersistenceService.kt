@@ -78,24 +78,23 @@ class SykmeldingPersistenceService(
                         pasient,
                         sykmelder,
                         ruleResult,
-                    )
-                    .toPGobject(),
+                    ),
             legekontorOrgnr = payload.meta.legekontorOrgnr,
             legekontorTlf = payload.meta.legekontorTlf,
         )
     }
 
-    fun mapDatabaseEntityToSykmeldingDocument(dbObject: SykmeldingDb): SykmeldingDocument {
-        val persistedSykmelding = dbObject.sykmelding.fromPGobject<PersistedSykmelding>()
+    fun mapDatabaseEntityToSykmeldingDocument(sykmeldingDb: SykmeldingDb): SykmeldingDocument {
+        val persistedSykmelding = sykmeldingDb.sykmelding
         return SykmeldingDocument(
-            sykmeldingId = dbObject.sykmeldingId,
+            sykmeldingId = sykmeldingDb.sykmeldingId,
             meta =
                 SykmeldingDocumentMeta(
-                    mottatt = dbObject.mottatt,
+                    mottatt = sykmeldingDb.mottatt,
                     pasientIdent = persistedSykmelding.pasient.ident,
                     sykmelder = persistedSykmelding.sykmelder.toSykmeldingDocumentSykmelder(),
-                    legekontorOrgnr = dbObject.legekontorOrgnr,
-                    legekontorTlf = dbObject.legekontorTlf,
+                    legekontorOrgnr = sykmeldingDb.legekontorOrgnr,
+                    legekontorTlf = sykmeldingDb.legekontorTlf,
                 ),
             values = persistedSykmelding.toSykmeldingDocumentValues(),
             utfall =
@@ -125,8 +124,7 @@ class SykmeldingPersistenceService(
                         sykmeldingRecord,
                         person,
                         sykmelder,
-                    )
-                    .toPGobject(),
+                    ),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
             legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
             validertOk = validertOk,
