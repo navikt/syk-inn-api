@@ -14,7 +14,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.client.RestClient
 
 @ExtendWith(MockKExtension::class)
 class PdlClientTest {
@@ -31,9 +31,9 @@ class PdlClientTest {
         texasClient = mockk()
         client =
             PdlClient(
-                webClientBuilder = WebClient.builder(),
-                pdlEndpointUrl = mockWebServer.url("/").toString(),
+                restClientBuilder = RestClient.builder(),
                 texasClient = texasClient,
+                pdlEndpointUrl = mockWebServer.url("/").toString(),
             )
     }
 

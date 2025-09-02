@@ -6,8 +6,8 @@ import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
 
 interface IHelsenettProxyClient {
     fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder>
@@ -18,14 +18,14 @@ interface IHelsenettProxyClient {
 @Profile("!local & !test")
 @Component
 class HelsenettProxyClient(
-    webClientBuilder: WebClient.Builder,
+    restClientBuilder: RestClient.Builder,
     private val texasClient: TexasClient,
     @param:Value($$"${services.teamsykmelding.syfohelsenettproxy.url}") private val baseUrl: String,
 ) : IHelsenettProxyClient {
     private val logger = logger()
     private val teamLogger = teamLogger()
 
-    private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
+    private val restClient: RestClient = restClientBuilder.baseUrl(baseUrl).build()
 
     override fun getSykmelderByHpr(
         behandlerHpr: String,
@@ -40,7 +40,7 @@ class HelsenettProxyClient(
 
         return try {
             val response =
-                webClient
+                restClient
                     .get()
                     .uri { uriBuilder -> uriBuilder.path("/api/v2/behandlerMedHprNummer").build() }
                     .headers {
@@ -50,9 +50,7 @@ class HelsenettProxyClient(
                         it.set("Authorization", "Bearer $accessToken")
                     }
                     .retrieve()
-                    .onStatus({ it.isError }) { res -> onStatusError(res) }
-                    .bodyToMono(HprSykmelder::class.java)
-                    .block()
+                    .body(HprSykmelder::class.java)
 
             if (response != null) {
                 logger.info(
@@ -65,6 +63,20 @@ class HelsenettProxyClient(
                 teamLogger.warn("$msg and hpr=$behandlerHpr")
                 Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
+        } catch (e: RestClientResponseException) {
+            val status = e.statusCode
+            val body = e.responseBodyAsString
+            teamLogger.error(
+                "HelsenettProxy HTTP ${status.value()}: $body, hpr=$behandlerHpr, callId=$callId",
+                e
+            )
+            logger.error(
+                "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
+                e
+            )
+            Result.failure(
+                IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
+            )
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
             teamLogger.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
@@ -81,7 +93,7 @@ class HelsenettProxyClient(
 
         return try {
             val response =
-                webClient
+                restClient
                     .get()
                     .uri { uriBuilder -> uriBuilder.path("/api/v2/behandler").build() }
                     .headers {
@@ -91,9 +103,7 @@ class HelsenettProxyClient(
                         it.set("Authorization", "Bearer $accessToken")
                     }
                     .retrieve()
-                    .onStatus({ it.isError }) { res -> onStatusError(res) }
-                    .bodyToMono(HprSykmelder::class.java)
-                    .block()
+                    .body(HprSykmelder::class.java)
 
             if (response != null) {
                 logger.info(
@@ -106,16 +116,25 @@ class HelsenettProxyClient(
                 teamLogger.warn("$msg and hpr=$behandlerFnr")
                 Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
             }
+        } catch (e: RestClientResponseException) {
+            val status = e.statusCode
+            val body = e.responseBodyAsString
+            teamLogger.error(
+                "HelsenettProxy HTTP ${status.value()}: $body, fnr=$behandlerFnr, callId=$callId",
+                e
+            )
+            logger.error(
+                "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
+                e
+            )
+            Result.failure(
+                IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
+            )
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
             teamLogger.error("Exception with hpr=$behandlerFnr for sykmeldingId=$callId", e)
             Result.failure(e)
         }
-    }
-
-    private fun onStatusError(res: ClientResponse): Nothing {
-        throw RuntimeException("Error from syfohelsenettproxy got status code: ${res.statusCode()}")
-            .also { logger.error(it.message, it) }
     }
 
     fun getToken(): TexasClient.TokenResponse =

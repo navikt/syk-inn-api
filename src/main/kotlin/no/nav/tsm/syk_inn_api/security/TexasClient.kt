@@ -5,20 +5,21 @@ import javax.naming.AuthenticationException
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
-import reactor.core.publisher.Mono
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestClientResponseException
 
 /** Texas = Token Exchange as a Service */
 @Profile("!local")
 @Component
 class TexasClient(
-    webClientBuilder: WebClient.Builder,
+    restClientBuilder: RestClient.Builder,
     @param:Value($$"${nais.token_endpoint}") private val naisTokenEndpoint: String,
     @param:Value($$"${nais.cluster}") private val cluster: String,
 ) {
-    private val webClient: WebClient = webClientBuilder.baseUrl(naisTokenEndpoint).build()
+    private val restClient: RestClient = restClientBuilder.baseUrl(naisTokenEndpoint).build()
     private val logger = logger()
 
     fun requestToken(namespace: String, otherApiAppName: String): TokenResponse {
@@ -33,55 +34,50 @@ class TexasClient(
 
         return try {
             logger.info("Trying to request token with body: $requestBody")
-            webClient
-                .post()
-                .header("Content-Type", "application/json")
-                .bodyValue(requestBody)
-                .retrieve()
-                .onStatus({ status -> status.is4xxClientError }) { response ->
-                    response.bodyToMono(String::class.java).flatMap { errorBody ->
-                        logger.error(
-                            "TexasClient got a Client error: ${response.statusCode()} - $errorBody",
-                        )
-                        Mono.error(handleClientError(response.statusCode().value(), errorBody))
-                    }
-                }
-                .onStatus({ status -> status.is5xxServerError }) { response ->
-                    response.bodyToMono(String::class.java).flatMap { errorBody ->
-                        logger.error(
-                            "TexasClient got a Server error: ${response.statusCode()} - $errorBody",
-                        )
-                        Mono.error(
-                            RuntimeException("Server error (${response.statusCode()}): $errorBody"),
-                        )
-                    }
-                }
-                .bodyToMono(TokenResponse::class.java)
-                .block()
-                ?: throw RuntimeException("Failed to retrieve token: empty response")
-        } catch (ex: WebClientResponseException) {
+            val response =
+                restClient
+                    .post()
+                    .header("Content-Type", "application/json")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(TokenResponse::class.java)
+
+            response ?: throw IllegalStateException("Failed to retrieve token: empty response")
+        } catch (e: RestClientResponseException) {
+            val status = e.statusCode
+            val body = e.responseBodyAsString
             logger.error(
-                "WebClientResponseException: ${ex.statusCode} - ${ex.responseBodyAsString}",
-                ex,
+                "TexasClient token request failed with HTTP ${status.value()}: $body (ns=$namespace app=$otherApiAppName)",
+                e,
             )
-            throw RuntimeException("HTTP error: ${ex.statusCode} - ${ex.responseBodyAsString}", ex)
-        } catch (ex: Exception) {
+            throw mapTexasError(status, body, e)
+        } catch (e: RestClientException) {
             logger.error(
-                "Unexpected error while requesting token for ${namespace}:${otherApiAppName}",
-                ex
+                "Unexpected RestClientException while requesting token for ${namespace}:${otherApiAppName}",
+                e,
             )
-            throw RuntimeException("Unexpected error: ${ex.message}", ex)
+            throw RuntimeException("Unexpected error: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error(
+                "Unexpected exception while requesting token for ${namespace}:${otherApiAppName}",
+                e,
+            )
+            throw e
         }
     }
 
-    private fun handleClientError(status: Int, errorBody: String): Exception {
-        return when (status) {
-            400 -> IllegalArgumentException("Bad Request: $errorBody")
-            401 -> AuthenticationException("Unauthorized: $errorBody")
-            403 -> AccessDeniedException("Forbidden: $errorBody")
-            else -> RuntimeException("Client error ($status): $errorBody")
+    private fun mapTexasError(
+        status: HttpStatusCode,
+        errorBody: String,
+        cause: Throwable?
+    ): Exception =
+        when (status.value()) {
+            400 -> IllegalArgumentException("Bad Request: $errorBody", cause)
+            401 -> AuthenticationException("Unauthorized: $errorBody").apply { initCause(cause) }
+            403 -> AccessDeniedException("Forbidden: $errorBody").apply { initCause(cause) }
+            in 500..599 -> RuntimeException("Server error (${status.value()}): $errorBody", cause)
+            else -> RuntimeException("HTTP ${status.value()}: $errorBody", cause)
         }
-    }
 
     data class TokenRequest(val identity_provider: String, val target: String)
 
