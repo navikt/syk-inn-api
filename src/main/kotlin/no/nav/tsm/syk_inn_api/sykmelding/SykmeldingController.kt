@@ -1,6 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.RuleOutcome
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -51,7 +53,19 @@ class SykmeldingController(
         return verificationResult.fold(
             { error -> error.toResponseEntity() },
         ) { verification ->
-            ResponseEntity.status(HttpStatus.OK).body(verification)
+            ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    when (verification) {
+                        is RegulaResult.NotOk ->
+                            RuleOutcome(
+                                status = verification.outcome.status.name,
+                                message = verification.outcome.reason.sykmelder,
+                                rule = verification.outcome.rule,
+                                tree = verification.outcome.tree,
+                            )
+                        is RegulaResult.Ok -> true
+                    }
+                )
         }
     }
 
@@ -88,8 +102,8 @@ class SykmeldingController(
 
 object CreateSykmelding {
     /**
-     * Rule outcomes that are NotOk are does not error the response completely, but rather return a
-     * well formatted reason to the frontend.
+     * For rule outcomes that are NotOk we present a well formatted reason to the frontend together
+     * with the status-code 422 Unprocessable Entity
      */
     data class RuleOutcome(
         val status: String,
