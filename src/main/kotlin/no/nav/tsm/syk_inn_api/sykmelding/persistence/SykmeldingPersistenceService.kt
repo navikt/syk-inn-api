@@ -73,12 +73,12 @@ class SykmeldingPersistenceService(
             mottatt = mottatt,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
-                        payload,
-                        sykmeldingId,
-                        pasient,
-                        sykmelder,
-                        ruleResult,
-                    ),
+                    payload,
+                    sykmeldingId,
+                    pasient,
+                    sykmelder,
+                    ruleResult,
+                ),
             legekontorOrgnr = payload.meta.legekontorOrgnr,
             legekontorTlf = payload.meta.legekontorTlf,
         )
@@ -121,10 +121,10 @@ class SykmeldingPersistenceService(
             sykmelderHpr = sykmelder.hpr,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
-                        sykmeldingRecord,
-                        person,
-                        sykmelder,
-                    ),
+                    sykmeldingRecord,
+                    person,
+                    sykmelder,
+                ),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
             legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
             validertOk = validertOk,

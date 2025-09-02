@@ -27,9 +27,17 @@ import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingArbeidsrelatertArsak
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMedisinskArsak
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingPasient
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.toPGobject
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsrelatertArsak
@@ -55,6 +63,8 @@ class SykmeldingServiceTest {
     private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
     private lateinit var personService: PersonService
 
+    val pasientIdent = "01019078901"
+    val behandlerIdent = "0101197054321"
     val behandlerHpr = "123456789"
     val sykmeldingId = UUID.randomUUID().toString()
     val foedselsdato = LocalDate.of(1990, 1, 1)
@@ -83,7 +93,7 @@ class SykmeldingServiceTest {
             Result.success(
                 Sykmelder.MedSuspensjon(
                     hpr = behandlerHpr,
-                    ident = "01019078901",
+                    ident = pasientIdent,
                     navn =
                         Navn(
                             fornavn = "Ola",
@@ -125,7 +135,7 @@ class SykmeldingServiceTest {
                 meta =
                     SykmeldingDocumentMeta(
                         mottatt = OffsetDateTime.now(),
-                        pasientIdent = "01019078901",
+                        pasientIdent = pasientIdent,
                         sykmelder =
                             SykmeldingDocumentSykmelder(
                                 hprNummer = behandlerHpr,
@@ -194,10 +204,10 @@ class SykmeldingServiceTest {
                 SykmeldingDb(
                     sykmeldingId = sykmeldingId,
                     mottatt = OffsetDateTime.now(),
-                    pasientIdent = "01019078901",
+                    pasientIdent = pasientIdent,
                     sykmelderHpr = behandlerHpr,
                     legekontorOrgnr = "987654321",
-                    sykmelding = getTestSykmelding().toPGobject(),
+                    sykmelding = getTestSykmelding(),
                     legekontorTlf = "12345678",
                 ),
             )
@@ -210,7 +220,7 @@ class SykmeldingServiceTest {
                     OpprettSykmeldingPayload(
                         meta =
                             OpprettSykmeldingMetadata(
-                                pasientIdent = "01019078901",
+                                pasientIdent = pasientIdent,
                                 sykmelderHpr = "123456789",
                                 legekontorOrgnr = "987654321",
                                 legekontorTlf = "577788888",
@@ -370,21 +380,22 @@ class SykmeldingServiceTest {
         }
     }
 
-    private fun getTestSykmelding(): OpprettSykmelding {
-        return OpprettSykmelding(
+    private fun getTestSykmelding(): PersistedSykmelding {
+        return PersistedSykmelding(
             hoveddiagnose =
-                OpprettSykmeldingDiagnoseInfo(
+                PersistedSykmeldingDiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
+                    text = "Angst"
                 ),
             aktivitet =
                 listOf(
-                    OpprettSykmeldingAktivitet.IkkeMulig(
+                    PersistedSykmeldingAktivitet.IkkeMulig(
                         fom = LocalDate.parse("2020-01-01"),
                         tom = LocalDate.parse("2020-01-30"),
-                        medisinskArsak = OpprettSykmeldingMedisinskArsak(isMedisinskArsak = true),
+                        medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
                         arbeidsrelatertArsak =
-                            OpprettSykmeldingArbeidsrelatertArsak(
+                            PersistedSykmeldingArbeidsrelatertArsak(
                                 isArbeidsrelatertArsak = false,
                                 arbeidsrelaterteArsaker = emptyList(),
                                 annenArbeidsrelatertArsak = null
@@ -393,11 +404,31 @@ class SykmeldingServiceTest {
                 ),
             pasientenSkalSkjermes = false,
             bidiagnoser = emptyList(),
-            meldinger = OpprettSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
+            meldinger = PersistedSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
             svangerskapsrelatert = false,
             yrkesskade = null,
             arbeidsgiver = null,
             tilbakedatering = null,
+            sykmeldingId = sykmeldingId,
+            pasient =
+                PersistedSykmeldingPasient(
+                    Navn("Ola", "", "Nordmann"),
+                    pasientIdent,
+                    LocalDate.parse("1970-01-01")
+                ),
+            sykmelder =
+                PersistedSykmeldingSykmelder(
+                    ident = behandlerIdent,
+                    hprNummer = behandlerHpr,
+                    fornavn = "Lege",
+                    mellomnavn = "",
+                    etternavn = "Legesen"
+                ),
+            regelResultat =
+                PersistedSykmeldingRuleResult(
+                    result = RuleType.OK,
+                    meldingTilSender = "Dette er en melding"
+                ),
         )
     }
 }
