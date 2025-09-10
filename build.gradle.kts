@@ -6,7 +6,7 @@ val javaVersion = JvmTarget.JVM_21
 
 // Runtime deps
 val logstashLogbackEncoderVersion = "8.1"
-val openHtmlToPdfVersion = "1.1.29"
+val openHtmlToPdfVersion = "1.1.31"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
@@ -21,9 +21,9 @@ val mockkSpringVersion = "4.0.2"
 val mockwebserverVersion = "5.1.0"
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.spring") version "2.2.0"
-    id("org.springframework.boot") version "3.5.4"
+    kotlin("jvm") version "2.2.20"
+    kotlin("plugin.spring") version "2.2.20"
+    id("org.springframework.boot") version "3.5.5"
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
