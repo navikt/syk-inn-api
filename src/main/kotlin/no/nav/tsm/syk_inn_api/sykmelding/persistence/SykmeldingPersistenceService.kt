@@ -73,28 +73,29 @@ class SykmeldingPersistenceService(
             mottatt = mottatt,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
-                    payload,
-                    sykmeldingId,
-                    pasient,
-                    sykmelder,
-                    ruleResult,
-                ),
+                        payload,
+                        sykmeldingId,
+                        pasient,
+                        sykmelder,
+                        ruleResult,
+                    )
+                    .toPGobject(),
             legekontorOrgnr = payload.meta.legekontorOrgnr,
             legekontorTlf = payload.meta.legekontorTlf,
         )
     }
 
-    fun mapDatabaseEntityToSykmeldingDocument(sykmeldingDb: SykmeldingDb): SykmeldingDocument {
-        val persistedSykmelding = sykmeldingDb.sykmelding
+    fun mapDatabaseEntityToSykmeldingDocument(dbObject: SykmeldingDb): SykmeldingDocument {
+        val persistedSykmelding = dbObject.sykmelding.fromPGobject<PersistedSykmelding>()
         return SykmeldingDocument(
-            sykmeldingId = sykmeldingDb.sykmeldingId,
+            sykmeldingId = dbObject.sykmeldingId,
             meta =
                 SykmeldingDocumentMeta(
-                    mottatt = sykmeldingDb.mottatt,
+                    mottatt = dbObject.mottatt,
                     pasientIdent = persistedSykmelding.pasient.ident,
                     sykmelder = persistedSykmelding.sykmelder.toSykmeldingDocumentSykmelder(),
-                    legekontorOrgnr = sykmeldingDb.legekontorOrgnr,
-                    legekontorTlf = sykmeldingDb.legekontorTlf,
+                    legekontorOrgnr = dbObject.legekontorOrgnr,
+                    legekontorTlf = dbObject.legekontorTlf,
                 ),
             values = persistedSykmelding.toSykmeldingDocumentValues(),
             utfall =
@@ -121,10 +122,11 @@ class SykmeldingPersistenceService(
             sykmelderHpr = sykmelder.hpr,
             sykmelding =
                 PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
-                    sykmeldingRecord,
-                    person,
-                    sykmelder,
-                ),
+                        sykmeldingRecord,
+                        person,
+                        sykmelder,
+                    )
+                    .toPGobject(),
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
             legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
             validertOk = validertOk,
