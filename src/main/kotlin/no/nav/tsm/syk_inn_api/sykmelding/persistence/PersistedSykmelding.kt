@@ -1,7 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
