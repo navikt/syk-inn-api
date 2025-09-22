@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import java.time.LocalDate
+import java.time.OffsetDateTime
+import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.test.IntegrationTest
@@ -8,16 +11,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import kotlin.test.Test
 
 @Transactional
 @DataJpaTest
 class SykmeldingRepositoryTest : IntegrationTest() {
 
-    @Autowired
-    lateinit var sykmeldingRepository: SykmeldingRepository
+    @Autowired lateinit var sykmeldingRepository: SykmeldingRepository
 
     @Test
     fun `should save and find sykmelding entity by sykmeldingId`() {

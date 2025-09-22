@@ -6,9 +6,9 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import org.hibernate.annotations.Type
 import java.time.OffsetDateTime
 import java.util.*
+import org.hibernate.annotations.Type
 
 @Entity
 @Table(name = "sykmelding")
@@ -18,8 +18,7 @@ data class SykmeldingDb(
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,
-    @Type(JsonBinaryType::class)
-    val sykmelding: PersistedSykmelding,
+    @Type(JsonBinaryType::class) val sykmelding: PersistedSykmelding,
     val legekontorOrgnr: String?,
     val legekontorTlf: String?,
     val validertOk: Boolean = false,
