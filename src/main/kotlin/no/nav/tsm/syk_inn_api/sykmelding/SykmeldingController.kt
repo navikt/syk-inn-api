@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
 import java.util.*
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.RuleOutcome
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.toResponseEntity
@@ -58,7 +59,7 @@ class SykmeldingController(
                     when (verification) {
                         is RegulaResult.NotOk ->
                             RuleOutcome(
-                                status = verification.outcome.status.name,
+                                status = verification.outcome.status,
                                 message = verification.outcome.reason.sykmelder,
                                 rule = verification.outcome.rule,
                                 tree = verification.outcome.tree,
@@ -106,7 +107,7 @@ object CreateSykmelding {
      * with the status-code 422 Unprocessable Entity
      */
     data class RuleOutcome(
-        val status: String,
+        val status: RegulaOutcomeStatus,
         val message: String,
         val rule: String,
         val tree: String
@@ -122,7 +123,7 @@ object CreateSykmelding {
                 ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(
                         RuleOutcome(
-                            status = this.result.outcome.status.name,
+                            status = this.result.outcome.status,
                             message = this.result.outcome.reason.sykmelder,
                             rule = this.result.outcome.rule,
                             tree = this.result.outcome.tree,

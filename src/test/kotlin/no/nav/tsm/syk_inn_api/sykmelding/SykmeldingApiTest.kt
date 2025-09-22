@@ -1,9 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRedacted
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
@@ -154,7 +156,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         val created = requireNotNull(response.body)
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
-        assertEquals(created.status, "INVALID")
+        assertEquals(created.status, RegulaOutcomeStatus.INVALID)
         assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
     }
 
@@ -245,7 +247,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     @Test
     fun `Broken input data - rule hit - should fail with 422 due to sykmelder being suspended`() {
         val response =
-            restTemplate.postForEntity<String>(
+            restTemplate.postForEntity<JsonNode>(
                 "/api/sykmelding",
                 HttpEntity(
                     brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
@@ -256,6 +258,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
             )
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        assertEquals(response.body?.path("status")?.asText(), "INVALID")
     }
 }
 
