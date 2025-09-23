@@ -24,10 +24,10 @@ class ConsumerConfig {
             DefaultKafkaConsumerFactory(
                 props.buildConsumerProperties(null).apply {
                     put(
-                        org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                         "earliest",
                     )
-                    put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
                 },
                 StringDeserializer(),
