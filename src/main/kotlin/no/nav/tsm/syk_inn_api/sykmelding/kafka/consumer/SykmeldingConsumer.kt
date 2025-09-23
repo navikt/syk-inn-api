@@ -20,6 +20,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class SykmeldingConsumer(
@@ -32,6 +33,7 @@ class SykmeldingConsumer(
     private val logger = logger()
     private val teamLogger = teamLogger()
 
+    @Transactional
     @KafkaListener(
         topics = [$$"${kafka.topics.sykmeldinger}"],
         groupId = "syk-inn-api-consumer",
@@ -50,6 +52,9 @@ class SykmeldingConsumer(
         teamLogger.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
 
         if (value == null) {
+            logger.info(
+                "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
+            )
             handleTombstone(sykmeldingId)
             return
         }
@@ -134,9 +139,6 @@ class SykmeldingConsumer(
     }
 
     private fun handleTombstone(sykmeldingId: String) {
-        logger.info(
-            "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
-        )
         sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
     }
 
