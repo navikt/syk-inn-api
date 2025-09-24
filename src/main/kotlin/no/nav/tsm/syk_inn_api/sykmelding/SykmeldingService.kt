@@ -8,7 +8,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
@@ -33,8 +32,6 @@ class SykmeldingService(
     private val teamLogger = teamLogger()
 
     sealed class SykmeldingCreationErrors {
-        data class RuleValidation(val result: RegulaResult.NotOk) : SykmeldingCreationErrors()
-
         object PersistenceError : SykmeldingCreationErrors()
 
         object ResourceError : SykmeldingCreationErrors()
@@ -78,11 +75,7 @@ class SykmeldingService(
                 foedselsdato = person.fodselsdato,
             )
 
-        if (ruleResult is RegulaResult.NotOk && ruleResult.status == RegulaStatus.INVALID) {
-            return SykmeldingCreationErrors.RuleValidation(ruleResult).left()
-        }
         val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
-
         val sykmeldingDocument =
             sykmeldingPersistenceService.saveSykmeldingPayload(
                 sykmeldingId = sykmeldingId,

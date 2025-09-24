@@ -9,8 +9,6 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import no.nav.tsm.regulus.regula.RegulaOutcome
@@ -270,7 +268,7 @@ class SykmeldingServiceTest {
     }
 
     @Test
-    fun `failing to create sykmelding because of rule tree hit`() {
+    fun `successfully creates sykmelding even with rule tree hit`() {
         every { sykmelderService.sykmelderMedSuspensjon(behandlerHpr, any(), any()) } returns
             Result.success(
                 Sykmelder.MedSuspensjon(
@@ -319,6 +317,91 @@ class SykmeldingServiceTest {
                     ),
                 results = emptyList(),
             )
+
+        val sykmeldingDocument =
+            SykmeldingDocument(
+                sykmeldingId = sykmeldingId,
+                meta =
+                    SykmeldingDocumentMeta(
+                        mottatt = OffsetDateTime.now(),
+                        pasientIdent = pasientIdent,
+                        sykmelder =
+                            SykmeldingDocumentSykmelder(
+                                hprNummer = behandlerHpr,
+                                fornavn = "Magnar",
+                                mellomnavn = null,
+                                etternavn = "Koman"
+                            ),
+                        legekontorOrgnr = "987654321",
+                        legekontorTlf = "12345678",
+                    ),
+                values =
+                    SykmeldingDocumentValues(
+                        hoveddiagnose =
+                            SykmeldingDocumentDiagnoseInfo(
+                                system = DiagnoseSystem.ICD10,
+                                code = "Z01",
+                                text = "Ukjent diagnose",
+                            ),
+                        aktivitet =
+                            listOf(
+                                SykmeldingDocumentAktivitet.IkkeMulig(
+                                    fom = LocalDate.parse("2020-01-01"),
+                                    tom = LocalDate.parse("2020-01-30"),
+                                    medisinskArsak =
+                                        SykmeldingDocumentMedisinskArsak(isMedisinskArsak = true),
+                                    arbeidsrelatertArsak =
+                                        SykmeldingDocumentArbeidsrelatertArsak(
+                                            isArbeidsrelatertArsak = false,
+                                            arbeidsrelaterteArsaker = emptyList(),
+                                            annenArbeidsrelatertArsak = null
+                                        )
+                                ),
+                            ),
+                        bidiagnoser = emptyList(),
+                        svangerskapsrelatert = false,
+                        pasientenSkalSkjermes = false,
+                        meldinger =
+                            SykmeldingDocumentMeldinger(
+                                tilNav = null,
+                                tilArbeidsgiver = null,
+                            ),
+                        yrkesskade = null,
+                        arbeidsgiver = null,
+                        tilbakedatering = null,
+                    ),
+                utfall =
+                    SykmeldingDocumentRuleResult(
+                        result = RuleType.OK,
+                        melding = null,
+                    ),
+            )
+        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(any()) } returns
+            sykmeldingDocument
+
+        every {
+            sykmeldingPersistenceService.saveSykmeldingPayload(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
+                SykmeldingDb(
+                    sykmeldingId = sykmeldingId,
+                    mottatt = OffsetDateTime.now(),
+                    pasientIdent = pasientIdent,
+                    sykmelderHpr = behandlerHpr,
+                    legekontorOrgnr = "987654321",
+                    sykmelding = getTestSykmelding(),
+                    legekontorTlf = "12345678",
+                ),
+            )
+
+        every { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -370,14 +453,7 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        result.fold(
-            {
-                assertIs<SykmeldingService.SykmeldingCreationErrors.RuleValidation>(it)
-                assertEquals(it.result.outcome.rule, "the rule that failed")
-            },
-        ) {
-            fail("Expected rule validation error but got success: $it")
-        }
+        result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
 
     private fun getTestSykmelding(): PersistedSykmelding {

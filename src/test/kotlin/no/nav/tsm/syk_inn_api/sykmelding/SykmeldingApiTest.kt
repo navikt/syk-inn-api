@@ -144,7 +144,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     fun `rule hits should return why`() {
         val response =
             restTemplate.postForEntity<CreateSykmelding.RuleOutcome>(
-                "/api/sykmelding",
+                "/api/sykmelding/verify",
                 HttpEntity(
                     fullExampleSykmeldingPayload.replace("L73", "Bad"),
                     HttpHeaders().apply {
@@ -155,7 +155,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 
         val created = requireNotNull(response.body)
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(created.status, RegulaOutcomeStatus.INVALID)
         assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
     }
@@ -245,20 +245,21 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `Broken input data - rule hit - should fail with 422 due to sykmelder being suspended`() {
+    fun `Expected rule hit - should OK with 200 even if sykmelder is suspended`() {
         val response =
             restTemplate.postForEntity<JsonNode>(
                 "/api/sykmelding",
                 HttpEntity(
-                    brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
+                    exampleSykmeldingPayloadValidHprButSuspendedFnr,
                     HttpHeaders().apply {
                         set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     },
                 ),
             )
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
-        assertEquals(response.body?.path("status")?.asText(), "INVALID")
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        println(response.body)
+        assertEquals(response.body?.path("utfall")?.path("result")?.asText(), "INVALID")
     }
 }
 
@@ -458,7 +459,7 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
         .trimMargin()
 
 @Language("JSON")
-private val brokenExampleSykmeldingPayloadValidHprButSuspendedFnr =
+private val exampleSykmeldingPayloadValidHprButSuspendedFnr =
     """
     |{
     |  "meta": {
