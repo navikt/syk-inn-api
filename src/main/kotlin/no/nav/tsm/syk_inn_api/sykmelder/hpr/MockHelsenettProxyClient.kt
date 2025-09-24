@@ -31,8 +31,16 @@ class MockHelsenettProxyClient : IHelsenettProxyClient {
         if (behandlerHpr == "hprButFnrIsSuspended") {
             return Result.success(
                 HprSykmelder(
-                    godkjenninger = emptyList(),
-                    fnr = "suspendedFnr",
+                    godkjenninger =
+                        listOf(
+                            HprGodkjenning(
+                                helsepersonellkategori =
+                                    HprKode(aktiv = true, oid = 0, verdi = "LE"),
+                                autorisasjon = HprKode(aktiv = true, oid = 7704, verdi = "1"),
+                                tillegskompetanse = null
+                            )
+                        ),
+                    fnr = "suspendertFnr",
                     hprNummer = "hprButFnrIsSuspended",
                     fornavn = "James",
                     mellomnavn = "007",

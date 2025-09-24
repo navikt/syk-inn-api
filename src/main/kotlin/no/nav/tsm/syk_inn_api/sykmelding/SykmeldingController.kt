@@ -119,17 +119,6 @@ object CreateSykmelding {
      */
     fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
         when (this) {
-            is SykmeldingService.SykmeldingCreationErrors.RuleValidation -> {
-                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(
-                        RuleOutcome(
-                            status = this.result.outcome.status,
-                            message = this.result.outcome.reason.sykmelder,
-                            rule = this.result.outcome.rule,
-                            tree = this.result.outcome.tree,
-                        ),
-                    )
-            }
             is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to persist sykmelding")
