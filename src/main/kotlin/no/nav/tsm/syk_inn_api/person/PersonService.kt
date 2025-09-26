@@ -28,16 +28,18 @@ class PersonService(
                 ?.ident
 
         if (currentIdent == null) {
+            teamLog.error("No valid FOLKEREGISTERIDENT found for person with ident $ident")
             return Result.failure(
                 IllegalStateException(
-                    "No valid FOLKEREGISTERIDENT found for person with ident $ident"
+                    "No valid FOLKEREGISTERIDENT found for person, see teamlog for ident"
                 )
             )
         }
 
         if (person.navn == null) {
+            teamLog.error("No name found for person with ident $ident")
             return Result.failure(
-                IllegalStateException("No name found for person with ident $ident")
+                IllegalStateException("No name found for person, see teamlog for ident")
             )
         }
 
