@@ -42,8 +42,9 @@ class PersonService(
         }
 
         if (person.foedselsdato == null) {
+            teamLog.error("No fødselsdato found for person with ident $ident")
             return Result.failure(
-                IllegalStateException("No fødselsdato found for person with ident $ident")
+                IllegalStateException("Found person without fødselsdato, see teamlog for ident")
             )
         }
 
