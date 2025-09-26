@@ -141,7 +141,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `rule hits should return why`() {
+    fun `verify - rule hits should return why`() {
         val response =
             restTemplate.postForEntity<CreateSykmelding.RuleOutcome>(
                 "/api/sykmelding/verify",
@@ -158,6 +158,24 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(created.status, RegulaOutcomeStatus.INVALID)
         assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
+    }
+
+    @Test
+    fun `Verify - should reply with 422 when person does not exist in PDL`() {
+        val response =
+            restTemplate.postForEntity<JsonNode>(
+                "/api/sykmelding/verify",
+                HttpEntity(
+                    fullExampleSykmeldingPayload.replace("21037712323", "does-not-exist"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        println(response.body)
+        assertEquals(response.body?.path("message")?.asText(), "Person does not exist")
     }
 
     @Test

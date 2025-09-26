@@ -65,7 +65,7 @@ class SykmeldingController(
                                 tree = verification.outcome.tree,
                             )
                         is RegulaResult.Ok -> true
-                    }
+                    },
                 )
         }
     }
@@ -113,12 +113,21 @@ object CreateSykmelding {
         val tree: String
     )
 
+    data class ErrorMessage(
+        val message: String,
+    )
+
     /**
      * Handles all error cases for SykmeldingCreationErrors, and maps them to appropriate HTTP
      * responses.
      */
     fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
         when (this) {
+            is SykmeldingService.SykmeldingCreationErrors.PersonDoesNotExist ->
+                ResponseEntity.status(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                    )
+                    .body(ErrorMessage("Person does not exist"))
             is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to persist sykmelding")
