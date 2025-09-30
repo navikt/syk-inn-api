@@ -25,6 +25,7 @@ import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
 import no.nav.tsm.sykmelding.input.core.model.Avventende
 import no.nav.tsm.sykmelding.input.core.model.Behandler
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
@@ -112,7 +113,8 @@ object SykmeldingKafkaMapper {
         sykmelding: SykmeldingDocument,
         sykmeldingId: String,
         person: Person,
-        sykmelder: Sykmelder
+        sykmelder: Sykmelder,
+        source: String
     ): DigitalSykmelding {
         val sykmelderNavn: Navn? =
             sykmelder.navn?.let {
@@ -135,6 +137,7 @@ object SykmeldingKafkaMapper {
                 DigitalSykmeldingMetadata(
                     mottattDato = OffsetDateTime.now(),
                     genDate = OffsetDateTime.now(),
+                    avsenderSystem = AvsenderSystem(source, "1")
                 ),
             pasient =
                 Pasient(

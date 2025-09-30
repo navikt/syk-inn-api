@@ -8,7 +8,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.regulus.regula.RegulaStatus
+import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
@@ -33,7 +33,7 @@ class SykmeldingService(
     private val teamLogger = teamLogger()
 
     sealed class SykmeldingCreationErrors {
-        data class RuleValidation(val result: RegulaResult.NotOk) : SykmeldingCreationErrors()
+        object PersonDoesNotExist : SykmeldingCreationErrors()
 
         object PersistenceError : SykmeldingCreationErrors()
 
@@ -78,11 +78,7 @@ class SykmeldingService(
                 foedselsdato = person.fodselsdato,
             )
 
-        if (ruleResult is RegulaResult.NotOk && ruleResult.status == RegulaStatus.INVALID) {
-            return SykmeldingCreationErrors.RuleValidation(ruleResult).left()
-        }
         val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
-
         val sykmeldingDocument =
             sykmeldingPersistenceService.saveSykmeldingPayload(
                 sykmeldingId = sykmeldingId,
@@ -104,6 +100,7 @@ class SykmeldingService(
             person = person,
             sykmelder = sykmelder,
             validationResult = validation,
+            source = payload.meta.source,
         )
 
         return sykmeldingDocument.right()
@@ -127,32 +124,28 @@ class SykmeldingService(
 
     fun verifySykmelding(
         payload: OpprettSykmeldingPayload
-    ): Either<SykmeldingCreationErrors.ResourceError, RegulaResult> {
+    ): Either<SykmeldingCreationErrors, RegulaResult> {
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
-        val resources = result {
-            val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
-            val sykmelder =
-                sykmelderService
-                    .sykmelderMedSuspensjon(
-                        hpr = payload.meta.sykmelderHpr,
-                        signaturDato = mottatt.toLocalDate(),
-                        callId = sykmeldingId,
+        val person: Person =
+            personService.getPersonByIdent(payload.meta.pasientIdent).fold({ it }) {
+                return SykmeldingCreationErrors.PersonDoesNotExist.left()
+            }
+
+        val sykmelder =
+            sykmelderService
+                .sykmelderMedSuspensjon(
+                    hpr = payload.meta.sykmelderHpr,
+                    signaturDato = mottatt.toLocalDate(),
+                    callId = sykmeldingId,
+                )
+                .fold({ it }) {
+                    logger.error(
+                        "Feil ved henting av sykmelder med hpr=${payload.meta.sykmelderHpr}"
                     )
-                    .bind()
-
-            person to sykmelder
-        }
-
-        val (person, sykmelder) =
-            resources.fold(
-                { it },
-                {
-                    logger.warn("Feil ved henting av eksterne ressurser for regelvalidering: $it")
                     return SykmeldingCreationErrors.ResourceError.left()
-                },
-            )
+                }
 
         val ruleResult: RegulaResult =
             ruleService.validateRules(

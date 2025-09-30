@@ -501,9 +501,7 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmeldingArbeidsgiver? {
         return when (val value = sykmeldingRecord.sykmelding) {
             is DigitalSykmelding -> {
-                val arbeidsgiver = value.arbeidsgiver
-
-                getArbeidsgiverInfo(arbeidsgiver)
+                getArbeidsgiverInfo(value.arbeidsgiver)
             }
             is Papirsykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)

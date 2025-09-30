@@ -22,6 +22,7 @@ class SykmeldingProducer(
         person: Person,
         sykmelder: Sykmelder,
         validationResult: ValidationResult,
+        source: String,
     ) {
         val sykmeldingKafkaMessage =
             SykmeldingRecord(
@@ -32,6 +33,7 @@ class SykmeldingProducer(
                         sykmeldingId,
                         person,
                         sykmelder,
+                        source,
                     ),
                 validation = validationResult,
             )

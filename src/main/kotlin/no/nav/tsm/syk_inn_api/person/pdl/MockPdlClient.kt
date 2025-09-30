@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component
 @Component
 class MockPdlClient : IPdlClient {
     override fun getPerson(fnr: String): Result<PdlPerson> {
+        if (fnr == "does-not-exist")
+            return Result.failure(IllegalStateException("Could not find person in pdl cache"))
+
         return Result.success(
             PdlPerson(
                 navn =
@@ -26,7 +29,7 @@ class MockPdlClient : IPdlClient {
                             historisk = false,
                         ),
                     ),
-            )
+            ),
         )
     }
 }

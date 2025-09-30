@@ -1,9 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRedacted
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
@@ -139,10 +141,10 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `rule hits should return why`() {
+    fun `verify - rule hits should return why`() {
         val response =
             restTemplate.postForEntity<CreateSykmelding.RuleOutcome>(
-                "/api/sykmelding",
+                "/api/sykmelding/verify",
                 HttpEntity(
                     fullExampleSykmeldingPayload.replace("L73", "Bad"),
                     HttpHeaders().apply {
@@ -153,9 +155,27 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 
         val created = requireNotNull(response.body)
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
-        assertEquals(created.status, "INVALID")
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(created.status, RegulaOutcomeStatus.INVALID)
         assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
+    }
+
+    @Test
+    fun `Verify - should reply with 422 when person does not exist in PDL`() {
+        val response =
+            restTemplate.postForEntity<JsonNode>(
+                "/api/sykmelding/verify",
+                HttpEntity(
+                    fullExampleSykmeldingPayload.replace("21037712323", "does-not-exist"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        println(response.body)
+        assertEquals(response.body?.path("message")?.asText(), "Person does not exist")
     }
 
     @Test
@@ -243,19 +263,21 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `Broken input data - rule hit - should fail with 422 due to sykmelder being suspended`() {
+    fun `Expected rule hit - should OK with 200 even if sykmelder is suspended`() {
         val response =
-            restTemplate.postForEntity<String>(
+            restTemplate.postForEntity<JsonNode>(
                 "/api/sykmelding",
                 HttpEntity(
-                    brokenExampleSykmeldingPayloadValidHprButSuspendedFnr,
+                    exampleSykmeldingPayloadValidHprButSuspendedFnr,
                     HttpHeaders().apply {
                         set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     },
                 ),
             )
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        println(response.body)
+        assertEquals(response.body?.path("utfall")?.path("result")?.asText(), "INVALID")
     }
 }
 
@@ -264,6 +286,7 @@ private val fullExampleSykmeldingPayload =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -303,6 +326,7 @@ private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -342,6 +366,7 @@ private val brokenExampleSykmeldingPayloadUnknownAktivitet =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -381,6 +406,7 @@ private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
     """
     |{
     |  "meta": {
+    |  "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "brokenHpr",
     |    "legekontorOrgnr": "123456789",
@@ -420,6 +446,7 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
     """
     |{
     |  "meta": {
+    |  "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "hprButHasBrokenFnrAndNoGodkjenninger",
     |    "legekontorOrgnr": "123456789",
@@ -455,10 +482,11 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
         .trimMargin()
 
 @Language("JSON")
-private val brokenExampleSykmeldingPayloadValidHprButSuspendedFnr =
+private val exampleSykmeldingPayloadValidHprButSuspendedFnr =
     """
     |{
     |  "meta": {
+    |      "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "hprButFnrIsSuspended",
     |    "legekontorOrgnr": "123456789",
