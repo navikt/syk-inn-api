@@ -25,7 +25,7 @@ class ProducerConfig {
     @Bean
     @Profile("default")
     fun kafkaProducer(): SykmeldingInputProducer {
-        return SykmeldingInputKafkaInputFactory.create()
+        return SykmeldingInputKafkaInputFactory.naisProducer()
     }
 
     @Bean

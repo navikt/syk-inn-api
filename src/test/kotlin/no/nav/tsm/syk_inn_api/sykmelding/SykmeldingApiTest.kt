@@ -286,6 +286,7 @@ private val fullExampleSykmeldingPayload =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -325,6 +326,7 @@ private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -364,6 +366,7 @@ private val brokenExampleSykmeldingPayloadUnknownAktivitet =
     """
     |{
     |  "meta": {
+    |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "9144889",
     |    "legekontorOrgnr": "123456789",
@@ -403,6 +406,7 @@ private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
     """
     |{
     |  "meta": {
+    |  "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "brokenHpr",
     |    "legekontorOrgnr": "123456789",
@@ -442,6 +446,7 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
     """
     |{
     |  "meta": {
+    |  "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "hprButHasBrokenFnrAndNoGodkjenninger",
     |    "legekontorOrgnr": "123456789",
@@ -481,6 +486,7 @@ private val exampleSykmeldingPayloadValidHprButSuspendedFnr =
     """
     |{
     |  "meta": {
+    |      "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",
     |    "sykmelderHpr": "hprButFnrIsSuspended",
     |    "legekontorOrgnr": "123456789",

@@ -210,7 +210,16 @@ class SykmeldingServiceTest {
                 ),
             )
 
-        every { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) } just Runs
+        every {
+            sykmeldingInputProducer.send(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -222,6 +231,7 @@ class SykmeldingServiceTest {
                                 sykmelderHpr = "123456789",
                                 legekontorOrgnr = "987654321",
                                 legekontorTlf = "577788888",
+                                source = "Source (FHIR)",
                             ),
                         values =
                             OpprettSykmelding(
@@ -262,7 +272,9 @@ class SykmeldingServiceTest {
                     ),
             )
 
-        verify(exactly = 1) { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            sykmeldingInputProducer.send(any(), any(), any(), any(), any(), any())
+        }
 
         result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
@@ -401,7 +413,16 @@ class SykmeldingServiceTest {
                 ),
             )
 
-        every { sykmeldingInputProducer.send(any(), any(), any(), any(), any()) } just Runs
+        every {
+            sykmeldingInputProducer.send(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -413,6 +434,7 @@ class SykmeldingServiceTest {
                                 sykmelderHpr = "123456789",
                                 legekontorOrgnr = "987654321",
                                 legekontorTlf = "12345678",
+                                source = "Source (FHIR)",
                             ),
                         values =
                             OpprettSykmelding(

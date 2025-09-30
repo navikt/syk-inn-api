@@ -12,6 +12,7 @@ data class OpprettSykmeldingPayload(
 )
 
 data class OpprettSykmeldingMetadata(
+    val source: String,
     val pasientIdent: String,
     val sykmelderHpr: String,
     val legekontorOrgnr: String,

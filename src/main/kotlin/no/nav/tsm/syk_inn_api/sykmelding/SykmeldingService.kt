@@ -100,6 +100,7 @@ class SykmeldingService(
             person = person,
             sykmelder = sykmelder,
             validationResult = validation,
+            source = payload.meta.source,
         )
 
         return sykmeldingDocument.right()
