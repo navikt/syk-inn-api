@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
@@ -38,6 +39,7 @@ abstract class FullIntegrationTest {
                 withDatabaseName("testdb")
                 withUsername("test")
                 withPassword("test")
+                waitingFor(Wait.forListeningPort())
             }
 
         @Container

@@ -46,6 +46,7 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak
 import no.nav.tsm.sykmelding.input.core.model.metadata.Egenmeldt
 import no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel
 import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
+import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Papir
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
@@ -115,11 +116,9 @@ object PersistedSykmeldingMapper {
     fun mapLegekontorOrgnr(sykmeldingRecord: SykmeldingRecord): String? {
         return when (val metadata = sykmeldingRecord.metadata) {
             is Digital -> metadata.orgnummer
-            is Papir -> metadata.sender.ids.firstOrNull().let { it?.id }
-            is EmottakEnkel -> metadata.sender.ids.firstOrNull().let { it?.id }
-                    ?: error("No orgnr found in sender object (EmottakEnkel)")
-            is EDIEmottak -> metadata.sender.ids.firstOrNull().let { it?.id }
-                    ?: error("No orgnr found in sender object (EDIEmottak)")
+            is Papir -> metadata.sender.ids.firstOrNull { it.type == OrgIdType.ENH }?.id
+            is EmottakEnkel -> metadata.sender.ids.firstOrNull { it.type == OrgIdType.ENH }?.id
+            is EDIEmottak -> metadata.sender.ids.firstOrNull { it.type == OrgIdType.ENH }?.id
             is Utenlandsk -> null
             is Egenmeldt -> null
         }
