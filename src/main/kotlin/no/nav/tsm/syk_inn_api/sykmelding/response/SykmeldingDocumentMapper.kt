@@ -57,6 +57,8 @@ fun PersistedSykmelding.toSykmeldingDocumentValues(): SykmeldingDocumentValues {
         yrkesskade = this.yrkesskade.toExistingSykmeldingYrkesskade(),
         arbeidsgiver = this.arbeidsgiver.toExistingSykmeldingArbeidsgiver(),
         tilbakedatering = this.tilbakedatering.toExistingSykmeldingTilbakedatering(),
+        // TODO: Implementer utdypende spørsmål gjennom hele flyten
+        utdypendeSporsmal = null,
     )
 }
 

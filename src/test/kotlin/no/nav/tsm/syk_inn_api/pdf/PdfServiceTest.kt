@@ -132,6 +132,7 @@ class PdfServiceTest {
                             ),
                         arbeidsgiver = null,
                         tilbakedatering = null,
+                        utdypendeSporsmal = null,
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(

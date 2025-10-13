@@ -178,6 +178,7 @@ class SykmeldingServiceTest {
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
+                        utdypendeSporsmal = null,
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(
@@ -381,6 +382,7 @@ class SykmeldingServiceTest {
                         yrkesskade = null,
                         arbeidsgiver = null,
                         tilbakedatering = null,
+                        utdypendeSporsmal = null,
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(

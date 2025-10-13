@@ -39,6 +39,7 @@ data class SykmeldingDocumentValues(
     val yrkesskade: SykmeldingDocumentYrkesskade?,
     val arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
     val tilbakedatering: SykmeldingDocumentTilbakedatering?,
+    val utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?,
 )
 
 @JsonSubTypes(
@@ -134,4 +135,10 @@ data class SykmeldingDocumentSykmelder(
     val fornavn: String?,
     val mellomnavn: String?,
     val etternavn: String?,
+)
+
+data class SykmeldingDocumentUtdypendeSporsmal(
+    val utfodringerMedArbeid: String?,
+    val medisinskOppsummering: String?,
+    val hensynPaArbeidsplassen: String?,
 )
