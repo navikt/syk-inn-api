@@ -7,6 +7,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnose
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 
 fun SykmeldingDocument.toRedactedSykmelding(): SykmeldingDocumentRedacted {
@@ -57,8 +58,7 @@ fun PersistedSykmelding.toSykmeldingDocumentValues(): SykmeldingDocumentValues {
         yrkesskade = this.yrkesskade.toExistingSykmeldingYrkesskade(),
         arbeidsgiver = this.arbeidsgiver.toExistingSykmeldingArbeidsgiver(),
         tilbakedatering = this.tilbakedatering.toExistingSykmeldingTilbakedatering(),
-        // TODO: Implementer utdypende spørsmål gjennom hele flyten
-        utdypendeSporsmal = null,
+        utdypendeSporsmal = this.utdypendeSporsmal.toExistingUtdypendeSporsmal(),
     )
 }
 
@@ -145,6 +145,17 @@ private fun PersistedSykmeldingTilbakedatering?.toExistingSykmeldingTilbakedater
         SykmeldingDocumentTilbakedatering(
             startdato = it.startdato,
             begrunnelse = it.begrunnelse,
+        )
+    }
+}
+
+private fun PersistedSykmeldingUtdypendeSporsmal?.toExistingUtdypendeSporsmal():
+    SykmeldingDocumentUtdypendeSporsmal? {
+    return this?.let {
+        SykmeldingDocumentUtdypendeSporsmal(
+            utfodringerMedArbeid = it.utfodringerMedArbeid,
+            medisinskOppsummering = it.medisinskOppsummering,
+            hensynPaArbeidsplassen = it.hensynPaArbeidsplassen,
         )
     }
 }

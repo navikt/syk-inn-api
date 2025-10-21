@@ -186,6 +186,7 @@ object SykmeldingKafkaMapper {
                     sykmelding.values.meldinger,
                 ),
             tilbakedatering = mapTilbakedatering(sykmelding.values.tilbakedatering),
+            // utdypendeSporsmal: TODO: Legg til støtte for utdypendeSporsmal i DigitalSykmelding
             bistandNav = mapBistandNav(sykmelding.values.meldinger),
         )
     }

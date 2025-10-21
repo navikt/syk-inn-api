@@ -29,6 +29,7 @@ data class OpprettSykmelding(
     val yrkesskade: OpprettSykmeldingYrkesskade?,
     val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
     val tilbakedatering: OpprettSykmeldingTilbakedatering?,
+    val utdypendeSporsmal: OpprettSykmeldingUtdypendeSporsmal?,
 )
 
 data class OpprettSykmeldingMeldinger(
@@ -49,6 +50,12 @@ data class OpprettSykmeldingArbeidsgiver(
 data class OpprettSykmeldingTilbakedatering(
     val startdato: LocalDate,
     val begrunnelse: String,
+)
+
+data class OpprettSykmeldingUtdypendeSporsmal(
+    val hensynPaArbeidsplassen: String?,
+    val medisinskOppsummering: String?,
+    val utfodringerMedArbeid: String?,
 )
 
 @JsonSubTypes(

@@ -24,6 +24,13 @@ data class PersistedSykmelding(
     val arbeidsgiver: PersistedSykmeldingArbeidsgiver?,
     val tilbakedatering: PersistedSykmeldingTilbakedatering?,
     val regelResultat: PersistedSykmeldingRuleResult,
+    val utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?,
+)
+
+data class PersistedSykmeldingUtdypendeSporsmal (
+    val hensynPaArbeidsplassen: String?,
+    val medisinskOppsummering: String?,
+    val utfodringerMedArbeid: String?,
 )
 
 data class PersistedSykmeldingRuleResult(
