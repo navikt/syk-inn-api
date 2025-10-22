@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE sykmelding
 (
-    id               UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    id               UUID PRIMARY KEY,
     sykmelding_id    TEXT UNIQUE NOT NULL,
     mottatt          timestamptz NOT NULL,
     pasient_ident    TEXT        NOT NULL,

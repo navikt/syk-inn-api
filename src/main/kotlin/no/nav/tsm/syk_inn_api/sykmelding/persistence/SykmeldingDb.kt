@@ -13,7 +13,7 @@ import org.hibernate.annotations.Type
 @Entity
 @Table(name = "sykmelding")
 data class SykmeldingDb(
-    @Id @GeneratedValue(strategy = GenerationType.AUTO) val id: UUID? = null,
+    @Id @GeneratedValue(strategy = GenerationType.UUID) val id: UUID? = null,
     val sykmeldingId: String,
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
