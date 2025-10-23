@@ -24,6 +24,8 @@ spring:
     bootstrap-servers: ${BOOTSTRAP_SERVERS:localhost:9092}
     security:
       protocol: plaintext
+  jpa:
+    open-in-view: false
 
 nais:
   cluster: ${NAIS_CLUSTER:local}
