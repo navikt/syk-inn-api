@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: confluentinc/cp-kafka:8.1.0
+    image: confluentinc/confluent-local:8.1.0
     container_name: kafka-kraft
     ports:
       - "9092:9092"
@@ -14,25 +14,22 @@ services:
       KAFKA_LISTENERS: 'PLAINTEXT://kafka-kraft:29092,CONTROLLER://kafka-kraft:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-      CLUSTER_ID: 'zHd54rJcQFK3B6dUaS7ILQ'
 
-  kafka-init:
-    image: confluentinc/cp-kafka:8.1.0
+  kafka-topics:
+    image: confluentinc/confluent-local:8.1.0
+    container_name: kafka-topic-creator
     depends_on:
       - kafka
     entrypoint: [ '/bin/sh', '-c' ]
     command: |
       "
-      # Wait for Kafka to be ready
       echo 'Waiting for Kafka to be ready...'
-      cub kafka-ready -b kafka-kraft:29092 1 30
-      
-      # Create topics
+      sleep 10
+
       echo 'Creating topics...'
       kafka-topics --bootstrap-server kafka-kraft:29092 --create --if-not-exists --topic tsm.sykmeldinger-input --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server kafka-kraft:29092 --create --if-not-exists --topic tsm.sykmeldinger --replication-factor 1 --partitions 1
-      
-      # List topics to verify
+
       echo 'Topics created successfully:'
       kafka-topics --bootstrap-server kafka-kraft:29092 --list
       "
