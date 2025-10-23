@@ -6,30 +6,30 @@ val javaVersion = JvmTarget.JVM_21
 
 // Runtime deps
 val logstashLogbackEncoderVersion = "8.1"
-val openHtmlToPdfVersion = "1.1.29"
+val openHtmlToPdfVersion = "1.1.31"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.1.2"
-val regulaVersion = "41"
+val regulaVersion = "43"
 val sykmeldingInputVersion = "16"
 
 // Dev deps
 val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
-val mockkVersion = "1.14.5"
+val mockkVersion = "1.14.6"
 val mockkSpringVersion = "4.0.2"
-val mockwebserverVersion = "5.1.0"
+val mockwebserverVersion = "5.2.1"
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.spring") version "2.2.0"
-    kotlin("plugin.jpa") version "2.2.10"
-    id("org.springframework.boot") version "3.5.4"
+    kotlin("jvm") version "2.2.21"
+    kotlin("plugin.spring") version "2.2.21"
+    kotlin("plugin.jpa") version "2.2.21"
+    id("org.springframework.boot") version "3.5.7"
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "7.2.1"
-    id("com.github.ben-manes.versions") version "0.52.0"
+    id("com.diffplug.spotless") version "8.0.0"
+    id("com.github.ben-manes.versions") version "0.53.0"
 }
 
 group = "no.nav.tsm"
@@ -67,7 +67,7 @@ dependencies {
     implementation("no.nav.tsm.sykmelding", "input", sykmeldingInputVersion)
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
 
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.10.3")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
