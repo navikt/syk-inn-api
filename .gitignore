@@ -51,3 +51,6 @@ secure.log
 
 # Used for local development
 src/main/resources/application-dev-kafka.yaml
+
+# Local
+*.DS_Store
