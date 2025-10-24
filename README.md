@@ -63,41 +63,12 @@ You will also need docker installed for running the application locally, and run
 ### Building the application
 
 1. Start infrastructure: `docker-compose up -d`
-2. Run with local profile: `./gradlew bootRun --args='--spring.profiles.active=local'`
-3. External services are mocked (no real PDL, BTSYS, HPR calls)
+2. Run:
+   1. Run in IntelliJ - set profiles local and def-kafka
+   2. Run with local profile: `./gradlew bootRun --args='--spring.profiles.active=local,dev-kafka'`
+4. External services are mocked (no real PDL, BTSYS, HPR calls)
 
 This will run tests as well.
-
-#### Colima sidenote
-
-Ensure Testcontainers has access to Docker by adding this to your configuration
-```
-export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
-export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
-export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
-```
-
-## Run this application locally
-
-external services are mocked so we are not calling pdl, btsys etc-
-
-``` bash
-docker compose up -d 
-```
-
-or
-
-``` bash
-podman-compose up -d
-```
-
-Run the application normally from IntelliJ, remember to set the profile `local` in your run configuration.
-
-Or run the application using Gradle:
-
-``` bash
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
 
 ### Inspecting topics
 
@@ -106,6 +77,15 @@ content in the topic::
 
 ``` bash
 kcat -b localhost:9092 -t tsm.sykmeldinger-input -C -o beginning
+```
+
+#### Colima sidenote
+
+Ensure Testcontainers has access to Docker by adding this to your configuration
+```
+export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
+export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
 ```
 
 # Architecture
