@@ -194,4 +194,15 @@ class SykmeldingPersistenceService(
         sykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
         logger.info("Deleted sykmelding with id=$sykmeldingId")
     }
+
+    fun deleteSykmeldinger(sykmeldingerIds: List<String>) {
+        sykmeldingerIds.forEach { sykmeldingRepository.deleteBySykmeldingId(it) }
+    }
+
+    fun findSykmeldingerOlderThanDays(daysToSubtract: Long): List<SykmeldingDocument> {
+        val cutoffDate = java.time.LocalDate.now().minusDays(daysToSubtract)
+        return sykmeldingRepository.findSykmeldingerWithAktivitetOlderThan(cutoffDate).map {
+            mapDatabaseEntityToSykmeldingDocument(it)
+        }
+    }
 }
