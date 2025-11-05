@@ -208,6 +208,8 @@ class SykmeldingServiceTest {
                     legekontorOrgnr = "987654321",
                     sykmelding = getTestSykmelding(),
                     legekontorTlf = "12345678",
+                    fom = LocalDate.parse("2020-01-01"),
+                    tom = LocalDate.parse("2020-01-30"),
                 ),
             )
 
@@ -412,6 +414,8 @@ class SykmeldingServiceTest {
                     legekontorOrgnr = "987654321",
                     sykmelding = getTestSykmelding(),
                     legekontorTlf = "12345678",
+                    fom = LocalDate.parse("2020-01-01"),
+                    tom = LocalDate.parse("2020-01-30"),
                 ),
             )
 

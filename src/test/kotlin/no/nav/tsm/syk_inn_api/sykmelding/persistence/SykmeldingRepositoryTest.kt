@@ -41,8 +41,8 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                         aktivitet =
                             listOf(
                                 PersistedSykmeldingAktivitet.IkkeMulig(
-                                    LocalDate.parse("2024-04-01"),
-                                    LocalDate.parse("2024-04-10"),
+                                    fom = LocalDate.parse("2024-04-01"),
+                                    tom = LocalDate.parse("2024-04-10"),
                                     medisinskArsak =
                                         PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
                                     arbeidsrelatertArsak =
@@ -162,8 +162,8 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                     aktivitet =
                         listOf(
                             PersistedSykmeldingAktivitet.IkkeMulig(
-                                aktivitetTom.minusDays(fomDaysToSubtract),
-                                aktivitetTom,
+                                fom = aktivitetTom.minusDays(fomDaysToSubtract),
+                                tom = aktivitetTom,
                                 medisinskArsak =
                                     PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
                                 arbeidsrelatertArsak =

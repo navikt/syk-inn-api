@@ -78,33 +78,37 @@ data class PersistedSykmeldingTilbakedatering(
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface PersistedSykmeldingAktivitet {
+    val fom: LocalDate
+    val tom: LocalDate
+
     data class IkkeMulig(
-        val fom: LocalDate,
-        val tom: LocalDate,
         val medisinskArsak: PersistedSykmeldingMedisinskArsak,
-        val arbeidsrelatertArsak: PersistedSykmeldingArbeidsrelatertArsak
+        val arbeidsrelatertArsak: PersistedSykmeldingArbeidsrelatertArsak,
+        override val fom: LocalDate,
+        override val tom: LocalDate
     ) : PersistedSykmeldingAktivitet
 
     data class Gradert(
         val grad: Int,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val reisetilskudd: Boolean
+        val reisetilskudd: Boolean,
+        override val fom: LocalDate,
+        override val tom: LocalDate
     ) : PersistedSykmeldingAktivitet
 
     data class Behandlingsdager(
         val antallBehandlingsdager: Int,
-        val fom: LocalDate,
-        val tom: LocalDate
+        override val fom: LocalDate,
+        override val tom: LocalDate,
     ) : PersistedSykmeldingAktivitet
 
     data class Avventende(
         val innspillTilArbeidsgiver: String,
-        val fom: LocalDate,
-        val tom: LocalDate
+        override val fom: LocalDate,
+        override val tom: LocalDate,
     ) : PersistedSykmeldingAktivitet
 
-    data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : PersistedSykmeldingAktivitet
+    data class Reisetilskudd(override val fom: LocalDate, override val tom: LocalDate) :
+        PersistedSykmeldingAktivitet
 }
 
 data class PersistedSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)

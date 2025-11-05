@@ -83,33 +83,9 @@ class SykmeldingPersistenceService(
             sykmelding = persistedSykmelding,
             legekontorOrgnr = payload.meta.legekontorOrgnr,
             legekontorTlf = payload.meta.legekontorTlf,
-            fom = extractFirstFomDate(persistedSykmelding),
-            tom = extractLatestTomDate(persistedSykmelding),
+            fom = persistedSykmelding.aktivitet.minOf { it.fom },
+            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
         )
-    }
-
-    private fun extractFirstFomDate(sykmelding: PersistedSykmelding): LocalDate {
-        return sykmelding.aktivitet.minOf { aktivitet ->
-            when (aktivitet) {
-                is PersistedSykmeldingAktivitet.IkkeMulig -> aktivitet.fom
-                is PersistedSykmeldingAktivitet.Gradert -> aktivitet.fom
-                is PersistedSykmeldingAktivitet.Behandlingsdager -> aktivitet.fom
-                is PersistedSykmeldingAktivitet.Avventende -> aktivitet.fom
-                is PersistedSykmeldingAktivitet.Reisetilskudd -> aktivitet.fom
-            }
-        }
-    }
-
-    private fun extractLatestTomDate(sykmelding: PersistedSykmelding): LocalDate {
-        return sykmelding.aktivitet.maxOf { aktivitet ->
-            when (aktivitet) {
-                is PersistedSykmeldingAktivitet.IkkeMulig -> aktivitet.tom
-                is PersistedSykmeldingAktivitet.Gradert -> aktivitet.tom
-                is PersistedSykmeldingAktivitet.Behandlingsdager -> aktivitet.tom
-                is PersistedSykmeldingAktivitet.Avventende -> aktivitet.tom
-                is PersistedSykmeldingAktivitet.Reisetilskudd -> aktivitet.tom
-            }
-        }
     }
 
     fun mapDatabaseEntityToSykmeldingDocument(sykmeldingDb: SykmeldingDb): SykmeldingDocument {
@@ -157,8 +133,8 @@ class SykmeldingPersistenceService(
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
             legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
             validertOk = validertOk,
-            fom = extractFirstFomDate(persistedSykmelding),
-            tom = extractLatestTomDate(persistedSykmelding),
+            fom = persistedSykmelding.aktivitet.minOf { it.fom },
+            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
         )
     }
 
