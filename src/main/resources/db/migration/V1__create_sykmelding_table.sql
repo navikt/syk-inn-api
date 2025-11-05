@@ -10,5 +10,11 @@ CREATE TABLE sykmelding
     sykmelding       JSONB       NOT NULL,
     legekontor_orgnr TEXT,
     legekontor_tlf   TEXT,
-    validert_ok      BOOLEAN     NOT NULL DEFAULT FALSE
+    validert_ok      BOOLEAN     NOT NULL DEFAULT FALSE,
+    fom              DATE,
+    tom              DATE
 );
+
+CREATE INDEX idx_sykmelding_pasient_ident ON sykmelding (pasient_ident);
+CREATE INDEX idx_sykmelding_fom ON sykmelding (fom);
+CREATE INDEX idx_sykmelding_tom ON sykmelding (tom);

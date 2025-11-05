@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 import org.hibernate.annotations.Type
@@ -22,4 +23,6 @@ data class SykmeldingDb(
     val legekontorOrgnr: String?,
     val legekontorTlf: String?,
     val validertOk: Boolean = false,
+    val fom: LocalDate,
+    val tom: LocalDate,
 )

@@ -17,13 +17,9 @@ class ScheduledTasks(private val sykmeldingPersistenceService: SykmeldingPersist
             "Starting task to delete old sykmeldinger older than ${DAYS_OLD_SYKMELDING} days"
         )
 
-        val sykmeldingerToBeDeleted =
-            sykmeldingPersistenceService.findSykmeldingerOlderThanDays(DAYS_OLD_SYKMELDING)
-        logger.info("Found ${sykmeldingerToBeDeleted.size} sykmeldinger to be deleted")
-        sykmeldingPersistenceService.deleteSykmeldinger(
-            sykmeldingerToBeDeleted.map { it.sykmeldingId }
-        )
+        val deletedCount =
+            sykmeldingPersistenceService.deleteSykmeldingerOlderThanDays(DAYS_OLD_SYKMELDING)
 
-        logger.info("Successfully deleted ${sykmeldingerToBeDeleted.size} sykmeldinger")
+        logger.info("Successfully deleted $deletedCount sykmeldinger")
     }
 }

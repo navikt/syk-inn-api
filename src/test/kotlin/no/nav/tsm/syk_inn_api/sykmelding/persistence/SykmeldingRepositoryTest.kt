@@ -93,6 +93,8 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                     ),
                 legekontorTlf = "12345678",
                 validertOk = false,
+                fom = LocalDate.parse("2024-04-01"),
+                tom = LocalDate.parse("2024-04-10"),
             )
 
         val savedEntity = sykmeldingRepository.save(sykmeldingDb)
@@ -105,7 +107,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
     }
 
     @Test
-    fun `should find sykmeldinger with aktivitet older than 365 days`() {
+    fun `should delete sykmeldinger with aktivitet older than 365 days`() {
         val oldSykmeldingId = "old-sykmelding-123"
         val oldDate = LocalDate.now().minusDays(400)
         val oldSykmeldingDb =
@@ -128,11 +130,13 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
         sykmeldingRepository.save(recentSykmeldingDb)
 
         val cutoffDate = LocalDate.now().minusDays(365)
-        val oldSykmeldinger =
-            sykmeldingRepository.findSykmeldingerWithAktivitetOlderThan(cutoffDate)
+        val deletedCount = sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
 
-        assertThat(oldSykmeldinger).hasSize(1)
-        assertThat(oldSykmeldinger[0].sykmeldingId).isEqualTo(oldSykmeldingId)
+        assertThat(deletedCount).isEqualTo(1)
+
+        val remainingSykmeldinger = sykmeldingRepository.findAll().toList()
+        assertThat(remainingSykmeldinger).hasSize(1)
+        assertThat(remainingSykmeldinger[0].sykmeldingId).isEqualTo(recentSykmeldingId)
     }
 
     private fun createTestSykmeldingDb(
@@ -140,6 +144,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
         pasientIdent: String,
         aktivitetTom: LocalDate,
     ): SykmeldingDb {
+        val fomDaysToSubtract = 10L
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
             pasientIdent = pasientIdent,
@@ -157,7 +162,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                     aktivitet =
                         listOf(
                             PersistedSykmeldingAktivitet.IkkeMulig(
-                                aktivitetTom.minusDays(10),
+                                aktivitetTom.minusDays(fomDaysToSubtract),
                                 aktivitetTom,
                                 medisinskArsak =
                                     PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
@@ -209,6 +214,8 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                 ),
             legekontorTlf = "12345678",
             validertOk = false,
+            fom = aktivitetTom.minusDays(fomDaysToSubtract),
+            tom = aktivitetTom,
         )
     }
 }
