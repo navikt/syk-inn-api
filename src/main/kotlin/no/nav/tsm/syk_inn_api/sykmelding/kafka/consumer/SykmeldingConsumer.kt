@@ -3,6 +3,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
@@ -92,22 +93,16 @@ class SykmeldingConsumer(
                 }
 
             val sykmelder =
-                sykmelderService
-                    .sykmelder(
-                        findHprNumber(sykmeldingRecord),
-                        sykmeldingId,
+                findHprNumber(sykmeldingRecord).getOrElse {
+                    logger.error(
+                        "Kafka consumer failed, key: ${record.key()} - Sykmelder not found in Helsenett Proxy Exception",
+                        it,
                     )
-                    .getOrElse {
-                        logger.error(
-                            "Kafka consumer failed, key: ${record.key()} - Sykmelder not found in Helsenett Proxy Exception",
-                            it,
-                        )
-                        if (clusterName == "dev-gcp") {
-                            logger.warn("Sykmelder not found in dev-gcp, skipping sykmelding")
-                            return
-                        } else throw it
-                    }
-
+                    if (clusterName == "dev-gcp") {
+                        logger.warn("Sykmelder not found in dev-gcp, skipping sykmelding")
+                        return
+                    } else throw it
+                }
             try {
                 sykmeldingPersistenceService.updateSykmelding(
                     sykmeldingId = sykmeldingId,
@@ -142,10 +137,10 @@ class SykmeldingConsumer(
         sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
     }
 
-    private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): String {
+    private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): Result<Sykmelder.Enkel> {
         val hprNummer = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord)
         if (hprNummer != null) {
-            return hprNummer
+            return sykmelderService.sykmelder(hprNummer, sykmeldingRecord.sykmelding.id)
         }
 
         val sykmelding = sykmeldingRecord.sykmelding
@@ -166,15 +161,6 @@ class SykmeldingConsumer(
 
         requireNotNull(sykmelderFnr) { "Sykmelder not found in Helsenett Proxy" }
 
-        return sykmelderService
-            .sykmelderByFnr(sykmelderFnr, requireNotNull(sykmeldingId))
-            .getOrElse {
-                logger.error(
-                    "Failed to get sykmelder hpr from a fnr - Sykmelder not found in Helsenett Proxy Exception",
-                    it,
-                )
-                throw it
-            }
-            .hpr
+        return sykmelderService.sykmelderByFnr(sykmelderFnr, requireNotNull(sykmeldingId))
     }
 }
