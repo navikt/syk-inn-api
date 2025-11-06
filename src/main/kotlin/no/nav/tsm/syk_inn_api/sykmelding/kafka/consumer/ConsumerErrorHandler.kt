@@ -48,6 +48,7 @@ class ConsumerErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
+
         records.forEach { record ->
             appLog.error(
                 "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",

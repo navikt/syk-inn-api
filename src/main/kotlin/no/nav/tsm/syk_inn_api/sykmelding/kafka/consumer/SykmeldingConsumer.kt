@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -103,19 +104,17 @@ class SykmeldingConsumer(
                         return
                     } else throw it
                 }
-            try {
-                sykmeldingPersistenceService.updateSykmelding(
-                    sykmeldingId = sykmeldingId,
-                    sykmeldingRecord = sykmeldingRecord,
-                    person = person,
-                    sykmelder = sykmelder,
-                )
-            } catch (e: Exception) {
-                logger.error(
-                    "Kafka consumer failed, key: ${record.key()} - Unable to save to database",
-                    e,
-                )
-
+            sykmeldingPersistenceService.updateSykmelding(
+                sykmeldingId = sykmeldingId,
+                sykmeldingRecord = sykmeldingRecord,
+                person = person,
+                sykmelder = sykmelder,
+            )
+        } catch (e: JacksonException) {
+            logger.error(
+                "Failed to parse sykmelding record, record: ${record.key()}, offset: ${record.offset()}"
+            )
+            if (clusterName != "dev-gcp") {
                 throw e
             }
         } catch (e: Exception) {
