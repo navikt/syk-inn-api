@@ -48,10 +48,6 @@ class SykmeldingPersistenceService(
                     ruleResult = ruleResult,
                 ),
             )
-        if (savedEntity.id == null) {
-            logger.error("Lagring av sykmelding med id=$sykmeldingId feilet")
-            return null
-        }
 
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
