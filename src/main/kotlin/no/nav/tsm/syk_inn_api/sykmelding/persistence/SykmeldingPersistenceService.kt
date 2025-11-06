@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
@@ -66,21 +67,24 @@ class SykmeldingPersistenceService(
         ruleResult: ValidationResult,
     ): SykmeldingDb {
         logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
+        val persistedSykmelding =
+            PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
+                payload,
+                sykmeldingId,
+                pasient,
+                sykmelder,
+                ruleResult,
+            )
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
             pasientIdent = payload.meta.pasientIdent,
             sykmelderHpr = payload.meta.sykmelderHpr,
             mottatt = mottatt,
-            sykmelding =
-                PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
-                    payload,
-                    sykmeldingId,
-                    pasient,
-                    sykmelder,
-                    ruleResult,
-                ),
+            sykmelding = persistedSykmelding,
             legekontorOrgnr = payload.meta.legekontorOrgnr,
             legekontorTlf = payload.meta.legekontorTlf,
+            fom = persistedSykmelding.aktivitet.minOf { it.fom },
+            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
         )
     }
 
@@ -114,20 +118,23 @@ class SykmeldingPersistenceService(
         person: Person,
         sykmelder: Sykmelder,
     ): SykmeldingDb {
+        val persistedSykmelding =
+            PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
+                sykmeldingRecord,
+                person,
+                sykmelder,
+            )
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
             mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
             pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
             sykmelderHpr = sykmelder.hpr,
-            sykmelding =
-                PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
-                    sykmeldingRecord,
-                    person,
-                    sykmelder,
-                ),
+            sykmelding = persistedSykmelding,
             legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
             legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
             validertOk = validertOk,
+            fom = persistedSykmelding.aktivitet.minOf { it.fom },
+            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
         )
     }
 
@@ -193,5 +200,10 @@ class SykmeldingPersistenceService(
     fun deleteSykmelding(sykmeldingId: String) {
         sykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
         logger.info("Deleted sykmelding with id=$sykmeldingId")
+    }
+
+    fun deleteSykmeldingerOlderThanDays(daysToSubtract: Long): Int {
+        val cutoffDate = java.time.LocalDate.now().minusDays(daysToSubtract)
+        return sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
     }
 }
