@@ -48,13 +48,10 @@ class ConsumerErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-
-        records.forEach { record ->
-            appLog.error(
-                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
-                thrownException,
-            )
-        }
+        appLog.error(
+            "Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}",
+            thrownException,
+        )
         if (records.isEmpty()) {
             appLog.error("Feil i listener uten noen records", thrownException)
         }

@@ -3,10 +3,13 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
+import no.nav.tsm.syk_inn_api.person.PdlException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
+import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
+import no.nav.tsm.syk_inn_api.sykmelding.errors.KafkaProcessingError
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.scheduled.DAYS_OLD_SYKMELDING
@@ -30,6 +33,7 @@ class SykmeldingConsumer(
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
+    private val errorRepository: ErrorRepository,
     private val poisonPills: PoisonPills,
     @param:Value($$"${nais.cluster}") private val clusterName: String,
 ) {
@@ -86,16 +90,7 @@ class SykmeldingConsumer(
             }
 
             val person: Person =
-                personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrElse {
-                    logger.error(
-                        "Kafka consumer failed, key: ${record.key()} - Person not found in Pdl Exception",
-                        it,
-                    )
-                    if (clusterName == "dev-gcp") {
-                        logger.warn("Person not found in dev-gcp, skipping sykmelding")
-                        return
-                    } else throw it
-                }
+                personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
 
             val sykmelder =
                 findHprNumber(sykmeldingRecord).getOrElse {
@@ -115,12 +110,9 @@ class SykmeldingConsumer(
                 sykmelder = sykmelder,
             )
         } catch (e: JacksonException) {
-            logger.error(
-                "Failed to parse sykmelding record, record: ${record.key()}, offset: ${record.offset()}"
-            )
-            if (clusterName != "dev-gcp") {
-                throw e
-            }
+            handleError(record, e)
+        } catch (pdlException: PdlException) {
+            handleError(record, pdlException)
         } catch (e: Exception) {
             logger.error(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record",
@@ -134,6 +126,20 @@ class SykmeldingConsumer(
             // Don't eat the exception, we don't want to commit on unexpected errors
             throw e
         }
+    }
+
+    private fun handleError(record: ConsumerRecord<String, ByteArray?>, e: Exception) {
+        logger.error("Error processing record, key: ${record.key()}, error: ${e.message}", e)
+        val kafkaProcessingError =
+            KafkaProcessingError(
+                kafkaOffset = record.offset(),
+                kafkaPartition = record.partition(),
+                key = record.key(),
+                error = e.message,
+                stackTrace = e.stackTraceToString(),
+                partitionOffset = "${record.partition()}:${record.offset()}",
+            )
+        errorRepository.save(kafkaProcessingError)
     }
 
     private fun handleTombstone(sykmeldingId: String) {

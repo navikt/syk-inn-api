@@ -7,6 +7,8 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
 
+class PdlException(message: String) : Exception(message)
+
 @Service
 class PersonService(
     private val pdlClient: IPdlClient,
@@ -30,23 +32,19 @@ class PersonService(
         if (currentIdent == null) {
             teamLog.error("No valid FOLKEREGISTERIDENT found for person with ident $ident")
             return Result.failure(
-                IllegalStateException(
-                    "No valid FOLKEREGISTERIDENT found for person, see teamlog for ident"
-                )
+                PdlException("No valid FOLKEREGISTERIDENT found for person, see teamlog for ident")
             )
         }
 
         if (person.navn == null) {
             teamLog.error("No name found for person with ident $ident")
-            return Result.failure(
-                IllegalStateException("No name found for person, see teamlog for ident")
-            )
+            return Result.failure(PdlException("No name found for person, see teamlog for ident"))
         }
 
         if (person.foedselsdato == null) {
             teamLog.error("No fødselsdato found for person with ident $ident")
             return Result.failure(
-                IllegalStateException("Found person without fødselsdato, see teamlog for ident")
+                PdlException("Found person without fødselsdato, see teamlog for ident")
             )
         }
 
