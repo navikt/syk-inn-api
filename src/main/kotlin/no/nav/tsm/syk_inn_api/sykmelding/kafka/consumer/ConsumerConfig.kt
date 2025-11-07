@@ -27,7 +27,7 @@ class ConsumerConfig {
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                         "earliest",
                     )
-                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+                    put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true)
                 },
                 StringDeserializer(),
