@@ -8,6 +8,7 @@ import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
+import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprException
 import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
 import no.nav.tsm.syk_inn_api.sykmelding.errors.KafkaProcessingError
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
@@ -92,17 +93,7 @@ class SykmeldingConsumer(
             val person: Person =
                 personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
 
-            val sykmelder =
-                findHprNumber(sykmeldingRecord).getOrElse {
-                    logger.error(
-                        "Kafka consumer failed, key: ${record.key()} - Sykmelder not found in Helsenett Proxy Exception",
-                        it,
-                    )
-                    if (clusterName == "dev-gcp") {
-                        logger.warn("Sykmelder not found in dev-gcp, skipping sykmelding")
-                        return
-                    } else throw it
-                }
+            val sykmelder = findHprNumber(sykmeldingRecord).getOrThrow()
             sykmeldingPersistenceService.updateSykmelding(
                 sykmeldingId = sykmeldingId,
                 sykmeldingRecord = sykmeldingRecord,
@@ -113,6 +104,8 @@ class SykmeldingConsumer(
             handleError(record, e)
         } catch (pdlException: PdlException) {
             handleError(record, pdlException)
+        } catch (hprException: HprException) {
+            handleError(record, hprException)
         } catch (e: Exception) {
             logger.error(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record",
@@ -149,7 +142,13 @@ class SykmeldingConsumer(
     private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): Result<Sykmelder.Enkel> {
         val hprNummer = PersistedSykmeldingMapper.mapHprNummer(sykmeldingRecord)
         if (hprNummer != null) {
-            return sykmelderService.sykmelder(hprNummer, sykmeldingRecord.sykmelding.id)
+            val byHpr = sykmelderService.sykmelder(hprNummer, sykmeldingRecord.sykmelding.id)
+            if (byHpr.isSuccess) {
+                return byHpr
+            }
+            logger.warn(
+                "Sykmelder not found in Helsenett Proxy by, hprNummer: $hprNummer, trying with fnr"
+            )
         }
 
         val sykmelding = sykmeldingRecord.sykmelding
@@ -168,7 +167,11 @@ class SykmeldingConsumer(
                 else -> null to null
             }
 
-        requireNotNull(sykmelderFnr) { "Sykmelder not found in Helsenett Proxy" }
+        if (sykmelderFnr == null) {
+            return Result.failure(
+                HprException("Sykmelder not found in Helsenett Proxy by HPR and FNR", null)
+            )
+        }
 
         return sykmelderService.sykmelderByFnr(sykmelderFnr, requireNotNull(sykmeldingId))
     }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
 
+class HprException(message: String, cause: Exception?) : Exception(message, cause)
+
 interface IHelsenettProxyClient {
     fun getSykmelderByHpr(behandlerHpr: String, callId: String): Result<HprSykmelder>
 
@@ -67,6 +69,9 @@ class HelsenettProxyClient(
                 "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
                 e
             )
+            if (status.value() == 404)
+                return Result.failure(HprException("Fant ikke behandler for hpr=$behandlerHpr", e))
+
             Result.failure(
                 IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
             )
@@ -113,6 +118,8 @@ class HelsenettProxyClient(
                 "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
                 e
             )
+            if (status.value() == 404)
+                return Result.failure(HprException("Fant ikke behandler for fnr", e))
             Result.failure(
                 IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
             )
