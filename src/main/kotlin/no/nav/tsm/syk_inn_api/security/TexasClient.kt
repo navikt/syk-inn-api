@@ -23,9 +23,6 @@ class TexasClient(
     private val logger = logger()
 
     fun requestToken(namespace: String, otherApiAppName: String): TokenResponse {
-        logger.info(
-            "Requesting token for $otherApiAppName in namespace $namespace on cluster $cluster and endpoint $naisTokenEndpoint",
-        )
         val requestBody =
             TokenRequest(
                 identity_provider = "azuread",
@@ -33,7 +30,6 @@ class TexasClient(
             )
 
         return try {
-            logger.info("Trying to request token with body: $requestBody")
             val response =
                 restClient
                     .post()

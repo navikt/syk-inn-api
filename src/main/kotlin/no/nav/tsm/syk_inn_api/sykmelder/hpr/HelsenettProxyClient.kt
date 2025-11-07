@@ -34,10 +34,6 @@ class HelsenettProxyClient(
     ): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
-        logger.info(
-            "Getting sykmelder for hpr=$behandlerHpr, sykmeldingId=$callId",
-        )
-
         return try {
             val response =
                 restClient
@@ -53,9 +49,6 @@ class HelsenettProxyClient(
                     .body(HprSykmelder::class.java)
 
             if (response != null) {
-                logger.info(
-                    "Response from HelsenettProxy was successful for sykmeldingId=$callId",
-                )
                 Result.success(response)
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
@@ -87,10 +80,6 @@ class HelsenettProxyClient(
     override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
         val (accessToken) = getToken()
 
-        teamLogger.info(
-            "Getting sykmelder for fnr=$behandlerFnr, sykmeldingId=$callId",
-        )
-
         return try {
             val response =
                 restClient
@@ -106,9 +95,6 @@ class HelsenettProxyClient(
                     .body(HprSykmelder::class.java)
 
             if (response != null) {
-                logger.info(
-                    "Response from HelsenettProxy was successful for sykmeldingId=$callId",
-                )
                 Result.success(response)
             } else {
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
