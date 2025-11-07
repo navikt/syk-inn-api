@@ -150,7 +150,6 @@ class SykmeldingPersistenceService(
 
         val typeNotDigital = sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
         if (sykmeldingEntity == null && typeNotDigital) {
-            logger.info("Sykmelding with id=$sykmeldingId is not found in DB, creating new entry")
             try {
                 // TODO skal sjekke om den faktisk er avvist eller ikkje før en kan sette validert
                 // ok?
@@ -163,7 +162,6 @@ class SykmeldingPersistenceService(
                         sykmelder = sykmelder,
                     )
                 sykmeldingRepository.save(entity)
-                logger.debug("Saved new sykmelding with id=${sykmeldingRecord.sykmelding.id}")
             } catch (ex: Exception) {
                 logger.error(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",

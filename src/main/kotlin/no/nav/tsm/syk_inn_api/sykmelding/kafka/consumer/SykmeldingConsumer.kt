@@ -2,13 +2,14 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper.isBeforeYear
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.sykmelding.scheduled.DAYS_OLD_SYKMELDING
 import no.nav.tsm.syk_inn_api.utils.PoisonPills
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
@@ -51,8 +52,6 @@ class SykmeldingConsumer(
 
         val value: ByteArray? = record.value()
 
-        teamLogger.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
-
         if (value == null) {
             logger.info(
                 "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
@@ -62,16 +61,21 @@ class SykmeldingConsumer(
         }
 
         try {
+
             val sykmeldingRecord = sykmeldingObjectMapper.readValue<SykmeldingRecord>(value)
+
+            if (
+                sykmeldingRecord.sykmelding.aktivitet.maxOf { it.tom } <
+                    LocalDate.now().minusDays(DAYS_OLD_SYKMELDING)
+            ) {
+                return // Skip processing for sykmeldinger before 2024
+            }
+
             if (sykmeldingRecord.sykmelding.aktivitet.isEmpty()) {
                 logger.warn(
                     "SykmeldingRecord with id=${record.key()} has no activity, skipping processing",
                 )
                 return
-            }
-
-            if (sykmeldingRecord.isBeforeYear(2024)) {
-                return // Skip processing for sykmeldinger before 2024
             }
 
             if (
