@@ -52,8 +52,6 @@ class SykmeldingConsumer(
 
         val value: ByteArray? = record.value()
 
-        teamLogger.info("Consuming record (id: $sykmeldingId): $value from topic ${record.topic()}")
-
         if (value == null) {
             logger.info(
                 "SykmeldingRecord is null (tombstone), deleting sykmelding with id=${sykmeldingId}",
