@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_name != 'main' && !startsWith(github.ref_name, 'dev')
     steps:
-      - uses: navikt/tsm-workflows/actions/gradle/test@feat/actions-for-gradlew
+      - uses: navikt/tsm-workflows/actions/gradle/test@main
 
   build:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]' && (github.ref_name == 'main' || startsWith(github.ref_name, 'dev'))
     steps:
-      - uses: navikt/tsm-workflows/actions/gradle/build@feat/actions-for-gradlew
+      - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
         with:
           app: "syk-inn-api"
@@ -42,6 +42,7 @@ jobs:
           VAR: image=${{ needs.build.outputs.image }}
 
   deploy-prod:
+    if: github.ref_name == 'main'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -50,4 +51,4 @@ jobs:
         env:
           CLUSTER: "prod-gcp"
           RESOURCE: ".nais/nais-prod.yaml"
-          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }}

@@ -68,9 +68,6 @@ spec:
         - id: loki
         - id: elastic
   accessPolicy:
-    inbound:
-      rules:
-        - application: syk-inn
     outbound:
       rules:
         - application: logging
