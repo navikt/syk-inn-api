@@ -17,10 +17,11 @@ spec:
           - name: syk-inn-api
             envVarPrefix: DB
         diskAutoresize: true
-        highAvailability: false
+        highAvailability: true
         diskType: SSD
         insights:
           enabled: true
+        tier: db-custom-1-3840
         flags:
           - name: cloudsql.enable_pgaudit
             value: "true"
@@ -30,7 +31,6 @@ spec:
             value: "on"
           - name: cloudsql.logical_decoding
             value: "on"
-        tier: db-f1-micro
   image: {{ image }}
   replicas:
     min: 1
@@ -56,9 +56,9 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
+      tenant: nav.no
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   observability:
     autoInstrumentation:
       enabled: true
@@ -89,17 +89,17 @@ spec:
           namespace: team-rocket
   env:
     - name: SYFOHELSENETTPROXY_SCOPE
-      value: api://dev-gcp.teamsykmelding.syfohelsenettproxy/.default
+      value: api://prod-gcp.teamsykmelding.syfohelsenettproxy/.default
     - name: SYFOSMREGLER_SCOPE
-      value: api://dev-gcp.teamsykmelding.syfosmregler/.default
+      value: api://prod-gcp.teamsykmelding.syfosmregler/.default
     - name: SYFOSMREGISTER_SCOPE
-      value: api://dev-gcp.teamsykmelding.syfosmregister/.default
+      value: api://prod-gcp.teamsykmelding.syfosmregister/.default
     - name: SMPDFGEN_SCOPE
-      value: api://dev-gcp.teamsykmelding.smpdfgen/.default
+      value: api://prod-gcp.teamsykmelding.smpdfgen/.default
     - name: TSMPDL_SCOPE
-      value: api://dev-gcp.tsm.tsm-pdl-cache/.default
+      value: api://prod-gcp.tsm.tsm-pdl-cache/.default
     - name: LEGE_SUSPENSJON_PROXY_SCOPE
-      value: api://dev-gcp.team-rocket.btsys-api/.default
+      value: api://prod-gcp.team-rocket.btsys-api/.default
     - name: TSM_PDL_ENDPOINT_URL
       value: http://tsm-pdl-cache
     - name: BTSYS_ENDPOINT_URL
