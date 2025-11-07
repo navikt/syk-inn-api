@@ -34,7 +34,7 @@ spec:
   image: {{ image }}
   replicas:
     min: 1
-    max: 2
+    max: 10
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
@@ -48,10 +48,8 @@ spec:
     enabled: true
     path: /internal/prometheus
   resources:
-    limits:
-      memory: 1Gi
     requests:
-      cpu: 30m
+      cpu: 1024m
       memory: 512Mi
   azure:
     application:
