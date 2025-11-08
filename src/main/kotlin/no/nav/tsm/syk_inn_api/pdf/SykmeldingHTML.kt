@@ -15,7 +15,7 @@ import org.intellij.lang.annotations.Language
 private object HtmlResources {
     val b64Logo: String? =
         this.javaClass.getResourceAsStream("/pdf/logo.svg").use { stream ->
-            stream.readBytes().let { bytes -> Base64.getEncoder().encodeToString(bytes) }
+            stream?.readBytes()?.let { bytes -> Base64.getEncoder().encodeToString(bytes) }
         }
 }
 
@@ -142,7 +142,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         tr {
                             tableInfo("Diagnose") {
                                 if (sykmelding.values.hoveddiagnose != null) {
-                                    "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.code})"
+                                    "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.name})"
                                 } else {
                                     "Ingen diagnose oppgitt"
                                 }
@@ -150,7 +150,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             tableInfoMultiRow("Bidiagnoser") {
                                 if (sykmelding.values.bidiagnoser?.isNotEmpty() == true) {
                                     sykmelding.values.bidiagnoser.map {
-                                        "${it.code}: ${it.text} (${it.system.code})"
+                                        "${it.code}: ${it.text} (${it.system.name})"
                                     }
                                 } else {
                                     listOf("Ingen bidiagnoser oppgitt")

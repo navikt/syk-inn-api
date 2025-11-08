@@ -74,6 +74,9 @@ class RuleService() {
                         when (payload.values.hoveddiagnose.system) {
                             DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
                             DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                            DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                            DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
+                            DiagnoseSystem.UGYLDIG -> "UGYLDIG"
                         },
                 ),
             bidiagnoser = mapToRegulaBidiagnoser(payload.values.bidiagnoser),
@@ -122,6 +125,9 @@ class RuleService() {
                     when (diagnose.system) {
                         DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
                         DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                        DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                        DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
+                        DiagnoseSystem.UGYLDIG -> "UGYLDIG"
                     },
             )
         }

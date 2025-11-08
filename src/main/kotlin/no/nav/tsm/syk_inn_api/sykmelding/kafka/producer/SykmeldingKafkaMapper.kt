@@ -6,7 +6,6 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper.findTextFromDiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.parseHelsepersonellKategori
@@ -127,7 +126,7 @@ object SykmeldingKafkaMapper {
 
         requireNotNull(sykmelderNavn) { "Sykmelder must have a name" }
 
-        // TODO is it ok to use the first godkjenning?
+        // TODO is it ok to use the first godkjenning? NO need to find the best one first
         val helsepersonellKategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
         requireNotNull(helsepersonellKategoriKode)
 
@@ -328,8 +327,7 @@ fun mapHoveddiagnose(hoveddiagnose: SykmeldingDocumentDiagnoseInfo?): DiagnoseIn
     return DiagnoseInfo(
         system = hoveddiagnose.system.toKafkaDiagnoseSystem(),
         kode = hoveddiagnose.code,
-        tekst =
-            findTextFromDiagnoseSystem(system = hoveddiagnose.system, code = hoveddiagnose.code),
+        tekst = hoveddiagnose.text,
     )
 }
 
@@ -338,6 +336,9 @@ private fun DiagnoseSystem.toKafkaDiagnoseSystem():
     return when (this) {
         DiagnoseSystem.ICPC2 -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICPC2
         DiagnoseSystem.ICD10 -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICD10
+        DiagnoseSystem.ICPC2B -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICPC2B
+        DiagnoseSystem.PHBU -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.PHBU
+        DiagnoseSystem.UGYLDIG -> no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.UGYLDIG
     }
 }
 
@@ -361,7 +362,7 @@ private fun List<SykmeldingDocumentDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo(
         DiagnoseInfo(
             system = diagnose.system.toKafkaDiagnoseSystem(),
             kode = diagnose.code,
-            tekst = findTextFromDiagnoseSystem(system = diagnose.system, code = diagnose.code),
+            tekst = diagnose.text,
         )
     }
 }

@@ -189,10 +189,9 @@ object PersistedSykmeldingMapper {
         return when (this) {
             no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICD10 -> DiagnoseSystem.ICD10
             no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICPC2 -> DiagnoseSystem.ICPC2
-            else -> {
-                logger.error("Unknown DiagnoseSystem: $this")
-                throw IllegalArgumentException("Unknown DiagnoseSystem: $this")
-            }
+            no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.ICPC2B -> DiagnoseSystem.ICPC2B
+            no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.PHBU -> DiagnoseSystem.PHBU
+            no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem.UGYLDIG -> DiagnoseSystem.UGYLDIG
         }
     }
 
@@ -477,7 +476,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingDiagnoseInfo(
             system = system.toDiagnoseSystem(),
             code = kode,
-            text = DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toDiagnoseSystem(), kode)
+            text = tekst ?: DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toDiagnoseSystem(), kode)
                     ?: "Unknown diagnosis code: $kode",
         )
     }
