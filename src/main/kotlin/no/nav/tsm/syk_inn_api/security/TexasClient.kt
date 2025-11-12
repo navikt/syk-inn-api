@@ -1,11 +1,10 @@
 package no.nav.tsm.syk_inn_api.security
 
-import io.opentelemetry.api.trace.Span
-import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.nio.file.AccessDeniedException
 import javax.naming.AuthenticationException
+import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -26,7 +25,7 @@ class TexasClient(
     private val restClient: RestClient = restClientBuilder.baseUrl(naisTokenEndpoint).build()
     private val logger = logger()
 
-    @WithSpan("TexasClient.requestToken")
+    @WithSpan("Texas.requestToken")
     fun requestToken(
         @SpanAttribute("namespace") namespace: String,
         @SpanAttribute("API") otherApiAppName: String
@@ -48,37 +47,26 @@ class TexasClient(
 
             response ?: throw IllegalStateException("Failed to retrieve token: empty response")
         } catch (e: RestClientResponseException) {
-            val span = Span.current()
-            span.recordException(e)
-            span.setStatus(StatusCode.ERROR)
-
             val status = e.statusCode
             val body = e.responseBodyAsString
             logger.error(
                 "TexasClient token request failed with HTTP ${status.value()}: $body (ns=$namespace app=$otherApiAppName)",
                 e,
             )
-            throw mapTexasError(status, body, e)
-        } catch (e: RestClientException) {
-            val span = Span.current()
-            span.recordException(e)
-            span.setStatus(StatusCode.ERROR)
 
+            throw mapTexasError(status, body, e).failSpan()
+        } catch (e: RestClientException) {
             logger.error(
                 "Unexpected RestClientException while requesting token for ${namespace}:${otherApiAppName}",
                 e,
             )
-            throw RuntimeException("Unexpected error: ${e.message}", e)
+            throw RuntimeException("Unexpected error: ${e.message}", e).failSpan()
         } catch (e: Exception) {
-            val span = Span.current()
-            span.recordException(e)
-            span.setStatus(StatusCode.ERROR)
-
             logger.error(
                 "Unexpected exception while requesting token for ${namespace}:${otherApiAppName}",
                 e,
             )
-            throw e
+            throw e.failSpan()
         }
     }
 

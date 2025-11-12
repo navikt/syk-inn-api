@@ -5,7 +5,6 @@ import arrow.core.left
 import arrow.core.raise.result
 import arrow.core.right
 import io.opentelemetry.api.trace.Span
-import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -71,8 +70,7 @@ class SykmeldingService(
             resources.fold(
                 { it },
                 {
-                    span.setStatus(StatusCode.ERROR)
-                    span.recordException(it)
+                    it.failSpan()
                     logger.error("Feil ved henting av eksterne ressurser: $it")
                     return SykmeldingCreationErrors.ResourceError.left()
                 },
@@ -134,7 +132,6 @@ class SykmeldingService(
     fun verifySykmelding(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, RegulaResult> {
-        val span = Span.current()
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -154,7 +151,7 @@ class SykmeldingService(
                     logger.error(
                         "Feil ved henting av sykmelder med hpr=${payload.meta.sykmelderHpr}"
                     )
-                    failSpan(it)
+                    it.failSpan()
                     return SykmeldingCreationErrors.ResourceError.left()
                 }
 

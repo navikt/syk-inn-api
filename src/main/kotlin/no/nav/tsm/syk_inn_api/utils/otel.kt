@@ -9,8 +9,12 @@ fun failSpan(span: Span, exception: Throwable): Throwable {
     return exception
 }
 
-fun failSpan(exception: Throwable): Throwable {
+fun Throwable.failSpan(): Throwable {
     val span = Span.current()
 
-    return failSpan(span, exception)
+    return failSpan(span, this)
+}
+
+fun Throwable.failSpan(span: Span): Throwable {
+    return failSpan(span, this)
 }

@@ -56,11 +56,10 @@ class RuleService() {
                 }
         } catch (e: Exception) {
             logger.error("Error while executing Regula rules", e)
-            throw failSpan(
-                RuntimeException(
+            throw RuntimeException(
                     "Error while executing Regula rules for sykmeldingId=$sykmeldingId",
-                ),
-            )
+                )
+                .failSpan()
         }
     }
 

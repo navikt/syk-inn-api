@@ -35,25 +35,22 @@ class PersonService(
         if (currentIdent == null) {
             teamLog.error("No valid FOLKEREGISTERIDENT found for person with ident $ident")
             return Result.failure(
-                failSpan(
-                    PdlException(
-                        "No valid FOLKEREGISTERIDENT found for person, see teamlog for ident"
-                    ),
-                ),
+                PdlException("No valid FOLKEREGISTERIDENT found for person, see teamlog for ident")
+                    .failSpan(),
             )
         }
 
         if (person.navn == null) {
             teamLog.error("No name found for person with ident $ident")
             return Result.failure(
-                failSpan(PdlException("No name found for person, see teamlog for ident"))
+                PdlException("No name found for person, see teamlog for ident").failSpan()
             )
         }
 
         if (person.foedselsdato == null) {
             teamLog.error("No fødselsdato found for person with ident $ident")
             return Result.failure(
-                failSpan(PdlException("Found person without fødselsdato, see teamlog for ident")),
+                PdlException("Found person without fødselsdato, see teamlog for ident").failSpan(),
             )
         }
 

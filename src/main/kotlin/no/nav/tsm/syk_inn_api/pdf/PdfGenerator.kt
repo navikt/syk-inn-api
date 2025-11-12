@@ -64,7 +64,7 @@ class PdfGenerator() {
             span.setAttribute("PdfGenerator.bytes", byteArray.size.toLong())
             return byteArray
         } catch (e: Exception) {
-            throw RuntimeException("Feil ved generering av pdf", failSpan(span, e))
+            throw RuntimeException("Feil ved generering av pdf", e.failSpan(span))
         }
     }
 
