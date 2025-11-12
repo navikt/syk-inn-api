@@ -5,8 +5,6 @@ metadata:
   namespace: tsm
   labels:
     team: tsm
-  annotations:
-    texas.nais.io/enabled: "true"
 spec:
   gcp:
     sqlInstances:
@@ -74,38 +72,17 @@ spec:
         - id: loki
         - id: elastic
   accessPolicy:
+# TODO: Enable when syk-inn is ready for production
+#    inbound:
+#      rules:
+#        - application: syk-inn
     outbound:
       rules:
         - application: logging
           namespace: nais-system
         - application: syfohelsenettproxy
           namespace: teamsykmelding
-        - application: syfosmregler
-          namespace: teamsykmelding
-        - application: syfosmregister
-          namespace: teamsykmelding
-        - application: smpdfgen
-          namespace: teamsykmelding
         - application: tsm-pdl-cache
           namespace: tsm
         - application: btsys-api
           namespace: team-rocket
-  env:
-    - name: SYFOHELSENETTPROXY_SCOPE
-      value: api://prod-gcp.teamsykmelding.syfohelsenettproxy/.default
-    - name: SYFOSMREGLER_SCOPE
-      value: api://prod-gcp.teamsykmelding.syfosmregler/.default
-    - name: SYFOSMREGISTER_SCOPE
-      value: api://prod-gcp.teamsykmelding.syfosmregister/.default
-    - name: SMPDFGEN_SCOPE
-      value: api://prod-gcp.teamsykmelding.smpdfgen/.default
-    - name: TSMPDL_SCOPE
-      value: api://prod-gcp.tsm.tsm-pdl-cache/.default
-    - name: LEGE_SUSPENSJON_PROXY_SCOPE
-      value: api://prod-gcp.team-rocket.btsys-api/.default
-    - name: TSM_PDL_ENDPOINT_URL
-      value: http://tsm-pdl-cache
-    - name: BTSYS_ENDPOINT_URL
-      value: http://btsys-api.team-rocket
-    - name: SYFOHELSENETTPROXY_URL
-      value: http://syfohelsenettproxy.teamsykmelding
