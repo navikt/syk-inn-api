@@ -72,10 +72,9 @@ spec:
         - id: loki
         - id: elastic
   accessPolicy:
-# TODO: Enable when syk-inn is ready for production
-#    inbound:
-#      rules:
-#        - application: syk-inn
+    inbound:
+      rules:
+        - application: syk-inn
     outbound:
       rules:
         - application: logging
