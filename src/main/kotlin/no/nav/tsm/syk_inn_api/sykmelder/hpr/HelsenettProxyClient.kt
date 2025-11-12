@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelder.hpr
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.syk_inn_api.security.TexasClient
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
@@ -29,12 +32,15 @@ class HelsenettProxyClient(
 
     private val restClient: RestClient = restClientBuilder.baseUrl(baseUrl).build()
 
+    @WithSpan
     override fun getSykmelderByHpr(
         behandlerHpr: String,
         // TODO: Use MDC?
         callId: String
     ): Result<HprSykmelder> {
         val (accessToken) = getToken()
+
+        val span = Span.current()
 
         return try {
             val response =
@@ -56,26 +62,36 @@ class HelsenettProxyClient(
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
                 logger.warn(msg)
                 teamLogger.warn("$msg and hpr=$behandlerHpr")
-                Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
+                val exception = IllegalStateException("HelsenettProxy returned no Sykmelder")
+                span.setStatus(StatusCode.ERROR)
+                span.recordException(exception)
+                Result.failure(exception)
             }
         } catch (e: RestClientResponseException) {
             val status = e.statusCode
             val body = e.responseBodyAsString
             teamLogger.error(
                 "HelsenettProxy HTTP ${status.value()}: $body, hpr=$behandlerHpr, callId=$callId",
-                e
+                e,
             )
             logger.error(
                 "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
-                e
+                e,
             )
             if (status.value() == 404)
                 return Result.failure(HprException("Fant ikke behandler for hpr=$behandlerHpr", e))
 
-            Result.failure(
+            val exception =
                 IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
+
+            span.setStatus(StatusCode.ERROR)
+            span.recordException(exception)
+            Result.failure(
+                exception,
             )
         } catch (e: Exception) {
+            span.setStatus(StatusCode.ERROR)
+            span.recordException(e)
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
             teamLogger.error("Exception with hpr=$behandlerHpr for sykmeldingId=$callId", e)
             Result.failure(e)
@@ -84,6 +100,8 @@ class HelsenettProxyClient(
 
     override fun getSykmelderByFnr(behandlerFnr: String, callId: String): Result<HprSykmelder> {
         val (accessToken) = getToken()
+
+        val span = Span.current()
 
         return try {
             val response =
@@ -105,24 +123,33 @@ class HelsenettProxyClient(
                 val msg = "HelsenettProxy returned null response for sykmeldingId=$callId"
                 logger.warn(msg)
                 teamLogger.warn("$msg and hpr=$behandlerFnr")
-                Result.failure(IllegalStateException("HelsenettProxy returned no Sykmelder"))
+                val exception = IllegalStateException("HelsenettProxy returned no Sykmelder")
+                span.setStatus(StatusCode.ERROR)
+                span.recordException(exception)
+                Result.failure(exception)
             }
         } catch (e: RestClientResponseException) {
             val status = e.statusCode
             val body = e.responseBodyAsString
             teamLogger.error(
                 "HelsenettProxy HTTP ${status.value()}: $body, fnr=$behandlerFnr, callId=$callId",
-                e
+                e,
             )
             logger.error(
                 "HelsenettProxy request failed with ${status.value()} for sykmeldingId=$callId",
-                e
+                e,
             )
-            if (status.value() == 404)
-                return Result.failure(HprException("Fant ikke behandler for fnr", e))
-            Result.failure(
-                IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
-            )
+
+            val exception =
+                if (status.value() == 404) {
+                    HprException("Fant ikke behandler for fnr", e)
+                } else {
+                    IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
+                }
+
+            span.setStatus(StatusCode.ERROR)
+            span.recordException(exception)
+            return Result.failure(exception)
         } catch (e: Exception) {
             logger.error("Error while calling HelsenettProxy API for sykmeldingId=$callId", e)
             teamLogger.error("Exception with hpr=$behandlerFnr for sykmeldingId=$callId", e)

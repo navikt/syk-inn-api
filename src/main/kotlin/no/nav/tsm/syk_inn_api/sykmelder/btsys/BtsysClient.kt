@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelder.btsys
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.syk_inn_api.security.TexasClient
@@ -24,6 +27,7 @@ class BtsysClient(
     private val restClient: RestClient = restClientBuilder.baseUrl(btsysEndpointUrl).build()
     private val logger = logger()
 
+    @WithSpan
     override fun checkSuspensionStatus(
         sykmelderFnr: String,
         oppslagsdato: LocalDate
@@ -57,14 +61,23 @@ class BtsysClient(
                 Result.failure(IllegalStateException("Btsys returned no suspension status"))
             }
         } catch (e: RestClientResponseException) {
+            val span = Span.current()
+            span.setStatus(StatusCode.ERROR)
+
             val status = e.statusCode
             val body = e.responseBodyAsString
             logger.error("BtsysClient request failed with ${status.value()} and body: $body", e)
-            Result.failure(
+            val exception =
                 IllegalStateException("HelsenettProxy error (${status.value()}): $body", e)
-            )
+            span.recordException(exception)
+            Result.failure(exception)
         } catch (e: Exception) {
             logger.error("Error while calling Btsys API", e)
+
+            val span = Span.current()
+            span.setStatus(StatusCode.ERROR)
+            span.recordException(e)
+
             Result.failure(e)
         }
     }
