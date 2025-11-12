@@ -70,7 +70,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.12.0")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
