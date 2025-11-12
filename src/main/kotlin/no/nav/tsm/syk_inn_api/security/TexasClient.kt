@@ -1,5 +1,9 @@
 package no.nav.tsm.syk_inn_api.security
 
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.SpanAttribute
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.nio.file.AccessDeniedException
 import javax.naming.AuthenticationException
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -22,7 +26,11 @@ class TexasClient(
     private val restClient: RestClient = restClientBuilder.baseUrl(naisTokenEndpoint).build()
     private val logger = logger()
 
-    fun requestToken(namespace: String, otherApiAppName: String): TokenResponse {
+    @WithSpan("TexasClient.requestToken")
+    fun requestToken(
+        @SpanAttribute("namespace") namespace: String,
+        @SpanAttribute("API") otherApiAppName: String
+    ): TokenResponse {
         val requestBody =
             TokenRequest(
                 identity_provider = "azuread",
@@ -40,6 +48,10 @@ class TexasClient(
 
             response ?: throw IllegalStateException("Failed to retrieve token: empty response")
         } catch (e: RestClientResponseException) {
+            val span = Span.current()
+            span.recordException(e)
+            span.setStatus(StatusCode.ERROR)
+
             val status = e.statusCode
             val body = e.responseBodyAsString
             logger.error(
@@ -48,12 +60,20 @@ class TexasClient(
             )
             throw mapTexasError(status, body, e)
         } catch (e: RestClientException) {
+            val span = Span.current()
+            span.recordException(e)
+            span.setStatus(StatusCode.ERROR)
+
             logger.error(
                 "Unexpected RestClientException while requesting token for ${namespace}:${otherApiAppName}",
                 e,
             )
             throw RuntimeException("Unexpected error: ${e.message}", e)
         } catch (e: Exception) {
+            val span = Span.current()
+            span.recordException(e)
+            span.setStatus(StatusCode.ERROR)
+
             logger.error(
                 "Unexpected exception while requesting token for ${namespace}:${otherApiAppName}",
                 e,
