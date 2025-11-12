@@ -19,16 +19,29 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]' && (github.ref_name == 'main' || startsWith(github.ref_name, 'dev'))
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev')
     steps:
       - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
         with:
           app: "syk-inn-api"
           team: "tsm"
+          salsa: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
       image: ${{ steps.build.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+
+  sbom:
+    name: Upload SBOM for build
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: navikt/tsm-workflows/actions/attest-sign@main
+        with:
+          image: ${{ needs.build-dev.outputs.image }}
+          digest: ${{ needs.build-dev.outputs.digest }}
+          team: tsm
 
   deploy-dev:
     needs: build
