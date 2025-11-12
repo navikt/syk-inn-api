@@ -42,36 +42,6 @@ spring:
           issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
           jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
           audiences: ${AZURE_APP_CLIENT_ID}
-      client:
-        registration:
-          syfohelsenettproxy-m2m:
-            authorization-grant-type: client_credentials
-            client-authentication-method: client_secret_basic
-            client-id: ${azure.app.client.id}
-            client-secret: ${azure.app.client.secret}
-            provider: aad
-            scope:
-              - ${syfohelsenettproxy.scope}
-
-          btsys-m2m:
-            authorization-grant-type: client_credentials
-            client-authentication-method: client_secret_basic
-            client-id: ${azure.app.client.id}
-            client-secret: ${azure.app.client.secret}
-            provider: aad
-            scope:
-              - ${btsys.scope}
-          pdlcache-m2m:
-            authorization-grant-type: client_credentials
-            client-authentication-method: client_secret_basic
-            client-id: ${azure.app.client.id}
-            client-secret: ${azure.app.client.secret}
-            provider: aad
-            scope:
-              - ${tsmpdl.scope}
-        provider:
-          aad:
-            issuer-uri: ${azure.openid.config.issuer}
 
 # Kafka topics that this syk-inn-api uses
 kafka:
@@ -83,12 +53,12 @@ kafka:
 services:
   teamsykmelding:
     syfohelsenettproxy:
-      url: ${SYFOHELSENETTPROXY_URL}
+      url: http://syfohelsenettproxy.teamsykmelding
     pdlcache:
-      url: ${TSM_PDL_ENDPOINT_URL}
+      url: http://tsm-pdl-cache
   external:
     btsys:
-      url: ${BTSYS_ENDPOINT_URL}
+      url: http://btsys-api.team-rocket
 
 # Config for Texas
 nais:

@@ -30,7 +30,6 @@ class SecurityConfig {
             securityMatcher("/**")
             csrf { disable() }
             oauth2ResourceServer { jwt {} }
-            oauth2Client {}
             authorizeHttpRequests {
                 authorize("/internal/**", permitAll)
                 authorize(anyRequest, authenticated)
