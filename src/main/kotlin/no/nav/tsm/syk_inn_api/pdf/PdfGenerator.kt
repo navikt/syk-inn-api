@@ -6,8 +6,11 @@ import com.openhtmltopdf.pdfboxout.PDFontSupplier
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import com.openhtmltopdf.util.XRLog
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.fontbox.ttf.TTFParser
 import org.apache.fontbox.ttf.TrueTypeFont
@@ -41,7 +44,9 @@ class PdfGenerator() {
         XRLog.setLoggingEnabled(false)
     }
 
+    @WithSpan
     fun generatePDFA(html: String): ByteArray {
+        val span = Span.current()
         val outputStream = ByteArrayOutputStream()
 
         try {
@@ -55,9 +60,11 @@ class PdfGenerator() {
                 .toStream(outputStream)
                 .run()
 
-            return outputStream.toByteArray()
+            val byteArray = outputStream.toByteArray()
+            span.setAttribute("PdfGenerator.bytes", byteArray.size.toLong())
+            return byteArray
         } catch (e: Exception) {
-            throw RuntimeException("Feil ved generering av pdf", e)
+            throw RuntimeException("Feil ved generering av pdf", failSpan(span, e))
         }
     }
 

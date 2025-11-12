@@ -1,8 +1,10 @@
 package no.nav.tsm.syk_inn_api.person
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.syk_inn_api.person.pdl.IDENT_GRUPPE
 import no.nav.tsm.syk_inn_api.person.pdl.IPdlClient
 import no.nav.tsm.syk_inn_api.person.pdl.PdlPerson
+import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
@@ -16,6 +18,7 @@ class PersonService(
     private val logger = logger()
     private val teamLog = teamLogger()
 
+    @WithSpan
     fun getPersonByIdent(ident: String): Result<Person> {
         val person: PdlPerson =
             pdlClient.getPerson(ident).fold({ it }) {
@@ -32,19 +35,25 @@ class PersonService(
         if (currentIdent == null) {
             teamLog.error("No valid FOLKEREGISTERIDENT found for person with ident $ident")
             return Result.failure(
-                PdlException("No valid FOLKEREGISTERIDENT found for person, see teamlog for ident")
+                failSpan(
+                    PdlException(
+                        "No valid FOLKEREGISTERIDENT found for person, see teamlog for ident"
+                    ),
+                ),
             )
         }
 
         if (person.navn == null) {
             teamLog.error("No name found for person with ident $ident")
-            return Result.failure(PdlException("No name found for person, see teamlog for ident"))
+            return Result.failure(
+                failSpan(PdlException("No name found for person, see teamlog for ident"))
+            )
         }
 
         if (person.foedselsdato == null) {
             teamLog.error("No fødselsdato found for person with ident $ident")
             return Result.failure(
-                PdlException("Found person without fødselsdato, see teamlog for ident")
+                failSpan(PdlException("Found person without fødselsdato, see teamlog for ident")),
             )
         }
 
@@ -53,7 +62,7 @@ class PersonService(
                 navn = person.navn,
                 ident = currentIdent,
                 fodselsdato = person.foedselsdato,
-            )
+            ),
         )
     }
 }

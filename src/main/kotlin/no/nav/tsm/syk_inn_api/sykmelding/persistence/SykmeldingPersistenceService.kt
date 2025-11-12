@@ -35,7 +35,7 @@ class SykmeldingPersistenceService(
         person: Person,
         sykmelder: Sykmelder,
         ruleResult: ValidationResult,
-    ): SykmeldingDocument? {
+    ): SykmeldingDocument {
         logger.info("Lagrer sykmelding med id=${sykmeldingId}")
         val savedEntity =
             sykmeldingRepository.save(

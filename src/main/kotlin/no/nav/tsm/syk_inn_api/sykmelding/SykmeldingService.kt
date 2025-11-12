@@ -4,6 +4,9 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.raise.result
 import arrow.core.right
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -16,6 +19,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
+import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
@@ -41,9 +45,11 @@ class SykmeldingService(
     }
 
     @Transactional
+    @WithSpan
     fun createSykmelding(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
+        val span = Span.current()
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -65,6 +71,8 @@ class SykmeldingService(
             resources.fold(
                 { it },
                 {
+                    span.setStatus(StatusCode.ERROR)
+                    span.recordException(it)
                     logger.error("Feil ved henting av eksterne ressurser: $it")
                     return SykmeldingCreationErrors.ResourceError.left()
                 },
@@ -89,11 +97,6 @@ class SykmeldingService(
                 ruleResult = validation,
             )
 
-        if (sykmeldingDocument == null) {
-            logger.info("Lagring av sykmelding with id=$sykmeldingId er feilet")
-            return SykmeldingCreationErrors.PersistenceError.left()
-        }
-
         sykmeldingInputProducer.send(
             sykmeldingId = sykmeldingId,
             sykmelding = sykmeldingDocument,
@@ -103,12 +106,17 @@ class SykmeldingService(
             source = payload.meta.source,
         )
 
+        span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
+        span.setAttribute("SykmeldingService.create.source", payload.meta.source)
+
         return sykmeldingDocument.right()
     }
 
+    @WithSpan
     fun getSykmeldingById(sykmeldingId: UUID): SykmeldingDocument? =
         sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
 
+    @WithSpan
     fun getSykmeldingerByIdent(ident: String): Result<List<SykmeldingDocument>> {
         teamLogger.info("Henter sykmeldinger for ident=$ident")
 
@@ -122,9 +130,11 @@ class SykmeldingService(
         return Result.success(sykmeldinger)
     }
 
+    @WithSpan
     fun verifySykmelding(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, RegulaResult> {
+        val span = Span.current()
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
@@ -144,6 +154,7 @@ class SykmeldingService(
                     logger.error(
                         "Feil ved henting av sykmelder med hpr=${payload.meta.sykmelderHpr}"
                     )
+                    failSpan(it)
                     return SykmeldingCreationErrors.ResourceError.left()
                 }
 

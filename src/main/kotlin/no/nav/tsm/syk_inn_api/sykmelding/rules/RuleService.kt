@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.rules
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.diagnosekoder.Diagnosekoder
@@ -22,6 +23,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service
 class RuleService() {
     private val logger = logger()
 
+    @WithSpan
     fun validateRules(
         payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
@@ -53,8 +56,10 @@ class RuleService() {
                 }
         } catch (e: Exception) {
             logger.error("Error while executing Regula rules", e)
-            throw RuntimeException(
-                "Error while executing Regula rules for sykmeldingId=$sykmeldingId",
+            throw failSpan(
+                RuntimeException(
+                    "Error while executing Regula rules for sykmeldingId=$sykmeldingId",
+                ),
             )
         }
     }

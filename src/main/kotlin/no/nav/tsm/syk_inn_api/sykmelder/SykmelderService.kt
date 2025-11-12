@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelder
 
 import arrow.core.flatMap
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.sykmelder.btsys.IBtsysClient
@@ -15,6 +16,7 @@ class SykmelderService(
 ) {
     val logger = logger()
 
+    @WithSpan
     fun sykmelder(hpr: String, callId: String): Result<Sykmelder.Enkel> {
         val sykmelder =
             helsenettProxyClient.getSykmelderByHpr(hpr, callId).mapCatching {
@@ -39,6 +41,7 @@ class SykmelderService(
         return sykmelder
     }
 
+    @WithSpan
     fun sykmelderByFnr(fnr: String, callId: String): Result<Sykmelder.Enkel> {
         val sykmelder =
             helsenettProxyClient.getSykmelderByFnr(fnr, callId).mapCatching {
@@ -66,6 +69,7 @@ class SykmelderService(
         return sykmelder
     }
 
+    @WithSpan
     fun sykmelderMedSuspensjon(
         hpr: String,
         signaturDato: LocalDate,
