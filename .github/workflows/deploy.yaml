@@ -39,8 +39,8 @@ jobs:
     steps:
       - uses: navikt/tsm-workflows/actions/attest-sign@main
         with:
-          image: ${{ needs.build-dev.outputs.image }}
-          digest: ${{ needs.build-dev.outputs.digest }}
+          image: ${{ needs.build.outputs.image }}
+          digest: ${{ needs.build.outputs.digest }}
           team: tsm
 
   deploy-dev:

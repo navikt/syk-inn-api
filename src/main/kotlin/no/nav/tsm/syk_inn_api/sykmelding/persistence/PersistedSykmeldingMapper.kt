@@ -476,8 +476,12 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingDiagnoseInfo(
             system = system.toDiagnoseSystem(),
             code = kode,
-            text = tekst ?: DiagnosekodeMapper.findTextFromDiagnoseSystem(system.toDiagnoseSystem(), kode)
-                    ?: "Unknown diagnosis code: $kode",
+            text = tekst
+                    ?: DiagnosekodeMapper.findTextFromDiagnoseSystem(
+                        system.toDiagnoseSystem(),
+                        kode
+                    )
+                        ?: "Unknown diagnosis code: $kode",
         )
     }
 
