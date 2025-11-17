@@ -12,8 +12,7 @@ const val DAYS_OLD_SYKMELDING = 365L
 class ScheduledTasks(private val sykmeldingPersistenceService: SykmeldingPersistenceService) {
     private val logger = logger()
 
-//    @Scheduled(cron = "0 0 2 * * ?") // Runs every day at 2 AM
-    @Scheduled(cron = "0 */5 * * * ?") // Runs every 5 minutes
+    @Scheduled(cron = "0 0 2 * * ?") // Runs every day at 2 AM
     @Transactional
     fun deleteOldSykmeldinger() {
         logger.info("Starting task to delete old sykmeldinger older than $DAYS_OLD_SYKMELDING days")
