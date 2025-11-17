@@ -18,7 +18,7 @@ val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.6"
 val mockkSpringVersion = "4.0.2"
-val mockwebserverVersion = "5.3.0"
+val mockwebserverVersion = "5.3.1"
 val otelVersion = "1.56.0"
 val otelAnnotationsVersion = "2.21.0"
 
@@ -70,7 +70,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.12.0")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
