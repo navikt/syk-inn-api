@@ -18,7 +18,7 @@ val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.6"
 val mockkSpringVersion = "4.0.2"
-val mockwebserverVersion = "5.3.0"
+val mockwebserverVersion = "5.3.2"
 val otelVersion = "1.56.0"
 val otelAnnotationsVersion = "2.21.0"
 
@@ -30,7 +30,7 @@ plugins {
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "8.0.0"
+    id("com.diffplug.spotless") version "8.1.0"
     id("com.github.ben-manes.versions") version "0.53.0"
 }
 
@@ -70,7 +70,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.12.0")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
