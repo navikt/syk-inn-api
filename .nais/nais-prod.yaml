@@ -35,7 +35,7 @@ spec:
     max: 10
     scalingStrategy:
       cpu:
-        thresholdPercentage: 50
+        thresholdPercentage: 90
       kafka:
         consumerGroup: syk-inn-api-consumer
         threshold: 500
@@ -55,8 +55,8 @@ spec:
     limits:
       memory: 2Gi
     requests:
-      cpu: 1024m
-      memory: 1Gi
+      cpu: 100m
+      memory: 256Mi
   azure:
     application:
       enabled: true
