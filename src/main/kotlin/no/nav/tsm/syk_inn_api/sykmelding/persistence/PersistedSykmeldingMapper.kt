@@ -16,6 +16,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -78,6 +79,8 @@ object PersistedSykmeldingMapper {
             yrkesskade = payload.values.yrkesskade.toPersistedSykmeldingYrkesskade(),
             arbeidsgiver = payload.values.arbeidsgiver.toPersistedSykmeldingArbeidsgiver(),
             tilbakedatering = payload.values.tilbakedatering.toPersistedSykmeldingTilbakedatering(),
+            utdypendeSporsmal =
+                payload.values.utdypendeSporsmal.toPersistedSykmeldingUtdypendeSporsmal(),
             regelResultat = validation.toPersistedSykmeldingResult(),
         )
     }
@@ -109,6 +112,7 @@ object PersistedSykmeldingMapper {
                 mapSykmeldingRecordToPersistedSykmeldingTilbakedatering(
                     sykmeldingRecord,
                 ),
+            utdypendeSporsmal = null, // TODO: Deal with Kafka later
             regelResultat = sykmeldingRecord.validation.toPersistedSykmeldingResult(),
         )
     }
@@ -231,6 +235,17 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingTilbakedatering(
             startdato = startdato,
             begrunnelse = begrunnelse,
+        )
+    }
+
+    private fun OpprettSykmeldingUtdypendeSporsmal?.toPersistedSykmeldingUtdypendeSporsmal():
+        PersistedSykmeldingUtdypendeSporsmal? {
+        if (this == null) return null
+
+        return PersistedSykmeldingUtdypendeSporsmal(
+            hensynPaArbeidsplassen = hensynPaArbeidsplassen,
+            medisinskOppsummering = medisinskOppsummering,
+            utfodringerMedArbeid = utfodringerMedArbeid,
         )
     }
 

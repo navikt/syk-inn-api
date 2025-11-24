@@ -271,6 +271,7 @@ class SykmeldingServiceTest {
                                 yrkesskade = null,
                                 arbeidsgiver = null,
                                 tilbakedatering = null,
+                                utdypendeSporsmal = null
                             ),
                     ),
             )
@@ -477,6 +478,7 @@ class SykmeldingServiceTest {
                                 yrkesskade = null,
                                 arbeidsgiver = null,
                                 tilbakedatering = null,
+                                utdypendeSporsmal = null
                             ),
                     ),
             )
@@ -513,6 +515,7 @@ class SykmeldingServiceTest {
             yrkesskade = null,
             arbeidsgiver = null,
             tilbakedatering = null,
+            utdypendeSporsmal = null,
             sykmeldingId = sykmeldingId,
             pasient =
                 PersistedSykmeldingPasient(

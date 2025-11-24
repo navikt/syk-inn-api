@@ -74,7 +74,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                 yrkesskadeText(sykmelding.values.yrkesskade),
             )
             .ifEmpty { null }
-
+    val utdypendeSporsmal = sykmelding.values.utdypendeSporsmal
     val htmlContent =
         createHTML(prettyPrint = true, xhtmlCompatible = true).html {
             head {
@@ -154,6 +154,35 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     }
                                 } else {
                                     listOf("Ingen bidiagnoser oppgitt")
+                                }
+                            }
+                        }
+                        if (utdypendeSporsmal != null) {
+                            if (utdypendeSporsmal.utfodringerMedArbeid != null) {
+                                tr {
+                                    tableInfo(
+                                        "Hvilke utfordringer har pasienten med å utføre gradert arbeid?"
+                                    ) {
+                                        utdypendeSporsmal.utfodringerMedArbeid
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmal.medisinskOppsummering != null) {
+                                tr {
+                                    tableInfo(
+                                        "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)"
+                                    ) {
+                                        utdypendeSporsmal.medisinskOppsummering
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
+                                tr {
+                                    tableInfo(
+                                        "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)"
+                                    ) {
+                                        utdypendeSporsmal.hensynPaArbeidsplassen
+                                    }
                                 }
                             }
                         }
