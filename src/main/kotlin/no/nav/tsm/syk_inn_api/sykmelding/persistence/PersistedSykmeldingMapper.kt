@@ -245,7 +245,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingUtdypendeSporsmal(
             hensynPaArbeidsplassen = hensynPaArbeidsplassen,
             medisinskOppsummering = medisinskOppsummering,
-            utfodringerMedArbeid = utfodringerMedArbeid,
+            utfordringerMedArbeid = utfordringerMedArbeid,
         )
     }
 

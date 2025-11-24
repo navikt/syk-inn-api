@@ -155,7 +155,7 @@ private fun PersistedSykmeldingUtdypendeSporsmal?.toExistingSykmeldingUtdypendeS
         SykmeldingDocumentUtdypendeSporsmal(
             hensynPaArbeidsplassen = it.hensynPaArbeidsplassen,
             medisinskOppsummering = it.medisinskOppsummering,
-            utfodringerMedArbeid = it.utfodringerMedArbeid
+            utfordringerMedArbeid = it.utfordringerMedArbeid
         )
     }
 }

@@ -70,7 +70,7 @@ data class PersistedSykmeldingTilbakedatering(
 data class PersistedSykmeldingUtdypendeSporsmal(
     val hensynPaArbeidsplassen: String?,
     val medisinskOppsummering: String?,
-    val utfodringerMedArbeid: String?,
+    val utfordringerMedArbeid: String?,
 )
 
 @JsonSubTypes(

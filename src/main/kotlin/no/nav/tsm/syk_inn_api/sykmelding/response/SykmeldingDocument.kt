@@ -138,7 +138,7 @@ data class SykmeldingDocumentSykmelder(
 )
 
 data class SykmeldingDocumentUtdypendeSporsmal(
-    val utfodringerMedArbeid: String?,
+    val utfordringerMedArbeid: String?,
     val medisinskOppsummering: String?,
     val hensynPaArbeidsplassen: String?,
 )
