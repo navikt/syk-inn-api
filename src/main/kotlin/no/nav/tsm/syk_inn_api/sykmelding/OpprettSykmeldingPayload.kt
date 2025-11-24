@@ -55,7 +55,7 @@ data class OpprettSykmeldingTilbakedatering(
 data class OpprettSykmeldingUtdypendeSporsmal(
     val hensynPaArbeidsplassen: String?,
     val medisinskOppsummering: String?,
-    val utfodringerMedArbeid: String?,
+    val utfordringerMedArbeid: String?,
 )
 
 @JsonSubTypes(

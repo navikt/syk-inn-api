@@ -158,12 +158,12 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             }
                         }
                         if (utdypendeSporsmal != null) {
-                            if (utdypendeSporsmal.utfodringerMedArbeid != null) {
+                            if (utdypendeSporsmal.utfordringerMedArbeid != null) {
                                 tr {
                                     tableInfo(
                                         "Hvilke utfordringer har pasienten med å utføre gradert arbeid?"
                                     ) {
-                                        utdypendeSporsmal.utfodringerMedArbeid
+                                        utdypendeSporsmal.utfordringerMedArbeid
                                     }
                                 }
                             }
