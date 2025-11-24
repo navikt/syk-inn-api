@@ -85,6 +85,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                                 etternavn = "Angel",
                             ),
                         tilbakedatering = null,
+                        utdypendeSporsmal = null,
                         regelResultat =
                             PersistedSykmeldingRuleResult(
                                 result = RuleType.OK,
@@ -206,6 +207,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                             etternavn = "Angel",
                         ),
                     tilbakedatering = null,
+                    utdypendeSporsmal = null,
                     regelResultat =
                         PersistedSykmeldingRuleResult(
                             result = RuleType.OK,
