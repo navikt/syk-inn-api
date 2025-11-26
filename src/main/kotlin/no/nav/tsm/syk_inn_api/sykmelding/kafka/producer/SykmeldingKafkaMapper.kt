@@ -211,35 +211,35 @@ object SykmeldingKafkaMapper {
     private fun mapUtdypendeSporsmal(
         utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?
     ): List<UtdypendeSporsmal>? {
-        if (utdypendeSporsmal != null) {
-            val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
-            if (utdypendeSporsmal.utfordringerMedArbeid != null) {
-                utdypendeSporsmalList.add(
-                    UtdypendeSporsmal(
-                        utdypendeSporsmal.utfordringerMedArbeid,
-                        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
-                    ),
-                )
-            }
-            if (utdypendeSporsmal.medisinskOppsummering != null) {
-                utdypendeSporsmalList.add(
-                    UtdypendeSporsmal(
-                        utdypendeSporsmal.medisinskOppsummering,
-                        Sporsmalstype.MEDISINSK_OPPSUMMERING,
-                    ),
-                )
-            }
-            if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
-                utdypendeSporsmalList.add(
-                    UtdypendeSporsmal(
-                        utdypendeSporsmal.hensynPaArbeidsplassen,
-                        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
-                    ),
-                )
-            }
-            return utdypendeSporsmalList
+        if (utdypendeSporsmal == null) {
+            return null
         }
-        return null
+            val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
+        if (utdypendeSporsmal.utfordringerMedArbeid != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmal.utfordringerMedArbeid,
+                    Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
+                ),
+            )
+        }
+        if (utdypendeSporsmal.medisinskOppsummering != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmal.medisinskOppsummering,
+                    Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                ),
+            )
+        }
+        if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmal.hensynPaArbeidsplassen,
+                    Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
+                ),
+            )
+        }
+        return utdypendeSporsmalList
     }
 
     private fun mapArbeidsgiver(

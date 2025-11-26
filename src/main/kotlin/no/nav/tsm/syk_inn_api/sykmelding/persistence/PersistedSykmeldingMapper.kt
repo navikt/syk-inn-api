@@ -656,9 +656,6 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmeldingUtdypendeSporsmal? {
         return when (val value = sykmeldingRecord.sykmelding) {
             is DigitalSykmelding -> {
-                logger.warn(
-                    "TODO: Legg til støtte for utdypendeSporsmal i DigitalSykmelding (${sykmeldingRecord.sykmelding.id} not processed)"
-                )
                 createPersistedSykmeldingDigitalSykmeldingUtdypendeSporsmal(value.utdypendeSporsmal)
             }
             is XmlSykmelding -> {
@@ -679,7 +676,7 @@ object PersistedSykmeldingMapper {
         if (utdypendeOpplysninger == null) return null
 
         var medisinskOppsummering: String? = null
-        var utfodringerMedArbeid: String? = null
+        var utfordringerMedArbeid: String? = null
         utdypendeOpplysninger.forEach { utdypendeOpplysning ->
             if (utdypendeOpplysning.key == "6.4") {
                 utdypendeOpplysning.value.forEach {
@@ -687,7 +684,7 @@ object PersistedSykmeldingMapper {
                         medisinskOppsummering = it.value.svar
                     }
                     if (it.key == "6.4.3") {
-                        utfodringerMedArbeid = it.value.svar
+                        utfordringerMedArbeid = it.value.svar
                     }
                 }
             }
@@ -695,7 +692,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingUtdypendeSporsmal(
             null,
             medisinskOppsummering,
-            utfodringerMedArbeid
+            utfordringerMedArbeid
         )
     }
 
