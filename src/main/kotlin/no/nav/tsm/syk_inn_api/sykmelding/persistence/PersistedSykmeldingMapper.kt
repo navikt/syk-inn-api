@@ -38,8 +38,11 @@ import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
+import no.nav.tsm.sykmelding.input.core.model.SporsmalSvar
+import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
@@ -51,6 +54,7 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Papir
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
+import kotlin.text.get
 
 object PersistedSykmeldingMapper {
 
@@ -112,7 +116,8 @@ object PersistedSykmeldingMapper {
                 mapSykmeldingRecordToPersistedSykmeldingTilbakedatering(
                     sykmeldingRecord,
                 ),
-            utdypendeSporsmal = null, // TODO: Deal with Kafka later
+            utdypendeSporsmal =
+                mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmal(sykmeldingRecord),
             regelResultat = sykmeldingRecord.validation.toPersistedSykmeldingResult(),
         )
     }
@@ -644,6 +649,68 @@ object PersistedSykmeldingMapper {
                 return null
             }
         }
+    }
+
+    private fun mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmal(
+        sykmeldingRecord: SykmeldingRecord
+    ): PersistedSykmeldingUtdypendeSporsmal? {
+        return when (val value = sykmeldingRecord.sykmelding) {
+            is DigitalSykmelding -> {
+                logger.warn(
+                    "TODO: Legg til støtte for utdypendeSporsmal i DigitalSykmelding (${sykmeldingRecord.sykmelding.id} not processed)"
+                )
+                createPersistedSykmeldingDigitalSykmeldingUtdypendeSporsmal(value.utdypendeSporsmal)
+            }
+            is XmlSykmelding -> {
+                createPersistedSykmeldingUtdypendeSporsmal(value.utdypendeOpplysninger)
+            }
+            is Papirsykmelding -> {
+                createPersistedSykmeldingUtdypendeSporsmal(value.utdypendeOpplysninger)
+            }
+            else -> {
+                return null
+            }
+        }
+    }
+
+    private fun createPersistedSykmeldingUtdypendeSporsmal(
+        utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+    ): PersistedSykmeldingUtdypendeSporsmal? {
+        if (utdypendeOpplysninger == null) return null
+
+        var medisinskOppsummering: String? = null
+        var utfodringerMedArbeid: String? = null
+        utdypendeOpplysninger.forEach { utdypendeOpplysning ->
+            if (utdypendeOpplysning.key == "6.4") {
+                utdypendeOpplysning.value.forEach {
+                    if (it.key == "6.4.2") {
+                        medisinskOppsummering = it.value.svar
+                    }
+                    if (it.key == "6.4.3") {
+                        utfodringerMedArbeid = it.value.svar
+                    }
+                }
+            }
+        }
+        return PersistedSykmeldingUtdypendeSporsmal(
+            null,
+            medisinskOppsummering,
+            utfodringerMedArbeid
+        )
+    }
+
+    private fun createPersistedSykmeldingDigitalSykmeldingUtdypendeSporsmal(
+        utdypendeSporsmal: List<UtdypendeSporsmal>?
+    ): PersistedSykmeldingUtdypendeSporsmal? {
+        if (utdypendeSporsmal.isNullOrEmpty()) return null
+
+        val svarMap = utdypendeSporsmal.associateBy { it.type }
+
+        return PersistedSykmeldingUtdypendeSporsmal(
+            hensynPaArbeidsplassen = svarMap[Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN]?.svar,
+            medisinskOppsummering = svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.svar,
+            utfordringerMedArbeid = svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]?.svar
+        )
     }
 
     private fun createPersistedSykmeldingTilbakedatering(
