@@ -17,6 +17,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -44,8 +45,10 @@ import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
 import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
+import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
@@ -185,6 +188,7 @@ object SykmeldingKafkaMapper {
                     sykmelding.values.meldinger,
                 ),
             tilbakedatering = mapTilbakedatering(sykmelding.values.tilbakedatering),
+            utdypendeSporsmal = mapUtdypendeSporsmal(sykmelding.values.utdypendeSporsmal),
             bistandNav = mapBistandNav(sykmelding.values.meldinger),
         )
     }
@@ -202,6 +206,40 @@ object SykmeldingKafkaMapper {
             kontaktDato = tilbakedatering.startdato,
             begrunnelse = tilbakedatering.begrunnelse,
         )
+    }
+
+    private fun mapUtdypendeSporsmal(
+        utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?
+    ): List<UtdypendeSporsmal>? {
+        if (utdypendeSporsmal != null) {
+            val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
+            if (utdypendeSporsmal.utfordringerMedArbeid != null) {
+                utdypendeSporsmalList.add(
+                    UtdypendeSporsmal(
+                        utdypendeSporsmal.utfordringerMedArbeid,
+                        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
+                    ),
+                )
+            }
+            if (utdypendeSporsmal.medisinskOppsummering != null) {
+                utdypendeSporsmalList.add(
+                    UtdypendeSporsmal(
+                        utdypendeSporsmal.medisinskOppsummering,
+                        Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    ),
+                )
+            }
+            if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
+                utdypendeSporsmalList.add(
+                    UtdypendeSporsmal(
+                        utdypendeSporsmal.hensynPaArbeidsplassen,
+                        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
+                    ),
+                )
+            }
+            return utdypendeSporsmalList
+        }
+        return null
     }
 
     private fun mapArbeidsgiver(
