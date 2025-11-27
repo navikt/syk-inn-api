@@ -673,26 +673,12 @@ object PersistedSykmeldingMapper {
     private fun createPersistedSykmeldingUtdypendeSporsmal(
         utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     ): PersistedSykmeldingUtdypendeSporsmal? {
-        if (utdypendeOpplysninger == null) return null
-
-        var medisinskOppsummering: String? = null
-        var utfordringerMedArbeid: String? = null
-        utdypendeOpplysninger.forEach { utdypendeOpplysning ->
-            if (utdypendeOpplysning.key == "6.4") {
-                utdypendeOpplysning.value.forEach {
-                    if (it.key == "6.4.2") {
-                        medisinskOppsummering = it.value.svar
-                    }
-                    if (it.key == "6.4.3") {
-                        utfordringerMedArbeid = it.value.svar
-                    }
-                }
-            }
-        }
+        val uke7 = utdypendeOpplysninger?.get("6.3") ?: return null
+        
         return PersistedSykmeldingUtdypendeSporsmal(
             null,
-            medisinskOppsummering,
-            utfordringerMedArbeid
+            uke7["6.3.1"]?.svar,
+            uke7["6.3.2"]?.svar,
         )
     }
 
