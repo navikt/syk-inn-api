@@ -44,7 +44,7 @@ abstract class FullIntegrationTest {
 
         @Container
         private val kafka =
-            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0")).also {
+            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:8.1.0")).also {
                 it.start()
             }
 
