@@ -48,6 +48,13 @@ class PdfController(private val pdfService: PdfService) {
                 }
             },
         ) { error ->
+            if (error is SecurityException) {
+                logger.warn(
+                    "Unauthorized access attempt to PDF for sykmeldingId: $sykmeldingId, error: ${error.message}",
+                )
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden")
+            }
+
             logger.error(
                 "Failed to create PDF for sykmeldingId: $sykmeldingId, error: ${error.message}",
             )
