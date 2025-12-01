@@ -29,6 +29,12 @@ fun FlowContent.navHeader(title: String) {
     }
 }
 
+fun FlowContent.sykmeldingId(sykmeldingId: String) {
+    div(classes = "sykmeldingsId") {
+        +"SykmeldingId: ${sykmeldingId}"
+    }
+}
+
 fun TR.tableInfo(
     title: String,
     colspan: String? = null,
@@ -225,6 +231,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                         }
                     }
                 }
+
+                sykmeldingId(sykmelding.sykmeldingId)
             }
         }
 
@@ -278,6 +286,12 @@ body {
     margin: 0;
     margin-top: -4px;
     padding-left: 32px;
+}
+
+.sykmeldingId {
+    padding-left: 2cm;
+    font-size: 14px;
+    color: #888;
 }
 
 .info-table {
