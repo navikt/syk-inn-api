@@ -6,7 +6,7 @@ val javaVersion = JvmTarget.JVM_21
 
 // Runtime deps
 val logstashLogbackEncoderVersion = "9.0"
-val openHtmlToPdfVersion = "1.1.31"
+val openHtmlToPdfVersion = "1.1.33"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
@@ -17,20 +17,20 @@ val sykmeldingInputVersion = "21"
 val testContainersVersion = "1.21.3"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.6"
-val mockkSpringVersion = "4.0.2"
-val mockwebserverVersion = "5.3.0"
+val mockkSpringVersion = "5.0.1"
+val mockwebserverVersion = "5.3.2"
 val otelVersion = "1.56.0"
-val otelAnnotationsVersion = "2.21.0"
+val otelAnnotationsVersion = "2.22.0"
 
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
     kotlin("plugin.jpa") version "2.2.21"
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.0.0"
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.diffplug.spotless") version "8.0.0"
+    id("com.diffplug.spotless") version "8.1.0"
     id("com.github.ben-manes.versions") version "0.53.0"
 }
 
@@ -70,7 +70,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.13.1")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
