@@ -14,7 +14,7 @@ val regulaVersion = "45"
 val sykmeldingInputVersion = "21"
 
 // Dev deps
-val testContainersVersion = "1.21.3"
+val testContainersVersion = "2.0.2"
 val ktfmtVersion = "0.44"
 val mockkVersion = "1.14.6"
 val mockkSpringVersion = "4.0.2"
@@ -85,10 +85,10 @@ dependencies {
     }
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
-    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:$mockwebserverVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")

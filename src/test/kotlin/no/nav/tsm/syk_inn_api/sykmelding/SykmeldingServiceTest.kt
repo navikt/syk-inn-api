@@ -90,6 +90,8 @@ class SykmeldingServiceTest {
 
     @Test
     fun `create sykmelding with valid data`() {
+        val idempotencyKey = UUID.randomUUID()
+
         every { sykmelderService.sykmelderMedSuspensjon(behandlerHpr, any(), any()) } returns
             Result.success(
                 Sykmelder.MedSuspensjon(
@@ -205,6 +207,7 @@ class SykmeldingServiceTest {
             sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
                 SykmeldingDb(
                     sykmeldingId = sykmeldingId,
+                    idempotencyKey = idempotencyKey,
                     mottatt = OffsetDateTime.now(),
                     pasientIdent = pasientIdent,
                     sykmelderHpr = behandlerHpr,
@@ -232,7 +235,7 @@ class SykmeldingServiceTest {
             sykmeldingService.createSykmelding(
                 payload =
                     OpprettSykmeldingPayload(
-                        submitId = UUID.randomUUID(),
+                        submitId = idempotencyKey,
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = pasientIdent,
@@ -290,6 +293,8 @@ class SykmeldingServiceTest {
 
     @Test
     fun `successfully creates sykmelding even with rule tree hit`() {
+        val idempotencyKey = UUID.randomUUID()
+
         every { sykmelderService.sykmelderMedSuspensjon(behandlerHpr, any(), any()) } returns
             Result.success(
                 Sykmelder.MedSuspensjon(
@@ -414,6 +419,7 @@ class SykmeldingServiceTest {
             sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
                 SykmeldingDb(
                     sykmeldingId = sykmeldingId,
+                    idempotencyKey = idempotencyKey,
                     mottatt = OffsetDateTime.now(),
                     pasientIdent = pasientIdent,
                     sykmelderHpr = behandlerHpr,
@@ -441,7 +447,7 @@ class SykmeldingServiceTest {
             sykmeldingService.createSykmelding(
                 payload =
                     OpprettSykmeldingPayload(
-                        submitId = UUID.randomUUID(),
+                        submitId = idempotencyKey,
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = "12345678901",

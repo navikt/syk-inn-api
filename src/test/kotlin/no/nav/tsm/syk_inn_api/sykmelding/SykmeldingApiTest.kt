@@ -70,6 +70,38 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
+    fun `idempotency test - should not create multiple with same idempotency key`() {
+        val response =
+            restTemplate.postForEntity<SykmeldingDocument>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        val created = requireNotNull(response.body)
+
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(created.meta.pasientIdent, "21037712323")
+
+        val nextRequest =
+            restTemplate.postForEntity<Unit>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.ALREADY_REPORTED, nextRequest.statusCode)
+    }
+
+    @Test
     fun `fetching list of sykmeldinger not written by you should return 'Redacted' version`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(

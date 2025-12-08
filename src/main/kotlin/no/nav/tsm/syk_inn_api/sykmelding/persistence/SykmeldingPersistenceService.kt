@@ -14,6 +14,7 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,22 +45,37 @@ class SykmeldingPersistenceService(
         sykmelder: Sykmelder,
         ruleResult: ValidationResult,
     ): SykmeldingDocument {
-        logger.info("Lagrer sykmelding med id=${sykmeldingId}")
-        val savedEntity =
-            sykmeldingRepository.save(
-                mapSykmeldingPayloadToDatabaseEntity(
-                    sykmeldingId = sykmeldingId,
-                    mottatt = mottatt,
-                    payload = payload,
-                    pasient = person,
-                    sykmelder = sykmelder,
-                    ruleResult = ruleResult,
-                ),
+        logger.info(
+            "Lagrer sykmelding med id=${sykmeldingId} og idempotencyKey=${payload.submitId}"
+        )
+
+        return try {
+            val savedEntity =
+                sykmeldingRepository.save(
+                    mapSykmeldingPayloadToDatabaseEntity(
+                        sykmeldingId = sykmeldingId,
+                        mottatt = mottatt,
+                        payload = payload,
+                        pasient = person,
+                        sykmelder = sykmelder,
+                        ruleResult = ruleResult,
+                    ),
+                )
+
+            logger.info("Sykmelding with id=$sykmeldingId er lagret")
+
+            mapDatabaseEntityToSykmeldingDocument(savedEntity)
+        } catch (exception: DataIntegrityViolationException) {
+            logger.warn(
+                "Sykmelding with idempotencyKey=${payload.submitId} already exists, returning existing sykmelding",
+                exception,
             )
 
-        logger.info("Sykmelding with id=$sykmeldingId er lagret")
-
-        return mapDatabaseEntityToSykmeldingDocument(savedEntity)
+            this.getSykmeldingById(sykmeldingId)
+                ?: throw IllegalStateException(
+                    "Sykmelding with id=$sykmeldingId not found after ConstraintViolationException",
+                )
+        }
     }
 
     private fun mapSykmeldingPayloadToDatabaseEntity(
@@ -81,6 +97,7 @@ class SykmeldingPersistenceService(
             )
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
+            idempotencyKey = payload.submitId,
             pasientIdent = payload.meta.pasientIdent,
             sykmelderHpr = payload.meta.sykmelderHpr,
             mottatt = mottatt,
@@ -131,6 +148,7 @@ class SykmeldingPersistenceService(
             )
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
+            idempotencyKey = UUID.randomUUID(),
             mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
             pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
             sykmelderHpr = sykmelder.hpr,
