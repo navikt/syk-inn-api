@@ -6,13 +6,14 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 import org.hibernate.annotations.Type
 
 @Entity
 @Table(name = "sykmelding")
 data class SykmeldingDb(
     @Id val sykmeldingId: String,
+    val idempotencyKey: UUID,
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,

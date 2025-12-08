@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.LocalDate
 import java.time.Month
+import kotlin.text.get
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
 import no.nav.tsm.syk_inn_api.person.Person
@@ -54,7 +55,6 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Papir
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
-import kotlin.text.get
 
 object PersistedSykmeldingMapper {
 
@@ -674,7 +674,7 @@ object PersistedSykmeldingMapper {
         utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     ): PersistedSykmeldingUtdypendeSporsmal? {
         val uke7 = utdypendeOpplysninger?.get("6.3") ?: return null
-        
+
         return PersistedSykmeldingUtdypendeSporsmal(
             null,
             uke7["6.3.1"]?.svar,

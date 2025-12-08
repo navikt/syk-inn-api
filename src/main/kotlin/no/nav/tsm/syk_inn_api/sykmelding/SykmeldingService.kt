@@ -22,7 +22,6 @@ import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingService(
@@ -43,7 +42,6 @@ class SykmeldingService(
         object ResourceError : SykmeldingCreationErrors()
     }
 
-    @Transactional
     @WithSpan
     fun createSykmelding(
         payload: OpprettSykmeldingPayload

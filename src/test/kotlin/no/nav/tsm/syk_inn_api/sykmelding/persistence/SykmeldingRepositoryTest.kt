@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Navn
@@ -21,11 +22,13 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
     @Test
     fun `should save and find sykmelding entity by sykmeldingId`() {
         val sykmeldingId = "sykmelding-123"
+        val idempotencyKey = UUID.randomUUID()
         val pasientIdent = "010190567891"
         val sykmelderHpr = "123456"
         val sykmeldingDb =
             SykmeldingDb(
                 sykmeldingId = sykmeldingId,
+                idempotencyKey = idempotencyKey,
                 pasientIdent = pasientIdent,
                 sykmelderHpr = sykmelderHpr,
                 legekontorOrgnr = "987654321",
@@ -109,11 +112,13 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
 
     @Test
     fun `should delete sykmeldinger with aktivitet older than 365 days`() {
+        val idempotencyKey = UUID.randomUUID()
         val oldSykmeldingId = "old-sykmelding-123"
         val oldDate = LocalDate.now().minusDays(400)
         val oldSykmeldingDb =
             createTestSykmeldingDb(
                 sykmeldingId = oldSykmeldingId,
+                idempotencyKey = idempotencyKey,
                 pasientIdent = "010190567891",
                 aktivitetTom = oldDate,
             )
@@ -123,6 +128,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
         val recentSykmeldingDb =
             createTestSykmeldingDb(
                 sykmeldingId = recentSykmeldingId,
+                idempotencyKey = idempotencyKey,
                 pasientIdent = "020290567892",
                 aktivitetTom = recentDate,
             )
@@ -142,12 +148,14 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
 
     private fun createTestSykmeldingDb(
         sykmeldingId: String,
+        idempotencyKey: UUID,
         pasientIdent: String,
         aktivitetTom: LocalDate,
     ): SykmeldingDb {
         val fomDaysToSubtract = 10L
         return SykmeldingDb(
             sykmeldingId = sykmeldingId,
+            idempotencyKey = idempotencyKey,
             pasientIdent = pasientIdent,
             sykmelderHpr = "123456",
             legekontorOrgnr = "987654321",
