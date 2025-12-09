@@ -9,10 +9,10 @@ import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprException
+import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
 import no.nav.tsm.syk_inn_api.sykmelding.errors.KafkaProcessingError
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.scheduled.DAYS_OLD_SYKMELDING
 import no.nav.tsm.syk_inn_api.utils.PoisonPills
 import no.nav.tsm.syk_inn_api.utils.logger
@@ -31,12 +31,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class SykmeldingConsumer(
-    private val sykmeldingPersistenceService: SykmeldingPersistenceService,
+    private val sykmeldingService: SykmeldingService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     private val errorRepository: ErrorRepository,
     private val poisonPills: PoisonPills,
-    @param:Value($$"${nais.cluster}") private val clusterName: String,
+    @param:Value("\${nais.cluster}") private val clusterName: String,
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -94,7 +94,7 @@ class SykmeldingConsumer(
                 personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
 
             val sykmelder = findHprNumber(sykmeldingRecord).getOrThrow()
-            sykmeldingPersistenceService.updateSykmelding(
+            sykmeldingService.updateSykmelding(
                 sykmeldingId = sykmeldingId,
                 sykmeldingRecord = sykmeldingRecord,
                 person = person,
@@ -136,7 +136,7 @@ class SykmeldingConsumer(
     }
 
     private fun handleTombstone(sykmeldingId: String) {
-        sykmeldingPersistenceService.deleteSykmelding(sykmeldingId)
+        sykmeldingService.deleteSykmelding(sykmeldingId)
     }
 
     private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): Result<Sykmelder.Enkel> {

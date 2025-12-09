@@ -113,13 +113,12 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
 
     @Test
     fun `should delete sykmeldinger with aktivitet older than 365 days`() {
-        val idempotencyKey = UUID.randomUUID()
         val oldSykmeldingId = "old-sykmelding-123"
         val oldDate = LocalDate.now().minusDays(400)
         val oldSykmeldingDb =
             createTestSykmeldingDb(
                 sykmeldingId = oldSykmeldingId,
-                idempotencyKey = idempotencyKey,
+                idempotencyKey = UUID.randomUUID(),
                 pasientIdent = "010190567891",
                 aktivitetTom = oldDate,
             )
@@ -129,7 +128,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
         val recentSykmeldingDb =
             createTestSykmeldingDb(
                 sykmeldingId = recentSykmeldingId,
-                idempotencyKey = idempotencyKey,
+                idempotencyKey = UUID.randomUUID(),
                 pasientIdent = "020290567892",
                 aktivitetTom = recentDate,
             )

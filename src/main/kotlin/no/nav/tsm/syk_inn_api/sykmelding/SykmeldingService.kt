@@ -6,30 +6,30 @@ import arrow.core.raise.result
 import arrow.core.right
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
+import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 @Service
 class SykmeldingService(
     private val ruleService: RuleService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
-    private val sykmeldingInputProducer: SykmeldingProducer,
+    private val sykmeldingInputProducer: SykmeldingInputProducer,
     private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = logger()
@@ -93,8 +93,8 @@ class SykmeldingService(
             )
 
         val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
-        try {
 
+        try {
             val sykmeldingDocument =
                 sykmeldingPersistenceService.saveSykmeldingPayload(
                     sykmeldingId = sykmeldingId,
@@ -103,8 +103,9 @@ class SykmeldingService(
                     person = person,
                     sykmelder = sykmelder,
                     ruleResult = validation,
+
                 )
-            sykmeldingInputProducer.send(
+            sykmeldingProducer.send(
                 sykmeldingId = sykmeldingId,
                 sykmelding = sykmeldingDocument,
                 person = person,
@@ -115,6 +116,7 @@ class SykmeldingService(
 
             span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
             span.setAttribute("SykmeldingService.create.source", payload.meta.source)
+            logger.info("Created and sent sykmelding with id=$sykmeldingId to Kafka")
 
             return sykmeldingDocument.right()
         } catch (ex: DataIntegrityViolationException) {

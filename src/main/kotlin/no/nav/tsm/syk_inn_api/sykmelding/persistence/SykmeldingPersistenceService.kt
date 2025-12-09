@@ -1,3 +1,4 @@
+
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
