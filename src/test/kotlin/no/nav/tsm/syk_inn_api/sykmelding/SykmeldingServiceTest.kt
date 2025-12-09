@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.assertNotNull
 import kotlin.test.fail
@@ -24,7 +23,6 @@ import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprKode
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingProducer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmelding
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingArbeidsrelatertArsak
@@ -35,19 +33,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingPasient
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsrelatertArsak
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMedisinskArsak
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -57,8 +46,8 @@ class SykmeldingServiceTest {
     private lateinit var sykmeldingService: SykmeldingService
     private lateinit var sykmelderService: SykmelderService
     private lateinit var ruleService: RuleService
-    private lateinit var sykmeldingInputProducer: SykmeldingProducer
-    private lateinit var sykmeldingPersistenceService: SykmeldingPersistenceService
+    private lateinit var sykmeldingRepository: SykmeldingRepository
+    private lateinit var kafkaProducer: SykmeldingInputProducer
     private lateinit var personService: PersonService
 
     val pasientIdent = "01019078901"
@@ -71,16 +60,16 @@ class SykmeldingServiceTest {
     @BeforeEach
     fun setup() {
         ruleService = mockk()
-        sykmeldingPersistenceService = mockk()
-        sykmeldingInputProducer = mockk()
+        sykmeldingRepository = mockk()
+        kafkaProducer = mockk()
         personService = mockk()
         sykmelderService = mockk()
         sykmeldingService =
             SykmeldingService(
-                sykmeldingPersistenceService = sykmeldingPersistenceService,
+                sykmeldingRepository = sykmeldingRepository,
                 ruleService = ruleService,
                 sykmelderService = sykmelderService,
-                sykmeldingInputProducer = sykmeldingInputProducer,
+                kafkaProducer = kafkaProducer,
                 personService = personService,
             )
     }
@@ -125,107 +114,11 @@ class SykmeldingServiceTest {
         every { personService.getPersonByIdent(any()) } returns
             Result.success(Person(navn = navn, fodselsdato = foedselsdato, ident = "123"))
         every { ruleService.validateRules(any(), any(), any(), foedselsdato) } returns
-            RegulaResult.Ok(
-                emptyList(),
-            )
+            RegulaResult.Ok(emptyList())
 
-        val sykmeldingDocument =
-            SykmeldingDocument(
-                sykmeldingId = sykmeldingId,
-                meta =
-                    SykmeldingDocumentMeta(
-                        mottatt = OffsetDateTime.now(),
-                        pasientIdent = pasientIdent,
-                        sykmelder =
-                            SykmeldingDocumentSykmelder(
-                                hprNummer = behandlerHpr,
-                                fornavn = "Magnar",
-                                mellomnavn = null,
-                                etternavn = "Koman"
-                            ),
-                        legekontorOrgnr = "987654321",
-                        legekontorTlf = "12345678",
-                    ),
-                values =
-                    SykmeldingDocumentValues(
-                        hoveddiagnose =
-                            SykmeldingDocumentDiagnoseInfo(
-                                system = DiagnoseSystem.ICD10,
-                                code = "Z01",
-                                text = "Ukjent diagnose",
-                            ),
-                        aktivitet =
-                            listOf(
-                                SykmeldingDocumentAktivitet.IkkeMulig(
-                                    fom = LocalDate.parse("2020-01-01"),
-                                    tom = LocalDate.parse("2020-01-30"),
-                                    medisinskArsak =
-                                        SykmeldingDocumentMedisinskArsak(isMedisinskArsak = true),
-                                    arbeidsrelatertArsak =
-                                        SykmeldingDocumentArbeidsrelatertArsak(
-                                            isArbeidsrelatertArsak = false,
-                                            arbeidsrelaterteArsaker = emptyList(),
-                                            annenArbeidsrelatertArsak = null
-                                        )
-                                ),
-                            ),
-                        bidiagnoser = emptyList(),
-                        svangerskapsrelatert = false,
-                        pasientenSkalSkjermes = false,
-                        meldinger =
-                            SykmeldingDocumentMeldinger(
-                                tilNav = null,
-                                tilArbeidsgiver = null,
-                            ),
-                        yrkesskade = null,
-                        arbeidsgiver = null,
-                        tilbakedatering = null,
-                        utdypendeSporsmal = null,
-                    ),
-                utfall =
-                    SykmeldingDocumentRuleResult(
-                        result = RuleType.OK,
-                        melding = null,
-                    ),
-            )
-        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(any()) } returns
-            sykmeldingDocument
+        every { sykmeldingRepository.save(any()) } answers { firstArg<SykmeldingDb>() }
 
-        every {
-            sykmeldingPersistenceService.saveSykmeldingPayload(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } returns
-            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
-                SykmeldingDb(
-                    sykmeldingId = sykmeldingId,
-                    idempotencyKey = idempotencyKey,
-                    mottatt = OffsetDateTime.now(),
-                    pasientIdent = pasientIdent,
-                    sykmelderHpr = behandlerHpr,
-                    legekontorOrgnr = "987654321",
-                    sykmelding = getTestSykmelding(),
-                    legekontorTlf = "12345678",
-                    fom = LocalDate.parse("2020-01-01"),
-                    tom = LocalDate.parse("2020-01-30"),
-                ),
-            )
-
-        every {
-            sykmeldingInputProducer.send(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } just Runs
+        every { kafkaProducer.sendSykmelding(any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -254,14 +147,14 @@ class SykmeldingServiceTest {
                                             tom = LocalDate.parse("2020-01-30"),
                                             medisinskArsak =
                                                 OpprettSykmeldingMedisinskArsak(
-                                                    isMedisinskArsak = true
+                                                    isMedisinskArsak = true,
                                                 ),
                                             arbeidsrelatertArsak =
                                                 OpprettSykmeldingArbeidsrelatertArsak(
                                                     isArbeidsrelatertArsak = false,
                                                     arbeidsrelaterteArsaker = emptyList(),
-                                                    annenArbeidsrelatertArsak = null
-                                                )
+                                                    annenArbeidsrelatertArsak = null,
+                                                ),
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -275,14 +168,12 @@ class SykmeldingServiceTest {
                                 yrkesskade = null,
                                 arbeidsgiver = null,
                                 tilbakedatering = null,
-                                utdypendeSporsmal = null
+                                utdypendeSporsmal = null,
                             ),
                     ),
             )
 
-        verify(exactly = 1) {
-            sykmeldingInputProducer.send(any(), any(), any(), any(), any(), any())
-        }
+        verify(exactly = 1) { kafkaProducer.sendSykmelding(any()) }
 
         result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
@@ -340,103 +231,9 @@ class SykmeldingServiceTest {
                 results = emptyList(),
             )
 
-        val sykmeldingDocument =
-            SykmeldingDocument(
-                sykmeldingId = sykmeldingId,
-                meta =
-                    SykmeldingDocumentMeta(
-                        mottatt = OffsetDateTime.now(),
-                        pasientIdent = pasientIdent,
-                        sykmelder =
-                            SykmeldingDocumentSykmelder(
-                                hprNummer = behandlerHpr,
-                                fornavn = "Magnar",
-                                mellomnavn = null,
-                                etternavn = "Koman"
-                            ),
-                        legekontorOrgnr = "987654321",
-                        legekontorTlf = "12345678",
-                    ),
-                values =
-                    SykmeldingDocumentValues(
-                        hoveddiagnose =
-                            SykmeldingDocumentDiagnoseInfo(
-                                system = DiagnoseSystem.ICD10,
-                                code = "Z01",
-                                text = "Ukjent diagnose",
-                            ),
-                        aktivitet =
-                            listOf(
-                                SykmeldingDocumentAktivitet.IkkeMulig(
-                                    fom = LocalDate.parse("2020-01-01"),
-                                    tom = LocalDate.parse("2020-01-30"),
-                                    medisinskArsak =
-                                        SykmeldingDocumentMedisinskArsak(isMedisinskArsak = true),
-                                    arbeidsrelatertArsak =
-                                        SykmeldingDocumentArbeidsrelatertArsak(
-                                            isArbeidsrelatertArsak = false,
-                                            arbeidsrelaterteArsaker = emptyList(),
-                                            annenArbeidsrelatertArsak = null
-                                        )
-                                ),
-                            ),
-                        bidiagnoser = emptyList(),
-                        svangerskapsrelatert = false,
-                        pasientenSkalSkjermes = false,
-                        meldinger =
-                            SykmeldingDocumentMeldinger(
-                                tilNav = null,
-                                tilArbeidsgiver = null,
-                            ),
-                        yrkesskade = null,
-                        arbeidsgiver = null,
-                        tilbakedatering = null,
-                        utdypendeSporsmal = null,
-                    ),
-                utfall =
-                    SykmeldingDocumentRuleResult(
-                        result = RuleType.OK,
-                        melding = null,
-                    ),
-            )
-        every { sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(any()) } returns
-            sykmeldingDocument
+        every { sykmeldingRepository.save(any()) } answers { firstArg<SykmeldingDb>() }
 
-        every {
-            sykmeldingPersistenceService.saveSykmeldingPayload(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } returns
-            sykmeldingPersistenceService.mapDatabaseEntityToSykmeldingDocument(
-                SykmeldingDb(
-                    sykmeldingId = sykmeldingId,
-                    idempotencyKey = idempotencyKey,
-                    mottatt = OffsetDateTime.now(),
-                    pasientIdent = pasientIdent,
-                    sykmelderHpr = behandlerHpr,
-                    legekontorOrgnr = "987654321",
-                    sykmelding = getTestSykmelding(),
-                    legekontorTlf = "12345678",
-                    fom = LocalDate.parse("2020-01-01"),
-                    tom = LocalDate.parse("2020-01-30"),
-                ),
-            )
-
-        every {
-            sykmeldingInputProducer.send(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } just Runs
+        every { kafkaProducer.sendSykmelding(any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -465,14 +262,14 @@ class SykmeldingServiceTest {
                                             tom = LocalDate.parse("2020-01-30"),
                                             medisinskArsak =
                                                 OpprettSykmeldingMedisinskArsak(
-                                                    isMedisinskArsak = true
+                                                    isMedisinskArsak = true,
                                                 ),
                                             arbeidsrelatertArsak =
                                                 OpprettSykmeldingArbeidsrelatertArsak(
                                                     isArbeidsrelatertArsak = false,
                                                     arbeidsrelaterteArsaker = emptyList(),
-                                                    annenArbeidsrelatertArsak = null
-                                                )
+                                                    annenArbeidsrelatertArsak = null,
+                                                ),
                                         ),
                                     ),
                                 pasientenSkalSkjermes = false,
@@ -486,7 +283,7 @@ class SykmeldingServiceTest {
                                 yrkesskade = null,
                                 arbeidsgiver = null,
                                 tilbakedatering = null,
-                                utdypendeSporsmal = null
+                                utdypendeSporsmal = null,
                             ),
                     ),
             )
@@ -500,7 +297,7 @@ class SykmeldingServiceTest {
                 PersistedSykmeldingDiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     code = "Z01",
-                    text = "Angst"
+                    text = "Angst",
                 ),
             aktivitet =
                 listOf(
@@ -512,8 +309,8 @@ class SykmeldingServiceTest {
                             PersistedSykmeldingArbeidsrelatertArsak(
                                 isArbeidsrelatertArsak = false,
                                 arbeidsrelaterteArsaker = emptyList(),
-                                annenArbeidsrelatertArsak = null
-                            )
+                                annenArbeidsrelatertArsak = null,
+                            ),
                     ),
                 ),
             pasientenSkalSkjermes = false,
@@ -529,7 +326,7 @@ class SykmeldingServiceTest {
                 PersistedSykmeldingPasient(
                     Navn("Ola", "", "Nordmann"),
                     pasientIdent,
-                    LocalDate.parse("1970-01-01")
+                    LocalDate.parse("1970-01-01"),
                 ),
             sykmelder =
                 PersistedSykmeldingSykmelder(
@@ -537,12 +334,12 @@ class SykmeldingServiceTest {
                     hprNummer = behandlerHpr,
                     fornavn = "Lege",
                     mellomnavn = "",
-                    etternavn = "Legesen"
+                    etternavn = "Legesen",
                 ),
             regelResultat =
                 PersistedSykmeldingRuleResult(
                     result = RuleType.OK,
-                    meldingTilSender = "Dette er en melding"
+                    meldingTilSender = "Dette er en melding",
                 ),
         )
     }
