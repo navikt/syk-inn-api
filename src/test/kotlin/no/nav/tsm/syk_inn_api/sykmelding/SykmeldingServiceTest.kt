@@ -75,6 +75,8 @@ class SykmeldingServiceTest {
         sykmeldingInputProducer = mockk()
         personService = mockk()
         sykmelderService = mockk()
+        val sykmeldingMetrics = mockk<no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics>(relaxed = true)
+        val sli = mockk<no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingServiceLevelIndicators>(relaxed = true)
         sykmeldingService =
             SykmeldingService(
                 sykmeldingPersistenceService = sykmeldingPersistenceService,
@@ -82,6 +84,8 @@ class SykmeldingServiceTest {
                 sykmelderService = sykmelderService,
                 sykmeldingInputProducer = sykmeldingInputProducer,
                 personService = personService,
+                sykmeldingMetrics = sykmeldingMetrics,
+                sli = sli,
             )
     }
 

@@ -1,10 +1,9 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
-import java.time.LocalDate
-import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
@@ -15,17 +14,28 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.Instant
+import java.time.OffsetDateTime
 
 @Service
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingMetrics: SykmeldingMetrics,
 ) {
     private val logger = logger()
 
     fun getSykmeldingById(sykmeldingId: String): SykmeldingDocument? {
-        return sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
-            mapDatabaseEntityToSykmeldingDocument(it)
-        }
+        val startTime = Instant.now()
+        val result =
+            sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
+                mapDatabaseEntityToSykmeldingDocument(it)
+            }
+        sykmeldingMetrics.recordDatabaseQueryDuration(
+            Duration.between(startTime, Instant.now()),
+            "getSykmeldingById",
+        )
+        return result
     }
 
     fun saveSykmeldingPayload(
@@ -37,6 +47,8 @@ class SykmeldingPersistenceService(
         ruleResult: ValidationResult,
     ): SykmeldingDocument {
         logger.info("Lagrer sykmelding med id=${sykmeldingId}")
+        val startTime = Instant.now()
+
         val savedEntity =
             sykmeldingRepository.save(
                 mapSykmeldingPayloadToDatabaseEntity(
@@ -48,6 +60,9 @@ class SykmeldingPersistenceService(
                     ruleResult = ruleResult,
                 ),
             )
+
+        sykmeldingMetrics.incrementDatabaseSave()
+        sykmeldingMetrics.recordDatabaseSaveDuration(Duration.between(startTime, Instant.now()))
 
         logger.info("Sykmelding with id=$sykmeldingId er lagret")
 
@@ -135,9 +150,16 @@ class SykmeldingPersistenceService(
     }
 
     fun getSykmeldingerByIdent(ident: String): List<SykmeldingDocument> {
-        return sykmeldingRepository.findAllByPasientIdent(ident).map {
-            mapDatabaseEntityToSykmeldingDocument(it)
-        }
+        val startTime = Instant.now()
+        val result =
+            sykmeldingRepository.findAllByPasientIdent(ident).map {
+                mapDatabaseEntityToSykmeldingDocument(it)
+            }
+        sykmeldingMetrics.recordDatabaseQueryDuration(
+            Duration.between(startTime, Instant.now()),
+            "getSykmeldingerByIdent",
+        )
+        return result
     }
 
     fun updateSykmelding(
@@ -162,6 +184,7 @@ class SykmeldingPersistenceService(
                         sykmelder = sykmelder,
                     )
                 sykmeldingRepository.save(entity)
+                sykmeldingMetrics.incrementSykmeldingUpdated(sykmeldingRecord.sykmelding.type.name)
             } catch (ex: Exception) {
                 logger.error(
                     "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
@@ -187,17 +210,21 @@ class SykmeldingPersistenceService(
                         sykmelder = sykmelder,
                     ),
             )
+            sykmeldingMetrics.incrementSykmeldingUpdated(sykmeldingRecord.sykmelding.type.name)
             logger.info("Updated sykmelding with id=${sykmeldingRecord.sykmelding.id}")
         }
     }
 
     fun deleteSykmelding(sykmeldingId: String) {
         sykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
+        sykmeldingMetrics.incrementSykmeldingDeleted()
         logger.info("Deleted sykmelding with id=$sykmeldingId")
     }
 
     fun deleteSykmeldingerOlderThanDays(daysToSubtract: Long): Int {
         val cutoffDate = java.time.LocalDate.now().minusDays(daysToSubtract)
-        return sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
+        val count = sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
+        sykmeldingMetrics.incrementScheduledDeletion(count)
+        return count
     }
 }

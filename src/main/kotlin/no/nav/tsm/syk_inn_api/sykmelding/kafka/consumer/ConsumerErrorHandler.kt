@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
+import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component
 import org.springframework.util.backoff.FixedBackOff
 
 @Component
-class ConsumerErrorHandler :
+class ConsumerErrorHandler(
+    private val sykmeldingMetrics: SykmeldingMetrics,
+) :
     DefaultErrorHandler(
         null,
         FixedBackOff(BACKOFF_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS),
@@ -26,6 +29,11 @@ class ConsumerErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ): Boolean {
+        sykmeldingMetrics.incrementConsumerErrorHandled(
+            thrownException::class.simpleName ?: "Unknown",
+        )
+        sykmeldingMetrics.incrementConsumerRetryAttempt()
+
         appLog.error(
             """
             Feil i prosesseringen av record:
@@ -48,8 +56,14 @@ class ConsumerErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
+        sykmeldingMetrics.incrementConsumerErrorHandled(
+            thrownException::class.simpleName ?: "Unknown",
+        )
+
         appLog.error(
-            "Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}",
+            "Feil i prossesseringen av record med offset: ${
+                records.first().offset()
+            }, key: ${records.first().key()} på topic ${records.first().topic()}",
             thrownException,
         )
         if (records.isEmpty()) {
@@ -66,6 +80,10 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
+        sykmeldingMetrics.incrementConsumerErrorHandled(
+            thrownException::class.simpleName ?: "Unknown",
+        )
+
         if (data.isEmpty) {
             appLog.error("Feil i listener uten noen records", thrownException)
         }
