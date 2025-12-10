@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import java.time.Duration
+import java.time.Instant
+import java.util.*
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.sykmelding.CreateSykmelding.RuleOutcome
@@ -17,9 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Duration
-import java.time.Instant
-import java.util.*
 
 @RestController
 @RequestMapping("/api/sykmelding")
@@ -66,7 +66,8 @@ class SykmeldingController(
                         startTime,
                         Instant.now(),
                     ),
-                    "/api/sykmelding", "POST",
+                    "/api/sykmelding",
+                    "POST",
                 )
                 response
             },
@@ -110,25 +111,26 @@ class SykmeldingController(
                         startTime,
                         Instant.now(),
                     ),
-                    "/api/sykmelding/verify", "POST",
+                    "/api/sykmelding/verify",
+                    "POST",
                 )
                 response
             },
         ) { verification ->
-            val response = ResponseEntity.status(HttpStatus.OK)
-                .body(
-                    when (verification) {
-                        is RegulaResult.NotOk ->
-                            RuleOutcome(
-                                status = verification.outcome.status,
-                                message = verification.outcome.reason.sykmelder,
-                                rule = verification.outcome.rule,
-                                tree = verification.outcome.tree,
-                            )
-
-                        is RegulaResult.Ok -> true
-                    },
-                )
+            val response =
+                ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                        when (verification) {
+                            is RegulaResult.NotOk ->
+                                RuleOutcome(
+                                    status = verification.outcome.status,
+                                    message = verification.outcome.reason.sykmelder,
+                                    rule = verification.outcome.rule,
+                                    tree = verification.outcome.tree,
+                                )
+                            is RegulaResult.Ok -> true
+                        },
+                    )
             sykmeldingMetrics.incrementHttpRequest(
                 "/api/sykmelding/verify",
                 "POST",
@@ -202,16 +204,17 @@ class SykmeldingController(
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<List<SykmeldingResponse>> {
         val startTime = Instant.now()
-        val result = sykmeldingService.getSykmeldingerByIdent(ident).fold(
-            { sykmeldingList ->
-                val accessControlledList: List<SykmeldingResponse> =
-                    sykmeldingList.mapNotNull { sykmeldingAccessControl(hpr, it) }
+        val result =
+            sykmeldingService.getSykmeldingerByIdent(ident).fold(
+                { sykmeldingList ->
+                    val accessControlledList: List<SykmeldingResponse> =
+                        sykmeldingList.mapNotNull { sykmeldingAccessControl(hpr, it) }
 
-                ResponseEntity.ok(accessControlledList)
-            },
-        ) {
-            ResponseEntity.internalServerError().build()
-        }
+                    ResponseEntity.ok(accessControlledList)
+                },
+            ) {
+                ResponseEntity.internalServerError().build()
+            }
 
         sykmeldingMetrics.incrementHttpRequest("/api/sykmelding", "GET", result.statusCode.value())
         sykmeldingMetrics.recordHttpRequestDuration(
@@ -247,18 +250,16 @@ object CreateSykmelding {
         when (this) {
             is SykmeldingService.SykmeldingCreationErrors.PersonDoesNotExist ->
                 ResponseEntity.status(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                )
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                    )
                     .body(ErrorMessage("Person does not exist"))
-
             is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to persist sykmelding")
-
             is SykmeldingService.SykmeldingCreationErrors.ResourceError ->
                 ResponseEntity.status(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                )
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                    )
                     .body("Failed to fetch required resources")
         }
 }

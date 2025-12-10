@@ -30,9 +30,7 @@ fun FlowContent.navHeader(title: String) {
 }
 
 fun FlowContent.sykmeldingId(sykmeldingId: String) {
-    div(classes = "sykmeldingsId") {
-        +"SykmeldingId: ${sykmeldingId}"
-    }
+    div(classes = "sykmeldingsId") { +"SykmeldingId: ${sykmeldingId}" }
 }
 
 fun TR.tableInfo(

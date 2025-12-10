@@ -47,9 +47,7 @@ class SykmeldingServiceLevelIndicators(private val registry: MeterRegistry) {
             calculateAvailability()
         }
 
-        registry.gauge("sykmelding.sli.error.rate.percent", failedRequests) {
-            calculateErrorRate()
-        }
+        registry.gauge("sykmelding.sli.error.rate.percent", failedRequests) { calculateErrorRate() }
 
         registry.gauge("sykmelding.sli.consumer.lag.seconds", lastConsumerProcessing) {
             calculateConsumerLag()
@@ -67,12 +65,11 @@ class SykmeldingServiceLevelIndicators(private val registry: MeterRegistry) {
         totalRequests.incrementAndGet()
         successfulRequests.incrementAndGet()
 
-        registry.counter("sykmelding.sli.requests.total", listOf(Tag.of("operation", operation)))
+        registry
+            .counter("sykmelding.sli.requests.total", listOf(Tag.of("operation", operation)))
             .increment()
-        registry.counter(
-                "sykmelding.sli.requests.successful",
-                listOf(Tag.of("operation", operation))
-            )
+        registry
+            .counter("sykmelding.sli.requests.successful", listOf(Tag.of("operation", operation)))
             .increment()
     }
 
@@ -80,9 +77,11 @@ class SykmeldingServiceLevelIndicators(private val registry: MeterRegistry) {
         totalRequests.incrementAndGet()
         failedRequests.incrementAndGet()
 
-        registry.counter("sykmelding.sli.requests.total", listOf(Tag.of("operation", operation)))
+        registry
+            .counter("sykmelding.sli.requests.total", listOf(Tag.of("operation", operation)))
             .increment()
-        registry.counter("sykmelding.sli.requests.failed", listOf(Tag.of("operation", operation)))
+        registry
+            .counter("sykmelding.sli.requests.failed", listOf(Tag.of("operation", operation)))
             .increment()
 
         checkAvailabilitySLO()
@@ -153,4 +152,3 @@ class SykmeldingServiceLevelIndicators(private val registry: MeterRegistry) {
 
     fun getLastConsumerProcessingAtomicLong(): AtomicLong = lastConsumerProcessing
 }
-

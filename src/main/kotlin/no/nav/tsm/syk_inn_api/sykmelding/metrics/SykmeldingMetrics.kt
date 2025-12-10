@@ -3,10 +3,10 @@ package no.nav.tsm.syk_inn_api.sykmelding.metrics
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicLong
+import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
+import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingMetrics(private val registry: MeterRegistry) {
@@ -286,8 +286,6 @@ class SykmeldingMetrics(private val registry: MeterRegistry) {
 
     // Histogram for sykmelding duration
     fun recordSykmeldingDuration(days: Long) {
-        registry.summary("sykmelding.duration.days")
-            .record(days.toDouble())
+        registry.summary("sykmelding.duration.days").record(days.toDouble())
     }
 }
-

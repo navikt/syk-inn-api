@@ -1,14 +1,14 @@
 package no.nav.tsm.syk_inn_api.sykmelding.scheduled
 
+import java.time.Duration
+import java.time.Instant
+import java.util.concurrent.atomic.AtomicLong
 import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
-import java.time.Instant
-import java.util.concurrent.atomic.AtomicLong
 
 const val DAYS_OLD_SYKMELDING = 365L
 

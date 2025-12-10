@@ -2,6 +2,9 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
 import no.nav.tsm.syk_inn_api.person.PdlException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -29,9 +32,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
 
 @Component
 class SykmeldingConsumer(
@@ -82,7 +82,7 @@ class SykmeldingConsumer(
 
             if (
                 sykmeldingRecord.sykmelding.aktivitet.maxOf { it.tom } <
-                LocalDate.now().minusDays(DAYS_OLD_SYKMELDING)
+                    LocalDate.now().minusDays(DAYS_OLD_SYKMELDING)
             ) {
                 return // Skip processing for sykmeldinger before 2024
             }
@@ -96,7 +96,7 @@ class SykmeldingConsumer(
 
             if (
                 sykmeldingRecord.sykmelding.type ==
-                no.nav.tsm.sykmelding.input.core.model.SykmeldingType.UTENLANDSK
+                    no.nav.tsm.sykmelding.input.core.model.SykmeldingType.UTENLANDSK
             ) {
                 return // skip processing for utenlandske sykmeldinger
             }
@@ -182,15 +182,12 @@ class SykmeldingConsumer(
                 is DigitalSykmelding ->
                     sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
                         sykmelding.id
-
                 is Papirsykmelding ->
                     sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
                         sykmelding.id
-
                 is XmlSykmelding ->
                     sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR }?.id to
                         sykmelding.id
-
                 else -> null to null
             }
 

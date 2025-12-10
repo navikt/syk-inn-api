@@ -133,15 +133,16 @@ class SykmeldingService(
         val aktivitetType = payload.values.aktivitet.first()::class.simpleName ?: "UNKNOWN"
 
         // Extract fom/tom from aktivitet based on sealed interface implementation
-        val aktivitetDates = payload.values.aktivitet.map { aktivitet ->
-            when (aktivitet) {
-                is OpprettSykmeldingAktivitet.IkkeMulig -> aktivitet.fom to aktivitet.tom
-                is OpprettSykmeldingAktivitet.Gradert -> aktivitet.fom to aktivitet.tom
-                is OpprettSykmeldingAktivitet.Behandlingsdager -> aktivitet.fom to aktivitet.tom
-                is OpprettSykmeldingAktivitet.Avventende -> aktivitet.fom to aktivitet.tom
-                is OpprettSykmeldingAktivitet.Reisetilskudd -> aktivitet.fom to aktivitet.tom
+        val aktivitetDates =
+            payload.values.aktivitet.map { aktivitet ->
+                when (aktivitet) {
+                    is OpprettSykmeldingAktivitet.IkkeMulig -> aktivitet.fom to aktivitet.tom
+                    is OpprettSykmeldingAktivitet.Gradert -> aktivitet.fom to aktivitet.tom
+                    is OpprettSykmeldingAktivitet.Behandlingsdager -> aktivitet.fom to aktivitet.tom
+                    is OpprettSykmeldingAktivitet.Avventende -> aktivitet.fom to aktivitet.tom
+                    is OpprettSykmeldingAktivitet.Reisetilskudd -> aktivitet.fom to aktivitet.tom
+                }
             }
-        }
 
         val minFom = aktivitetDates.minOf { it.first }
         val maxTom = aktivitetDates.maxOf { it.second }
@@ -231,10 +232,7 @@ class SykmeldingService(
         sli.checkLatencySLO("verify", duration)
         sli.recordSuccessfulRequest("verify")
 
-        sykmeldingMetrics.incrementSykmeldingVerified(
-            payload.meta.source,
-            ruleResult.status.name
-        )
+        sykmeldingMetrics.incrementSykmeldingVerified(payload.meta.source, ruleResult.status.name)
 
         return ruleResult.right()
     }

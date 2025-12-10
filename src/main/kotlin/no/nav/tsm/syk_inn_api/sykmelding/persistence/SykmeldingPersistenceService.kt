@@ -1,5 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import java.time.Duration
+import java.time.Instant
+import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
@@ -14,9 +17,6 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import org.springframework.stereotype.Service
-import java.time.Duration
-import java.time.Instant
-import java.time.OffsetDateTime
 
 @Service
 class SykmeldingPersistenceService(

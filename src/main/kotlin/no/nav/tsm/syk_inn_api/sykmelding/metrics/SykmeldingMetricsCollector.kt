@@ -1,17 +1,17 @@
 package no.nav.tsm.syk_inn_api.sykmelding.metrics
 
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.atomic.AtomicLong
 import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Scheduled collector that queries the database periodically to update gauge metrics.
- * Runs every 60 seconds to keep metrics fresh.
+ * Scheduled collector that queries the database periodically to update gauge metrics. Runs every 60
+ * seconds to keep metrics fresh.
  */
 @Component
 class SykmeldingMetricsCollector(
@@ -79,4 +79,3 @@ class SykmeldingMetricsCollector(
         oldestErrorAgeHours.set(0)
     }
 }
-

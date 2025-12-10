@@ -1,5 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
+import java.time.Duration
+import java.time.Instant
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics
@@ -9,8 +11,6 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.stereotype.Component
-import java.time.Duration
-import java.time.Instant
 
 @Component
 class SykmeldingProducer(

@@ -214,7 +214,7 @@ object SykmeldingKafkaMapper {
         if (utdypendeSporsmal == null) {
             return null
         }
-            val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
+        val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
         if (utdypendeSporsmal.utfordringerMedArbeid != null) {
             utdypendeSporsmalList.add(
                 UtdypendeSporsmal(
