@@ -10,7 +10,7 @@ val openHtmlToPdfVersion = "1.1.31"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
-val regulaVersion = "43"
+val regulaVersion = "45"
 val sykmeldingInputVersion = "21"
 
 // Dev deps
@@ -63,6 +63,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:${kotlinxHtmlVersion}")
     implementation("org.postgresql:postgresql")
     implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.prometheus:prometheus-metrics-simpleclient-bridge:1.0.0")
 
     implementation("no.nav.tsm.regulus:regula:$regulaVersion")
     implementation("no.nav.tsm.sykmelding", "input", sykmeldingInputVersion)
