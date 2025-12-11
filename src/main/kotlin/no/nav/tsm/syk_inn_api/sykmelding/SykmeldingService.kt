@@ -18,6 +18,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
@@ -31,7 +32,6 @@ import no.nav.tsm.syk_inn_api.utils.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 
@@ -41,7 +41,7 @@ class SykmeldingService(
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     private val sykmeldingRepository: SykmeldingRepository,
-    private val kafkaProducer: SykmeldingInputProducer,
+    private val sykmeldingPersistenceService: SykmeldingPersistenceService,
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -61,7 +61,7 @@ class SykmeldingService(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
         val span = Span.current()
-        val sykmeldingId = UUID.randomUUID().toString()
+        val sykmeldingId = UUID.randomUUID()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
         val resources = result {
@@ -71,7 +71,7 @@ class SykmeldingService(
                     .sykmelderMedSuspensjon(
                         hpr = payload.meta.sykmelderHpr,
                         signaturDato = mottatt.toLocalDate(),
-                        callId = sykmeldingId,
+                        callId = sykmeldingId.toString(),
                     )
                     .bind()
 
@@ -91,7 +91,7 @@ class SykmeldingService(
         val ruleResult: RegulaResult =
             ruleService.validateRules(
                 payload = payload,
-                sykmeldingId = sykmeldingId,
+                sykmeldingId = sykmeldingId.toString(),
                 sykmelder = sykmelder,
                 foedselsdato = person.fodselsdato,
             )
@@ -99,37 +99,22 @@ class SykmeldingService(
         val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
 
         try {
-            val savedEntity =
-                sykmeldingRepository.save(
-                    mapSykmeldingPayloadToDatabaseEntity(
-                        sykmeldingId = sykmeldingId,
-                        mottatt = mottatt,
-                        payload = payload,
-                        pasient = person,
-                        sykmelder = sykmelder,
-                        ruleResult = validation,
-                    ),
+
+            val sykmeldingDb =
+                mapSykmeldingPayloadToDatabaseEntity(
+                    sykmeldingId = sykmeldingId.toString(),
+                    mottatt = mottatt,
+                    payload = payload,
+                    pasient = person,
+                    sykmelder = sykmelder,
+                    ruleResult = validation,
                 )
+
+            val savedEntity = sykmeldingPersistenceService.saveSykmelding(sykmeldingDb)
             val sykmeldingDocument = mapDatabaseEntityToSykmeldingDocument(savedEntity)
 
-            kafkaProducer.sendSykmelding(
-                SykmeldingRecord(
-                    metadata = SykmeldingKafkaMapper.mapMessageMetadata(sykmeldingDocument.meta),
-                    sykmelding =
-                        SykmeldingKafkaMapper.mapToDigitalSykmelding(
-                            sykmeldingDocument,
-                            sykmeldingId,
-                            person,
-                            sykmelder,
-                            payload.meta.source,
-                        ),
-                    validation = validation,
-                )
-            )
-
-            span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
+            span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId.toString())
             span.setAttribute("SykmeldingService.create.source", payload.meta.source)
-            logger.info("Created and sent sykmelding with id=$sykmeldingId to Kafka")
 
             return sykmeldingDocument.right()
         } catch (e: DataIntegrityViolationException) {
@@ -295,7 +280,6 @@ class SykmeldingService(
                 )
             return SykmeldingDb(
                 sykmeldingId = sykmeldingId,
-                idempotencyKey = payload.submitId,
                 pasientIdent = payload.meta.pasientIdent,
                 sykmelderHpr = payload.meta.sykmelderHpr,
                 mottatt = mottatt,
@@ -304,6 +288,7 @@ class SykmeldingService(
                 legekontorTlf = payload.meta.legekontorTlf,
                 fom = persistedSykmelding.aktivitet.minOf { it.fom },
                 tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+                idempotencyKey = payload.submitId,
             )
         }
 
@@ -322,7 +307,6 @@ class SykmeldingService(
                 )
             return SykmeldingDb(
                 sykmeldingId = sykmeldingId,
-                idempotencyKey = UUID.randomUUID(),
                 mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
                 pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
                 sykmelderHpr = sykmelder.hpr,
@@ -332,6 +316,7 @@ class SykmeldingService(
                 validertOk = validertOk,
                 fom = persistedSykmelding.aktivitet.minOf { it.fom },
                 tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+                idempotencyKey = UUID.randomUUID(),
             )
         }
     }

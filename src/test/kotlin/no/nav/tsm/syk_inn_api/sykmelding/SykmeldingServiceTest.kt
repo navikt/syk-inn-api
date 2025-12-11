@@ -5,9 +5,8 @@ import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import no.nav.tsm.regulus.regula.RegulaOutcome
@@ -66,11 +65,11 @@ class SykmeldingServiceTest {
         sykmelderService = mockk()
         sykmeldingService =
             SykmeldingService(
-                sykmeldingRepository = sykmeldingRepository,
                 ruleService = ruleService,
-                sykmelderService = sykmelderService,
-                kafkaProducer = kafkaProducer,
                 personService = personService,
+                sykmelderService = sykmelderService,
+                sykmeldingRepository = sykmeldingRepository,
+                sykmeldingPersistenceService = mockk(relaxed = true),
             )
     }
 
@@ -117,8 +116,6 @@ class SykmeldingServiceTest {
             RegulaResult.Ok(emptyList())
 
         every { sykmeldingRepository.save(any()) } answers { firstArg<SykmeldingDb>() }
-
-        every { kafkaProducer.sendSykmelding(any()) } just Runs
 
         val result =
             sykmeldingService.createSykmelding(
@@ -172,8 +169,6 @@ class SykmeldingServiceTest {
                             ),
                     ),
             )
-
-        verify(exactly = 1) { kafkaProducer.sendSykmelding(any()) }
 
         result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
@@ -290,57 +285,62 @@ class SykmeldingServiceTest {
 
         result.fold({ fail("Expected success but got failure: $it") }) { assertNotNull(it) }
     }
+}
 
-    private fun getTestSykmelding(): PersistedSykmelding {
-        return PersistedSykmelding(
-            hoveddiagnose =
-                PersistedSykmeldingDiagnoseInfo(
-                    system = DiagnoseSystem.ICD10,
-                    code = "Z01",
-                    text = "Angst",
+fun getTestSykmelding(
+    sykmeldingId: UUID = UUID.randomUUID(),
+    pasientIdent: String = "12345678912",
+    behandlerIdent: String = "12345678901",
+    behandlerHpr: String = "123456789"
+): PersistedSykmelding {
+    return PersistedSykmelding(
+        hoveddiagnose =
+            PersistedSykmeldingDiagnoseInfo(
+                system = DiagnoseSystem.ICD10,
+                code = "Z01",
+                text = "Angst",
+            ),
+        aktivitet =
+            listOf(
+                PersistedSykmeldingAktivitet.IkkeMulig(
+                    fom = LocalDate.parse("2020-01-01"),
+                    tom = LocalDate.parse("2020-01-30"),
+                    medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
+                    arbeidsrelatertArsak =
+                        PersistedSykmeldingArbeidsrelatertArsak(
+                            isArbeidsrelatertArsak = false,
+                            arbeidsrelaterteArsaker = emptyList(),
+                            annenArbeidsrelatertArsak = null,
+                        ),
                 ),
-            aktivitet =
-                listOf(
-                    PersistedSykmeldingAktivitet.IkkeMulig(
-                        fom = LocalDate.parse("2020-01-01"),
-                        tom = LocalDate.parse("2020-01-30"),
-                        medisinskArsak = PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                        arbeidsrelatertArsak =
-                            PersistedSykmeldingArbeidsrelatertArsak(
-                                isArbeidsrelatertArsak = false,
-                                arbeidsrelaterteArsaker = emptyList(),
-                                annenArbeidsrelatertArsak = null,
-                            ),
-                    ),
-                ),
-            pasientenSkalSkjermes = false,
-            bidiagnoser = emptyList(),
-            meldinger = PersistedSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
-            svangerskapsrelatert = false,
-            yrkesskade = null,
-            arbeidsgiver = null,
-            tilbakedatering = null,
-            utdypendeSporsmal = null,
-            sykmeldingId = sykmeldingId,
-            pasient =
-                PersistedSykmeldingPasient(
-                    Navn("Ola", "", "Nordmann"),
-                    pasientIdent,
-                    LocalDate.parse("1970-01-01"),
-                ),
-            sykmelder =
-                PersistedSykmeldingSykmelder(
-                    ident = behandlerIdent,
-                    hprNummer = behandlerHpr,
-                    fornavn = "Lege",
-                    mellomnavn = "",
-                    etternavn = "Legesen",
-                ),
-            regelResultat =
-                PersistedSykmeldingRuleResult(
-                    result = RuleType.OK,
-                    meldingTilSender = "Dette er en melding",
-                ),
-        )
-    }
+            ),
+        pasientenSkalSkjermes = false,
+        bidiagnoser = emptyList(),
+        meldinger = PersistedSykmeldingMeldinger(tilNav = null, tilArbeidsgiver = null),
+        svangerskapsrelatert = false,
+        yrkesskade = null,
+        arbeidsgiver = null,
+        tilbakedatering = null,
+        utdypendeSporsmal = null,
+        sykmeldingId = sykmeldingId.toString(),
+        pasient =
+            PersistedSykmeldingPasient(
+                Navn("Ola", "", "Nordmann"),
+                pasientIdent,
+                LocalDate.parse("1970-01-01"),
+            ),
+        sykmelder =
+            PersistedSykmeldingSykmelder(
+                ident = behandlerIdent,
+                hprNummer = behandlerHpr,
+                fornavn = "Lege",
+                mellomnavn = "",
+                etternavn = "Legesen",
+            ),
+        regelResultat =
+            PersistedSykmeldingRuleResult(
+                result = RuleType.OK,
+                meldingTilSender = "Dette er en melding",
+            ),
+    )
 }
