@@ -36,11 +36,13 @@ class SykmeldingService(
     private val teamLogger = teamLogger()
 
     sealed class SykmeldingCreationErrors {
-        object PersonDoesNotExist : SykmeldingCreationErrors()
+        data object PersonDoesNotExist : SykmeldingCreationErrors()
 
-        object PersistenceError : SykmeldingCreationErrors()
+        data object PersistenceError : SykmeldingCreationErrors()
 
-        object ResourceError : SykmeldingCreationErrors()
+        data object ResourceError : SykmeldingCreationErrors()
+
+        data object AlreadyExists : SykmeldingCreationErrors()
     }
 
     @Transactional
@@ -51,6 +53,9 @@ class SykmeldingService(
         val span = Span.current()
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
+
+        val exists = sykmeldingPersistenceService.hasBeenSubmittet(payload.submitId)
+        if (exists) return SykmeldingCreationErrors.AlreadyExists.left()
 
         val resources = result {
             val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()

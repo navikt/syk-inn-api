@@ -14,6 +14,8 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDb, UUID> {
 
     fun findAllByPasientIdent(pasientIdent: String): List<SykmeldingDb>
 
+    fun existsByIdempotencyKey(idempotencyKey: UUID): Boolean
+
     @Modifying
     @Query(value = "DELETE FROM sykmelding WHERE tom < :cutoffDate", nativeQuery = true)
     fun deleteSykmeldingerWithAktivitetOlderThan(@Param("cutoffDate") cutoffDate: LocalDate): Int
