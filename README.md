@@ -206,6 +206,53 @@ graph LR
     style Right fill:#2ECC71,color:#fff
 ```
 
+---
+
+## Metrics
+
+Application metrics are exposed via Spring Actuator at `/actuator/prometheus` for Prometheus scraping.
+
+### Key Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `sykmelding.created` | Counter | Sykmeldinger created (tags: source, diagnose_system, validation_result, aktivitet_type) |
+| `sykmelding.creation.failed` | Counter | Failed creations (tags: error_type, source) |
+| `sykmelding.create.duration` | Timer | Time to create a sykmelding |
+| `sykmelding.verified` | Counter | Sykmeldinger verified (dry-run) |
+| `sykmelding.verify.duration` | Timer | Time to verify a sykmelding |
+| `sykmelding.kafka.message.sent` | Counter | Kafka messages sent |
+| `sykmelding.kafka.message.consumed` | Counter | Kafka messages consumed |
+| `sykmelding.database.save` | Counter | Database save operations |
+| `sykmelding.active.count` | Gauge | Current sykmeldinger in database |
+| `sykmelding.error.queue.size` | Gauge | Unresolved Kafka processing errors |
+
+### SLI Metrics (for Grafana dashboards)
+
+Calculate availability and error rates in PromQL:
+
+```promql
+# Availability (15min window)
+sum(rate(sykmelding_sli_requests_successful_total[15m])) 
+/ sum(rate(sykmelding_sli_requests_total[15m])) * 100
+
+# Error rate (15min window)  
+sum(rate(sykmelding_sli_requests_failed_total[15m]))
+/ sum(rate(sykmelding_sli_requests_total[15m])) * 100
+```
+
+### SLO Thresholds
+
+| SLI | Target |
+|-----|--------|
+| Availability | ≥99.5% |
+| Create latency p95 | ≤2000ms |
+| Verify latency p95 | ≤500ms |
+
+Latency violations are tracked via `sykmelding.slo.latency.{create,verify}.violation` counters.
+
+---
+
 ## Contact
 
 This project is maintained by [navikt/tsm](CODEOWNERS)

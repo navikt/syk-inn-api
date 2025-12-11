@@ -10,8 +10,13 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 /**
- * Scheduled collector that queries the database periodically to update gauge metrics. Runs every 60
- * seconds to keep metrics fresh.
+ * Scheduled collector that queries the database periodically to update gauge metrics.
+ * Runs every 60 seconds to keep metrics fresh.
+ *
+ * These gauges are useful for operational dashboards to monitor "normal drift":
+ * - Are we persisting and processing sykmeldinger at expected rates?
+ * - Is the error queue growing?
+ * - How old is the oldest sykmelding in the system?
  */
 @Component
 class SykmeldingMetricsCollector(
@@ -49,33 +54,24 @@ class SykmeldingMetricsCollector(
     }
 
     private fun collectSykmeldingMetrics() {
-        val allSykmeldinger = sykmeldingRepository.findAll().toList()
-
-        activeSykmeldingerCount.set(allSykmeldinger.size.toLong())
-
-        val validatedOk = allSykmeldinger.count { it.validertOk }
-        validatedOkCount.set(validatedOk.toLong())
-        validatedNotOkCount.set((allSykmeldinger.size - validatedOk).toLong())
+        // Use efficient count queries instead of loading all entities
+        activeSykmeldingerCount.set(sykmeldingRepository.countAll())
+        validatedOkCount.set(sykmeldingRepository.countValidertOk())
+        validatedNotOkCount.set(sykmeldingRepository.countValidertNotOk())
 
         // Calculate oldest sykmelding age
-        if (allSykmeldinger.isNotEmpty()) {
-            val oldestFom = allSykmeldinger.minOfOrNull { it.fom }
-            if (oldestFom != null) {
-                val ageDays = ChronoUnit.DAYS.between(oldestFom, LocalDate.now())
-                oldestSykmeldingAgeDays.set(ageDays)
-            }
+        val oldestFom = sykmeldingRepository.findMinFom()
+        if (oldestFom != null) {
+            val ageDays = ChronoUnit.DAYS.between(oldestFom, LocalDate.now())
+            oldestSykmeldingAgeDays.set(ageDays)
         } else {
             oldestSykmeldingAgeDays.set(0)
         }
     }
 
     private fun collectErrorMetrics() {
-        val allErrors = errorRepository.findAll().toList()
-        errorQueueSize.set(allErrors.size.toLong())
-
-        // Calculate oldest error age in hours (assuming errors have timestamp if available)
-        // For now, we'll set to 0 as KafkaProcessingError doesn't have a timestamp field
-        // This can be enhanced if timestamp is added to the entity
+        errorQueueSize.set(errorRepository.count())
+        // Error age tracking can be added if timestamp is added to KafkaProcessingError entity
         oldestErrorAgeHours.set(0)
     }
 }

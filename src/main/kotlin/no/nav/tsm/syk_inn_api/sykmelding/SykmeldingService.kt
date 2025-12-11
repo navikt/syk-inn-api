@@ -154,9 +154,6 @@ class SykmeldingService(
             diagnoseSystem = payload.values.hoveddiagnose.system,
             validationResult = validation.status.name,
             aktivitetType = aktivitetType,
-            yrkesskade = payload.values.yrkesskade?.yrkesskade ?: false,
-            svangerskapsrelatert = payload.values.svangerskapsrelatert,
-            tilbakedateringPresent = payload.values.tilbakedatering != null,
         )
 
         return sykmeldingDocument.right()

@@ -17,4 +17,17 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDb, UUID> {
     @Modifying
     @Query(value = "DELETE FROM sykmelding WHERE tom < :cutoffDate", nativeQuery = true)
     fun deleteSykmeldingerWithAktivitetOlderThan(@Param("cutoffDate") cutoffDate: LocalDate): Int
+
+    // Efficient count queries for metrics collection
+    @Query("SELECT COUNT(s) FROM SykmeldingDb s")
+    fun countAll(): Long
+
+    @Query("SELECT COUNT(s) FROM SykmeldingDb s WHERE s.validertOk = true")
+    fun countValidertOk(): Long
+
+    @Query("SELECT COUNT(s) FROM SykmeldingDb s WHERE s.validertOk = false")
+    fun countValidertNotOk(): Long
+
+    @Query("SELECT MIN(s.fom) FROM SykmeldingDb s")
+    fun findMinFom(): LocalDate?
 }

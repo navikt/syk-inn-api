@@ -14,7 +14,6 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprException
 import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
 import no.nav.tsm.syk_inn_api.sykmelding.errors.KafkaProcessingError
 import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingMetrics
-import no.nav.tsm.syk_inn_api.sykmelding.metrics.SykmeldingServiceLevelIndicators
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
 import no.nav.tsm.syk_inn_api.sykmelding.scheduled.DAYS_OLD_SYKMELDING
@@ -41,8 +40,7 @@ class SykmeldingConsumer(
     private val errorRepository: ErrorRepository,
     private val poisonPills: PoisonPills,
     private val sykmeldingMetrics: SykmeldingMetrics,
-    private val sli: SykmeldingServiceLevelIndicators,
-    @param:Value($$"${nais.cluster}") private val clusterName: String,
+    @param:Value("\${nais.cluster}") private val clusterName: String,
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -119,7 +117,6 @@ class SykmeldingConsumer(
                     Instant.now(),
                 ),
             )
-            sli.updateConsumerProcessingTimestamp()
         } catch (e: JacksonException) {
             sykmeldingMetrics.incrementKafkaProcessingError("jackson_error")
             handleError(record, e)

@@ -1,7 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
-import java.time.Duration
-import java.time.Instant
 import java.util.*
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.regulus.regula.RegulaResult
@@ -32,116 +30,44 @@ class SykmeldingController(
 
     @PostMapping
     fun createSykmelding(@RequestBody payload: OpprettSykmeldingPayload): ResponseEntity<Any> {
-        val startTime = Instant.now()
         teamLogger.info("Received request to create sykmelding with payload: $payload")
 
         if (payload.meta.pasientIdent.isBlank() || payload.meta.sykmelderHpr.isBlank()) {
-            val response: ResponseEntity<Any> =
-                ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
-            sykmeldingMetrics.incrementHttpRequest(
-                "/api/sykmelding",
-                "POST",
-                response.statusCode.value(),
-            )
-            sykmeldingMetrics.recordHttpRequestDuration(
-                Duration.between(startTime, Instant.now()),
-                "/api/sykmelding",
-                "POST",
-            )
-            return response
+            return ResponseEntity.badRequest().body("Pasient fnr and sykmelder hpr are required")
         }
 
         val sykmeldingResult = sykmeldingService.createSykmelding(payload)
 
         return sykmeldingResult.fold(
-            { error ->
-                val response = error.toResponseEntity()
-                sykmeldingMetrics.incrementHttpRequest(
-                    "/api/sykmelding",
-                    "POST",
-                    response.statusCode.value(),
-                )
-                sykmeldingMetrics.recordHttpRequestDuration(
-                    Duration.between(
-                        startTime,
-                        Instant.now(),
-                    ),
-                    "/api/sykmelding",
-                    "POST",
-                )
-                response
-            },
+            { error -> error.toResponseEntity() },
         ) { sykmelding ->
-            logger.info(
-                "Sykmelding created successfully with ID: ${sykmelding.sykmeldingId}",
-            )
-            val response: ResponseEntity<Any> =
-                ResponseEntity.status(HttpStatus.CREATED).body(sykmelding)
-            sykmeldingMetrics.incrementHttpRequest(
-                "/api/sykmelding",
-                "POST",
-                response.statusCode.value(),
-            )
-            sykmeldingMetrics.recordHttpRequestDuration(
-                Duration.between(startTime, Instant.now()),
-                "/api/sykmelding",
-                "POST",
-            )
-            response
+            logger.info("Sykmelding created successfully with ID: ${sykmelding.sykmeldingId}")
+            ResponseEntity.status(HttpStatus.CREATED).body(sykmelding)
         }
     }
 
     @PostMapping("/verify")
     fun verifySykmelding(@RequestBody payload: OpprettSykmeldingPayload): ResponseEntity<Any> {
-        val startTime = Instant.now()
         teamLogger.info("Received request to verify sykmelding with payload: $payload")
 
         val verificationResult = sykmeldingService.verifySykmelding(payload)
 
         return verificationResult.fold(
-            { error ->
-                val response = error.toResponseEntity()
-                sykmeldingMetrics.incrementHttpRequest(
-                    "/api/sykmelding/verify",
-                    "POST",
-                    response.statusCode.value(),
-                )
-                sykmeldingMetrics.recordHttpRequestDuration(
-                    Duration.between(
-                        startTime,
-                        Instant.now(),
-                    ),
-                    "/api/sykmelding/verify",
-                    "POST",
-                )
-                response
-            },
+            { error -> error.toResponseEntity() },
         ) { verification ->
-            val response =
-                ResponseEntity.status(HttpStatus.OK)
-                    .body(
-                        when (verification) {
-                            is RegulaResult.NotOk ->
-                                RuleOutcome(
-                                    status = verification.outcome.status,
-                                    message = verification.outcome.reason.sykmelder,
-                                    rule = verification.outcome.rule,
-                                    tree = verification.outcome.tree,
-                                )
-                            is RegulaResult.Ok -> true
-                        },
-                    )
-            sykmeldingMetrics.incrementHttpRequest(
-                "/api/sykmelding/verify",
-                "POST",
-                response.statusCode.value(),
-            )
-            sykmeldingMetrics.recordHttpRequestDuration(
-                Duration.between(startTime, Instant.now()),
-                "/api/sykmelding/verify",
-                "POST",
-            )
-            response
+            ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    when (verification) {
+                        is RegulaResult.NotOk ->
+                            RuleOutcome(
+                                status = verification.outcome.status,
+                                message = verification.outcome.reason.sykmelder,
+                                rule = verification.outcome.rule,
+                                tree = verification.outcome.tree,
+                            )
+                        is RegulaResult.Ok -> true
+                    },
+                )
         }
     }
 
@@ -150,52 +76,16 @@ class SykmeldingController(
         @PathVariable sykmeldingId: UUID,
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<SykmeldingResponse> {
-        val startTime = Instant.now()
         val sykmelding = sykmeldingService.getSykmeldingById(sykmeldingId)
-        if (sykmelding == null) {
-            val response = ResponseEntity.notFound().build<SykmeldingResponse>()
-            sykmeldingMetrics.incrementHttpRequest(
-                "/api/sykmelding/{id}",
-                "GET",
-                response.statusCode.value(),
-            )
-            sykmeldingMetrics.recordHttpRequestDuration(
-                Duration.between(startTime, Instant.now()),
-                "/api/sykmelding/{id}",
-                "GET",
-            )
-            return response
-        }
+            ?: return ResponseEntity.notFound().build()
 
         val sykmeldingAccessControlled = sykmeldingAccessControl(hpr, sykmelding)
         if (sykmeldingAccessControlled == null) {
             sykmeldingMetrics.incrementAccessControlDenied("/api/sykmelding/{id}")
-            val response = ResponseEntity.notFound().build<SykmeldingResponse>()
-            sykmeldingMetrics.incrementHttpRequest(
-                "/api/sykmelding/{id}",
-                "GET",
-                response.statusCode.value(),
-            )
-            sykmeldingMetrics.recordHttpRequestDuration(
-                Duration.between(startTime, Instant.now()),
-                "/api/sykmelding/{id}",
-                "GET",
-            )
-            return response
+            return ResponseEntity.notFound().build()
         }
 
-        val response = ResponseEntity.ok(sykmeldingAccessControlled)
-        sykmeldingMetrics.incrementHttpRequest(
-            "/api/sykmelding/{id}",
-            "GET",
-            response.statusCode.value(),
-        )
-        sykmeldingMetrics.recordHttpRequestDuration(
-            Duration.between(startTime, Instant.now()),
-            "/api/sykmelding/{id}",
-            "GET",
-        )
-        return response
+        return ResponseEntity.ok(sykmeldingAccessControlled)
     }
 
     @GetMapping
@@ -203,26 +93,15 @@ class SykmeldingController(
         @RequestHeader("Ident") ident: String,
         @RequestHeader("HPR") hpr: String,
     ): ResponseEntity<List<SykmeldingResponse>> {
-        val startTime = Instant.now()
-        val result =
-            sykmeldingService.getSykmeldingerByIdent(ident).fold(
-                { sykmeldingList ->
-                    val accessControlledList: List<SykmeldingResponse> =
-                        sykmeldingList.mapNotNull { sykmeldingAccessControl(hpr, it) }
-
-                    ResponseEntity.ok(accessControlledList)
-                },
-            ) {
-                ResponseEntity.internalServerError().build()
-            }
-
-        sykmeldingMetrics.incrementHttpRequest("/api/sykmelding", "GET", result.statusCode.value())
-        sykmeldingMetrics.recordHttpRequestDuration(
-            Duration.between(startTime, Instant.now()),
-            "/api/sykmelding",
-            "GET",
-        )
-        return result
+        return sykmeldingService.getSykmeldingerByIdent(ident).fold(
+            { sykmeldingList ->
+                val accessControlledList: List<SykmeldingResponse> =
+                    sykmeldingList.mapNotNull { sykmeldingAccessControl(hpr, it) }
+                ResponseEntity.ok(accessControlledList)
+            },
+        ) {
+            ResponseEntity.internalServerError().build()
+        }
     }
 }
 

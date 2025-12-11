@@ -17,18 +17,12 @@ class SykmeldingMetrics(private val registry: MeterRegistry) {
         diagnoseSystem: DiagnoseSystem,
         validationResult: String,
         aktivitetType: String,
-        yrkesskade: Boolean,
-        svangerskapsrelatert: Boolean,
-        tilbakedateringPresent: Boolean,
     ) {
         Counter.builder("sykmelding.created")
             .tag("source", source)
             .tag("diagnose_system", diagnoseSystem.name)
             .tag("validation_result", validationResult)
             .tag("aktivitet_type", aktivitetType)
-            .tag("yrkesskade", yrkesskade.toString())
-            .tag("svangerskapsrelatert", svangerskapsrelatert.toString())
-            .tag("tilbakedatering_present", tilbakedateringPresent.toString())
             .description("Total number of sykmeldinger created")
             .register(registry)
             .increment()
@@ -185,26 +179,6 @@ class SykmeldingMetrics(private val registry: MeterRegistry) {
             .record(duration)
     }
 
-    // HTTP API metrics
-    fun incrementHttpRequest(endpoint: String, method: String, statusCode: Int) {
-        Counter.builder("sykmelding.http.request")
-            .tag("endpoint", endpoint)
-            .tag("method", method)
-            .tag("status_code", statusCode.toString())
-            .description("Total number of HTTP requests")
-            .register(registry)
-            .increment()
-    }
-
-    fun recordHttpRequestDuration(duration: Duration, endpoint: String, method: String) {
-        Timer.builder("sykmelding.http.request.duration")
-            .tag("endpoint", endpoint)
-            .tag("method", method)
-            .description("Time taken to process HTTP requests")
-            .register(registry)
-            .record(duration)
-    }
-
     fun incrementAccessControlDenied(endpoint: String) {
         Counter.builder("sykmelding.access.control.denied")
             .tag("endpoint", endpoint)
@@ -276,9 +250,6 @@ class SykmeldingMetrics(private val registry: MeterRegistry) {
         registry.gauge("sykmelding.error.oldest.age.hours", valueSupplier)
     }
 
-    fun registerLastConsumerProcessingTimestamp(atomicLong: AtomicLong) {
-        registry.gauge("sykmelding.consumer.last.processing.timestamp", atomicLong)
-    }
 
     fun registerLastScheduledDeletionTimestamp(atomicLong: AtomicLong) {
         registry.gauge("sykmelding.scheduled.deletion.last.run.timestamp", atomicLong)
