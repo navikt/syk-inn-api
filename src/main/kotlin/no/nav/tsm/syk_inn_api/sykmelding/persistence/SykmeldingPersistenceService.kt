@@ -16,12 +16,14 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import org.springframework.dao.DataIntegrityViolationException
+import no.nav.tsm.syk_inn_api.sykmelding.scheduled.SykmeldingStatusRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingStatusRepository: SykmeldingStatusRepository
 ) {
     private val logger = logger()
 
@@ -228,5 +230,21 @@ class SykmeldingPersistenceService(
     fun deleteSykmeldingerOlderThanDays(daysToSubtract: Long): Int {
         val cutoffDate = java.time.LocalDate.now().minusDays(daysToSubtract)
         return sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
+        @Transactional
+        fun saveSykmelding(
+            sykmeldingDb: SykmeldingDb,
+        ): SykmeldingDb {
+            val savedEntity =
+                sykmeldingRepository.save(
+                    sykmeldingDb,
+                )
+            sykmeldingStatusRepository.insert(
+                UUID.fromString(sykmeldingDb.sykmeldingId),
+                sykmeldingDb.mottatt
+            )
+            return savedEntity
+        }
     }
+
 }
+

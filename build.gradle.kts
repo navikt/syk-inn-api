@@ -1,6 +1,7 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val javaVersion = JvmTarget.JVM_21
 
@@ -139,4 +140,8 @@ tasks {
             dependsOn("spotlessApply")
         }
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }

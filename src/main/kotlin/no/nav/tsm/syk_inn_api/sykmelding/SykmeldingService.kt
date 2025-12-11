@@ -53,7 +53,7 @@ class SykmeldingService(
         payload: OpprettSykmeldingPayload
     ): Either<SykmeldingCreationErrors, SykmeldingDocument> {
         val span = Span.current()
-        val sykmeldingId = UUID.randomUUID().toString()
+        val sykmeldingId = UUID.randomUUID()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
         val existing = sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
         if (existing != null) {
@@ -67,7 +67,7 @@ class SykmeldingService(
                     .sykmelderMedSuspensjon(
                         hpr = payload.meta.sykmelderHpr,
                         signaturDato = mottatt.toLocalDate(),
-                        callId = sykmeldingId,
+                        callId = sykmeldingId.toString(),
                     )
                     .bind()
 
@@ -87,7 +87,7 @@ class SykmeldingService(
         val ruleResult: RegulaResult =
             ruleService.validateRules(
                 payload = payload,
-                sykmeldingId = sykmeldingId,
+                sykmeldingId = sykmeldingId.toString(),
                 sykmelder = sykmelder,
                 foedselsdato = person.fodselsdato,
             )
@@ -97,7 +97,7 @@ class SykmeldingService(
         try {
             val sykmeldingDocument =
                 sykmeldingPersistenceService.saveSykmeldingPayload(
-                    sykmeldingId = sykmeldingId,
+                    sykmeldingId = sykmeldingId.toString(),
                     mottatt = mottatt,
                     payload = payload,
                     person = person,
@@ -114,9 +114,8 @@ class SykmeldingService(
                 source = payload.meta.source,
             )
 
-            span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
+            span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId.toString())
             span.setAttribute("SykmeldingService.create.source", payload.meta.source)
-            logger.info("Created and sent sykmelding with id=$sykmeldingId to Kafka")
 
             return sykmeldingDocument.right()
         } catch (ex: DataIntegrityViolationException) {
