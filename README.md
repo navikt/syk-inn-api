@@ -210,7 +210,7 @@ graph LR
 
 ## Metrics
 
-Application metrics are exposed via Spring Actuator at `/actuator/prometheus` for Prometheus scraping.
+Application metrics are exposed via Spring Actuator at `/internal/prometheus` for Prometheus scraping.
 
 ### Key Metrics
 
