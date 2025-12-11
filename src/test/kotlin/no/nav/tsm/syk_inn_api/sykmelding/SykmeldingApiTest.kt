@@ -108,6 +108,38 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
+    fun `idempotency test - should not create multiple with same idempotency key`() {
+        val response =
+            restTemplate.postForEntity<SykmeldingDocument>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        val created = requireNotNull(response.body)
+
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(created.meta.pasientIdent, "21037712323")
+
+        val nextRequest =
+            restTemplate.postForEntity<Unit>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload,
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.ALREADY_REPORTED, nextRequest.statusCode)
+    }
+
+    @Test
     fun `fetching single sykmelding not written by you should return 'Redacted' version`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(
@@ -285,6 +317,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 private val fullExampleSykmeldingPayload =
     """
     |{
+    |  "submitId": "495d7f08-f17d-444f-b480-b1c94108d38a",
     |  "meta": {
     |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
@@ -325,6 +358,7 @@ private val fullExampleSykmeldingPayload =
 private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
     """
     |{
+    |  "submitId": "d06dc9ef-b090-4529-8649-1485d165197c",
     |  "meta": {
     |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
@@ -365,6 +399,7 @@ private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
 private val brokenExampleSykmeldingPayloadUnknownAktivitet =
     """
     |{
+    |  "submitId": "fa798f2d-c218-4c38-a40f-9bdd32893f2b",
     |  "meta": {
     |    "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
@@ -405,6 +440,7 @@ private val brokenExampleSykmeldingPayloadUnknownAktivitet =
 private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
     """
     |{
+    |  "submitId": "f5465ec4-10ea-4123-aa3f-cd47da9d9bfe",
     |  "meta": {
     |  "source": "Source (FHIR)",
     |    "pasientIdent": "21037712323",
@@ -445,6 +481,7 @@ private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
 private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
     """
     |{
+    |  "submitId": "6d37ce07-9960-427b-b608-bd1c1d3db7b4",
     |  "meta": {
     |  "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",
@@ -485,6 +522,7 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
 private val exampleSykmeldingPayloadValidHprButSuspendedFnr =
     """
     |{
+    |  "submitId": "927a297a-ff4c-481d-9d57-97f681ab79b3",
     |  "meta": {
     |      "source":  "Source (FHIR)",
     |    "pasientIdent": "21037712323",

@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Navn
@@ -96,6 +97,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                 validertOk = false,
                 fom = LocalDate.parse("2024-04-01"),
                 tom = LocalDate.parse("2024-04-10"),
+                idempotencyKey = UUID.randomUUID(),
             )
 
         val savedEntity = sykmeldingRepository.save(sykmeldingDb)
@@ -218,6 +220,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
             validertOk = false,
             fom = aktivitetTom.minusDays(fomDaysToSubtract),
             tom = aktivitetTom,
+            idempotencyKey = UUID.randomUUID(),
         )
     }
 }

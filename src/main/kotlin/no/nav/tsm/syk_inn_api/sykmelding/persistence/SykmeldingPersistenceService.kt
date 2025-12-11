@@ -1,7 +1,7 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
-import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
@@ -26,6 +26,10 @@ class SykmeldingPersistenceService(
         return sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
             mapDatabaseEntityToSykmeldingDocument(it)
         }
+    }
+
+    fun hasBeenSubmittet(submitId: UUID): Boolean {
+        return sykmeldingRepository.existsByIdempotencyKey(submitId)
     }
 
     fun saveSykmeldingPayload(
@@ -81,6 +85,7 @@ class SykmeldingPersistenceService(
             legekontorTlf = payload.meta.legekontorTlf,
             fom = persistedSykmelding.aktivitet.minOf { it.fom },
             tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+            idempotencyKey = payload.submitId,
         )
     }
 
@@ -131,6 +136,7 @@ class SykmeldingPersistenceService(
             validertOk = validertOk,
             fom = persistedSykmelding.aktivitet.minOf { it.fom },
             tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+            idempotencyKey = UUID.randomUUID()
         )
     }
 
