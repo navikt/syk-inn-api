@@ -71,7 +71,7 @@ class SykmeldingServiceTest {
     @BeforeEach
     fun setup() {
         ruleService = mockk()
-        sykmeldingPersistenceService = mockk()
+        sykmeldingPersistenceService = mockk(relaxed = true)
         sykmeldingInputProducer = mockk()
         personService = mockk()
         sykmelderService = mockk()
@@ -210,6 +210,7 @@ class SykmeldingServiceTest {
                     legekontorTlf = "12345678",
                     fom = LocalDate.parse("2020-01-01"),
                     tom = LocalDate.parse("2020-01-30"),
+                    idempotencyKey = UUID.randomUUID(),
                 ),
             )
 
@@ -228,6 +229,7 @@ class SykmeldingServiceTest {
             sykmeldingService.createSykmelding(
                 payload =
                     OpprettSykmeldingPayload(
+                        submitId = UUID.randomUUID(),
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = pasientIdent,
@@ -417,6 +419,7 @@ class SykmeldingServiceTest {
                     legekontorTlf = "12345678",
                     fom = LocalDate.parse("2020-01-01"),
                     tom = LocalDate.parse("2020-01-30"),
+                    idempotencyKey = UUID.randomUUID(),
                 ),
             )
 
@@ -435,6 +438,7 @@ class SykmeldingServiceTest {
             sykmeldingService.createSykmelding(
                 payload =
                     OpprettSykmeldingPayload(
+                        submitId = UUID.randomUUID(),
                         meta =
                             OpprettSykmeldingMetadata(
                                 pasientIdent = "12345678901",

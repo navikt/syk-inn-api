@@ -3,10 +3,12 @@ package no.nav.tsm.syk_inn_api.sykmelding
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 
 data class OpprettSykmeldingPayload(
+    val submitId: UUID,
     val meta: OpprettSykmeldingMetadata,
     val values: OpprettSykmelding,
 )
