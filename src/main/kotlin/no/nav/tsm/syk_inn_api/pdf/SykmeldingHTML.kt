@@ -124,18 +124,19 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 )
                             }
                         }
-                        tr {
-                            tableInfo(
-                                "Arbeidsgiver",
-                                italic = sykmelding.values.arbeidsgiver == null,
-                            ) {
-                                if (sykmelding.values.arbeidsgiver != null) {
-                                    sykmelding.values.arbeidsgiver.arbeidsgivernavn
-                                } else {
-                                    "Ingen arbeidsgiver"
+                        sykmelding.values.arbeidsgiver?.let {
+                            if (it.harFlere) {
+                                tr {
+                                    tableInfo(
+                                        "Arbeidsgiver",
+                                        italic = sykmelding.values.arbeidsgiver == null,
+                                    ) {
+                                        sykmelding.values.arbeidsgiver.arbeidsgivernavn
+                                    }
                                 }
                             }
                         }
+
                         tr {
                             tableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
                                 sykmelding.values.aktivitet.flatMap {
@@ -165,7 +166,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             if (utdypendeSporsmal.utfordringerMedArbeid != null) {
                                 tr {
                                     tableInfo(
-                                        "Hvilke utfordringer har pasienten med å utføre gradert arbeid?"
+                                        "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
                                     ) {
                                         utdypendeSporsmal.utfordringerMedArbeid
                                     }
@@ -174,7 +175,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             if (utdypendeSporsmal.medisinskOppsummering != null) {
                                 tr {
                                     tableInfo(
-                                        "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)"
+                                        "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
                                     ) {
                                         utdypendeSporsmal.medisinskOppsummering
                                     }
@@ -183,7 +184,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                             if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
                                 tr {
                                     tableInfo(
-                                        "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)"
+                                        "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
                                     ) {
                                         utdypendeSporsmal.hensynPaArbeidsplassen
                                     }
@@ -221,7 +222,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 tableInfo(
                                     "Pasienten er skjermet for medisinske opplysninger",
                                     colspan = "2",
-                                    italic = false
+                                    italic = false,
                                 ) {
                                     "Ja"
                                 }
