@@ -55,7 +55,10 @@ class SykmeldingService(
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
         val exists = sykmeldingPersistenceService.hasBeenSubmittet(payload.submitId)
-        if (exists) return SykmeldingCreationErrors.AlreadyExists.left()
+        if (exists) {
+            logger.warn("Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen")
+            return SykmeldingCreationErrors.AlreadyExists.left()
+        }
 
         val resources = result {
             val person = personService.getPersonByIdent(payload.meta.pasientIdent).bind()
