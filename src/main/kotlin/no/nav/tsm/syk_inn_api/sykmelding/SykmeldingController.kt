@@ -124,17 +124,15 @@ object CreateSykmelding {
     fun SykmeldingService.SykmeldingCreationErrors.toResponseEntity(): ResponseEntity<Any> =
         when (this) {
             is SykmeldingService.SykmeldingCreationErrors.PersonDoesNotExist ->
-                ResponseEntity.status(
-                        HttpStatus.UNPROCESSABLE_ENTITY,
-                    )
+                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(ErrorMessage("Person does not exist"))
             is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to persist sykmelding")
             is SykmeldingService.SykmeldingCreationErrors.ResourceError ->
-                ResponseEntity.status(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                    )
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch required resources")
+            is SykmeldingService.SykmeldingCreationErrors.AlreadyExists ->
+                ResponseEntity.status(HttpStatus.ALREADY_REPORTED).build()
         }
 }
