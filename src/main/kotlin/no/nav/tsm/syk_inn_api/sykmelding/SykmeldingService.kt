@@ -38,11 +38,14 @@ class SykmeldingService(
     sealed class SykmeldingCreationErrors {
         data object PersonDoesNotExist : SykmeldingCreationErrors()
 
+        data object ProcessingError : SykmeldingCreationErrors()
+
         data object PersistenceError : SykmeldingCreationErrors()
 
         data object ResourceError : SykmeldingCreationErrors()
 
-        data object AlreadyExists : SykmeldingCreationErrors()
+        data class AlreadyExists(val sykmeldingDocument: SykmeldingDocument) :
+            SykmeldingCreationErrors()
     }
 
     @Transactional
@@ -54,12 +57,21 @@ class SykmeldingService(
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
 
-        val exists = sykmeldingPersistenceService.hasBeenSubmittet(payload.submitId)
-        if (exists) {
+        val existing = sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
+        if (existing != null) {
             logger.warn(
                 "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen"
             )
-            return SykmeldingCreationErrors.AlreadyExists.left()
+            val pasientId = existing.meta.pasientIdent
+            val hprNr = existing.meta.sykmelder.hprNummer
+
+            if (hprNr != payload.meta.sykmelderHpr) {
+                return SykmeldingCreationErrors.ProcessingError.left()
+            } else if (pasientId != payload.meta.pasientIdent) {
+                return SykmeldingCreationErrors.ProcessingError.left()
+            }
+
+            return SykmeldingCreationErrors.AlreadyExists(existing).left()
         }
 
         val resources = result {
