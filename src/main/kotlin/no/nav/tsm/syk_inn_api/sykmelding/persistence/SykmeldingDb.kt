@@ -22,5 +22,5 @@ data class SykmeldingDb(
     val validertOk: Boolean = false,
     val fom: LocalDate,
     val tom: LocalDate,
-    val idempotencyKey: UUID,
+    val idempotencyKey: UUID?,
 )

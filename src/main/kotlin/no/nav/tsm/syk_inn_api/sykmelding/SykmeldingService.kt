@@ -56,7 +56,9 @@ class SykmeldingService(
 
         val exists = sykmeldingPersistenceService.hasBeenSubmittet(payload.submitId)
         if (exists) {
-            logger.warn("Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen")
+            logger.warn(
+                "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen"
+            )
             return SykmeldingCreationErrors.AlreadyExists.left()
         }
 
