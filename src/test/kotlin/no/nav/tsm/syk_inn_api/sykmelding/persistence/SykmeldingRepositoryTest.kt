@@ -141,86 +141,86 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
         assertThat(remainingSykmeldinger).hasSize(1)
         assertThat(remainingSykmeldinger[0].sykmeldingId).isEqualTo(recentSykmeldingId)
     }
+}
 
-    private fun createTestSykmeldingDb(
-        sykmeldingId: String,
-        pasientIdent: String,
-        aktivitetTom: LocalDate,
-    ): SykmeldingDb {
-        val fomDaysToSubtract = 10L
-        return SykmeldingDb(
-            sykmeldingId = sykmeldingId,
-            pasientIdent = pasientIdent,
-            sykmelderHpr = "123456",
-            legekontorOrgnr = "987654321",
-            mottatt = OffsetDateTime.now(),
-            sykmelding =
-                PersistedSykmelding(
-                    hoveddiagnose =
-                        PersistedSykmeldingDiagnoseInfo(
-                            DiagnoseSystem.ICD10,
-                            "R99",
-                            "Ukjent diagnose",
-                        ),
-                    aktivitet =
-                        listOf(
-                            PersistedSykmeldingAktivitet.IkkeMulig(
-                                fom = aktivitetTom.minusDays(fomDaysToSubtract),
-                                tom = aktivitetTom,
-                                medisinskArsak =
-                                    PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
-                                arbeidsrelatertArsak =
-                                    PersistedSykmeldingArbeidsrelatertArsak(
-                                        isArbeidsrelatertArsak = false,
-                                        arbeidsrelaterteArsaker = emptyList(),
-                                        annenArbeidsrelatertArsak = null,
-                                    ),
-                            ),
-                        ),
-                    pasientenSkalSkjermes = false,
-                    bidiagnoser = emptyList(),
-                    meldinger =
-                        PersistedSykmeldingMeldinger(
-                            tilNav = null,
-                            tilArbeidsgiver = null,
-                        ),
-                    svangerskapsrelatert = false,
-                    yrkesskade = null,
-                    arbeidsgiver = null,
-                    sykmeldingId = sykmeldingId,
-                    pasient =
-                        PersistedSykmeldingPasient(
-                            navn =
-                                Navn(
-                                    fornavn = "Ola",
-                                    mellomnavn = "Norman",
-                                    etternavn = "Nordmann",
+fun createTestSykmeldingDb(
+    sykmeldingId: String,
+    pasientIdent: String,
+    aktivitetTom: LocalDate,
+): SykmeldingDb {
+    val fomDaysToSubtract = 10L
+    return SykmeldingDb(
+        sykmeldingId = sykmeldingId,
+        pasientIdent = pasientIdent,
+        sykmelderHpr = "123456",
+        legekontorOrgnr = "987654321",
+        mottatt = OffsetDateTime.now(),
+        sykmelding =
+            PersistedSykmelding(
+                hoveddiagnose =
+                    PersistedSykmeldingDiagnoseInfo(
+                        DiagnoseSystem.ICD10,
+                        "R99",
+                        "Ukjent diagnose",
+                    ),
+                aktivitet =
+                    listOf(
+                        PersistedSykmeldingAktivitet.IkkeMulig(
+                            fom = aktivitetTom.minusDays(fomDaysToSubtract),
+                            tom = aktivitetTom,
+                            medisinskArsak =
+                                PersistedSykmeldingMedisinskArsak(isMedisinskArsak = true),
+                            arbeidsrelatertArsak =
+                                PersistedSykmeldingArbeidsrelatertArsak(
+                                    isArbeidsrelatertArsak = false,
+                                    arbeidsrelaterteArsaker = emptyList(),
+                                    annenArbeidsrelatertArsak = null,
                                 ),
-                            ident = pasientIdent,
-                            fodselsdato = LocalDate.of(1990, 1, 1),
                         ),
-                    sykmelder =
-                        PersistedSykmeldingSykmelder(
-                            godkjenninger = emptyList(),
-                            ident = "02029212345",
-                            hprNummer = "123456",
-                            fornavn = "Nicky",
-                            mellomnavn = "D",
-                            etternavn = "Angel",
-                        ),
-                    tilbakedatering = null,
-                    utdypendeSporsmal = null,
-                    regelResultat =
-                        PersistedSykmeldingRuleResult(
-                            result = RuleType.OK,
-                            meldingTilSender = null,
-                        ),
-                ),
-            legekontorTlf = "12345678",
-            validertOk = false,
-            fom = aktivitetTom.minusDays(fomDaysToSubtract),
-            tom = aktivitetTom,
-            idempotencyKey = UUID.randomUUID(),
-        )
-    }
+                    ),
+                pasientenSkalSkjermes = false,
+                bidiagnoser = emptyList(),
+                meldinger =
+                    PersistedSykmeldingMeldinger(
+                        tilNav = null,
+                        tilArbeidsgiver = null,
+                    ),
+                svangerskapsrelatert = false,
+                yrkesskade = null,
+                arbeidsgiver = null,
+                sykmeldingId = sykmeldingId,
+                pasient =
+                    PersistedSykmeldingPasient(
+                        navn =
+                            Navn(
+                                fornavn = "Ola",
+                                mellomnavn = "Norman",
+                                etternavn = "Nordmann",
+                            ),
+                        ident = pasientIdent,
+                        fodselsdato = LocalDate.of(1990, 1, 1),
+                    ),
+                sykmelder =
+                    PersistedSykmeldingSykmelder(
+                        godkjenninger = emptyList(),
+                        ident = "02029212345",
+                        hprNummer = "123456",
+                        fornavn = "Nicky",
+                        mellomnavn = "D",
+                        etternavn = "Angel",
+                    ),
+                tilbakedatering = null,
+                utdypendeSporsmal = null,
+                regelResultat =
+                    PersistedSykmeldingRuleResult(
+                        result = RuleType.OK,
+                        meldingTilSender = null,
+                    ),
+            ),
+        legekontorTlf = "12345678",
+        validertOk = false,
+        fom = aktivitetTom.minusDays(fomDaysToSubtract),
+        tom = aktivitetTom,
+        idempotencyKey = UUID.randomUUID(),
+    )
 }
