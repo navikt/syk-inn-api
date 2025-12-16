@@ -71,7 +71,10 @@ class SykmeldingServiceTest {
     @BeforeEach
     fun setup() {
         ruleService = mockk()
-        sykmeldingPersistenceService = mockk(relaxed = true)
+        sykmeldingPersistenceService =
+            mockk<SykmeldingPersistenceService>().also {
+                every { it.getSykmeldingByIdempotencyKey(any()) } returns null
+            }
         sykmeldingInputProducer = mockk()
         personService = mockk()
         sykmelderService = mockk()

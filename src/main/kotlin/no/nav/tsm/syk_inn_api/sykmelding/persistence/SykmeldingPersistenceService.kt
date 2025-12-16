@@ -28,8 +28,10 @@ class SykmeldingPersistenceService(
         }
     }
 
-    fun hasBeenSubmittet(submitId: UUID): Boolean {
-        return sykmeldingRepository.existsByIdempotencyKey(submitId)
+    fun getSykmeldingByIdempotencyKey(submitId: UUID): SykmeldingDocument? {
+        return sykmeldingRepository.getSykmeldingDbByIdempotencyKey(submitId)?.let {
+            mapDatabaseEntityToSykmeldingDocument(it)
+        }
     }
 
     fun saveSykmeldingPayload(

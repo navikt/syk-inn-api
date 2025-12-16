@@ -9,6 +9,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -128,11 +129,18 @@ object CreateSykmelding {
                     .body(ErrorMessage("Person does not exist"))
             is SykmeldingService.SykmeldingCreationErrors.PersistenceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to persist sykmelding")
+                    .body(ErrorMessage("Failed to persist sykmelding"))
             is SykmeldingService.SykmeldingCreationErrors.ResourceError ->
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to fetch required resources")
-            is SykmeldingService.SykmeldingCreationErrors.AlreadyExists ->
-                ResponseEntity.status(HttpStatus.ALREADY_REPORTED).build()
+                    .body(ErrorMessage("Failed to fetch required resources"))
+            is SykmeldingService.SykmeldingCreationErrors.AlreadyExists -> {
+                ResponseEntity.status(HttpStatus.ALREADY_REPORTED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(sykmeldingDocument)
+            }
+            is SykmeldingService.SykmeldingCreationErrors.ProcessingError -> {
+                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(ErrorMessage("Failed to process sykmelding"))
+            }
         }
 }

@@ -126,7 +126,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(created.meta.pasientIdent, "21037712323")
 
         val nextRequest =
-            restTemplate.postForEntity<Unit>(
+            restTemplate.postForEntity<SykmeldingDocument>(
                 "/api/sykmelding",
                 HttpEntity(
                     fullExampleSykmeldingPayload,
