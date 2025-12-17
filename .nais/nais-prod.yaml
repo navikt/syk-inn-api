@@ -32,7 +32,7 @@ spec:
   image: {{ image }}
   replicas:
     min: 2
-    max: 10
+    max: 5
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
@@ -48,7 +48,7 @@ spec:
   startup:
     path: /internal/health
     initialDelay: 30
-    failureThreshold: 30
+    failureThreshold: 60
     periodSeconds: 10
   prometheus:
     enabled: true
