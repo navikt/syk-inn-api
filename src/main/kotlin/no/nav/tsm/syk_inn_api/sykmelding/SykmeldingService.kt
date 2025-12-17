@@ -23,7 +23,6 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingService(
@@ -49,7 +48,6 @@ class SykmeldingService(
             SykmeldingCreationErrors()
     }
 
-    @Transactional
     @WithSpan
     fun createSykmelding(
         payload: OpprettSykmeldingPayload

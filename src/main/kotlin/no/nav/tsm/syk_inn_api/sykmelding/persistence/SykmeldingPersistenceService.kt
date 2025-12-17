@@ -15,6 +15,7 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SykmeldingPersistenceService(
@@ -34,6 +35,7 @@ class SykmeldingPersistenceService(
         }
     }
 
+    @Transactional
     fun saveSykmeldingPayload(
         sykmeldingId: String,
         mottatt: OffsetDateTime,
