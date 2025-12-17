@@ -21,6 +21,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -56,22 +57,9 @@ class SykmeldingService(
         val span = Span.current()
         val sykmeldingId = UUID.randomUUID().toString()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
-
         val existing = sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
         if (existing != null) {
-            logger.warn(
-                "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen"
-            )
-            val pasientId = existing.meta.pasientIdent
-            val hprNr = existing.meta.sykmelder.hprNummer
-
-            if (hprNr != payload.meta.sykmelderHpr) {
-                return SykmeldingCreationErrors.ProcessingError.left()
-            } else if (pasientId != payload.meta.pasientIdent) {
-                return SykmeldingCreationErrors.ProcessingError.left()
-            }
-
-            return SykmeldingCreationErrors.AlreadyExists(existing).left()
+            return duplicateSubmitResult(payload, existing)
         }
 
         val resources = result {
@@ -107,29 +95,63 @@ class SykmeldingService(
             )
 
         val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
-        val sykmeldingDocument =
-            sykmeldingPersistenceService.saveSykmeldingPayload(
+        try {
+
+            val sykmeldingDocument =
+                sykmeldingPersistenceService.saveSykmeldingPayload(
+                    sykmeldingId = sykmeldingId,
+                    mottatt = mottatt,
+                    payload = payload,
+                    person = person,
+                    sykmelder = sykmelder,
+                    ruleResult = validation,
+                )
+            sykmeldingInputProducer.send(
                 sykmeldingId = sykmeldingId,
-                mottatt = mottatt,
-                payload = payload,
+                sykmelding = sykmeldingDocument,
                 person = person,
                 sykmelder = sykmelder,
-                ruleResult = validation,
+                validationResult = validation,
+                source = payload.meta.source,
             )
 
-        sykmeldingInputProducer.send(
-            sykmeldingId = sykmeldingId,
-            sykmelding = sykmeldingDocument,
-            person = person,
-            sykmelder = sykmelder,
-            validationResult = validation,
-            source = payload.meta.source,
+            span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
+            span.setAttribute("SykmeldingService.create.source", payload.meta.source)
+
+            return sykmeldingDocument.right()
+        } catch (ex: DataIntegrityViolationException) {
+            logger.warn(
+                "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen",
+                ex
+            )
+            return duplicateSubmitResult(
+                payload = payload,
+                existing =
+                    sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
+            )
+        }
+    }
+
+    private fun duplicateSubmitResult(
+        payload: OpprettSykmeldingPayload,
+        existing: SykmeldingDocument?
+    ): Either<SykmeldingCreationErrors, Nothing> {
+        logger.warn(
+            "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen",
         )
 
-        span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId)
-        span.setAttribute("SykmeldingService.create.source", payload.meta.source)
+        existing ?: return SykmeldingCreationErrors.ProcessingError.left()
 
-        return sykmeldingDocument.right()
+        val pasientId = existing.meta.pasientIdent
+        val hprNr = existing.meta.sykmelder.hprNummer
+
+        if (hprNr != payload.meta.sykmelderHpr) {
+            return SykmeldingCreationErrors.ProcessingError.left()
+        } else if (pasientId != payload.meta.pasientIdent) {
+            return SykmeldingCreationErrors.ProcessingError.left()
+        }
+
+        return SykmeldingCreationErrors.AlreadyExists(existing).left()
     }
 
     @WithSpan
