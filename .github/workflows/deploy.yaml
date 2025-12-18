@@ -123,3 +123,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           SYK_INN_API_INTEGRATION_TESTS_IMAGE=ghcr.io/${{ github.repository }}-test:${{ github.sha }} yarn test:integration
+      - name: Test report
+        if: always()
+        run: ./scripts/test-reporter.mjs 'syk-inn integration tests' ./test-results/vitest-report.json >> "$GITHUB_STEP_SUMMARY"
