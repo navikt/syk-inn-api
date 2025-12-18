@@ -32,6 +32,6 @@ nais:
 
 jobs:
   sykmelding:
-    initialDelaySeconds: 1
-    fixedDelaySeconds: 10
-    resetTimeoutSeconds: 10
+    initialDelaySeconds: ${JOBS_SYKMELDING_INITIAL_DELAY:1}
+    fixedDelaySeconds: ${JOBS_SYKMELDING_FIXED_DELAY:10}
+    resetTimeoutSeconds: ${JOBS_SYKMELDING_RESET_TIMEOUT_DELAY:10}

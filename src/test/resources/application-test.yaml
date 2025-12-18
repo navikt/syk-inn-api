@@ -36,6 +36,6 @@ kafka:
 
 jobs:
   sykmelding:
-    initialDelaySeconds: 1
-    fixedDelaySeconds: 1
-    resetTimeoutSeconds: 1
+    initialDelaySeconds: ${JOBS_SYKMELDING_INITIAL_DELAY:1}
+    fixedDelaySeconds: ${JOBS_SYKMELDING_FIXED_DELAY:1}
+    resetTimeoutSeconds: ${JOBS_SYKMELDING_RESET_TIMEOUT_DELAY:1}
