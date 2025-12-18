@@ -101,9 +101,10 @@ jobs:
     needs: build-for-gpr
     runs-on: ubuntu-latest
     steps:
-      - name: Clone syk-inn frontend repo
-        run: |
-          git clone https://github.com/navikt/syk-inn.git .
+      - uses: actions/checkout@v6
+        with:
+          repository: navikt/syk-inn
+          fetch-depth: 1
       - run: corepack enable
       - uses: actions/setup-node@v6
         id: setup-node
