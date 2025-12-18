@@ -97,10 +97,23 @@ jobs:
           tags: ${{ steps.tags.outputs.tags }}
 
   test-syk-inn-integrations:
-    name: Runs syk-inn (frontend) integration tests with the newest syk-inn-api from GPR
+    name: Runs syk-inn integration tests with the newest syk-inn-api from GPR
     needs: build-for-gpr
     runs-on: ubuntu-latest
     steps:
+      - name: Clone syk-inn frontend repo
+        run: |
+          git clone https://github.com/navikt/syk-inn.git .
+      - run: corepack enable
+      - uses: actions/setup-node@v6
+        id: setup-node
+        with:
+          node-version: 24
+          cache: yarn
+      - name: Install yarn dependencies
+        run: yarn workspaces focus
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -108,7 +121,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-           docker run \
-              -v /var/run/docker.sock:/var/run/docker.sock \
-              --env SYK_INN_API_INTEGRATION_TESTS_IMAGE=ghcr.io/${{ github.repository }}-test:${{ github.sha }} \
-              ghcr.io/navikt/syk-inn-integration-tests:latest
+          SYK_INN_API_INTEGRATION_TESTS_IMAGE=ghcr.io/${{ github.repository }}-test:${{ github.sha }} yarn test:integration
