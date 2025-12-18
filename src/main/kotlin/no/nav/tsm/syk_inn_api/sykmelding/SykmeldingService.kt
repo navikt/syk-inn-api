@@ -6,31 +6,35 @@ import arrow.core.raise.result
 import arrow.core.right
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
+import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
-import no.nav.tsm.syk_inn_api.sykmelding.kafka.producer.SykmeldingKafkaMapper
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistenceService
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykInnPersistence
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentSykmelder
+import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
-import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 @Service
 class SykmeldingService(
     private val ruleService: RuleService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
-    private val sykmeldingInputProducer: SykmeldingInputProducer,
-    private val sykmeldingPersistenceService: SykmeldingPersistenceService,
+    private val sykInnPersistence: SykInnPersistence,
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -55,7 +59,7 @@ class SykmeldingService(
         val span = Span.current()
         val sykmeldingId = UUID.randomUUID()
         val mottatt = OffsetDateTime.now(ZoneOffset.UTC)
-        val existing = sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
+        val existing = sykInnPersistence.getSykmeldingByIdempotencyKey(payload.submitId)
         if (existing != null) {
             return duplicateSubmitResult(payload, existing)
         }
@@ -92,32 +96,24 @@ class SykmeldingService(
                 foedselsdato = person.fodselsdato,
             )
 
-        val validation = SykmeldingKafkaMapper.mapValidationResult(ruleResult)
-
         try {
-            val sykmeldingDocument =
-                sykmeldingPersistenceService.saveSykmeldingPayload(
+
+            val sykmeldingDb =
+                mapSykmeldingPayloadToDatabaseEntity(
                     sykmeldingId = sykmeldingId.toString(),
                     mottatt = mottatt,
                     payload = payload,
-                    person = person,
+                    pasient = person,
                     sykmelder = sykmelder,
-                    ruleResult = validation,
-
+                    ruleResult = ruleResult,
                 )
-            sykmeldingProducer.send(
-                sykmeldingId = sykmeldingId,
-                sykmelding = sykmeldingDocument,
-                person = person,
-                sykmelder = sykmelder,
-                validationResult = validation,
-                source = payload.meta.source,
-            )
+
+            val saved = sykInnPersistence.saveNewSykmelding(sykmeldingDb, null)
 
             span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId.toString())
             span.setAttribute("SykmeldingService.create.source", payload.meta.source)
 
-            return sykmeldingDocument.right()
+            return mapDatabaseEntityToSykmeldingDocument(saved).right()
         } catch (ex: DataIntegrityViolationException) {
             logger.warn(
                 "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen",
@@ -125,15 +121,14 @@ class SykmeldingService(
             )
             return duplicateSubmitResult(
                 payload = payload,
-                existing =
-                    sykmeldingPersistenceService.getSykmeldingByIdempotencyKey(payload.submitId)
+                existing = sykInnPersistence.getSykmeldingByIdempotencyKey(payload.submitId)
             )
         }
     }
 
     private fun duplicateSubmitResult(
         payload: OpprettSykmeldingPayload,
-        existing: SykmeldingDocument?
+        existing: SykmeldingDb?
     ): Either<SykmeldingCreationErrors, Nothing> {
         logger.warn(
             "Sykmelding med submitId=${payload.submitId} allerede er lagret i databasen",
@@ -141,8 +136,8 @@ class SykmeldingService(
 
         existing ?: return SykmeldingCreationErrors.ProcessingError.left()
 
-        val pasientId = existing.meta.pasientIdent
-        val hprNr = existing.meta.sykmelder.hprNummer
+        val pasientId = existing.pasientIdent
+        val hprNr = existing.sykmelderHpr
 
         if (hprNr != payload.meta.sykmelderHpr) {
             return SykmeldingCreationErrors.ProcessingError.left()
@@ -150,19 +145,26 @@ class SykmeldingService(
             return SykmeldingCreationErrors.ProcessingError.left()
         }
 
-        return SykmeldingCreationErrors.AlreadyExists(existing).left()
+        return SykmeldingCreationErrors.AlreadyExists(
+                mapDatabaseEntityToSykmeldingDocument(existing)
+            )
+            .left()
     }
 
     @WithSpan
     fun getSykmeldingById(sykmeldingId: UUID): SykmeldingDocument? =
-        sykmeldingPersistenceService.getSykmeldingById(sykmeldingId.toString())
+        sykInnPersistence.getBySykmeldingId(sykmeldingId.toString())?.let {
+            mapDatabaseEntityToSykmeldingDocument(it)
+        }
 
     @WithSpan
     fun getSykmeldingerByIdent(ident: String): Result<List<SykmeldingDocument>> {
         teamLogger.info("Henter sykmeldinger for ident=$ident")
 
         val sykmeldinger: List<SykmeldingDocument> =
-            sykmeldingPersistenceService.getSykmeldingerByIdent(ident)
+            sykInnPersistence.getSykmeldingByPasientIdent(ident).map {
+                mapDatabaseEntityToSykmeldingDocument(it)
+            }
 
         if (sykmeldinger.isEmpty()) {
             return Result.success(emptyList())
@@ -208,4 +210,61 @@ class SykmeldingService(
 
         return ruleResult.right()
     }
+}
+
+fun mapDatabaseEntityToSykmeldingDocument(sykmeldingDb: SykmeldingDb): SykmeldingDocument {
+    val persistedSykmelding = sykmeldingDb.sykmelding
+    return SykmeldingDocument(
+        sykmeldingId = sykmeldingDb.sykmeldingId,
+        meta =
+            SykmeldingDocumentMeta(
+                mottatt = sykmeldingDb.mottatt,
+                pasientIdent = persistedSykmelding.pasient.ident,
+                sykmelder = persistedSykmelding.sykmelder.toSykmeldingDocumentSykmelder(),
+                legekontorOrgnr = sykmeldingDb.legekontorOrgnr,
+                legekontorTlf = sykmeldingDb.legekontorTlf,
+            ),
+        values = persistedSykmelding.toSykmeldingDocumentValues(),
+        utfall =
+            persistedSykmelding.regelResultat.let {
+                SykmeldingDocumentRuleResult(
+                    result = it.result,
+                    melding = it.meldingTilSender,
+                )
+            },
+    )
+}
+
+fun mapSykmeldingPayloadToDatabaseEntity(
+    sykmeldingId: String,
+    mottatt: OffsetDateTime,
+    payload: OpprettSykmeldingPayload,
+    pasient: Person,
+    sykmelder: Sykmelder,
+    ruleResult: RegulaResult,
+): SykmeldingDb {
+    val validationResult = PersistedSykmeldingMapper.mapValidationResult(ruleResult)
+
+    val persistedSykmelding =
+        PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
+            payload,
+            sykmeldingId,
+            pasient,
+            sykmelder,
+            validationResult,
+        )
+
+    return SykmeldingDb(
+        sykmeldingId = sykmeldingId,
+        idempotencyKey = payload.submitId,
+        pasientIdent = payload.meta.pasientIdent,
+        sykmelderHpr = payload.meta.sykmelderHpr,
+        mottatt = mottatt,
+        sykmelding = persistedSykmelding,
+        legekontorOrgnr = payload.meta.legekontorOrgnr,
+        legekontorTlf = payload.meta.legekontorTlf,
+        fom = persistedSykmelding.aktivitet.minOf { it.fom },
+        tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+        validationResult = validationResult,
+    )
 }

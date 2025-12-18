@@ -1,6 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
@@ -13,15 +15,14 @@ import org.hibernate.annotations.Type
 @Table(name = "sykmelding")
 data class SykmeldingDb(
     @Id val sykmeldingId: String,
-    val idempotencyKey: UUID,
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val sykmelderHpr: String,
     @Type(JsonBinaryType::class) val sykmelding: PersistedSykmelding,
     val legekontorOrgnr: String?,
     val legekontorTlf: String?,
-    val validertOk: Boolean = false,
     val fom: LocalDate,
     val tom: LocalDate,
-    val idempotencyKey: UUID?,
+    @Column(name = "idempotency_key", updatable = false) val idempotencyKey: UUID,
+    @Type(JsonBinaryType::class) @JsonSubTypes val validationResult: PersistedValidationResult
 )

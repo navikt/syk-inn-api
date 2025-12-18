@@ -4,6 +4,9 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.NextSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.Status
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingStatusRepository
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +27,13 @@ class SykmeldingStatusRepositoryTest() : FullIntegrationTest() {
     fun insertStatus() {
         val sykmeldingId = UUID.randomUUID()
         val mottattTimestamp = OffsetDateTime.now()
-        val inserted = sykmeldingStausRepository.insert(sykmeldingId, mottattTimestamp)
+        val inserted =
+            sykmeldingStausRepository.insert(
+                sykmeldingId,
+                mottattTimestamp,
+                mottattTimestamp,
+                "source"
+            )
 
         assertThat(inserted).isEqualTo(1)
     }
@@ -40,11 +49,12 @@ class SykmeldingStatusRepositoryTest() : FullIntegrationTest() {
     fun insertAndGetNextSykmelding() {
         val id = UUID.randomUUID()
         val mottattTimestamp = OffsetDateTime.now().minusMinutes(10)
-        val inserted = sykmeldingStausRepository.insert(id, mottattTimestamp)
+        val inserted =
+            sykmeldingStausRepository.insert(id, mottattTimestamp, mottattTimestamp, "source")
         assertThat(inserted).isEqualTo(1)
 
         val sykmeldingId = sykmeldingStausRepository.getNextSykmelding()
-        assertThat(sykmeldingId).isEqualTo(id)
+        assertThat(sykmeldingId).isEqualTo(NextSykmelding(id, "source"))
 
         val nextSykmelding = sykmeldingStausRepository.getNextSykmelding()
         assertThat(nextSykmelding).isEqualTo(null)
@@ -70,7 +80,7 @@ class SykmeldingStatusRepositoryTest() : FullIntegrationTest() {
 
         sykmeldingStausRepository.resetSykmeldingSending(mottattTimestamp.plusHours(2L))
         val resetSykmelding = sykmeldingStausRepository.getNextSykmelding()
-        assertThat(resetSykmelding).isEqualTo(id)
+        assertThat(resetSykmelding).isEqualTo(NextSykmelding(id, "source"))
 
         sykmeldingStausRepository.updateStatus(id, Status.SENT)
 
@@ -85,9 +95,14 @@ class SykmeldingStatusRepositoryTest() : FullIntegrationTest() {
     fun `should not insert duplicate sykmelding status`() {
         val sykmeldingId = UUID.randomUUID()
         val mottattTimestamp = OffsetDateTime.now()
-        sykmeldingStausRepository.insert(sykmeldingId, mottattTimestamp)
+        sykmeldingStausRepository.insert(sykmeldingId, mottattTimestamp, mottattTimestamp, "source")
         assertThrows<DataIntegrityViolationException> {
-            sykmeldingStausRepository.insert(sykmeldingId, mottattTimestamp)
+            sykmeldingStausRepository.insert(
+                sykmeldingId,
+                mottattTimestamp,
+                mottattTimestamp,
+                "source"
+            )
         }
     }
 }

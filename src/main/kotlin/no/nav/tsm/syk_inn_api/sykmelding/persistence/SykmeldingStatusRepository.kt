@@ -1,4 +1,4 @@
-package no.nav.tsm.syk_inn_api.sykmelding.scheduled
+package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.sql.Timestamp
 import java.time.OffsetDateTime
@@ -23,12 +23,17 @@ data class SykmeldingStatus(
     val event_timestamp: OffsetDateTime,
 )
 
+data class NextSykmelding(
+    val sykmeldingId: UUID,
+    val source: String,
+)
+
 @Repository
 class SykmeldingStatusRepository(
     @param:Autowired private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 ) {
 
-    fun getNextSykmelding(): UUID? {
+    fun getNextSykmelding(): NextSykmelding? {
         return namedParameterJdbcTemplate.query(
             """
          update sykmelding_status ss 
@@ -37,10 +42,11 @@ class SykmeldingStatusRepository(
                 from (
                     select sykmelding_id from sykmelding_status 
                     where status = :statusPending 
-                    order by event_timestamp 
+                    and send_timestamp < now()
+                    order by send_timestamp 
                     FOR UPDATE SKIP LOCKED limit 1) as temp_status
             where ss.sykmelding_id = temp_status.sykmelding_id
-            returning ss.sykmelding_id
+            returning ss.sykmelding_id, ss.source
     """
                 .trimIndent(),
             mapOf(
@@ -49,7 +55,10 @@ class SykmeldingStatusRepository(
             ),
             ResultSetExtractor { rs ->
                 if (rs.next()) {
-                    rs.getString("sykmelding_id")?.let { UUID.fromString(it) }
+                    NextSykmelding(
+                        sykmeldingId = rs.getString("sykmelding_id").let { UUID.fromString(it) },
+                        source = rs.getString("source")
+                    )
                 } else {
                     null
                 }
@@ -57,13 +66,13 @@ class SykmeldingStatusRepository(
         )
     }
 
-    fun getSykmeldingStatus(sykmelding_id: UUID): SykmeldingStatus? {
+    fun getSykmeldingStatus(sykmeldingId: UUID): SykmeldingStatus? {
         return namedParameterJdbcTemplate.query(
             """
                 select * from sykmelding_status where sykmelding_id = :sykmelding_id
             """
                 .trimIndent(),
-            mapOf("sykmelding_id" to sykmelding_id),
+            mapOf("sykmelding_id" to sykmeldingId),
             ResultSetExtractor<SykmeldingStatus>() {
                 if (it.next()) {
                     SykmeldingStatus(
@@ -93,22 +102,31 @@ class SykmeldingStatusRepository(
         )
     }
 
-    fun insert(sykmeldingId: UUID, mottatt_timestamp: OffsetDateTime): Int {
+    fun insert(
+        sykmeldingId: UUID,
+        mottattTimestamp: OffsetDateTime,
+        sendTimestamp: OffsetDateTime,
+        source: String,
+    ): Int {
         return namedParameterJdbcTemplate.update(
             """
                 insert into sykmelding_status(
                     sykmelding_id, 
                     status,
                     mottatt_timestamp,
-                    event_timestamp
+                    event_timestamp,
+                    send_timestamp,
+                    source
                 ) 
-                values (:sykmelding_id, :pendingStatus, :mottatt_timestamp, :mottatt_timestamp)
+                values (:sykmelding_id, :pendingStatus, :mottatt_timestamp, :mottatt_timestamp, :send_timestamp, :source)
             """
                 .trimIndent(),
             mapOf(
                 "sykmelding_id" to sykmeldingId,
-                "mottatt_timestamp" to Timestamp.from(mottatt_timestamp.toInstant()),
+                "mottatt_timestamp" to Timestamp.from(mottattTimestamp.toInstant()),
                 "pendingStatus" to Status.PENDING.name,
+                "send_timestamp" to Timestamp.from(sendTimestamp.toInstant()),
+                "source" to source
             ),
         )
     }

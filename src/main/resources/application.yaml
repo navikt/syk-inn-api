@@ -80,3 +80,9 @@ management:
   health:
     livenessState.enabled: true
     readinessState.enabled: true
+
+jobs:
+  sykmelding:
+    initialDelaySeconds: 30
+    fixedDelaySeconds: 10
+    resetTimeoutSeconds: 1800

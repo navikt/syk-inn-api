@@ -1,250 +1,70 @@
-
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
 import java.util.UUID
-import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
-import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentSykmelder
-import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.utils.logger
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingType
-import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import org.springframework.dao.DataIntegrityViolationException
-import no.nav.tsm.syk_inn_api.sykmelding.scheduled.SykmeldingStatusRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+interface SykInnPersistence {
+    fun saveNewSykmelding(sykmeldingDb: SykmeldingDb, sendTimestamp: OffsetDateTime?): SykmeldingDb
+
+    fun getSykmeldingByIdempotencyKey(submitId: UUID): SykmeldingDb?
+
+    fun getSykmeldingByPasientIdent(pasientIdent: String): List<SykmeldingDb>
+
+    fun getBySykmeldingId(sykmeldingId: String): SykmeldingDb?
+}
+
+interface SykmeldingPersistence {
+    fun saveSykmelding(sykmeldingDb: SykmeldingDb): SykmeldingDb
+
+    fun deleteSykmelding(sykmeldingId: String)
+}
+
 @Service
+@Transactional
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingStatusRepository: SykmeldingStatusRepository
-) {
+) : SykInnPersistence, SykmeldingPersistence {
     private val logger = logger()
 
-    fun getSykmeldingById(sykmeldingId: String): SykmeldingDocument? {
-        return sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)?.let {
-            mapDatabaseEntityToSykmeldingDocument(it)
-        }
+    override fun getSykmeldingByIdempotencyKey(submitId: UUID): SykmeldingDb? {
+        return sykmeldingRepository.getSykmeldingDbByIdempotencyKey(submitId)
     }
 
-    fun getSykmeldingByIdempotencyKey(submitId: UUID): SykmeldingDocument? {
-        return sykmeldingRepository.getSykmeldingDbByIdempotencyKey(submitId)?.let {
-            mapDatabaseEntityToSykmeldingDocument(it)
-        }
+    override fun getSykmeldingByPasientIdent(pasientIdent: String): List<SykmeldingDb> {
+        return sykmeldingRepository.findAllByPasientIdent(pasientIdent)
     }
 
-    @Transactional
-    fun saveSykmeldingPayload(
-        sykmeldingId: String,
-        mottatt: OffsetDateTime,
-        payload: OpprettSykmeldingPayload,
-        person: Person,
-        sykmelder: Sykmelder,
-        ruleResult: ValidationResult,
-    ): SykmeldingDocument {
-        logger.info(
-            "Lagrer sykmelding med id=${sykmeldingId} og idempotencyKey=${payload.submitId}"
-        )
-
-        return try {
-            val savedEntity =
-                sykmeldingRepository.save(
-                    mapSykmeldingPayloadToDatabaseEntity(
-                        sykmeldingId = sykmeldingId,
-                        mottatt = mottatt,
-                        payload = payload,
-                        pasient = person,
-                        sykmelder = sykmelder,
-                        ruleResult = ruleResult,
-                    ),
-                )
-
-            logger.info("Sykmelding with id=$sykmeldingId er lagret")
-
-            mapDatabaseEntityToSykmeldingDocument(savedEntity)
-        } catch (exception: DataIntegrityViolationException) {
-            logger.warn(
-                "Sykmelding with idempotencyKey=${payload.submitId} already exists, returning existing sykmelding",
-                exception,
-            )
-
-            this.getSykmeldingById(sykmeldingId)
-                ?: throw IllegalStateException(
-                    "Sykmelding with id=$sykmeldingId not found after ConstraintViolationException",
-                )
-        }
+    override fun getBySykmeldingId(sykmeldingId: String): SykmeldingDb? {
+        return sykmeldingRepository.getSykmeldingDbBySykmeldingId(sykmeldingId)
     }
 
-    private fun mapSykmeldingPayloadToDatabaseEntity(
-        sykmeldingId: String,
-        mottatt: OffsetDateTime,
-        payload: OpprettSykmeldingPayload,
-        pasient: Person,
-        sykmelder: Sykmelder,
-        ruleResult: ValidationResult,
-    ): SykmeldingDb {
-        logger.info("Mapper sykmelding payload til database entitet for sykmeldingId=$sykmeldingId")
-        val persistedSykmelding =
-            PersistedSykmeldingMapper.mapSykmeldingPayloadToPersistedSykmelding(
-                payload,
-                sykmeldingId,
-                pasient,
-                sykmelder,
-                ruleResult,
-            )
-        return SykmeldingDb(
-            sykmeldingId = sykmeldingId,
-            idempotencyKey = payload.submitId,
-            pasientIdent = payload.meta.pasientIdent,
-            sykmelderHpr = payload.meta.sykmelderHpr,
-            mottatt = mottatt,
-            sykmelding = persistedSykmelding,
-            legekontorOrgnr = payload.meta.legekontorOrgnr,
-            legekontorTlf = payload.meta.legekontorTlf,
-            fom = persistedSykmelding.aktivitet.minOf { it.fom },
-            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
-            idempotencyKey = payload.submitId,
-        )
-    }
-
-    fun mapDatabaseEntityToSykmeldingDocument(sykmeldingDb: SykmeldingDb): SykmeldingDocument {
-        val persistedSykmelding = sykmeldingDb.sykmelding
-        return SykmeldingDocument(
-            sykmeldingId = sykmeldingDb.sykmeldingId,
-            meta =
-                SykmeldingDocumentMeta(
-                    mottatt = sykmeldingDb.mottatt,
-                    pasientIdent = persistedSykmelding.pasient.ident,
-                    sykmelder = persistedSykmelding.sykmelder.toSykmeldingDocumentSykmelder(),
-                    legekontorOrgnr = sykmeldingDb.legekontorOrgnr,
-                    legekontorTlf = sykmeldingDb.legekontorTlf,
-                ),
-            values = persistedSykmelding.toSykmeldingDocumentValues(),
-            utfall =
-                persistedSykmelding.regelResultat.let {
-                    SykmeldingDocumentRuleResult(
-                        result = it.result,
-                        melding = it.meldingTilSender,
-                    )
-                },
-        )
-    }
-
-    fun mapSykmeldingRecordToSykmeldingDatabaseEntity(
-        sykmeldingId: String,
-        sykmeldingRecord: SykmeldingRecord,
-        validertOk: Boolean,
-        person: Person,
-        sykmelder: Sykmelder,
-    ): SykmeldingDb {
-        val persistedSykmelding =
-            PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
-                sykmeldingRecord,
-                person,
-                sykmelder,
-            )
-        return SykmeldingDb(
-            sykmeldingId = sykmeldingId,
-            idempotencyKey = UUID.randomUUID(),
-            mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
-            pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
-            sykmelderHpr = sykmelder.hpr,
-            sykmelding = persistedSykmelding,
-            legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
-            legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
-            validertOk = validertOk,
-            fom = persistedSykmelding.aktivitet.minOf { it.fom },
-            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
-            idempotencyKey = UUID.randomUUID()
-        )
-    }
-
-    fun getSykmeldingerByIdent(ident: String): List<SykmeldingDocument> {
-        return sykmeldingRepository.findAllByPasientIdent(ident).map {
-            mapDatabaseEntityToSykmeldingDocument(it)
-        }
-    }
-
-    fun updateSykmelding(
-        sykmeldingId: String,
-        sykmeldingRecord: SykmeldingRecord,
-        person: Person,
-        sykmelder: Sykmelder,
-    ) {
-        val sykmeldingEntity = sykmeldingRepository.findSykmeldingEntityBySykmeldingId(sykmeldingId)
-
-        val typeNotDigital = sykmeldingRecord.sykmelding.type != SykmeldingType.DIGITAL
-        if (sykmeldingEntity == null && typeNotDigital) {
-            try {
-                // TODO skal sjekke om den faktisk er avvist eller ikkje før en kan sette validert
-                // ok?
-                val entity =
-                    mapSykmeldingRecordToSykmeldingDatabaseEntity(
-                        sykmeldingId = sykmeldingId,
-                        sykmeldingRecord = sykmeldingRecord,
-                        validertOk = true,
-                        person = person,
-                        sykmelder = sykmelder,
-                    )
-                sykmeldingRepository.save(entity)
-            } catch (ex: Exception) {
-                logger.error(
-                    "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
-                    ex,
-                )
-                throw IllegalStateException(
-                    "Failed to map SykmeldingRecord to SykmeldingDb for sykmeldingId=$sykmeldingId",
-                    ex,
-                )
-            }
-        }
-
-        if (sykmeldingRecord.sykmelding.type == SykmeldingType.DIGITAL) {
-            val updatedEntity = sykmeldingEntity?.copy(validertOk = true)
-            logger.info("Updating sykmelding with id=${sykmeldingRecord.sykmelding.id}")
-            sykmeldingRepository.save(
-                updatedEntity
-                    ?: mapSykmeldingRecordToSykmeldingDatabaseEntity(
-                        sykmeldingId = sykmeldingId,
-                        sykmeldingRecord = sykmeldingRecord,
-                        validertOk = true,
-                        person = person,
-                        sykmelder = sykmelder,
-                    ),
-            )
-            logger.info("Updated sykmelding with id=${sykmeldingRecord.sykmelding.id}")
-        }
-    }
-
-    fun deleteSykmelding(sykmeldingId: String) {
+    override fun deleteSykmelding(sykmeldingId: String) {
         sykmeldingRepository.deleteBySykmeldingId(sykmeldingId)
         logger.info("Deleted sykmelding with id=$sykmeldingId")
     }
 
-    fun deleteSykmeldingerOlderThanDays(daysToSubtract: Long): Int {
-        val cutoffDate = java.time.LocalDate.now().minusDays(daysToSubtract)
-        return sykmeldingRepository.deleteSykmeldingerWithAktivitetOlderThan(cutoffDate)
-        @Transactional
-        fun saveSykmelding(
-            sykmeldingDb: SykmeldingDb,
-        ): SykmeldingDb {
-            val savedEntity =
-                sykmeldingRepository.save(
-                    sykmeldingDb,
-                )
-            sykmeldingStatusRepository.insert(
-                UUID.fromString(sykmeldingDb.sykmeldingId),
-                sykmeldingDb.mottatt
+    override fun saveNewSykmelding(
+        sykmeldingDb: SykmeldingDb,
+        sendTimestamp: OffsetDateTime?
+    ): SykmeldingDb {
+        val savedEntity =
+            sykmeldingRepository.save(
+                sykmeldingDb,
             )
-            return savedEntity
-        }
+        sykmeldingStatusRepository.insert(
+            UUID.fromString(sykmeldingDb.sykmeldingId),
+            sykmeldingDb.mottatt,
+            sendTimestamp ?: sykmeldingDb.mottatt,
+            "MY (FHIR)"
+        )
+        return savedEntity
     }
 
+    override fun saveSykmelding(sykmeldingDb: SykmeldingDb): SykmeldingDb {
+        return sykmeldingRepository.save(sykmeldingDb)
+    }
 }
-

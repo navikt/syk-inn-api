@@ -33,3 +33,9 @@ kafka:
   topics:
     sykmeldinger-input: "foo-bar"
     sykmeldinger: "baz-qux"
+
+jobs:
+  sykmelding:
+    initialDelaySeconds: 1
+    fixedDelaySeconds: 1
+    resetTimeoutSeconds: 1

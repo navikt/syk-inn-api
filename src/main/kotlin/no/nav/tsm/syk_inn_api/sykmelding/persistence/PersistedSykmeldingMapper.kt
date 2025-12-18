@@ -2,7 +2,11 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.LocalDate
 import java.time.Month
-import kotlin.text.get
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
+import no.nav.tsm.regulus.regula.RegulaResult
+import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.common.DiagnosekodeMapper
 import no.nav.tsm.syk_inn_api.person.Person
@@ -35,16 +39,21 @@ import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
+import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SporsmalSvar
 import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
+import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
+import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
 import no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak
@@ -60,12 +69,109 @@ object PersistedSykmeldingMapper {
 
     private val logger = logger()
 
+    fun mapValidationResult(regulaResult: RegulaResult): PersistedValidationResult {
+        val ruleTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
+        val status = toPersistedRuleType(regulaResult)
+        val validation =
+            when (regulaResult) {
+                is RegulaResult.Ok ->
+                    PersistedValidationResult(PersistedRuleType.OK, ruleTimestamp, emptyList())
+                is RegulaResult.NotOk -> {
+                    val name =
+                        when {
+                            isManualTilbakedatering(regulaResult) ->
+                                TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name
+                            else -> regulaResult.outcome.rule
+                        }
+                    val validationType = PersistedValidationType.AUTOMATIC
+                    val reason =
+                        PersistedReason(
+                            sykmeldt = regulaResult.outcome.reason.sykmeldt,
+                            sykmelder = regulaResult.outcome.reason.sykmelder,
+                        )
+
+                    val rule =
+                        when (regulaResult.outcome.status) {
+                            RegulaOutcomeStatus.INVALID ->
+                                PersistedInvalidRule(name, validationType, ruleTimestamp, reason)
+                            RegulaOutcomeStatus.MANUAL_PROCESSING ->
+                                PersistedPendingRule(name, ruleTimestamp, validationType, reason)
+                        }
+                    PersistedValidationResult(status, ruleTimestamp, rules = listOf(rule))
+                }
+            }
+        return validation
+    }
+
+    fun mapValidationResult(validation: ValidationResult): PersistedValidationResult {
+        return PersistedValidationResult(
+            status =
+                when (validation.status) {
+                    RuleType.OK -> PersistedRuleType.OK
+                    RuleType.PENDING -> PersistedRuleType.PENDING
+                    RuleType.INVALID -> PersistedRuleType.INVALID
+                },
+            timestamp = validation.timestamp,
+            rules =
+                validation.rules.map { validationRule ->
+                    when (validationRule) {
+                        is OKRule ->
+                            PersistedOKRule(
+                                name = validationRule.name,
+                                timestamp = validationRule.timestamp,
+                                validationType =
+                                    toPersistedValidationType(validationRule.validationType)
+                            )
+                        is InvalidRule ->
+                            PersistedInvalidRule(
+                                name = validationRule.name,
+                                timestamp = validationRule.timestamp,
+                                validationType =
+                                    toPersistedValidationType(validationRule.validationType),
+                                reason = toPersistedReason(validationRule.reason)
+                            )
+                        is PendingRule ->
+                            PersistedPendingRule(
+                                name = validationRule.name,
+                                timestamp = validationRule.timestamp,
+                                validationType =
+                                    toPersistedValidationType(validationRule.validationType),
+                                reason = toPersistedReason(validationRule.reason)
+                            )
+                    }
+                }
+        )
+    }
+
+    private fun toPersistedReason(reason: Reason): PersistedReason =
+        PersistedReason(
+            sykmeldt = reason.sykmeldt,
+            sykmelder = reason.sykmelder,
+        )
+
+    private fun toPersistedValidationType(validationType: ValidationType): PersistedValidationType =
+        when (validationType) {
+            ValidationType.AUTOMATIC -> PersistedValidationType.AUTOMATIC
+            ValidationType.MANUAL -> PersistedValidationType.MANUAL
+        }
+
+    private fun toPersistedRuleType(regulaResult: RegulaResult): PersistedRuleType =
+        when (regulaResult.status) {
+            RegulaStatus.OK -> PersistedRuleType.OK
+            RegulaStatus.INVALID -> PersistedRuleType.INVALID
+            RegulaStatus.MANUAL_PROCESSING -> PersistedRuleType.PENDING
+        }
+
+    private fun isManualTilbakedatering(regulaResult: RegulaResult.NotOk): Boolean =
+        regulaResult.outcome.status == RegulaOutcomeStatus.MANUAL_PROCESSING &&
+            regulaResult.outcome.tree == "Tilbakedatering"
+
     fun mapSykmeldingPayloadToPersistedSykmelding(
         payload: OpprettSykmeldingPayload,
         sykmeldingId: String,
         pasient: Person,
         sykmelder: Sykmelder,
-        validation: ValidationResult,
+        validation: PersistedValidationResult,
     ): PersistedSykmelding {
         return PersistedSykmelding(
             sykmeldingId = sykmeldingId,
@@ -505,6 +611,20 @@ object PersistedSykmeldingMapper {
         )
     }
 
+    private fun PersistedValidationResult.toPersistedSykmeldingResult():
+        PersistedSykmeldingRuleResult {
+        val meldingTilSender =
+            when (val latestRule = rules.maxByOrNull { it.timestamp }) {
+                is PersistedInvalidRule -> latestRule.reason.sykmelder
+                is PersistedPendingRule -> latestRule.reason.sykmelder
+                else -> null
+            }
+        return PersistedSykmeldingRuleResult(
+            result = status,
+            meldingTilSender = meldingTilSender,
+        )
+    }
+
     private fun ValidationResult.toPersistedSykmeldingResult(): PersistedSykmeldingRuleResult {
         val meldingTilSender =
             when (val latestRule = rules.maxByOrNull { it.timestamp }) {
@@ -513,7 +633,12 @@ object PersistedSykmeldingMapper {
                 else -> null
             }
         return PersistedSykmeldingRuleResult(
-            result = status,
+            result =
+                when (status) {
+                    RuleType.OK -> PersistedRuleType.OK
+                    RuleType.PENDING -> PersistedRuleType.PENDING
+                    RuleType.INVALID -> PersistedRuleType.INVALID
+                },
             meldingTilSender = meldingTilSender,
         )
     }

@@ -7,7 +7,6 @@ import kotlin.test.Test
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
-import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -91,20 +90,24 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                         utdypendeSporsmal = null,
                         regelResultat =
                             PersistedSykmeldingRuleResult(
-                                result = RuleType.OK,
+                                result = PersistedRuleType.OK,
                                 meldingTilSender = null,
                             ),
                     ),
                 legekontorTlf = "12345678",
-                validertOk = false,
                 fom = LocalDate.parse("2024-04-01"),
                 tom = LocalDate.parse("2024-04-10"),
-                idempotencyKey = UUID.randomUUID(),
+                validationResult =
+                    PersistedValidationResult(
+                        PersistedRuleType.OK,
+                        OffsetDateTime.now(),
+                        emptyList()
+                    ),
             )
 
         val savedEntity = sykmeldingRepository.save(sykmeldingDb)
 
-        val found = sykmeldingRepository.findSykmeldingEntityBySykmeldingId("sykmelding-123")
+        val found = sykmeldingRepository.getSykmeldingDbBySykmeldingId("sykmelding-123")
 
         assertThat(found).isNotNull
         assertThat(found?.sykmeldingId).isEqualTo(savedEntity.sykmeldingId)
@@ -150,13 +153,13 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
 fun createTestSykmeldingDb(
     sykmeldingId: String,
     idempotencyKey: UUID,
-        pasientIdent: String,
-        aktivitetTom: LocalDate,
-    ): SykmeldingDb {
-        val fomDaysToSubtract = 10L
-        return SykmeldingDb(
-            sykmeldingId = sykmeldingId,
-            idempotencyKey = idempotencyKey,
+    pasientIdent: String,
+    aktivitetTom: LocalDate,
+): SykmeldingDb {
+    val fomDaysToSubtract = 10L
+    return SykmeldingDb(
+        sykmeldingId = sykmeldingId,
+        idempotencyKey = idempotencyKey,
         pasientIdent = pasientIdent,
         sykmelderHpr = "123456",
         legekontorOrgnr = "987654321",
@@ -219,14 +222,14 @@ fun createTestSykmeldingDb(
                 utdypendeSporsmal = null,
                 regelResultat =
                     PersistedSykmeldingRuleResult(
-                        result = RuleType.OK,
+                        result = PersistedRuleType.OK,
                         meldingTilSender = null,
                     ),
             ),
         legekontorTlf = "12345678",
-        validertOk = false,
         fom = aktivitetTom.minusDays(fomDaysToSubtract),
         tom = aktivitetTom,
-        idempotencyKey = UUID.randomUUID(),
+        validationResult =
+            PersistedValidationResult(PersistedRuleType.OK, OffsetDateTime.now(), emptyList()),
     )
 }

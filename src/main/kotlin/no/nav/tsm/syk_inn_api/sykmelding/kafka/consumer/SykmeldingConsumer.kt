@@ -3,18 +3,19 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.tsm.syk_inn_api.person.PdlException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
 import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.SykmelderService
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprException
-import no.nav.tsm.syk_inn_api.sykmelding.SykmeldingService
 import no.nav.tsm.syk_inn_api.sykmelding.errors.ErrorRepository
 import no.nav.tsm.syk_inn_api.sykmelding.errors.KafkaProcessingError
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMapper
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingPersistence
 import no.nav.tsm.syk_inn_api.sykmelding.scheduled.DAYS_OLD_SYKMELDING
-import no.nav.tsm.syk_inn_api.utils.PoisonPills
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
@@ -24,19 +25,16 @@ import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
 class SykmeldingConsumer(
-    private val sykmeldingService: SykmeldingService,
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     private val errorRepository: ErrorRepository,
-    private val poisonPills: PoisonPills,
-    @param:Value("\${nais.cluster}") private val clusterName: String,
+    private val sykmeldingPersistence: SykmeldingPersistence,
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -50,11 +48,6 @@ class SykmeldingConsumer(
     )
     fun consume(record: ConsumerRecord<String, ByteArray?>) {
         val sykmeldingId = record.key()
-        if (poisonPills.isPoisoned(sykmeldingId)) {
-            logger.warn("Sykmelding with id=$sykmeldingId is poisoned, skipping processing")
-            return
-        }
-
         val value: ByteArray? = record.value()
 
         if (value == null) {
@@ -73,7 +66,7 @@ class SykmeldingConsumer(
                 sykmeldingRecord.sykmelding.aktivitet.maxOf { it.tom } <
                     LocalDate.now().minusDays(DAYS_OLD_SYKMELDING)
             ) {
-                return // Skip processing for sykmeldinger before 2024
+                return
             }
 
             if (sykmeldingRecord.sykmelding.aktivitet.isEmpty()) {
@@ -94,12 +87,15 @@ class SykmeldingConsumer(
                 personService.getPersonByIdent(sykmeldingRecord.sykmelding.pasient.fnr).getOrThrow()
 
             val sykmelder = findHprNumber(sykmeldingRecord).getOrThrow()
-            sykmeldingService.updateSykmelding(
-                sykmeldingId = sykmeldingId,
-                sykmeldingRecord = sykmeldingRecord,
-                person = person,
-                sykmelder = sykmelder,
-            )
+            val sykmeldingDb =
+                mapSykmeldingRecordToSykmeldingDatabaseEntity(
+                    sykmeldingId,
+                    sykmeldingRecord,
+                    true,
+                    person,
+                    sykmelder
+                )
+            sykmeldingPersistence.saveSykmelding(sykmeldingDb)
         } catch (e: JacksonException) {
             handleError(record, e)
         } catch (pdlException: PdlException) {
@@ -136,7 +132,7 @@ class SykmeldingConsumer(
     }
 
     private fun handleTombstone(sykmeldingId: String) {
-        sykmeldingService.deleteSykmelding(sykmeldingId)
+        sykmeldingPersistence.deleteSykmelding(sykmeldingId)
     }
 
     private fun findHprNumber(sykmeldingRecord: SykmeldingRecord): Result<Sykmelder.Enkel> {
@@ -174,5 +170,34 @@ class SykmeldingConsumer(
         }
 
         return sykmelderService.sykmelderByFnr(sykmelderFnr, requireNotNull(sykmeldingId))
+    }
+
+    fun mapSykmeldingRecordToSykmeldingDatabaseEntity(
+        sykmeldingId: String,
+        sykmeldingRecord: SykmeldingRecord,
+        validertOk: Boolean,
+        person: Person,
+        sykmelder: Sykmelder,
+    ): SykmeldingDb {
+        val persistedSykmelding =
+            PersistedSykmeldingMapper.mapSykmeldingRecordToPersistedSykmelding(
+                sykmeldingRecord,
+                person,
+                sykmelder,
+            )
+        return SykmeldingDb(
+            sykmeldingId = sykmeldingId,
+            idempotencyKey = UUID.randomUUID(),
+            mottatt = sykmeldingRecord.sykmelding.metadata.mottattDato,
+            pasientIdent = sykmeldingRecord.sykmelding.pasient.fnr,
+            sykmelderHpr = sykmelder.hpr,
+            sykmelding = persistedSykmelding,
+            legekontorOrgnr = PersistedSykmeldingMapper.mapLegekontorOrgnr(sykmeldingRecord),
+            legekontorTlf = PersistedSykmeldingMapper.mapLegekontorTlf(sykmeldingRecord),
+            fom = persistedSykmelding.aktivitet.minOf { it.fom },
+            tom = persistedSykmelding.aktivitet.maxOf { it.tom },
+            validationResult =
+                PersistedSykmeldingMapper.mapValidationResult(sykmeldingRecord.validation)
+        )
     }
 }

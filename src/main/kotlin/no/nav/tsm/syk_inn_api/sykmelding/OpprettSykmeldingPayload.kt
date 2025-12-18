@@ -72,33 +72,38 @@ data class OpprettSykmeldingUtdypendeSporsmal(
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface OpprettSykmeldingAktivitet {
+
+    val fom: LocalDate
+    val tom: LocalDate
+
     data class IkkeMulig(
-        val fom: LocalDate,
-        val tom: LocalDate,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
         val medisinskArsak: OpprettSykmeldingMedisinskArsak,
         val arbeidsrelatertArsak: OpprettSykmeldingArbeidsrelatertArsak
     ) : OpprettSykmeldingAktivitet
 
     data class Gradert(
         val grad: Int,
-        val fom: LocalDate,
-        val tom: LocalDate,
+        override val fom: LocalDate,
+        override val tom: LocalDate,
         val reisetilskudd: Boolean
     ) : OpprettSykmeldingAktivitet
 
     data class Behandlingsdager(
         val antallBehandlingsdager: Int,
-        val fom: LocalDate,
-        val tom: LocalDate
+        override val fom: LocalDate,
+        override val tom: LocalDate
     ) : OpprettSykmeldingAktivitet
 
     data class Avventende(
         val innspillTilArbeidsgiver: String,
-        val fom: LocalDate,
-        val tom: LocalDate
+        override val fom: LocalDate,
+        override val tom: LocalDate
     ) : OpprettSykmeldingAktivitet
 
-    data class Reisetilskudd(val fom: LocalDate, val tom: LocalDate) : OpprettSykmeldingAktivitet
+    data class Reisetilskudd(override val fom: LocalDate, override val tom: LocalDate) :
+        OpprettSykmeldingAktivitet
 }
 
 data class OpprettSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)

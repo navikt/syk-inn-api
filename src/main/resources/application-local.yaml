@@ -29,3 +29,9 @@ spring:
 
 nais:
   cluster: ${NAIS_CLUSTER:local}
+
+jobs:
+  sykmelding:
+    initialDelaySeconds: 1
+    fixedDelaySeconds: 10
+    resetTimeoutSeconds: 10
