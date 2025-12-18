@@ -7,7 +7,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 interface SykInnPersistence {
-    fun saveNewSykmelding(sykmeldingDb: SykmeldingDb, sendTimestamp: OffsetDateTime?): SykmeldingDb
+    fun saveNewSykmelding(
+        sykmeldingDb: SykmeldingDb,
+        sendTimestamp: OffsetDateTime?,
+        source: String
+    ): SykmeldingDb
 
     fun getSykmeldingByIdempotencyKey(submitId: UUID): SykmeldingDb?
 
@@ -49,7 +53,8 @@ class SykmeldingPersistenceService(
 
     override fun saveNewSykmelding(
         sykmeldingDb: SykmeldingDb,
-        sendTimestamp: OffsetDateTime?
+        sendTimestamp: OffsetDateTime?,
+        source: String,
     ): SykmeldingDb {
         val savedEntity =
             sykmeldingRepository.save(
@@ -59,7 +64,7 @@ class SykmeldingPersistenceService(
             UUID.fromString(sykmeldingDb.sykmeldingId),
             sykmeldingDb.mottatt,
             sendTimestamp ?: sykmeldingDb.mottatt,
-            "MY (FHIR)"
+            source = source
         )
         return savedEntity
     }

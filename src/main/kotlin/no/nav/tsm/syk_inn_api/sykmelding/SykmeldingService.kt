@@ -108,7 +108,7 @@ class SykmeldingService(
                     ruleResult = ruleResult,
                 )
 
-            val saved = sykInnPersistence.saveNewSykmelding(sykmeldingDb, null)
+            val saved = sykInnPersistence.saveNewSykmelding(sykmeldingDb, null, source = payload.meta.source)
 
             span.setAttribute("SykmeldingService.create.sykmeldingId", sykmeldingId.toString())
             span.setAttribute("SykmeldingService.create.source", payload.meta.source)
