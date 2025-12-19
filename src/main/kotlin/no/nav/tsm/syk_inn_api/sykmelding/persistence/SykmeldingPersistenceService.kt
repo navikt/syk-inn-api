@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 interface SykInnPersistence {
-    fun saveNewSykmelding(
+    fun saveSykInnSykmelding(
         sykmeldingDb: SykmeldingDb,
         sendTimestamp: OffsetDateTime?,
         source: String
@@ -51,7 +51,7 @@ class SykmeldingPersistenceService(
         logger.info("Deleted sykmelding with id=$sykmeldingId")
     }
 
-    override fun saveNewSykmelding(
+    override fun saveSykInnSykmelding(
         sykmeldingDb: SykmeldingDb,
         sendTimestamp: OffsetDateTime?,
         source: String,

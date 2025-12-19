@@ -29,7 +29,7 @@ class SykmeldingPersistenceServiceTest : FullIntegrationTest() {
     fun `test insert OK`() {
         val sykmeldingDb = db(getTestSykmelding())
 
-        val saved = sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+        val saved = sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
 
         assertEquals(sykmeldingDb, saved)
         val savedStatus =
@@ -43,9 +43,9 @@ class SykmeldingPersistenceServiceTest : FullIntegrationTest() {
     fun `test insert failed if sykmeldingID already exists`() {
         val persistedSykmelding = getTestSykmelding()
         val sykmeldingDb = db(persistedSykmelding)
-        sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+        sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
         assertThrows<DataIntegrityViolationException> {
-            sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+            sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
         }
     }
 
@@ -61,7 +61,7 @@ class SykmeldingPersistenceServiceTest : FullIntegrationTest() {
             "MY (FHIR)"
         )
         assertThrows<DataIntegrityViolationException> {
-            sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+            sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
         }
         val sykmelding =
             sykmeldingRepository.getSykmeldingDbBySykmeldingId(sykmeldingDb.sykmeldingId)
@@ -73,10 +73,10 @@ class SykmeldingPersistenceServiceTest : FullIntegrationTest() {
     fun `test insert failed if idempotencyKey already exists`() {
         val persistedSykmelding = getTestSykmelding()
         val sykmeldingDb = db(persistedSykmelding)
-        sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+        sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
         val duplicateSykmelding = sykmeldingDb.copy(sykmeldingId = UUID.randomUUID().toString())
         assertThrows<DataIntegrityViolationException> {
-            sykmeldingPersistenceService.saveNewSykmelding(duplicateSykmelding, null)
+            sykmeldingPersistenceService.saveSykInnSykmelding(duplicateSykmelding, null, "source")
         }
     }
 
@@ -85,13 +85,15 @@ class SykmeldingPersistenceServiceTest : FullIntegrationTest() {
     fun `test insert ok if new sykmeldingID and new IdempotencyKey`() {
         val persistedSykmelding = getTestSykmelding()
         val sykmeldingDb = db(persistedSykmelding)
-        val savedSykmelding = sykmeldingPersistenceService.saveNewSykmelding(sykmeldingDb, null)
+        val savedSykmelding =
+            sykmeldingPersistenceService.saveSykInnSykmelding(sykmeldingDb, null, "source")
         val newSykmelding =
             sykmeldingDb.copy(
                 sykmeldingId = UUID.randomUUID().toString(),
                 idempotencyKey = UUID.randomUUID()
             )
-        val newSavedSykmeldign = sykmeldingPersistenceService.saveNewSykmelding(newSykmelding, null)
+        val newSavedSykmeldign =
+            sykmeldingPersistenceService.saveSykInnSykmelding(newSykmelding, null, "source")
         assertEquals(savedSykmelding, sykmeldingDb)
         assertEquals(newSykmelding, newSavedSykmeldign)
     }

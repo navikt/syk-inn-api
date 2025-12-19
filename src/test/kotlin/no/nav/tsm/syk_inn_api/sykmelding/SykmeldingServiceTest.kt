@@ -48,7 +48,7 @@ class SykmeldingServiceTest {
     private lateinit var personService: PersonService
 
     val pasientIdent = "01019078901"
-    val behandlerIdent = "0101197054321"
+    val behandlerIdent = "0101197054322"
     val behandlerHpr = "123456789"
     val sykmeldingId = UUID.randomUUID().toString()
     val foedselsdato = LocalDate.of(1990, 1, 1)
@@ -111,7 +111,7 @@ class SykmeldingServiceTest {
                 emptyList(),
             )
 
-        every { sykInnPersistence.saveNewSykmelding(any(), null) } returns
+        every { sykInnPersistence.saveSykInnSykmelding(any(), null, any()) } returns
             SykmeldingDb(
                 sykmeldingId = sykmeldingId,
                 idempotencyKey = idempotencyKey,
@@ -241,7 +241,7 @@ class SykmeldingServiceTest {
             )
 
         val payload = createSykmeldingPayload(idempotencyKey)
-        every { sykInnPersistence.saveNewSykmelding(any(), any()) } returns
+        every { sykInnPersistence.saveSykInnSykmelding(any(), any(), any()) } returns
             mapSykmeldingPayloadToDatabaseEntity(
                 sykmeldingId = sykmeldingId,
                 mottatt = OffsetDateTime.now(),
