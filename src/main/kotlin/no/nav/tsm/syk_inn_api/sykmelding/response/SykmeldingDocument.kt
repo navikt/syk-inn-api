@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedRuleType
 
 /** This sealed interface allows both "Full" and "Redacted" versions of the sykmelding response. */
 sealed interface SykmeldingResponse
@@ -106,7 +106,7 @@ data class SykmeldingDocumentDiagnoseInfo(
 )
 
 data class SykmeldingDocumentRuleResult(
-    val result: RuleType,
+    val result: PersistedRuleType,
     val melding: String?,
 )
 

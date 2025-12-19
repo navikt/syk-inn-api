@@ -1,5 +1,7 @@
 package no.nav.tsm.syk_inn_api.test
 
+import com.ninjasquad.springmockk.MockkBean
+import no.nav.tsm.syk_inn_api.sykmelding.scheduled.SykmeldingKafkaTask
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -16,6 +18,7 @@ import org.testcontainers.utility.DockerImageName
 abstract class FullIntegrationTest {
 
     @Autowired lateinit var jdbcTemplate: JdbcTemplate
+    @MockkBean lateinit var sykmeldingKafkaTask: SykmeldingKafkaTask
 
     @BeforeEach
     fun cleanDatabase() {
@@ -44,8 +47,9 @@ abstract class FullIntegrationTest {
 
         @Container
         private val kafka =
-            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:8.1.0")).also {
-                it.start()
+            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:8.1.0")).apply {
+                waitingFor(Wait.forListeningPort())
+                start()
             }
 
         @JvmStatic
@@ -63,8 +67,6 @@ abstract class FullIntegrationTest {
 
             // Kafka
             registry.add("kafka.brokers", kafka::getBootstrapServers)
-
-            println("I AM IN DA PROPERTY THINGY ${kafka.bootstrapServers}")
         }
     }
 }

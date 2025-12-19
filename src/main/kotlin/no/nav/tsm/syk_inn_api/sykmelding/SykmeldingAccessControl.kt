@@ -1,9 +1,9 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedRuleType
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingResponse
 import no.nav.tsm.syk_inn_api.sykmelding.response.toRedactedSykmelding
-import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 /** Any sykmelding returned to user should always be access controlled through this */
 fun sykmeldingAccessControl(
@@ -19,7 +19,7 @@ fun sykmeldingAccessControl(
      * "Redacted" sykmelding should only ever be OK, other behandlere are unable to see invalid
      * sykmeldinger.
      */
-    if (sykmelding.utfall.result != RuleType.OK) return null
+    if (sykmelding.utfall.result != PersistedRuleType.OK) return null
 
     /** Any other scenario, you only see a "Redacted" version. */
     return sykmelding.toRedactedSykmelding()

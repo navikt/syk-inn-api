@@ -1,25 +1,26 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
-import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.person.Person
-import no.nav.tsm.syk_inn_api.sykmelder.Sykmelder
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.parseHelsepersonellKategori
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedInvalidRule
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedOKRule
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedPendingRule
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedReason
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedRuleType
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmelding
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivitet
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingArbeidsgiver
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnoseInfo
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmal
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationResult
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationType
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocument
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentAktivitet
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentArbeidsgiver
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentDiagnoseInfo
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentUtdypendeSporsmal
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
-import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
@@ -40,6 +41,7 @@ import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reason
@@ -47,7 +49,6 @@ import no.nav.tsm.sykmelding.input.core.model.Reisetilskudd
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
-import no.nav.tsm.sykmelding.input.core.model.TilbakedatertMerknad
 import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
@@ -61,80 +62,39 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 
 object SykmeldingKafkaMapper {
-    fun mapValidationResult(regulaResult: RegulaResult): ValidationResult {
-        val ruleTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
-        val status =
-            when (regulaResult.status) {
-                RegulaStatus.OK -> RuleType.OK
-                RegulaStatus.INVALID -> RuleType.INVALID
-                RegulaStatus.MANUAL_PROCESSING -> RuleType.PENDING
-            }
-        val validation =
-            when (regulaResult) {
-                is RegulaResult.Ok -> ValidationResult(RuleType.OK, ruleTimestamp, emptyList())
-                is RegulaResult.NotOk -> {
-                    val name =
-                        when {
-                            isManualTilbakedatering(regulaResult) ->
-                                TilbakedatertMerknad.TILBAKEDATERING_UNDER_BEHANDLING.name
-                            else -> regulaResult.outcome.rule
-                        }
-                    val validationType = ValidationType.AUTOMATIC
-                    val reason =
-                        Reason(
-                            sykmeldt = regulaResult.outcome.reason.sykmeldt,
-                            sykmelder = regulaResult.outcome.reason.sykmelder,
-                        )
 
-                    val rule =
-                        when (regulaResult.outcome.status) {
-                            RegulaOutcomeStatus.INVALID ->
-                                InvalidRule(name, validationType, ruleTimestamp, reason)
-                            RegulaOutcomeStatus.MANUAL_PROCESSING ->
-                                PendingRule(name, ruleTimestamp, validationType, reason)
-                        }
-                    ValidationResult(status, ruleTimestamp, rules = listOf(rule))
-                }
-            }
-        return validation
-    }
-
-    private fun isManualTilbakedatering(regulaResult: RegulaResult.NotOk): Boolean =
-        regulaResult.outcome.status == RegulaOutcomeStatus.MANUAL_PROCESSING &&
-            regulaResult.outcome.tree == "Tilbakedatering"
-
-    fun mapMessageMetadata(meta: SykmeldingDocumentMeta): MessageMetadata =
+    fun mapMessageMetadata(sykmelding: SykmeldingDb): MessageMetadata =
         Digital(
-            orgnummer = meta.legekontorOrgnr
+            orgnummer = sykmelding.legekontorOrgnr
                     ?: throw IllegalStateException(
                         "Unable to create sykmelding without legekontorOrgnr"
                     )
         )
 
-    fun mapToDigitalSykmelding(
-        sykmelding: SykmeldingDocument,
-        sykmeldingId: String,
-        person: Person,
-        sykmelder: Sykmelder,
-        source: String
-    ): DigitalSykmelding {
+    fun mapToDigitalSykmelding(sykmelding: SykmeldingDb, source: String): DigitalSykmelding {
+
         val sykmelderNavn: Navn? =
-            sykmelder.navn?.let {
-                Navn(
-                    fornavn = it.fornavn,
-                    mellomnavn = it.mellomnavn,
-                    etternavn = it.etternavn,
-                )
+            sykmelding.sykmelding.sykmelder.let {
+                if (it.fornavn == null || it.etternavn == null) {
+                    null
+                } else {
+                    Navn(
+                        fornavn = it.fornavn,
+                        mellomnavn = it.mellomnavn,
+                        etternavn = it.etternavn,
+                    )
+                }
             }
 
         requireNotNull(sykmelderNavn) { "Sykmelder must have a name" }
 
         // TODO is it ok to use the first godkjenning? NO need to find the best one first
-        val helsepersonellKategoriKode = sykmelder.godkjenninger.first().helsepersonellkategori
+        val helsepersonellKategoriKode =
+            sykmelding.sykmelding.sykmelder.godkjenninger.first().helsepersonellkategori
         requireNotNull(helsepersonellKategoriKode)
 
         return DigitalSykmelding(
-            id = sykmeldingId,
+            id = sykmelding.sykmeldingId,
             metadata =
                 DigitalSykmeldingMetadata(
                     mottattDato = OffsetDateTime.now(),
@@ -145,17 +105,17 @@ object SykmeldingKafkaMapper {
                 Pasient(
                     navn =
                         Navn(
-                            fornavn = person.navn.fornavn,
-                            mellomnavn = person.navn.mellomnavn,
-                            etternavn = person.navn.etternavn,
+                            fornavn = sykmelding.sykmelding.pasient.navn.fornavn,
+                            mellomnavn = sykmelding.sykmelding.pasient.navn.mellomnavn,
+                            etternavn = sykmelding.sykmelding.pasient.navn.etternavn,
                         ),
                     navKontor = null,
                     navnFastlege = null,
-                    fnr = person.ident,
+                    fnr = sykmelding.sykmelding.pasient.ident,
                     kontaktinfo = emptyList(),
                 ),
-            medisinskVurdering = mapMedisinskVurdering(sykmelding.values),
-            aktivitet = sykmelding.values.aktivitet.map { toRecordAktivitet(it) },
+            medisinskVurdering = mapMedisinskVurdering(sykmelding.sykmelding),
+            aktivitet = sykmelding.sykmelding.aktivitet.map { toRecordAktivitet(it) },
             behandler =
                 Behandler(
                     navn =
@@ -164,13 +124,13 @@ object SykmeldingKafkaMapper {
                             mellomnavn = sykmelderNavn.mellomnavn,
                             etternavn = sykmelderNavn.etternavn,
                         ),
-                    ids = mapPersonIdsForSykmelder(sykmelder),
+                    ids = mapPersonIdsForSykmelder(sykmelding.sykmelding.sykmelder),
                     kontaktinfo =
-                        if (sykmelding.meta.legekontorTlf != null)
+                        if (sykmelding.legekontorTlf != null)
                             listOf(
                                 Kontaktinfo(
                                     type = KontaktinfoType.TLF,
-                                    value = sykmelding.meta.legekontorTlf,
+                                    value = sykmelding.legekontorTlf,
                                 ),
                             )
                         else emptyList(),
@@ -178,27 +138,27 @@ object SykmeldingKafkaMapper {
                 ),
             sykmelder =
                 no.nav.tsm.sykmelding.input.core.model.Sykmelder(
-                    ids = mapPersonIdsForSykmelder(sykmelder),
+                    ids = mapPersonIdsForSykmelder(sykmelding.sykmelding.sykmelder),
                     helsepersonellKategori =
                         parseHelsepersonellKategori(helsepersonellKategoriKode.verdi),
                 ),
             arbeidsgiver =
                 mapArbeidsgiver(
-                    sykmelding.values.arbeidsgiver,
-                    sykmelding.values.meldinger,
+                    sykmelding.sykmelding.arbeidsgiver,
+                    sykmelding.sykmelding.meldinger,
                 ),
-            tilbakedatering = mapTilbakedatering(sykmelding.values.tilbakedatering),
-            utdypendeSporsmal = mapUtdypendeSporsmal(sykmelding.values.utdypendeSporsmal),
-            bistandNav = mapBistandNav(sykmelding.values.meldinger),
+            tilbakedatering = mapTilbakedatering(sykmelding.sykmelding.tilbakedatering),
+            utdypendeSporsmal = mapUtdypendeSporsmal(sykmelding.sykmelding.utdypendeSporsmal),
+            bistandNav = mapBistandNav(sykmelding.sykmelding.meldinger),
         )
     }
 
-    private fun mapBistandNav(meldinger: SykmeldingDocumentMeldinger): BistandNav? {
+    private fun mapBistandNav(meldinger: PersistedSykmeldingMeldinger): BistandNav {
         return BistandNav(bistandUmiddelbart = false, beskrivBistand = meldinger.tilNav)
     }
 
     private fun mapTilbakedatering(
-        tilbakedatering: SykmeldingDocumentTilbakedatering?
+        tilbakedatering: PersistedSykmeldingTilbakedatering?
     ): Tilbakedatering? {
         if (tilbakedatering == null) return null
 
@@ -209,7 +169,7 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapUtdypendeSporsmal(
-        utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?
+        utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?
     ): List<UtdypendeSporsmal>? {
         if (utdypendeSporsmal == null) {
             return null
@@ -243,8 +203,8 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapArbeidsgiver(
-        arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
-        meldinger: SykmeldingDocumentMeldinger
+        arbeidsgiver: PersistedSykmeldingArbeidsgiver?,
+        meldinger: PersistedSykmeldingMeldinger,
     ): ArbeidsgiverInfo {
         if (arbeidsgiver == null) {
             return EnArbeidsgiver(
@@ -268,10 +228,10 @@ object SykmeldingKafkaMapper {
         return IngenArbeidsgiver()
     }
 
-    private fun mapPersonIdsForSykmelder(sykmelder: Sykmelder): List<PersonId> {
+    private fun mapPersonIdsForSykmelder(sykmelder: PersistedSykmeldingSykmelder): List<PersonId> {
         return listOf(
             PersonId(
-                id = sykmelder.hpr,
+                id = sykmelder.hprNummer,
                 type = PersonIdType.HPR,
             ),
             PersonId(
@@ -282,22 +242,22 @@ object SykmeldingKafkaMapper {
     }
 
     fun mapMedisinskVurdering(
-        sykmeldingValues: SykmeldingDocumentValues,
+        sykmelding: PersistedSykmelding,
     ): MedisinskVurdering {
         return MedisinskVurdering(
-            hovedDiagnose = mapHoveddiagnose(sykmeldingValues.hoveddiagnose),
-            biDiagnoser = sykmeldingValues.bidiagnoser?.toSykmeldingRecordDiagnoseInfo(),
-            svangerskap = sykmeldingValues.svangerskapsrelatert,
-            skjermetForPasient = sykmeldingValues.pasientenSkalSkjermes,
-            yrkesskade = sykmeldingValues.yrkesskade.toSykmeldingRecordYrkesskade(),
+            hovedDiagnose = sykmelding.hoveddiagnose?.toDiagnoseInfo(),
+            biDiagnoser = sykmelding.bidiagnoser.toSykmeldingRecordDiagnoseInfo(),
+            svangerskap = sykmelding.svangerskapsrelatert,
+            skjermetForPasient = sykmelding.pasientenSkalSkjermes,
+            yrkesskade = sykmelding.yrkesskade.toSykmeldingRecordYrkesskade(),
             syketilfelletStartDato = null,
             annenFraversArsak = null,
         )
     }
 
-    fun toRecordAktivitet(aktivitet: SykmeldingDocumentAktivitet): Aktivitet {
+    fun toRecordAktivitet(aktivitet: PersistedSykmeldingAktivitet): Aktivitet {
         return when (aktivitet) {
-            is SykmeldingDocumentAktivitet.Gradert -> {
+            is PersistedSykmeldingAktivitet.Gradert -> {
                 Gradert(
                     grad = aktivitet.grad,
                     fom = aktivitet.fom,
@@ -305,7 +265,7 @@ object SykmeldingKafkaMapper {
                     reisetilskudd = aktivitet.reisetilskudd,
                 )
             }
-            is SykmeldingDocumentAktivitet.IkkeMulig -> {
+            is PersistedSykmeldingAktivitet.IkkeMulig -> {
                 AktivitetIkkeMulig(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
@@ -335,21 +295,21 @@ object SykmeldingKafkaMapper {
                         else null,
                 )
             }
-            is SykmeldingDocumentAktivitet.Avventende -> {
+            is PersistedSykmeldingAktivitet.Avventende -> {
                 Avventende(
                     innspillTilArbeidsgiver = aktivitet.innspillTilArbeidsgiver,
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
                 )
             }
-            is SykmeldingDocumentAktivitet.Behandlingsdager -> {
+            is PersistedSykmeldingAktivitet.Behandlingsdager -> {
                 Behandlingsdager(
                     antallBehandlingsdager = aktivitet.antallBehandlingsdager,
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
                 )
             }
-            is SykmeldingDocumentAktivitet.Reisetilskudd -> {
+            is PersistedSykmeldingAktivitet.Reisetilskudd -> {
                 Reisetilskudd(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
@@ -357,9 +317,58 @@ object SykmeldingKafkaMapper {
             }
         }
     }
+
+    fun mapValidationResult(persisted: PersistedValidationResult): ValidationResult {
+        return ValidationResult(
+            status =
+                when (persisted.status) {
+                    PersistedRuleType.OK -> RuleType.OK
+                    PersistedRuleType.PENDING -> RuleType.PENDING
+                    PersistedRuleType.INVALID -> RuleType.INVALID
+                },
+            timestamp = persisted.timestamp,
+            rules =
+                persisted.rules.map { persistedRule ->
+                    when (persistedRule) {
+                        is PersistedOKRule ->
+                            OKRule(
+                                name = persistedRule.name,
+                                timestamp = persistedRule.timestamp,
+                                validationType = toValidationType(persistedRule.validationType)
+                            )
+                        is PersistedInvalidRule ->
+                            InvalidRule(
+                                name = persistedRule.name,
+                                timestamp = persistedRule.timestamp,
+                                validationType = toValidationType(persistedRule.validationType),
+                                reason = toReason(persistedRule.reason)
+                            )
+                        is PersistedPendingRule ->
+                            PendingRule(
+                                name = persistedRule.name,
+                                timestamp = persistedRule.timestamp,
+                                validationType = toValidationType(persistedRule.validationType),
+                                reason = toReason(persistedRule.reason)
+                            )
+                    }
+                }
+        )
+    }
+
+    private fun toReason(reason: PersistedReason): Reason =
+        Reason(
+            sykmeldt = reason.sykmeldt,
+            sykmelder = reason.sykmelder,
+        )
+
+    private fun toValidationType(validationType: PersistedValidationType): ValidationType =
+        when (validationType) {
+            PersistedValidationType.AUTOMATIC -> ValidationType.AUTOMATIC
+            PersistedValidationType.MANUAL -> ValidationType.MANUAL
+        }
 }
 
-fun mapHoveddiagnose(hoveddiagnose: SykmeldingDocumentDiagnoseInfo?): DiagnoseInfo? {
+fun mapHoveddiagnose(hoveddiagnose: PersistedSykmeldingDiagnoseInfo?): DiagnoseInfo? {
     if (hoveddiagnose == null) return null
 
     return DiagnoseInfo(
@@ -380,7 +389,7 @@ private fun DiagnoseSystem.toKafkaDiagnoseSystem():
     }
 }
 
-private fun SykmeldingDocumentYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkesskade? {
+private fun PersistedSykmeldingYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkesskade? {
     if (this == null) return null
 
     if (!this.yrkesskade) {
@@ -390,17 +399,18 @@ private fun SykmeldingDocumentYrkesskade?.toSykmeldingRecordYrkesskade(): Yrkess
     return Yrkesskade(yrkesskadeDato = this.skadedato)
 }
 
-private fun List<SykmeldingDocumentDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
+private fun List<PersistedSykmeldingDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo():
     List<DiagnoseInfo>? {
     if (this.isEmpty()) {
         return null
     }
 
-    return this.map { diagnose ->
-        DiagnoseInfo(
-            system = diagnose.system.toKafkaDiagnoseSystem(),
-            kode = diagnose.code,
-            tekst = diagnose.text,
-        )
-    }
+    return this.map { diagnose -> diagnose.toDiagnoseInfo() }
 }
+
+private fun PersistedSykmeldingDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
+    DiagnoseInfo(
+        system = system.toKafkaDiagnoseSystem(),
+        kode = code,
+        tekst = text,
+    )

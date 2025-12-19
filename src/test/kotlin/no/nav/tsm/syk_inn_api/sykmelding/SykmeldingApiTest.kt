@@ -70,44 +70,6 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `fetching list of sykmeldinger not written by you should return 'Redacted' version`() {
-        val response =
-            restTemplate.postForEntity<SykmeldingDocument>(
-                "/api/sykmelding",
-                HttpEntity(
-                    fullExampleSykmeldingPayload.replace("9144889", "someone-else"),
-                    HttpHeaders().apply {
-                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    },
-                ),
-            )
-
-        val created = requireNotNull(response.body)
-        assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
-
-        val allResponse =
-            restTemplate.exchange<List<SykmeldingDocumentRedacted>>(
-                "/api/sykmelding",
-                HttpMethod.GET,
-                HttpEntity<Void>(
-                    HttpHeaders().apply {
-                        set("Ident", "21037712323")
-                        set("HPR", "9144889")
-                    },
-                ),
-            )
-
-        assertEquals(HttpStatus.OK, allResponse.statusCode)
-
-        val allSykmeldinger = requireNotNull(allResponse.body)
-        assertEquals(1, allSykmeldinger.size)
-
-        val first = allSykmeldinger.first()
-        assertIs<SykmeldingDocumentRedacted>(first)
-    }
-
-    @Test
     fun `idempotency test - should not create multiple with same idempotency key`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(

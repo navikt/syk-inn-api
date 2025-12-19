@@ -8,9 +8,9 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
 interface SykmeldingRepository : CrudRepository<SykmeldingDb, UUID> {
-    fun findSykmeldingEntityBySykmeldingId(sykmeldingId: String): SykmeldingDb?
+    fun getSykmeldingDbBySykmeldingId(sykmeldingId: String): SykmeldingDb?
 
-    fun deleteBySykmeldingId(sykmeldingId: String)
+    fun deleteBySykmeldingId(sykmeldingId: String): Int
 
     fun findAllByPasientIdent(pasientIdent: String): List<SykmeldingDb>
 
