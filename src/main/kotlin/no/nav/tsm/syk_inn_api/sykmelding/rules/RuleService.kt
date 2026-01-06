@@ -23,6 +23,7 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
+import no.nav.tsm.syk_inn_api.sykmelding.from2Bto2
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
@@ -224,11 +225,3 @@ class RuleService() {
         )
     }
 }
-
-private fun OpprettSykmeldingDiagnoseInfo.from2Bto2(): OpprettSykmeldingDiagnoseInfo =
-    if (this.system == DiagnoseSystem.ICPC2B)
-        this.copy(
-            system = DiagnoseSystem.ICPC2,
-            code = this.code.split(".").first(),
-        )
-    else this

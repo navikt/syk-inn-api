@@ -59,7 +59,7 @@ class RuleServiceTest {
                                 utdypendeSporsmal = null,
                             ),
                     ),
-                sykmelder = okSykmleder,
+                sykmelder = okSykmelder,
                 foedselsdato = LocalDate.now().minusYears(20),
             )
 
@@ -111,7 +111,7 @@ class RuleServiceTest {
                                 utdypendeSporsmal = null,
                             ),
                     ),
-                sykmelder = okSykmleder,
+                sykmelder = okSykmelder,
                 foedselsdato = LocalDate.now().minusYears(20),
             )
 
@@ -127,7 +127,7 @@ class RuleServiceTest {
             legekontorTlf = "00000000",
         )
 
-    private val okSykmleder =
+    private val okSykmelder =
         MedSuspensjon(
             hpr = "123456",
             navn = null,
