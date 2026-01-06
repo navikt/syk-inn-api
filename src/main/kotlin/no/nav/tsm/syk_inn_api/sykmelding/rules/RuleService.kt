@@ -72,17 +72,19 @@ class RuleService() {
         return RegulaPayload(
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
-                Diagnose(
-                    kode = payload.values.hoveddiagnose.code,
-                    system =
-                        when (payload.values.hoveddiagnose.system) {
-                            DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
-                            DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
-                            DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
-                            DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
-                            DiagnoseSystem.UGYLDIG -> "UGYLDIG"
-                        },
-                ),
+                payload.values.hoveddiagnose.from2Bto2().let { diagnose ->
+                    Diagnose(
+                        kode = diagnose.code,
+                        system =
+                            when (diagnose.system) {
+                                DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
+                                DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                                DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                                DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
+                                DiagnoseSystem.UGYLDIG -> "UGYLDIG"
+                            },
+                    )
+                },
             bidiagnoser = mapToRegulaBidiagnoser(payload.values.bidiagnoser),
             annenFravarsArsak = null,
             aktivitet = mapToSykmeldingAktivitet(payload.values.aktivitet.first()),
@@ -122,19 +124,21 @@ class RuleService() {
             return null
         }
 
-        return bidiagnoser.map { diagnose ->
-            Diagnose(
-                kode = diagnose.code,
-                system =
-                    when (diagnose.system) {
-                        DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
-                        DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
-                        DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
-                        DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
-                        DiagnoseSystem.UGYLDIG -> "UGYLDIG"
-                    },
-            )
-        }
+        return bidiagnoser
+            .map { it.from2Bto2() }
+            .map { diagnose ->
+                Diagnose(
+                    kode = diagnose.code,
+                    system =
+                        when (diagnose.system) {
+                            DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
+                            DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
+                            DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                            DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
+                            DiagnoseSystem.UGYLDIG -> "UGYLDIG"
+                        },
+                )
+            }
     }
 
     private fun HprGodkjenning.toSykmelderGodkjenning() =
@@ -182,7 +186,7 @@ class RuleService() {
                 },
         )
 
-    fun mapToSykmeldingAktivitet(
+    private fun mapToSykmeldingAktivitet(
         opprettSykmeldingAktivitet: OpprettSykmeldingAktivitet
     ): List<no.nav.tsm.regulus.regula.payload.Aktivitet> {
         return listOf(
@@ -220,3 +224,11 @@ class RuleService() {
         )
     }
 }
+
+private fun OpprettSykmeldingDiagnoseInfo.from2Bto2(): OpprettSykmeldingDiagnoseInfo =
+    if (this.system == DiagnoseSystem.ICPC2B)
+        this.copy(
+            system = DiagnoseSystem.ICPC2,
+            code = this.code.split(".").first(),
+        )
+    else this
