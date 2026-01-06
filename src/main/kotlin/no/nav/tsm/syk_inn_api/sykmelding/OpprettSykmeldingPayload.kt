@@ -118,3 +118,11 @@ data class OpprettSykmeldingDiagnoseInfo(
     val system: DiagnoseSystem,
     val code: String,
 )
+
+fun OpprettSykmeldingDiagnoseInfo.from2Bto2(): OpprettSykmeldingDiagnoseInfo =
+    if (this.system == DiagnoseSystem.ICPC2B)
+        this.copy(
+            system = DiagnoseSystem.ICPC2,
+            code = this.code.split(".").first(),
+        )
+    else this

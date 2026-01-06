@@ -209,6 +209,28 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
+    fun `Should automatically downgrade ICPC2B to ICPC2`() {
+        val response =
+            restTemplate.postForEntity<SykmeldingDocument>(
+                "/api/sykmelding",
+                HttpEntity(
+                    fullExampleSykmeldingPayload
+                        .replace("ICPC2", "ICPC2B")
+                        .replace("L73", "Y99.0004"),
+                    HttpHeaders().apply {
+                        set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    },
+                ),
+            )
+
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+
+        val result = response.body
+        assertEquals(result?.values?.hoveddiagnose?.system?.name, "ICPC2")
+        assertEquals(result?.values?.hoveddiagnose?.code, "Y99")
+    }
+
+    @Test
     fun `Broken input data - should fail with 400 due to unknown Aktivitet type`() {
         val response =
             restTemplate.postForEntity<String>(

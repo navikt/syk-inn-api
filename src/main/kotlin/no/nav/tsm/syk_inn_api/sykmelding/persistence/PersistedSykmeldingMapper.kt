@@ -23,6 +23,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
+import no.nav.tsm.syk_inn_api.sykmelding.from2Bto2
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -175,14 +176,16 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmelding {
         return PersistedSykmelding(
             sykmeldingId = sykmeldingId,
-            hoveddiagnose = payload.values.hoveddiagnose.toPersistedSykmeldingDiagnoseInfo(),
+            hoveddiagnose =
+                payload.values.hoveddiagnose.from2Bto2().toPersistedSykmeldingDiagnoseInfo(),
+            bidiagnoser =
+                payload.values.bidiagnoser
+                    .map { it.from2Bto2() }
+                    .fromOpprettSykmeldingToPersistedSykmeldingDiagnoseInfoList(),
             aktivitet =
                 payload.values.aktivitet.fromOpprettSykmeldingToPersistedSykmeldingAktivitetList(),
             pasient = pasient.toPersistedSykmeldingPasient(),
             sykmelder = sykmelder.toPersistedSykmeldingSykmelder(payload.meta.sykmelderHpr),
-            bidiagnoser =
-                payload.values.bidiagnoser
-                    .fromOpprettSykmeldingToPersistedSykmeldingDiagnoseInfoList(),
             svangerskapsrelatert = payload.values.svangerskapsrelatert,
             pasientenSkalSkjermes = payload.values.pasientenSkalSkjermes,
             meldinger = payload.values.meldinger.toPersistedSykmeldingMeldinger(),
