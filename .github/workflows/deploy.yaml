@@ -52,7 +52,7 @@ jobs:
         env:
           CLUSTER: "dev-gcp"
           RESOURCE: ".nais/nais-dev.yaml"
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
   deploy-prod:
     if: github.ref_name == 'main'
@@ -64,7 +64,8 @@ jobs:
         env:
           CLUSTER: "prod-gcp"
           RESOURCE: ".nais/nais-prod.yaml"
-          VAR: image=${{ needs.build.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }},sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
+
 
   build-for-gpr:
     name: Publish a version of syk-inn-api to GPR for use in testing
