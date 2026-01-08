@@ -209,7 +209,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     }
 
     @Test
-    fun `Should automatically downgrade ICPC2B to ICPC2`() {
+    fun `Should NOT automatically downgrade ICPC2B to ICPC2`() {
         val response =
             restTemplate.postForEntity<SykmeldingDocument>(
                 "/api/sykmelding",
@@ -226,8 +226,8 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
         assertEquals(HttpStatus.CREATED, response.statusCode)
 
         val result = response.body
-        assertEquals(result?.values?.hoveddiagnose?.system?.name, "ICPC2")
-        assertEquals(result?.values?.hoveddiagnose?.code, "Y99")
+        assertEquals(result?.values?.hoveddiagnose?.system?.name, "ICPC2B")
+        assertEquals(result?.values?.hoveddiagnose?.code, "Y99.0004")
     }
 
     @Test

@@ -13,6 +13,7 @@ val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
 val regulaVersion = "45"
 val sykmeldingInputVersion = "21"
+val diagnoserVersion = "2026.1.8"
 
 // Dev deps
 val testContainersVersion = "2.0.2"
@@ -67,7 +68,8 @@ dependencies {
     implementation("io.prometheus:prometheus-metrics-simpleclient-bridge:1.0.0")
 
     implementation("no.nav.tsm.regulus:regula:$regulaVersion")
-    implementation("no.nav.tsm.sykmelding", "input", sykmeldingInputVersion)
+    implementation("no.nav.tsm.sykmelding:input:$sykmeldingInputVersion")
+    implementation("no.nav.tsm:diagnoser:$diagnoserVersion")
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
