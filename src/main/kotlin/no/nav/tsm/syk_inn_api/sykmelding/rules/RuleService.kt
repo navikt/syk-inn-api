@@ -25,7 +25,6 @@ import no.nav.tsm.syk_inn_api.sykmelder.hpr.HprGodkjenning
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingAktivitet
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
-import no.nav.tsm.syk_inn_api.sykmelding.from2Bto2
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
@@ -75,7 +74,7 @@ class RuleService() {
         return RegulaPayload(
             sykmeldingId = sykmeldingId,
             hoveddiagnose =
-                payload.values.hoveddiagnose.from2Bto2().let { diagnose ->
+                payload.values.hoveddiagnose.let { diagnose ->
                     Diagnose(
                         kode = diagnose.code,
                         system =
@@ -127,21 +126,19 @@ class RuleService() {
             return null
         }
 
-        return bidiagnoser
-            .map { it.from2Bto2() }
-            .map { diagnose ->
-                Diagnose(
-                    kode = diagnose.code,
-                    system =
-                        when (diagnose.system) {
-                            DiagnoseSystem.ICPC2 -> ICPC2.OID
-                            DiagnoseSystem.ICD10 -> ICD10.OID
-                            DiagnoseSystem.ICPC2B -> ICPC2B.OID
-                            DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
-                            DiagnoseSystem.UGYLDIG -> "UGYLDIG"
-                        },
-                )
-            }
+        return bidiagnoser.map { diagnose ->
+            Diagnose(
+                kode = diagnose.code,
+                system =
+                    when (diagnose.system) {
+                        DiagnoseSystem.ICPC2 -> ICPC2.OID
+                        DiagnoseSystem.ICD10 -> ICD10.OID
+                        DiagnoseSystem.ICPC2B -> ICPC2B.OID
+                        DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
+                        DiagnoseSystem.UGYLDIG -> "UGYLDIG"
+                    },
+            )
+        }
     }
 
     private fun HprGodkjenning.toSykmelderGodkjenning() =
