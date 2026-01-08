@@ -1,6 +1,8 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.producer
 
 import java.time.OffsetDateTime
+import no.nav.tsm.diagnoser.Diagnose
+import no.nav.tsm.diagnoser.toICPC2
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelder.hpr.parseHelsepersonellKategori
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedInvalidRule
@@ -67,12 +69,11 @@ object SykmeldingKafkaMapper {
         Digital(
             orgnummer = sykmelding.legekontorOrgnr
                     ?: throw IllegalStateException(
-                        "Unable to create sykmelding without legekontorOrgnr"
-                    )
+                        "Unable to create sykmelding without legekontorOrgnr",
+                    ),
         )
 
     fun mapToDigitalSykmelding(sykmelding: SykmeldingDb, source: String): DigitalSykmelding {
-
         val sykmelderNavn: Navn? =
             sykmelding.sykmelding.sykmelder.let {
                 if (it.fornavn == null || it.etternavn == null) {
@@ -99,7 +100,7 @@ object SykmeldingKafkaMapper {
                 DigitalSykmeldingMetadata(
                     mottattDato = OffsetDateTime.now(),
                     genDate = OffsetDateTime.now(),
-                    avsenderSystem = AvsenderSystem(source, "1")
+                    avsenderSystem = AvsenderSystem(source, "1"),
                 ),
             pasient =
                 Pasient(
@@ -334,24 +335,24 @@ object SykmeldingKafkaMapper {
                             OKRule(
                                 name = persistedRule.name,
                                 timestamp = persistedRule.timestamp,
-                                validationType = toValidationType(persistedRule.validationType)
+                                validationType = toValidationType(persistedRule.validationType),
                             )
                         is PersistedInvalidRule ->
                             InvalidRule(
                                 name = persistedRule.name,
                                 timestamp = persistedRule.timestamp,
                                 validationType = toValidationType(persistedRule.validationType),
-                                reason = toReason(persistedRule.reason)
+                                reason = toReason(persistedRule.reason),
                             )
                         is PersistedPendingRule ->
                             PendingRule(
                                 name = persistedRule.name,
                                 timestamp = persistedRule.timestamp,
                                 validationType = toValidationType(persistedRule.validationType),
-                                reason = toReason(persistedRule.reason)
+                                reason = toReason(persistedRule.reason),
                             )
                     }
-                }
+                },
         )
     }
 
@@ -408,9 +409,21 @@ private fun List<PersistedSykmeldingDiagnoseInfo>.toSykmeldingRecordDiagnoseInfo
     return this.map { diagnose -> diagnose.toDiagnoseInfo() }
 }
 
-private fun PersistedSykmeldingDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
-    DiagnoseInfo(
+private fun PersistedSykmeldingDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo {
+    if (this.system == DiagnoseSystem.ICPC2B) {
+        return Diagnose.from(system.name, code)?.toICPC2()?.let {
+            DiagnoseInfo(
+                system = DiagnoseSystem.ICPC2.toKafkaDiagnoseSystem(),
+                kode = it.code,
+                tekst = it.text,
+            )
+        }
+            ?: throw IllegalStateException("ICPC2B code $code could not be mapped to ICPC2")
+    }
+
+    return DiagnoseInfo(
         system = system.toKafkaDiagnoseSystem(),
         kode = code,
         tekst = text,
     )
+}

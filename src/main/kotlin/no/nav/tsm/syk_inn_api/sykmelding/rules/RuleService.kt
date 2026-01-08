@@ -3,7 +3,9 @@ package no.nav.tsm.syk_inn_api.sykmelding.rules
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.diagnosekoder.Diagnosekoder
+import no.nav.tsm.diagnoser.ICD10
+import no.nav.tsm.diagnoser.ICPC2
+import no.nav.tsm.diagnoser.ICPC2B
 import no.nav.tsm.regulus.regula.RegulaAvsender
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaMeta
@@ -78,9 +80,9 @@ class RuleService() {
                         kode = diagnose.code,
                         system =
                             when (diagnose.system) {
-                                DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
-                                DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
-                                DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                                DiagnoseSystem.ICPC2 -> ICPC2.OID
+                                DiagnoseSystem.ICD10 -> ICD10.OID
+                                DiagnoseSystem.ICPC2B -> ICPC2B.OID
                                 DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
                                 DiagnoseSystem.UGYLDIG -> "UGYLDIG"
                             },
@@ -132,9 +134,9 @@ class RuleService() {
                     kode = diagnose.code,
                     system =
                         when (diagnose.system) {
-                            DiagnoseSystem.ICPC2 -> Diagnosekoder.ICPC2_CODE
-                            DiagnoseSystem.ICD10 -> Diagnosekoder.ICD10_CODE
-                            DiagnoseSystem.ICPC2B -> "2.16.578.1.12.4.1.1.7171"
+                            DiagnoseSystem.ICPC2 -> ICPC2.OID
+                            DiagnoseSystem.ICD10 -> ICD10.OID
+                            DiagnoseSystem.ICPC2B -> ICPC2B.OID
                             DiagnoseSystem.PHBU -> "2.16.578.1.12.4.1.1.7112"
                             DiagnoseSystem.UGYLDIG -> "UGYLDIG"
                         },
