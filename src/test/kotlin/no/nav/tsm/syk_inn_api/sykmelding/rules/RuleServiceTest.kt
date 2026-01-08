@@ -67,7 +67,7 @@ class RuleServiceTest {
     }
 
     @Test
-    fun `should automatically dumb-down ICPC2B to ICPC2 for both hoved and bi`() {
+    fun `should automatically validate OK for ICPC2B for both hoved and bi`() {
         val result =
             ruleService.validateRules(
                 sykmeldingId = "test-foo-bar",
