@@ -2,6 +2,8 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
 import java.util.UUID
+import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
+import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -9,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 interface SykInnPersistence {
     fun saveSykInnSykmelding(
         sykmeldingDb: SykmeldingDb,
+        juridiskHenvisningDB: JuridiskVurderingResult,
         sendTimestamp: OffsetDateTime?,
         source: String
     ): SykmeldingDb
@@ -30,7 +33,8 @@ interface SykmeldingPersistence {
 @Transactional
 class SykmeldingPersistenceService(
     private val sykmeldingRepository: SykmeldingRepository,
-    private val sykmeldingStatusRepository: SykmeldingStatusRepository
+    private val sykmeldingStatusRepository: SykmeldingStatusRepository,
+    private val juridiskHenvisningRepository: JuridiskHenvisningRepository,
 ) : SykInnPersistence, SykmeldingPersistence {
     private val logger = logger()
 
@@ -53,6 +57,7 @@ class SykmeldingPersistenceService(
 
     override fun saveSykInnSykmelding(
         sykmeldingDb: SykmeldingDb,
+        juridiskHenvisningDB: JuridiskVurderingResult,
         sendTimestamp: OffsetDateTime?,
         source: String,
     ): SykmeldingDb {
@@ -66,6 +71,12 @@ class SykmeldingPersistenceService(
             sendTimestamp ?: sykmeldingDb.mottatt,
             source = source
         )
+        juridiskHenvisningRepository.insert(
+            UUID.fromString(sykmeldingDb.sykmeldingId),
+            sykmeldingDb.mottatt,
+            juridiskHenvisningDB
+        )
+
         return savedEntity
     }
 

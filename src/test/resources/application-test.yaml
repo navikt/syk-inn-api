@@ -34,8 +34,15 @@ kafka:
     sykmeldinger-input: "foo-bar"
     sykmeldinger: "baz-qux"
 
+env:
+  sourceVersion: test
+
 jobs:
   sykmelding:
+    initialDelaySeconds: ${JOBS_SYKMELDING_INITIAL_DELAY:1}
+    fixedDelaySeconds: ${JOBS_SYKMELDING_FIXED_DELAY:1}
+    resetTimeoutSeconds: ${JOBS_SYKMELDING_RESET_TIMEOUT_DELAY:1}
+  juridisk:
     initialDelaySeconds: ${JOBS_SYKMELDING_INITIAL_DELAY:1}
     fixedDelaySeconds: ${JOBS_SYKMELDING_FIXED_DELAY:1}
     resetTimeoutSeconds: ${JOBS_SYKMELDING_RESET_TIMEOUT_DELAY:1}

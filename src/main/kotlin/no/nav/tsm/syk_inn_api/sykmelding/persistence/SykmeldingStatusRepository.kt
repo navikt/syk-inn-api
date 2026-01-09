@@ -139,7 +139,7 @@ class SykmeldingStatusRepository(
             """
                 update sykmelding_status set 
                     status = :pendingStatus,
-                    event_timestamp = :timestamp
+                    event_timestamp = now()
                 where status in (:statusToReset)
                 and event_timestamp < :timestamp
             """

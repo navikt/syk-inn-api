@@ -1,6 +1,7 @@
 package no.nav.tsm.syk_inn_api.test
 
 import com.ninjasquad.springmockk.MockkBean
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.SendJuridiskhenvisningerTask
 import no.nav.tsm.syk_inn_api.sykmelding.scheduled.SykmeldingKafkaTask
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,7 @@ abstract class FullIntegrationTest {
 
     @Autowired lateinit var jdbcTemplate: JdbcTemplate
     @MockkBean lateinit var sykmeldingKafkaTask: SykmeldingKafkaTask
+    @MockkBean lateinit var juridiskhenvisningerTask: SendJuridiskhenvisningerTask
 
     @BeforeEach
     fun cleanDatabase() {

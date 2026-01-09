@@ -5,7 +5,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import no.nav.tsm.regulus.regula.RegulaOutcome
@@ -35,6 +35,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationResult
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykInnPersistence
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingDb
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskHenvisningService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -46,6 +47,7 @@ class SykmeldingServiceTest {
     private lateinit var ruleService: RuleService
     private lateinit var sykInnPersistence: SykInnPersistence
     private lateinit var personService: PersonService
+    private val juridiskHenvisningService: JuridiskHenvisningService = mockk(relaxed = true)
 
     val pasientIdent = "01019078901"
     val behandlerIdent = "0101197054322"
@@ -69,6 +71,7 @@ class SykmeldingServiceTest {
                 ruleService = ruleService,
                 sykmelderService = sykmelderService,
                 personService = personService,
+                juridiskHenvisningService = juridiskHenvisningService
             )
     }
 
@@ -111,7 +114,7 @@ class SykmeldingServiceTest {
                 emptyList(),
             )
 
-        every { sykInnPersistence.saveSykInnSykmelding(any(), null, any()) } returns
+        every { sykInnPersistence.saveSykInnSykmelding(any(), any(), null, any()) } returns
             SykmeldingDb(
                 sykmeldingId = sykmeldingId,
                 idempotencyKey = idempotencyKey,
@@ -241,7 +244,7 @@ class SykmeldingServiceTest {
             )
 
         val payload = createSykmeldingPayload(idempotencyKey)
-        every { sykInnPersistence.saveSykInnSykmelding(any(), any(), any()) } returns
+        every { sykInnPersistence.saveSykInnSykmelding(any(), any(), any(), any()) } returns
             mapSykmeldingPayloadToDatabaseEntity(
                 sykmeldingId = sykmeldingId,
                 mottatt = OffsetDateTime.now(),
