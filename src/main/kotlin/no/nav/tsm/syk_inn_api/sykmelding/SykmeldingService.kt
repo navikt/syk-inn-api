@@ -23,6 +23,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
 import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.toSykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.rules.RuleService
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskHenvisningService
 import no.nav.tsm.syk_inn_api.utils.failSpan
 import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
@@ -35,6 +36,7 @@ class SykmeldingService(
     private val personService: PersonService,
     private val sykmelderService: SykmelderService,
     private val sykInnPersistence: SykInnPersistence,
+    private val juridiskHenvisningService: JuridiskHenvisningService
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
@@ -107,10 +109,16 @@ class SykmeldingService(
                     sykmelder = sykmelder,
                     ruleResult = ruleResult,
                 )
-
+            val juridiskHenvisningDB =
+                juridiskHenvisningService.createJuridiskHenvisning(
+                    sykmeldingId.toString(),
+                    person.ident,
+                    ruleResult
+                )
             val saved =
                 sykInnPersistence.saveSykInnSykmelding(
                     sykmeldingDb,
+                    juridiskHenvisningDB,
                     null,
                     source = payload.meta.source
                 )

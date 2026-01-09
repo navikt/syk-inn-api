@@ -197,7 +197,7 @@ class SykmeldingKafkaTaskTest() : FullIntegrationTest() {
                 sykmeldingStatusRepository = sykmeldingStatusRepository,
                 sykmeldingProducer = sykmeldingProducer,
                 sykmeldingRepo = sykmeldingRepo,
-                resetTimeoutSeconds = 0, // should reset immediately
+                resetTimeoutSeconds = -2, // should reset immediately
             )
 
         sykmeldingKafkaTask.sendPendingSykmeldingToKafka()

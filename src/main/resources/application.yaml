@@ -50,6 +50,7 @@ kafka:
   topics:
     sykmeldinger-input: "tsm.sykmeldinger-input"
     sykmeldinger: "tsm.sykmeldinger"
+    paragraf-i-kode: "teamsykmelding.paragraf-i-kode"
 
 # External services that syk-inn-api interacts with
 services:
@@ -81,8 +82,15 @@ management:
     livenessState.enabled: true
     readinessState.enabled: true
 
+env:
+  sourceVersion: ${SOURCE_VERSION_URL}
+
 jobs:
   sykmelding:
     initialDelaySeconds:  ${JOBS_SYKMELDING_INITIAL_DELAY:30}
     fixedDelaySeconds: ${JOBS_SYKMELDING_FIXED_DELAY:10}
     resetTimeoutSeconds: ${JOBS_SYKMELDING_RESET_TIMEOUT_DELAY:1800}
+  juridisk:
+    initialDelaySeconds: ${JOBS_JURIDISK_INITIAL_DELAY:30}
+    fixedDelaySeconds: ${JOBS_JURIDISK_FIXED_DELAY:10}
+    resetTimeoutSeconds: ${JOBS_JURIDISK_RESET_TIMEOUT_DELAY:1800}
