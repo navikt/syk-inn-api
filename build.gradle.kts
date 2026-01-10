@@ -11,7 +11,7 @@ val openHtmlToPdfVersion = "1.1.31"
 val verapdfVersion = "1.28.2"
 val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
-val regulaVersion = "46"
+val regulaVersion = "47"
 val sykmeldingInputVersion = "21"
 val diagnoserVersion = "2026.1.10"
 
