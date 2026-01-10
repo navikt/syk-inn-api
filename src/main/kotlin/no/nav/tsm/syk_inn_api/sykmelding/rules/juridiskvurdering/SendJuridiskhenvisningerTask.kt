@@ -40,7 +40,9 @@ class SendJuridiskhenvisningerTask(
                         nextJuridiskhenvisning.juridiskhenvisning
                     )
                     juridiskHenvisningRepository.markAsSent(nextJuridiskhenvisning)
-                    log.info("Sent juridiskhenvisning for sykmeldingId=${nextJuridiskhenvisning.sykmeldingId}")
+                    log.info(
+                        "Sent juridiskhenvisning for sykmeldingId=${nextJuridiskhenvisning.sykmeldingId}"
+                    )
                 } catch (ex: Exception) {
                     log.error(
                         "Failed to send juridiskhenvisning for sykmeldingId=${nextJuridiskhenvisning.sykmeldingId}",

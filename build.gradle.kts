@@ -13,7 +13,7 @@ val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
 val regulaVersion = "46"
 val sykmeldingInputVersion = "21"
-val diagnoserVersion = "2026.1.9"
+val diagnoserVersion = "2026.1.10"
 
 // Dev deps
 val testContainersVersion = "2.0.2"
