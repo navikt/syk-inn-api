@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 
 data class OpprettSykmeldingPayload(
     val submitId: UUID,
@@ -32,6 +33,7 @@ data class OpprettSykmelding(
     val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
     val tilbakedatering: OpprettSykmeldingTilbakedatering?,
     val utdypendeSporsmal: OpprettSykmeldingUtdypendeSporsmal?,
+    val annenFravarsgrunn: AnnenFravarsgrunn?
 )
 
 data class OpprettSykmeldingMeldinger(
