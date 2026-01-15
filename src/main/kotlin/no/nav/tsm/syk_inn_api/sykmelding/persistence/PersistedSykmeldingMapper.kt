@@ -1,7 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
-import java.time.LocalDate
-import java.time.Month
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
@@ -24,20 +22,23 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
-import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarArsakType
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.Avventende
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
 import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.LegacyMedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
@@ -66,8 +67,6 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
 
 object PersistedSykmeldingMapper {
-
-    private val logger = logger()
 
     fun mapValidationResult(regulaResult: RegulaResult): PersistedValidationResult {
         val ruleTimestamp = OffsetDateTime.now(ZoneOffset.UTC)
@@ -120,7 +119,7 @@ object PersistedSykmeldingMapper {
                                 name = validationRule.name,
                                 timestamp = validationRule.timestamp,
                                 validationType =
-                                    toPersistedValidationType(validationRule.validationType)
+                                    toPersistedValidationType(validationRule.validationType),
                             )
                         is InvalidRule ->
                             PersistedInvalidRule(
@@ -128,7 +127,7 @@ object PersistedSykmeldingMapper {
                                 timestamp = validationRule.timestamp,
                                 validationType =
                                     toPersistedValidationType(validationRule.validationType),
-                                reason = toPersistedReason(validationRule.reason)
+                                reason = toPersistedReason(validationRule.reason),
                             )
                         is PendingRule ->
                             PersistedPendingRule(
@@ -136,10 +135,10 @@ object PersistedSykmeldingMapper {
                                 timestamp = validationRule.timestamp,
                                 validationType =
                                     toPersistedValidationType(validationRule.validationType),
-                                reason = toPersistedReason(validationRule.reason)
+                                reason = toPersistedReason(validationRule.reason),
                             )
                     }
-                }
+                },
         )
     }
 
@@ -191,6 +190,7 @@ object PersistedSykmeldingMapper {
             tilbakedatering = payload.values.tilbakedatering.toPersistedSykmeldingTilbakedatering(),
             utdypendeSporsmal =
                 payload.values.utdypendeSporsmal.toPersistedSykmeldingUtdypendeSporsmal(),
+            annenFravarsgrunn = payload.values.annenFravarsgrunn,
             regelResultat = validation.toPersistedSykmeldingResult(),
         )
     }
@@ -224,6 +224,8 @@ object PersistedSykmeldingMapper {
                 ),
             utdypendeSporsmal =
                 mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmal(sykmeldingRecord),
+            annenFravarsgrunn =
+                sykmeldingRecord.sykmelding.medisinskVurdering.toAnnenfravarsgrunn(),
             regelResultat = sykmeldingRecord.validation.toPersistedSykmeldingResult(),
         )
     }
@@ -605,7 +607,7 @@ object PersistedSykmeldingMapper {
             text = tekst
                     ?: DiagnosekodeMapper.findTextFromDiagnoseSystem(
                         system.toDiagnoseSystem(),
-                        kode
+                        kode,
                     )
                         ?: "Unknown diagnosis code: $kode",
         )
@@ -656,9 +658,7 @@ object PersistedSykmeldingMapper {
             is XmlSykmelding -> {
                 getArbeidsgiverInfo(value.arbeidsgiver)
             }
-            else -> {
-                return null
-            }
+            else -> null
         }
     }
 
@@ -817,7 +817,7 @@ object PersistedSykmeldingMapper {
         return PersistedSykmeldingUtdypendeSporsmal(
             hensynPaArbeidsplassen = svarMap[Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN]?.svar,
             medisinskOppsummering = svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.svar,
-            utfordringerMedArbeid = svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]?.svar
+            utfordringerMedArbeid = svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]?.svar,
         )
     }
 
@@ -882,15 +882,34 @@ object PersistedSykmeldingMapper {
             }
         }
     }
+}
 
-    fun SykmeldingRecord.isBeforeYear(year: Int): Boolean {
-        val tom = sykmelding.aktivitet.maxBy { it.tom }.tom
-        return tom.isBefore(
-            LocalDate.of(
-                year,
-                Month.JANUARY,
-                1,
-            ),
-        )
+private fun MedisinskVurdering.toAnnenfravarsgrunn(): AnnenFravarsgrunn? {
+    when (this) {
+        is DigitalMedisinskVurdering -> return this.annenFravarsgrunn
+        is LegacyMedisinskVurdering -> {
+            val oldEnum = this.annenFraversArsak?.arsak?.first()
+
+            return when (oldEnum) {
+                AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON ->
+                    AnnenFravarsgrunn.GODKJENT_HELSEINSTITUSJON
+                AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> AnnenFravarsgrunn.ARBEIDSRETTET_TILTAK
+                AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
+                    AnnenFravarsgrunn.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+                AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE ->
+                    AnnenFravarsgrunn.NODVENDIG_KONTROLLUNDENRSOKELSE
+                AnnenFravarArsakType.SMITTEFARE -> AnnenFravarsgrunn.SMITTEFARE
+                AnnenFravarArsakType.ABORT -> AnnenFravarsgrunn.ABORT
+                AnnenFravarArsakType.UFOR_GRUNNET_BARNLOSHET ->
+                    AnnenFravarsgrunn.UFOR_GRUNNET_BARNLOSHET
+                AnnenFravarArsakType.DONOR -> AnnenFravarsgrunn.DONOR
+                AnnenFravarArsakType.BEHANDLING_STERILISERING ->
+                    AnnenFravarsgrunn.BEHANDLING_STERILISERING
+                // "B" is not supported in syk-inn yet, will be mapped to new data format once we
+                // implement proper support
+                AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> null
+                null -> null
+            }
+        }
     }
 }

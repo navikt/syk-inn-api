@@ -1,9 +1,11 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import com.fasterxml.jackson.core.JacksonException
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.tsm.syk_inn_api.person.PdlException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -20,14 +22,16 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
-import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.util.*
 
 @Component
 class SykmeldingConsumer(
@@ -38,7 +42,13 @@ class SykmeldingConsumer(
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
-
+    val objectMapper =
+        jacksonObjectMapper().apply {
+            registerModule(SykmeldingModule())
+            registerModule(JavaTimeModule())
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        }
     @Transactional
     @KafkaListener(
         topics = [$$"${kafka.topics.sykmeldinger}"],
@@ -60,7 +70,7 @@ class SykmeldingConsumer(
 
         try {
 
-            val sykmeldingRecord = sykmeldingObjectMapper.readValue<SykmeldingRecord>(value)
+            val sykmeldingRecord = objectMapper.readValue<SykmeldingRecord>(value)
 
             if (
                 sykmeldingRecord.sykmelding.aktivitet.maxOf { it.tom } <

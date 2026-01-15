@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedRuleType
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 
 /** This sealed interface allows both "Full" and "Redacted" versions of the sykmelding response. */
 sealed interface SykmeldingResponse
@@ -40,6 +41,7 @@ data class SykmeldingDocumentValues(
     val arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
     val tilbakedatering: SykmeldingDocumentTilbakedatering?,
     val utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?,
+    val annenFravarsgrunn: AnnenFravarsgrunn?
 )
 
 @JsonSubTypes(

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 class SykmeldingProducer(
     private val kafkaProducer: SykmeldingInputProducer,
 ) {
-
     private val logger = logger()
 
     fun send(

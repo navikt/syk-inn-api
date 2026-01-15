@@ -182,7 +182,8 @@ class SykmeldingServiceTest {
                                 yrkesskade = null,
                                 arbeidsgiver = null,
                                 tilbakedatering = null,
-                                utdypendeSporsmal = null
+                                utdypendeSporsmal = null,
+                                annenFravarsgrunn = null,
                             ),
                     ),
             )
@@ -311,6 +312,7 @@ fun createSykmeldingPayload(idempotencyKey: UUID = UUID.randomUUID()): OpprettSy
                 arbeidsgiver = null,
                 tilbakedatering = null,
                 utdypendeSporsmal = null,
+                annenFravarsgrunn = null,
             ),
     )
 
@@ -349,6 +351,7 @@ fun getTestSykmelding(
         arbeidsgiver = null,
         tilbakedatering = null,
         utdypendeSporsmal = null,
+        annenFravarsgrunn = null,
         sykmeldingId = sykmeldingId.toString(),
         pasient =
             PersistedSykmeldingPasient(

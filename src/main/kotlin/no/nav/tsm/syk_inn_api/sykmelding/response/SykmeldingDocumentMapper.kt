@@ -59,6 +59,7 @@ fun PersistedSykmelding.toSykmeldingDocumentValues(): SykmeldingDocumentValues {
         arbeidsgiver = this.arbeidsgiver.toExistingSykmeldingArbeidsgiver(),
         tilbakedatering = this.tilbakedatering.toExistingSykmeldingTilbakedatering(),
         utdypendeSporsmal = this.utdypendeSporsmal.toExistingSykmeldingUtdypendeSporsmal(),
+        annenFravarsgrunn = this.annenFravarsgrunn,
     )
 }
 
