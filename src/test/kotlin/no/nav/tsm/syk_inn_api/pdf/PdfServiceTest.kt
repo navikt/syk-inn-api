@@ -142,7 +142,7 @@ class PdfServiceTest {
                                 utfordringerMedArbeid =
                                     "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
                             ),
-                        // utdypendeSporsmal = null
+                        annenFravarsgrunn = null,
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(

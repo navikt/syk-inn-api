@@ -32,6 +32,7 @@ import no.nav.tsm.sykmelding.input.core.model.Behandler
 import no.nav.tsm.sykmelding.input.core.model.Behandlingsdager
 import no.nav.tsm.sykmelding.input.core.model.BistandNav
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
+import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmeldingMetadata
 import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
@@ -242,15 +243,14 @@ object SykmeldingKafkaMapper {
 
     fun mapMedisinskVurdering(
         sykmelding: PersistedSykmelding,
-    ): MedisinskVurdering {
-        return MedisinskVurdering(
+    ): DigitalMedisinskVurdering {
+        return DigitalMedisinskVurdering(
             hovedDiagnose = sykmelding.hoveddiagnose?.toDiagnoseInfo(),
             biDiagnoser = sykmelding.bidiagnoser.toSykmeldingRecordDiagnoseInfo(),
             svangerskap = sykmelding.svangerskapsrelatert,
             skjermetForPasient = sykmelding.pasientenSkalSkjermes,
             yrkesskade = sykmelding.yrkesskade.toSykmeldingRecordYrkesskade(),
-            syketilfelletStartDato = null,
-            annenFraversArsak = null,
+            annenFravarsgrunn = sykmelding.annenFravarsgrunn,
         )
     }
 
