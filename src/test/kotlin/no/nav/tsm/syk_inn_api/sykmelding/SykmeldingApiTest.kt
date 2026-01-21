@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding
 
-import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,6 +21,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import tools.jackson.databind.JsonNode
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -169,9 +169,9 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
                 ),
             )
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.statusCode)
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, response.statusCode)
         println(response.body)
-        assertEquals(response.body?.path("message")?.asText(), "Person does not exist")
+        assertEquals(response.body?.path("message")?.asString(), "Person does not exist")
     }
 
     @Test
@@ -295,7 +295,7 @@ class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
         println(response.body)
-        assertEquals(response.body?.path("utfall")?.path("result")?.asText(), "INVALID")
+        assertEquals(response.body?.path("utfall")?.path("result")?.asString(), "INVALID")
     }
 }
 

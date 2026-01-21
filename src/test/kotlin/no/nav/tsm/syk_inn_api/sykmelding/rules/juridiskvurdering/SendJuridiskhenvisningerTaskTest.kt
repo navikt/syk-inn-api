@@ -7,8 +7,6 @@ import io.mockk.verify
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.Test
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 

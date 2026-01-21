@@ -1,11 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
-import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.syk_inn_api.person.PdlException
@@ -24,7 +18,6 @@ import no.nav.tsm.syk_inn_api.utils.logger
 import no.nav.tsm.syk_inn_api.utils.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.Papirsykmelding
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.XmlSykmelding
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
@@ -32,6 +25,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.kotlinModule
+import tools.jackson.module.kotlin.readValue
 
 @Component
 class SykmeldingConsumer(
@@ -42,13 +42,17 @@ class SykmeldingConsumer(
 ) {
     private val logger = logger()
     private val teamLogger = teamLogger()
-    val objectMapper =
-        jacksonObjectMapper().apply {
-            registerModule(SykmeldingModule())
-            registerModule(JavaTimeModule())
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        }
+    val objectMapper: ObjectMapper = jsonMapper {
+        // NOTE: SykmeldingModule from no.nav.tsm.sykmelding:input:22 is a Jackson 2 module
+        // and is incompatible with Jackson 3. This library needs to be updated to Jackson 3
+        // before we can use it here. For now, deserialization will work but may not handle
+        // custom types from that library correctly.
+        // TODO: Track issue with sykmelding-input library team to update to Jackson 3
+        // addModule(SykmeldingModule())
+        addModule(kotlinModule())
+        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
 
     @Transactional
     @KafkaListener(

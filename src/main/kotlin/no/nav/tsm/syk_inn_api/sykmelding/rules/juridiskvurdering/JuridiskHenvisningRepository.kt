@@ -1,10 +1,5 @@
-package no.nav.tsm.syk_inn_api.sykmelding.rules
+package no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.sql.Timestamp
 import java.time.OffsetDateTime
 import java.util.*
@@ -15,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.kotlinModule
 
 data class JuridiskVurderingResult(val juridiskeVurderinger: List<JuridiskVurdering>)
 
@@ -29,13 +29,11 @@ class JuridiskHenvisningRepository(
     @param:Autowired private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
 
-    val objectMapper: ObjectMapper =
-        ObjectMapper().apply {
-            registerKotlinModule()
-            registerModule(JavaTimeModule())
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        }
+    val objectMapper: ObjectMapper = jsonMapper {
+        addModule(kotlinModule())
+        disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    }
 
     fun insert(
         sykmeldingId: UUID,
