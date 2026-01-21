@@ -41,7 +41,6 @@ import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
-import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
@@ -180,6 +179,9 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.utfordringerMedArbeid,
                     Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
+                    // TODO: Have syk-inn send over the texts (server side) that are used in the
+                    // actual form
+                    sporsmal = null,
                 ),
             )
         }
@@ -188,6 +190,9 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.medisinskOppsummering,
                     Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    // TODO: Have syk-inn send over the texts (server side) that are used in the
+                    // actual form
+                    sporsmal = null,
                 ),
             )
         }
@@ -196,6 +201,9 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.hensynPaArbeidsplassen,
                     Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
+                    // TODO: Have syk-inn send over the texts (server side) that are used in the
+                    // actual form
+                    sporsmal = null,
                 ),
             )
         }
