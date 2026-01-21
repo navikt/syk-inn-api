@@ -9,7 +9,7 @@ import no.nav.tsm.syk_inn_api.person.Navn
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
