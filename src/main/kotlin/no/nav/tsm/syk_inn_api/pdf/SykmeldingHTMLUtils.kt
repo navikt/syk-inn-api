@@ -14,8 +14,7 @@ object SykmeldingHTMLUtils {
         val aktivitetsLabel =
             when (aktivitet) {
                 is SykmeldingDocumentAktivitet.IkkeMulig -> "100% sykmeldt, aktivitet ikke mulig"
-                is SykmeldingDocumentAktivitet.Gradert ->
-                    "${aktivitet.grad}% sykmeldt" +
+                is SykmeldingDocumentAktivitet.Gradert -> "${aktivitet.grad}% sykmeldt" +
                         if (aktivitet.reisetilskudd) " med reisetilskudd" else ""
                 is SykmeldingDocumentAktivitet.Avventende -> TODO()
                 is SykmeldingDocumentAktivitet.Behandlingsdager -> TODO()
@@ -42,7 +41,8 @@ object SykmeldingHTMLUtils {
                     }
                 }
             }
-            else -> return emptyList()
+
+            else -> {}
         }
 
         return periode
