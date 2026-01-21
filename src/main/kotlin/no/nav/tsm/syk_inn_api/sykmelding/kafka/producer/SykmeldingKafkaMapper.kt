@@ -41,7 +41,6 @@ import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
-import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.OKRule
 import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
