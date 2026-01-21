@@ -14,6 +14,7 @@ val arrowVersion = "2.2.0"
 val regulaVersion = "47"
 val sykmeldingInputVersion = "22"
 val diagnoserVersion = "2026.1.10"
+val hypersistenceUtilsHibernateVersion = "3.14.1"
 
 // Dev deps
 val testContainersVersion = "2.0.2"
@@ -73,7 +74,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-71:$hypersistenceUtilsHibernateVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
