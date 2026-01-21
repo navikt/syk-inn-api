@@ -31,6 +31,7 @@ class JuridiskHenvisningService(
         sykmeldtIdent: String,
         regulaResult: RegulaResult
     ): JuridiskVurderingResult {
+        // TODO remove deprecation
         val juridiskeHenvisninger =
             regulaResult.results.mapNotNull { result ->
                 result.juridisk?.let {
