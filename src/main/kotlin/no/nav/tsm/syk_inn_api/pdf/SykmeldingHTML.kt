@@ -70,9 +70,9 @@ fun TR.tableInfoMultiRow(
 fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String {
     val andreSporsmalTexts: List<String>? =
         listOfNotNull(
-            svangerskapsrelatertText(sykmelding.values.svangerskapsrelatert),
-            yrkesskadeText(sykmelding.values.yrkesskade),
-        )
+                svangerskapsrelatertText(sykmelding.values.svangerskapsrelatert),
+                yrkesskadeText(sykmelding.values.yrkesskade),
+            )
             .ifEmpty { null }
     val utdypendeSporsmal = sykmelding.values.utdypendeSporsmal
     val htmlContent =
@@ -96,16 +96,13 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
             }
 
             body {
-                /**
-                 * This is fixed at the top across every page
-                 */
+                /** This is fixed at the top across every page */
                 navHeader(title = "Innsendt sykmelding")
 
                 /*
-                    This is fixed in the bottom left corner of every page
-                 */
+                   This is fixed in the bottom left corner of every page
+                */
                 div(classes = "footer") { +sykmelding.sykmeldingId }
-
 
                 div(classes = "content") {
                     table(classes = "info-table") {
@@ -172,6 +169,15 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                         }
                                     } else {
                                         listOf("Ingen bidiagnoser oppgitt")
+                                    }
+                                }
+                            }
+                            if (sykmelding.values.annenFravarsgrunn != null) {
+                                tr {
+                                    tableInfo("Annen lovfestet fraværsgrunn", colspan = "2") {
+                                        SykmeldingHTMLUtils.annenFravarsgrunnToText(
+                                            sykmelding.values.annenFravarsgrunn
+                                        )
                                     }
                                 }
                             }

@@ -32,6 +32,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentUtdypendeSporsmal
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -105,16 +106,16 @@ class PdfServiceTest {
                                                 listOf(
                                                     SykInnArbeidsrelatertArsakType
                                                         .TILRETTELEGGING_IKKE_MULIG,
-                                                    SykInnArbeidsrelatertArsakType.ANNET
+                                                    SykInnArbeidsrelatertArsakType.ANNET,
                                                 ),
-                                            annenArbeidsrelatertArsak = "Test"
-                                        )
+                                            annenArbeidsrelatertArsak = "Test",
+                                        ),
                                 ),
                                 SykmeldingDocumentAktivitet.Gradert(
                                     fom = LocalDate.parse("2023-01-11"),
                                     tom = LocalDate.parse("2023-01-15"),
                                     grad = 60,
-                                    reisetilskudd = false
+                                    reisetilskudd = false,
                                 ),
                             ),
                         bidiagnoser = emptyList(),
@@ -129,7 +130,7 @@ class PdfServiceTest {
                             SykmeldingDocumentMeldinger(
                                 tilNav = null,
                                 tilArbeidsgiver =
-                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                             ),
                         arbeidsgiver = null,
                         tilbakedatering = null,
@@ -142,7 +143,7 @@ class PdfServiceTest {
                                 utfordringerMedArbeid =
                                     "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
                             ),
-                        annenFravarsgrunn = null,
+                        annenFravarsgrunn = AnnenFravarsgrunn.BEHANDLING_FORHINDRER_ARBEID,
                     ),
                 utfall =
                     SykmeldingDocumentRuleResult(
@@ -158,21 +159,35 @@ class PdfServiceTest {
 
         assertNotNull(pdf)
 
+        // Uncomment to write to disk, nice if your PDF reader refreshes on file updates, uncomment
+        // the one below if not
+        // writePdf(pdf)
+
         // Uncomment this to open the PDF in the default viewer, for developing PDF
         // openPdf(pdf, temp = false)
     }
 }
 
-fun openPdf(bytes: ByteArray, temp: Boolean = true) {
+fun writePdf(bytes: ByteArray) {
+    // Write to example.pdf in the current directory
+    val outputStream: OutputStream = FileOutputStream("example.pdf")
+    outputStream.write(bytes)
+    outputStream.close()
+}
+
+fun openPdf(
+    bytes: ByteArray,
+    /**
+     * Writes to a temporary directory if true, nice if you don't want the pdf in the repo to change
+     */
+    temp: Boolean = true
+) {
     if (temp) {
         val tmpFile = kotlin.io.path.createTempFile(suffix = ".pdf").toFile()
         tmpFile.writeBytes(bytes)
         Desktop.getDesktop().open(tmpFile)
     } else {
-        // Write to example.pdf in the current directory
-        val outputStream: OutputStream = FileOutputStream("example.pdf")
-        outputStream.write(bytes)
-        outputStream.close()
+        writePdf(bytes)
         Desktop.getDesktop().open(File("example.pdf"))
     }
 }
