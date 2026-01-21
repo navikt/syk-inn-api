@@ -3,8 +3,8 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
@@ -22,7 +22,7 @@ class ConsumerConfig {
     ): ConcurrentKafkaListenerContainerFactory<String, ByteArray> {
         val consumerFactory =
             DefaultKafkaConsumerFactory(
-                props.buildConsumerProperties(null).apply {
+                props.buildConsumerProperties().apply {
                     put(
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
                         "earliest",
@@ -35,7 +35,7 @@ class ConsumerConfig {
             )
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, ByteArray>()
-        factory.consumerFactory = consumerFactory
+        factory.setConsumerFactory(consumerFactory)
         factory.setCommonErrorHandler(errorHandler)
         return factory
     }
