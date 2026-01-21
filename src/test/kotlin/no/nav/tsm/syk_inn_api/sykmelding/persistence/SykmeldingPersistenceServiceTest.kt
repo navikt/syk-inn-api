@@ -11,7 +11,7 @@ import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.transaction.annotation.Propagation
