@@ -11,13 +11,12 @@
     <!-- Stuff we wanna squelch, use sparingly -->
     <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR"/>
 
-    <!-- local profile -->
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.springframework.kafka" level="WARN"/>
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+
     <springProfile name="local">
-        <!-- Less spammy local development logging -->
-        <logger name="org.apache.kafka" level="WARN"/>
-        <logger name="org.springframework.kafka" level="WARN"/>
-        <logger name="ch.qos.logback" level="WARN"/>
-        <logger name="com.zaxxer.hikari" level="WARN"/>
 
         <root level="INFO">
             <appender-ref ref="PRETTY-CONSOLE"/>
