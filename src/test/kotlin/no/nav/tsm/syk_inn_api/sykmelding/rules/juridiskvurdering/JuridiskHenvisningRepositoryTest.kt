@@ -14,7 +14,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
 import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest
 import org.springframework.context.annotation.Import
 
 @JdbcTest
