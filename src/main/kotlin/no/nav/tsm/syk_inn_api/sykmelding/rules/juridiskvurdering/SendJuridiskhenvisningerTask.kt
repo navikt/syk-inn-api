@@ -3,7 +3,6 @@ package no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
 import java.util.concurrent.TimeUnit
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled

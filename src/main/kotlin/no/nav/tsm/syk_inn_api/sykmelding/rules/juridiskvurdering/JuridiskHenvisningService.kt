@@ -12,7 +12,6 @@ import no.nav.tsm.regulus.regula.RegulaLovverk
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.regulus.regula.TreeResult
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 

@@ -59,7 +59,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-kafka")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.boot:spring-boot-starter-jackson")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.0.3")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:${kotlinxHtmlVersion}")
@@ -89,6 +90,7 @@ dependencies {
     }
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.springframework.kafka:spring-kafka-test")

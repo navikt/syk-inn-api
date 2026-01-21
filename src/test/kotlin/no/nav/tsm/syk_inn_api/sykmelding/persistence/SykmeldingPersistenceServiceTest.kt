@@ -5,8 +5,8 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import no.nav.tsm.syk_inn_api.sykmelding.getTestSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskHenvisningRepository
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
