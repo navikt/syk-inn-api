@@ -11,10 +11,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRedacted
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.TestRestTemplate
+import org.springframework.boot.resttestclient.exchange
+import org.springframework.boot.resttestclient.postForEntity
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.exchange
-import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
