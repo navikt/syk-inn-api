@@ -8,18 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
 @Testcontainers
 abstract class FullIntegrationTest {
 
     @Autowired lateinit var jdbcTemplate: JdbcTemplate
+
     @MockkBean lateinit var sykmeldingKafkaTask: SykmeldingKafkaTask
+
     @MockkBean lateinit var juridiskhenvisningerTask: SendJuridiskhenvisningerTask
 
     @BeforeEach
@@ -27,7 +29,7 @@ abstract class FullIntegrationTest {
         val tables =
             jdbcTemplate.queryForList(
                 "SELECT tablename FROM pg_tables WHERE schemaname='public'",
-                String::class.java
+                String::class.java,
             )
 
         jdbcTemplate.execute("SET session_replication_role = 'replica';")
@@ -40,7 +42,7 @@ abstract class FullIntegrationTest {
     companion object {
         @Container
         private val postgres =
-            PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
+            PostgreSQLContainer(DockerImageName.parse("postgres:16-alpine")).apply {
                 withDatabaseName("testdb")
                 withUsername("test")
                 withPassword("test")
@@ -49,10 +51,16 @@ abstract class FullIntegrationTest {
 
         @Container
         private val kafka =
-            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:8.1.0")).apply {
-                waitingFor(Wait.forListeningPort())
-                start()
-            }
+            ConfluentKafkaContainer(
+                    DockerImageName.parse("confluentinc/confluent-local:8.1.0")
+                        .asCompatibleSubstituteFor(
+                            DockerImageName.parse("confluentinc/cp-kafka:8.1.0"),
+                        ),
+                )
+                .apply {
+                    waitingFor(Wait.forListeningPort())
+                    start()
+                }
 
         @JvmStatic
         @DynamicPropertySource
