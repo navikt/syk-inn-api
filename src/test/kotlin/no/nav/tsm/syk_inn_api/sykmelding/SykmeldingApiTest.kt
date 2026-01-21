@@ -12,6 +12,7 @@ import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.TestRestTemplate
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.boot.resttestclient.postForEntity
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 @ActiveProfiles("test")
 class SykmeldingApiTest(@param:Autowired val restTemplate: TestRestTemplate) :
     FullIntegrationTest() {
