@@ -90,8 +90,5 @@ class JuridiskHenvisningService(
             RegulaStatus.MANUAL_PROCESSING -> {
                 JuridiskUtfall.VILKAR_UAVKLART
             }
-            else -> {
-                JuridiskUtfall.VILKAR_UAVKLART
-            }
         }
 }
