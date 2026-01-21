@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.LocalDate
+import java.util.*
 import no.nav.tsm.syk_inn_api.person.PdlException
 import no.nav.tsm.syk_inn_api.person.Person
 import no.nav.tsm.syk_inn_api.person.PersonService
@@ -30,8 +32,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.util.*
 
 @Component
 class SykmeldingConsumer(
@@ -49,6 +49,7 @@ class SykmeldingConsumer(
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
         }
+
     @Transactional
     @KafkaListener(
         topics = [$$"${kafka.topics.sykmeldinger}"],
