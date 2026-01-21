@@ -29,10 +29,6 @@ fun FlowContent.navHeader(title: String) {
     }
 }
 
-fun FlowContent.sykmeldingId(sykmeldingId: String) {
-    div(classes = "sykmeldingsId") { +"SykmeldingId: ${sykmeldingId}" }
-}
-
 fun TR.tableInfo(
     title: String,
     colspan: String? = null,
@@ -74,9 +70,9 @@ fun TR.tableInfoMultiRow(
 fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String {
     val andreSporsmalTexts: List<String>? =
         listOfNotNull(
-                svangerskapsrelatertText(sykmelding.values.svangerskapsrelatert),
-                yrkesskadeText(sykmelding.values.yrkesskade),
-            )
+            svangerskapsrelatertText(sykmelding.values.svangerskapsrelatert),
+            yrkesskadeText(sykmelding.values.yrkesskade),
+        )
             .ifEmpty { null }
     val utdypendeSporsmal = sykmelding.values.utdypendeSporsmal
     val htmlContent =
@@ -100,138 +96,171 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
             }
 
             body {
+                /**
+                 * This is fixed at the top across every page
+                 */
                 navHeader(title = "Innsendt sykmelding")
+
+                /*
+                    This is fixed in the bottom left corner of every page
+                 */
+                div(classes = "footer") { +sykmelding.sykmeldingId }
+
 
                 div(classes = "content") {
                     table(classes = "info-table") {
-                        tr {
-                            tableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
-                            tableInfo("Mottatt av Nav") {
-                                toReadableDate(sykmelding.meta.mottatt.toLocalDate())
+                        tbody(classes = "keep-together") {
+                            tr {
+                                tableInfo("Navn") { "${pasient.displayName()} (${pasient.ident})" }
+                                tableInfo("Mottatt av Nav") {
+                                    toReadableDate(sykmelding.meta.mottatt.toLocalDate())
+                                }
+                            }
+                            tr {
+                                tableInfoMultiRow("Sykmelder") {
+                                    listOf(
+                                        "${sykmelding.meta.sykmelder.fornavn} ${sykmelding.meta.sykmelder.mellomnavn ?: ""} ${sykmelding.meta.sykmelder.etternavn}",
+                                        "HPR-nr: ${sykmelding.meta.sykmelder.hprNummer}",
+                                    )
+                                }
+                                tableInfoMultiRow("Legekontor", colspan = "2") {
+                                    listOf(
+                                        "Org.nr.: ${sykmelding.meta.legekontorOrgnr ?: "Ikke oppgitt"}",
+                                        "Tlf: ${sykmelding.meta.legekontorTlf ?: "Ikke oppgitt"}",
+                                    )
+                                }
                             }
                         }
-                        tr {
-                            tableInfoMultiRow("Sykmelder") {
-                                listOf(
-                                    "${sykmelding.meta.sykmelder.fornavn} ${sykmelding.meta.sykmelder.mellomnavn ?: ""} ${sykmelding.meta.sykmelder.etternavn}",
-                                    "HPR-nr: ${sykmelding.meta.sykmelder.hprNummer}",
-                                )
-                            }
-                            tableInfoMultiRow("Legekontor", colspan = "2") {
-                                listOf(
-                                    "Org.nr.: ${sykmelding.meta.legekontorOrgnr ?: "Ikke oppgitt"}",
-                                    "Tlf: ${sykmelding.meta.legekontorTlf ?: "Ikke oppgitt"}",
-                                )
-                            }
-                        }
+
                         sykmelding.values.arbeidsgiver?.let {
                             if (it.harFlere) {
-                                tr {
-                                    tableInfo(
-                                        "Arbeidsgiver",
-                                        italic = sykmelding.values.arbeidsgiver == null,
-                                    ) {
-                                        sykmelding.values.arbeidsgiver.arbeidsgivernavn
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            "Arbeidsgiver",
+                                            italic = sykmelding.values.arbeidsgiver == null,
+                                        ) {
+                                            sykmelding.values.arbeidsgiver.arbeidsgivernavn
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        tr {
-                            tableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
-                                sykmelding.values.aktivitet.flatMap {
-                                    SykmeldingHTMLUtils.formatReadablePeriode(it)
+                        tbody(classes = "keep-together") {
+                            tr {
+                                tableInfoMultiRow("Sykmeldingsperiode", colspan = "2") {
+                                    sykmelding.values.aktivitet.flatMap {
+                                        SykmeldingHTMLUtils.formatReadablePeriode(it)
+                                    }
                                 }
                             }
                         }
-                        tr {
-                            tableInfo("Diagnose") {
-                                if (sykmelding.values.hoveddiagnose != null) {
-                                    "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.name})"
-                                } else {
-                                    "Ingen diagnose oppgitt"
-                                }
-                            }
-                            tableInfoMultiRow("Bidiagnoser") {
-                                if (sykmelding.values.bidiagnoser?.isNotEmpty() == true) {
-                                    sykmelding.values.bidiagnoser.map {
-                                        "${it.code}: ${it.text} (${it.system.name})"
+                        tbody(classes = "keep-together") {
+                            tr {
+                                tableInfo("Diagnose") {
+                                    if (sykmelding.values.hoveddiagnose != null) {
+                                        "${sykmelding.values.hoveddiagnose.code}: ${sykmelding.values.hoveddiagnose.text} (${sykmelding.values.hoveddiagnose.system.name})"
+                                    } else {
+                                        "Ingen diagnose oppgitt"
                                     }
-                                } else {
-                                    listOf("Ingen bidiagnoser oppgitt")
+                                }
+                                tableInfoMultiRow("Bidiagnoser") {
+                                    if (sykmelding.values.bidiagnoser?.isNotEmpty() == true) {
+                                        sykmelding.values.bidiagnoser.map {
+                                            "${it.code}: ${it.text} (${it.system.name})"
+                                        }
+                                    } else {
+                                        listOf("Ingen bidiagnoser oppgitt")
+                                    }
                                 }
                             }
                         }
                         if (utdypendeSporsmal != null) {
                             if (utdypendeSporsmal.utfordringerMedArbeid != null) {
-                                tr {
-                                    tableInfo(
-                                        "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
-                                    ) {
-                                        utdypendeSporsmal.utfordringerMedArbeid
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmal.utfordringerMedArbeid
+                                        }
                                     }
                                 }
                             }
                             if (utdypendeSporsmal.medisinskOppsummering != null) {
-                                tr {
-                                    tableInfo(
-                                        "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
-                                    ) {
-                                        utdypendeSporsmal.medisinskOppsummering
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmal.medisinskOppsummering
+                                        }
                                     }
                                 }
                             }
                             if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
-                                tr {
-                                    tableInfo(
-                                        "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
-                                    ) {
-                                        utdypendeSporsmal.hensynPaArbeidsplassen
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmal.hensynPaArbeidsplassen
+                                        }
                                     }
                                 }
                             }
                         }
                         if (andreSporsmalTexts != null) {
-                            tr {
-                                tableInfoMultiRow("Andre spørsmål", colspan = "2") {
-                                    andreSporsmalTexts
+                            tbody(classes = "keep-together") {
+                                tr {
+                                    tableInfoMultiRow("Andre spørsmål", colspan = "2") {
+                                        andreSporsmalTexts
+                                    }
                                 }
                             }
                         }
-                        tr {
-                            tableInfo(
-                                "Melding til Nav",
-                                colspan = "2",
-                                italic = sykmelding.values.meldinger.tilNav == null,
-                            ) {
-                                sykmelding.values.meldinger.tilNav ?: "Ingen melding til Nav"
+                        tbody(classes = "keep-together") {
+                            tr {
+                                tableInfo(
+                                    "Melding til Nav",
+                                    colspan = "2",
+                                    italic = sykmelding.values.meldinger.tilNav == null,
+                                ) {
+                                    sykmelding.values.meldinger.tilNav ?: "Ingen melding til Nav"
+                                }
                             }
                         }
-                        tr {
-                            tableInfo(
-                                "Innspill til arbeidsgiver",
-                                colspan = "2",
-                                italic = sykmelding.values.meldinger.tilArbeidsgiver == null,
-                            ) {
-                                sykmelding.values.meldinger.tilArbeidsgiver
-                                    ?: "Ingen melding til arbeidsgiver"
+                        tbody(classes = "keep-together") {
+                            tr {
+                                tableInfo(
+                                    "Innspill til arbeidsgiver",
+                                    colspan = "2",
+                                    italic = sykmelding.values.meldinger.tilArbeidsgiver == null,
+                                ) {
+                                    sykmelding.values.meldinger.tilArbeidsgiver
+                                        ?: "Ingen melding til arbeidsgiver"
+                                }
                             }
                         }
                         if (sykmelding.values.pasientenSkalSkjermes) {
-                            tr {
-                                tableInfo(
-                                    "Pasienten er skjermet for medisinske opplysninger",
-                                    colspan = "2",
-                                    italic = false,
-                                ) {
-                                    "Ja"
+                            tbody(classes = "keep-together") {
+                                tr {
+                                    tableInfo(
+                                        "Pasienten er skjermet for medisinske opplysninger",
+                                        colspan = "2",
+                                        italic = false,
+                                    ) {
+                                        "Ja"
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
-                sykmeldingId(sykmelding.sykmeldingId)
             }
         }
 
@@ -246,7 +275,24 @@ val stylesheet =
 }
 
 @page {
-    margin: 0;
+    margin: 20mm 0 20mm 0;
+
+    @top-center {
+       width: 100%;
+       content: element(header);
+    }
+
+    @bottom-left {
+      font-family: 'Source Sans Pro', sans-serif;
+	  content: element(footer);
+      padding-left: 10mm;
+	}
+
+    @bottom-right {
+      font-family: 'Source Sans Pro', sans-serif;
+	  content: 'Side ' counter(page) ' av ' counter(pages);
+	  padding-right: 10mm;
+	}
 }
 
 html {
@@ -261,15 +307,14 @@ body {
 }
 
 .content {
-    padding: 2cm;
-    padding-top: 1cm;
+    padding: 0 20mm;
 }
 
 .header {
+    position: running(header);
     background-color: #E6F0FF;
-    padding: 0.75cm;
+    padding: 0.65cm;
     padding-left: 2cm;
-    height: 0.5cm;
 }
 
 .header img {
@@ -287,10 +332,9 @@ body {
     padding-left: 32px;
 }
 
-.sykmeldingId {
-    padding-left: 2cm;
-    font-size: 14px;
-    color: #888;
+.footer {
+  position: running(footer);
+  color: #797979;
 }
 
 .info-table {
@@ -303,16 +347,22 @@ body {
 }
 
 .info-table .title {
+    margin-top: 0.75cm;
     font-weight: bold;
 }
 
 .info-table .value {
-    margin-bottom: 0.75cm;
 }
 
 .info-table .value.italic {
     color: #333;
     font-style: italic;
+}
+
+.keep-together {
+  page-break-inside: avoid;
+  break-inside: avoid;        /* modern */
+  -fs-page-break-inside: avoid; /* openhtmltopdf / Flying Saucer */
 }
 """
         .trimIndent()

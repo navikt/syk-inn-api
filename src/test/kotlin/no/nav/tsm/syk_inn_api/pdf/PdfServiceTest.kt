@@ -68,7 +68,7 @@ class PdfServiceTest {
     fun `should create a simple PDF`() {
         val simpleSykmelding =
             SykmeldingDocument(
-                sykmeldingId = "sykmeldingId",
+                sykmeldingId = "453af806-34b6-4e6d-8b73-10df76719bfc",
                 meta =
                     SykmeldingDocumentMeta(
                         mottatt = OffsetDateTime.now(),
