@@ -16,6 +16,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinge
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmal
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmalQuestionText
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationResult
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationType
@@ -147,7 +148,11 @@ object SykmeldingKafkaMapper {
                     sykmelding.sykmelding.meldinger,
                 ),
             tilbakedatering = mapTilbakedatering(sykmelding.sykmelding.tilbakedatering),
-            utdypendeSporsmal = mapUtdypendeSporsmal(sykmelding.sykmelding.utdypendeSporsmal),
+            utdypendeSporsmal =
+                mapUtdypendeSporsmal(
+                    sykmelding.sykmelding.utdypendeSporsmal,
+                    sykmelding.sykmelding.utdypendeSporsmalQuestionText
+                ),
             bistandNav = mapBistandNav(sykmelding.sykmelding.meldinger),
         )
     }
@@ -168,7 +173,8 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapUtdypendeSporsmal(
-        utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?
+        utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?,
+        utdypendeSporsmalQuestionText: PersistedSykmeldingUtdypendeSporsmalQuestionText?
     ): List<UtdypendeSporsmal>? {
         if (utdypendeSporsmal == null) {
             return null
@@ -179,9 +185,7 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.utfordringerMedArbeid,
                     Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
-                    // TODO: Have syk-inn send over the texts (server side) that are used in the
-                    // actual form
-                    sporsmal = null,
+                    sporsmal = utdypendeSporsmalQuestionText?.utfordringerMedArbeid,
                 ),
             )
         }
@@ -190,9 +194,7 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.medisinskOppsummering,
                     Sporsmalstype.MEDISINSK_OPPSUMMERING,
-                    // TODO: Have syk-inn send over the texts (server side) that are used in the
-                    // actual form
-                    sporsmal = null,
+                    sporsmal = utdypendeSporsmalQuestionText?.medisinskOppsummering,
                 ),
             )
         }
@@ -201,9 +203,7 @@ object SykmeldingKafkaMapper {
                 UtdypendeSporsmal(
                     utdypendeSporsmal.hensynPaArbeidsplassen,
                     Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
-                    // TODO: Have syk-inn send over the texts (server side) that are used in the
-                    // actual form
-                    sporsmal = null,
+                    sporsmal = utdypendeSporsmalQuestionText?.hensynPaArbeidsplassen,
                 ),
             )
         }

@@ -33,6 +33,7 @@ data class OpprettSykmelding(
     val arbeidsgiver: OpprettSykmeldingArbeidsgiver?,
     val tilbakedatering: OpprettSykmeldingTilbakedatering?,
     val utdypendeSporsmal: OpprettSykmeldingUtdypendeSporsmal?,
+    val utdypendeSporsmalAnswerOptions: OpprettSykmeldingUtdypendeSporsmalAnswerOptions?,
     val annenFravarsgrunn: AnnenFravarsgrunn?
 )
 
@@ -60,6 +61,17 @@ data class OpprettSykmeldingUtdypendeSporsmal(
     val hensynPaArbeidsplassen: String?,
     val medisinskOppsummering: String?,
     val utfordringerMedArbeid: String?,
+)
+
+data class OpprettSykmeldingUtdypendeSporsmalAnswerOptions(
+    val hensynPaArbeidsplassen: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
+    val medisinskOppsummering: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
+    val utfordringerMedArbeid: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
+)
+
+data class OpprettSykmeldingUtdypendeSporsmalQuestionAnswer(
+    val sporsmalstekst: String,
+    val svar: String
 )
 
 @JsonSubTypes(

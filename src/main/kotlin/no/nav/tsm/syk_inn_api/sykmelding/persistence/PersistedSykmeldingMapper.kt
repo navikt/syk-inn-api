@@ -19,7 +19,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmal
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmalAnswerOptions
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -189,7 +189,11 @@ object PersistedSykmeldingMapper {
             arbeidsgiver = payload.values.arbeidsgiver.toPersistedSykmeldingArbeidsgiver(),
             tilbakedatering = payload.values.tilbakedatering.toPersistedSykmeldingTilbakedatering(),
             utdypendeSporsmal =
-                payload.values.utdypendeSporsmal.toPersistedSykmeldingUtdypendeSporsmal(),
+                payload.values.utdypendeSporsmalAnswerOptions
+                    .toPersistedSykmeldingUtdypendeSporsmal(),
+            utdypendeSporsmalQuestionText =
+                payload.values.utdypendeSporsmalAnswerOptions
+                    .toPersistedSykmeldingUtdypendeSporsmalQuestionText(),
             annenFravarsgrunn = payload.values.annenFravarsgrunn,
             regelResultat = validation.toPersistedSykmeldingResult(),
         )
@@ -224,6 +228,7 @@ object PersistedSykmeldingMapper {
                 ),
             utdypendeSporsmal =
                 mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmal(sykmeldingRecord),
+            utdypendeSporsmalQuestionText = null, // TODO("Implement mapping from Kafka"),
             annenFravarsgrunn =
                 sykmeldingRecord.sykmelding.medisinskVurdering.toAnnenfravarsgrunn(),
             regelResultat = sykmeldingRecord.validation.toPersistedSykmeldingResult(),
@@ -351,14 +356,26 @@ object PersistedSykmeldingMapper {
         )
     }
 
-    private fun OpprettSykmeldingUtdypendeSporsmal?.toPersistedSykmeldingUtdypendeSporsmal():
-        PersistedSykmeldingUtdypendeSporsmal? {
+    private fun OpprettSykmeldingUtdypendeSporsmalAnswerOptions?
+        .toPersistedSykmeldingUtdypendeSporsmal(): PersistedSykmeldingUtdypendeSporsmal? {
         if (this == null) return null
 
         return PersistedSykmeldingUtdypendeSporsmal(
-            hensynPaArbeidsplassen = hensynPaArbeidsplassen,
-            medisinskOppsummering = medisinskOppsummering,
-            utfordringerMedArbeid = utfordringerMedArbeid,
+            hensynPaArbeidsplassen = hensynPaArbeidsplassen?.svar,
+            medisinskOppsummering = medisinskOppsummering?.svar,
+            utfordringerMedArbeid = utfordringerMedArbeid?.svar,
+        )
+    }
+
+    private fun OpprettSykmeldingUtdypendeSporsmalAnswerOptions?
+        .toPersistedSykmeldingUtdypendeSporsmalQuestionText():
+        PersistedSykmeldingUtdypendeSporsmalQuestionText? {
+        if (this == null) return null
+
+        return PersistedSykmeldingUtdypendeSporsmalQuestionText(
+            hensynPaArbeidsplassen = hensynPaArbeidsplassen?.sporsmalstekst,
+            medisinskOppsummering = medisinskOppsummering?.sporsmalstekst,
+            utfordringerMedArbeid = utfordringerMedArbeid?.sporsmalstekst,
         )
     }
 
