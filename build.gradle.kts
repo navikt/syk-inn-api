@@ -7,9 +7,6 @@ val javaVersion = JvmTarget.JVM_21
 
 // Runtime deps
 val logstashLogbackEncoderVersion = "9.0"
-val openHtmlToPdfVersion = "1.1.36"
-val verapdfVersion = "1.28.2"
-val kotlinxHtmlVersion = "0.12.0"
 val arrowVersion = "2.2.0"
 val regulaVersion = "47"
 val sykmeldingInputVersion = "23"
@@ -61,8 +58,6 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:${kotlinxHtmlVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-html:${kotlinxHtmlVersion}")
     implementation("org.postgresql:postgresql")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.prometheus:prometheus-metrics-simpleclient-bridge:1.0.0")
@@ -75,10 +70,6 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
-    implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
-    implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
-    implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
-    implementation("org.verapdf:validation-model-jakarta:$verapdfVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 
     runtimeOnly("org.postgresql:postgresql")
