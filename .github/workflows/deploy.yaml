@@ -107,6 +107,7 @@ jobs:
           repository: navikt/syk-inn
           fetch-depth: 1
       - run: corepack enable
+      - uses: navikt/tsm-workflows/actions/typst@main
       - uses: actions/setup-node@v6
         id: setup-node
         with:
