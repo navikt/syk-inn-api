@@ -88,7 +88,7 @@ class SykmeldingRepositoryTest : FullIntegrationTest() {
                             ),
                         tilbakedatering = null,
                         utdypendeSporsmal = null,
-                        utdypendeSporsmalQuestionText = null,
+                        utdypendeSporsmalSvar = null,
                         annenFravarsgrunn = null,
                         regelResultat =
                             PersistedSykmeldingRuleResult(
@@ -222,7 +222,7 @@ fun createTestSykmeldingDb(
                     ),
                 tilbakedatering = null,
                 utdypendeSporsmal = null,
-                utdypendeSporsmalQuestionText = null,
+                utdypendeSporsmalSvar = null,
                 annenFravarsgrunn = null,
                 regelResultat =
                     PersistedSykmeldingRuleResult(

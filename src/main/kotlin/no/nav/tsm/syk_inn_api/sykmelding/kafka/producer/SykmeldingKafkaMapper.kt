@@ -15,8 +15,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnose
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmal
-import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmalQuestionText
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmalSvar
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationResult
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedValidationType
@@ -148,11 +147,7 @@ object SykmeldingKafkaMapper {
                     sykmelding.sykmelding.meldinger,
                 ),
             tilbakedatering = mapTilbakedatering(sykmelding.sykmelding.tilbakedatering),
-            utdypendeSporsmal =
-                mapUtdypendeSporsmal(
-                    sykmelding.sykmelding.utdypendeSporsmal,
-                    sykmelding.sykmelding.utdypendeSporsmalQuestionText
-                ),
+            utdypendeSporsmal = mapUtdypendeSporsmal(sykmelding.sykmelding.utdypendeSporsmalSvar),
             bistandNav = mapBistandNav(sykmelding.sykmelding.meldinger),
         )
     }
@@ -173,37 +168,36 @@ object SykmeldingKafkaMapper {
     }
 
     private fun mapUtdypendeSporsmal(
-        utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?,
-        utdypendeSporsmalQuestionText: PersistedSykmeldingUtdypendeSporsmalQuestionText?
+        utdypendeSporsmalSvar: PersistedSykmeldingUtdypendeSporsmalSvar?
     ): List<UtdypendeSporsmal>? {
-        if (utdypendeSporsmal == null) {
+        if (utdypendeSporsmalSvar == null) {
             return null
         }
         val utdypendeSporsmalList = mutableListOf<UtdypendeSporsmal>()
-        if (utdypendeSporsmal.utfordringerMedArbeid != null) {
+        if (utdypendeSporsmalSvar.utfordringerMedArbeid != null) {
             utdypendeSporsmalList.add(
                 UtdypendeSporsmal(
-                    utdypendeSporsmal.utfordringerMedArbeid,
+                    utdypendeSporsmalSvar.utfordringerMedArbeid.svar,
                     Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
-                    sporsmal = utdypendeSporsmalQuestionText?.utfordringerMedArbeid,
+                    sporsmal = utdypendeSporsmalSvar.utfordringerMedArbeid.sporsmal,
                 ),
             )
         }
-        if (utdypendeSporsmal.medisinskOppsummering != null) {
+        if (utdypendeSporsmalSvar.medisinskOppsummering != null) {
             utdypendeSporsmalList.add(
                 UtdypendeSporsmal(
-                    utdypendeSporsmal.medisinskOppsummering,
+                    utdypendeSporsmalSvar.medisinskOppsummering.svar,
                     Sporsmalstype.MEDISINSK_OPPSUMMERING,
-                    sporsmal = utdypendeSporsmalQuestionText?.medisinskOppsummering,
+                    sporsmal = utdypendeSporsmalSvar.medisinskOppsummering.sporsmal,
                 ),
             )
         }
-        if (utdypendeSporsmal.hensynPaArbeidsplassen != null) {
+        if (utdypendeSporsmalSvar.hensynPaArbeidsplassen != null) {
             utdypendeSporsmalList.add(
                 UtdypendeSporsmal(
-                    utdypendeSporsmal.hensynPaArbeidsplassen,
+                    utdypendeSporsmalSvar.hensynPaArbeidsplassen.svar,
                     Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
-                    sporsmal = utdypendeSporsmalQuestionText?.hensynPaArbeidsplassen,
+                    sporsmal = utdypendeSporsmalSvar.hensynPaArbeidsplassen.sporsmal,
                 ),
             )
         }

@@ -41,6 +41,7 @@ data class SykmeldingDocumentValues(
     val arbeidsgiver: SykmeldingDocumentArbeidsgiver?,
     val tilbakedatering: SykmeldingDocumentTilbakedatering?,
     val utdypendeSporsmal: SykmeldingDocumentUtdypendeSporsmal?,
+    val utdypendeSporsmalSvar: SykmeldingDocumentUtdypendeSporsmalSvar?,
     val annenFravarsgrunn: AnnenFravarsgrunn?
 )
 
@@ -144,3 +145,11 @@ data class SykmeldingDocumentUtdypendeSporsmal(
     val medisinskOppsummering: String?,
     val hensynPaArbeidsplassen: String?,
 )
+
+data class SykmeldingDocumentUtdypendeSporsmalSvar(
+    val utfordringerMedArbeid: SykmeldingDocumentSporsmalSvar?,
+    val medisinskOppsummering: SykmeldingDocumentSporsmalSvar?,
+    val hensynPaArbeidsplassen: SykmeldingDocumentSporsmalSvar?,
+)
+
+data class SykmeldingDocumentSporsmalSvar(val sporsmalstekst: String?, val svar: String)

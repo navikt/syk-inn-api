@@ -353,7 +353,7 @@ fun getTestSykmelding(
         arbeidsgiver = null,
         tilbakedatering = null,
         utdypendeSporsmal = null,
-        utdypendeSporsmalQuestionText = null,
+        utdypendeSporsmalSvar = null,
         annenFravarsgrunn = null,
         sykmeldingId = sykmeldingId.toString(),
         pasient =

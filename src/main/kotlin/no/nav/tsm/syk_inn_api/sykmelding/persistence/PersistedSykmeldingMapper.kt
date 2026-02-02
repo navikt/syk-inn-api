@@ -20,6 +20,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingPayload
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmalAnswerOptions
+import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmalQuestionAnswer
 import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingYrkesskade
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -191,9 +192,9 @@ object PersistedSykmeldingMapper {
             utdypendeSporsmal =
                 payload.values.utdypendeSporsmalAnswerOptions
                     .toPersistedSykmeldingUtdypendeSporsmal(),
-            utdypendeSporsmalQuestionText =
+            utdypendeSporsmalSvar =
                 payload.values.utdypendeSporsmalAnswerOptions
-                    .toPersistedSykmeldingUtdypendeSporsmalQuestionText(),
+                    .toPersistedSykmeldingUtdypendeSporsmalSvar(),
             annenFravarsgrunn = payload.values.annenFravarsgrunn,
             regelResultat = validation.toPersistedSykmeldingResult(),
         )
@@ -228,7 +229,8 @@ object PersistedSykmeldingMapper {
                 ),
             utdypendeSporsmal =
                 mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmal(sykmeldingRecord),
-            utdypendeSporsmalQuestionText = null, // TODO("Implement mapping from Kafka"),
+            utdypendeSporsmalSvar =
+                mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmalSvar(sykmeldingRecord),
             annenFravarsgrunn =
                 sykmeldingRecord.sykmelding.medisinskVurdering.toAnnenfravarsgrunn(),
             regelResultat = sykmeldingRecord.validation.toPersistedSykmeldingResult(),
@@ -368,14 +370,23 @@ object PersistedSykmeldingMapper {
     }
 
     private fun OpprettSykmeldingUtdypendeSporsmalAnswerOptions?
-        .toPersistedSykmeldingUtdypendeSporsmalQuestionText():
-        PersistedSykmeldingUtdypendeSporsmalQuestionText? {
+        .toPersistedSykmeldingUtdypendeSporsmalSvar(): PersistedSykmeldingUtdypendeSporsmalSvar? {
         if (this == null) return null
 
-        return PersistedSykmeldingUtdypendeSporsmalQuestionText(
-            hensynPaArbeidsplassen = hensynPaArbeidsplassen?.sporsmalstekst,
-            medisinskOppsummering = medisinskOppsummering?.sporsmalstekst,
-            utfordringerMedArbeid = utfordringerMedArbeid?.sporsmalstekst,
+        return PersistedSykmeldingUtdypendeSporsmalSvar(
+            hensynPaArbeidsplassen = hensynPaArbeidsplassen?.toPersistedSykmeldingSporsmalSvar(),
+            medisinskOppsummering = medisinskOppsummering?.toPersistedSykmeldingSporsmalSvar(),
+            utfordringerMedArbeid = utfordringerMedArbeid?.toPersistedSykmeldingSporsmalSvar(),
+        )
+    }
+
+    private fun OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?
+        .toPersistedSykmeldingSporsmalSvar(): PersistedSykmeldingSporsmalSvar {
+        if (this == null) error("SporsmalSvar cannot be null")
+
+        return PersistedSykmeldingSporsmalSvar(
+            sporsmal = sporsmalstekst,
+            svar = svar,
         )
     }
 
@@ -812,6 +823,27 @@ object PersistedSykmeldingMapper {
         }
     }
 
+    private fun mapSykmeldingRecordToPersistedSykmeldingUtdypendeSporsmalSvar(
+        sykmeldingRecord: SykmeldingRecord
+    ): PersistedSykmeldingUtdypendeSporsmalSvar? {
+        return when (val value = sykmeldingRecord.sykmelding) {
+            is DigitalSykmelding -> {
+                createPersistedSykmeldingDigitalSykmeldingUtdypendeSporsmalSvar(
+                    value.utdypendeSporsmal
+                )
+            }
+            is XmlSykmelding -> {
+                return createPersistedSykmeldingUtdypendeSporsmalSvar(value.utdypendeOpplysninger)
+            }
+            is Papirsykmelding -> {
+                return createPersistedSykmeldingUtdypendeSporsmalSvar(value.utdypendeOpplysninger)
+            }
+            else -> {
+                return null
+            }
+        }
+    }
+
     private fun createPersistedSykmeldingUtdypendeSporsmal(
         utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     ): PersistedSykmeldingUtdypendeSporsmal? {
@@ -821,6 +853,28 @@ object PersistedSykmeldingMapper {
             null,
             uke7["6.3.1"]?.svar,
             uke7["6.3.2"]?.svar,
+        )
+    }
+
+    private fun createPersistedSykmeldingUtdypendeSporsmalSvar(
+        utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+    ): PersistedSykmeldingUtdypendeSporsmalSvar? {
+        val uke7 = utdypendeOpplysninger?.get("6.3") ?: return null
+
+        return PersistedSykmeldingUtdypendeSporsmalSvar(
+            null,
+            uke7["6.3.1"]?.toPersistedSykmeldingSporsmalSvar(),
+            uke7["6.3.2"]?.toPersistedSykmeldingSporsmalSvar(),
+        )
+    }
+
+    private fun SporsmalSvar?.toPersistedSykmeldingSporsmalSvar():
+        PersistedSykmeldingSporsmalSvar? {
+        if (this == null) return null
+
+        return PersistedSykmeldingSporsmalSvar(
+            sporsmal = this.sporsmal,
+            svar = this.svar,
         )
     }
 
@@ -835,6 +889,35 @@ object PersistedSykmeldingMapper {
             hensynPaArbeidsplassen = svarMap[Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN]?.svar,
             medisinskOppsummering = svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.svar,
             utfordringerMedArbeid = svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]?.svar,
+        )
+    }
+
+    private fun createPersistedSykmeldingDigitalSykmeldingUtdypendeSporsmalSvar(
+        utdypendeSporsmal: List<UtdypendeSporsmal>?
+    ): PersistedSykmeldingUtdypendeSporsmalSvar? {
+        if (utdypendeSporsmal.isNullOrEmpty()) return null
+
+        val svarMap = utdypendeSporsmal.associateBy { it.type }
+
+        return PersistedSykmeldingUtdypendeSporsmalSvar(
+            hensynPaArbeidsplassen =
+                svarMap[Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN]
+                    ?.toPersistedSykmeldingSporsmalSvar(),
+            medisinskOppsummering =
+                svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.toPersistedSykmeldingSporsmalSvar(),
+            utfordringerMedArbeid =
+                svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]
+                    ?.toPersistedSykmeldingSporsmalSvar(),
+        )
+    }
+
+    private fun UtdypendeSporsmal?.toPersistedSykmeldingSporsmalSvar():
+        PersistedSykmeldingSporsmalSvar? {
+        if (this == null) return null
+
+        return PersistedSykmeldingSporsmalSvar(
+            sporsmal = this.sporsmal,
+            svar = this.svar,
         )
     }
 
