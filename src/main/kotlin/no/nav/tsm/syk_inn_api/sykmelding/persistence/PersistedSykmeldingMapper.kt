@@ -850,9 +850,9 @@ object PersistedSykmeldingMapper {
         val uke7 = utdypendeOpplysninger?.get("6.3") ?: return null
 
         return PersistedSykmeldingUtdypendeSporsmal(
-            null,
-            uke7["6.3.1"]?.svar,
-            uke7["6.3.2"]?.svar,
+            hensynPaArbeidsplassen = null,
+            medisinskOppsummering = uke7["6.3.1"]?.svar,
+            utfordringerMedArbeid = uke7["6.3.2"]?.svar,
         )
     }
 
@@ -862,9 +862,9 @@ object PersistedSykmeldingMapper {
         val uke7 = utdypendeOpplysninger?.get("6.3") ?: return null
 
         return PersistedSykmeldingUtdypendeSporsmalSvar(
-            null,
-            uke7["6.3.1"]?.toPersistedSykmeldingSporsmalSvar(),
-            uke7["6.3.2"]?.toPersistedSykmeldingSporsmalSvar(),
+            hensynPaArbeidsplassen = null,
+            medisinskOppsummering = uke7["6.3.1"]?.toPersistedSykmeldingSporsmalSvar(),
+            utfordringerMedArbeid = uke7["6.3.2"]?.toPersistedSykmeldingSporsmalSvar(),
         )
     }
 
