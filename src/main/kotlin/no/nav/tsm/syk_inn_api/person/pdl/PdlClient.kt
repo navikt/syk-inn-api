@@ -15,6 +15,9 @@ interface IPdlClient {
     fun getPerson(fnr: String): Result<PdlPerson>
 }
 
+
+class PersonNotFoundException(message: String) : IllegalStateException(message)
+
 @Profile("!local & !test")
 @Component
 class PdlClient(
@@ -58,7 +61,7 @@ class PdlClient(
                     teamLogger.warn("Person with fnr $fnr not found in PDL cache. Body: $body", e)
                     logger.warn("PDL person not found in PDL cache", e)
                     Result.failure(
-                        IllegalStateException("Could not find person in pdl cache").failSpan(),
+                        PersonNotFoundException("Could not find person in pdl cache").failSpan(),
                     )
                 }
                 status.is4xxClientError -> {

@@ -1,5 +1,6 @@
 package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
+import no.nav.tsm.syk_inn_api.person.pdl.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -20,6 +21,10 @@ class ConsumerErrorHandler :
         private const val BACKOFF_INTERVAL = 60_000L
     }
 
+    init {
+        addNotRetryableExceptions(PersonNotFoundException::class.java)
+    }
+
     override fun handleOne(
         thrownException: java.lang.Exception,
         record: ConsumerRecord<*, *>,
@@ -28,7 +33,7 @@ class ConsumerErrorHandler :
     ): Boolean {
         appLog.error(
             """
-            Feil i prosesseringen av record:
+            handle one: Feil i prosesseringen av record:
             - Topic: ${record.topic()}
             - Offset: ${record.offset()}
             - Key: ${record.key()}
@@ -49,7 +54,7 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
     ) {
         appLog.error(
-            "Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}",
+            "handle remaning: Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}",
             thrownException,
         )
         if (records.isEmpty()) {
@@ -71,7 +76,7 @@ class ConsumerErrorHandler :
         }
         data.forEach { record ->
             appLog.error(
-                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+                "handle Batch: Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
                 thrownException,
             )
         }
