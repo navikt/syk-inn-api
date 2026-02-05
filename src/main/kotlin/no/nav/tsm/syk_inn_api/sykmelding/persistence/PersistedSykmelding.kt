@@ -25,6 +25,7 @@ data class PersistedSykmelding(
     val arbeidsgiver: PersistedSykmeldingArbeidsgiver?,
     val tilbakedatering: PersistedSykmeldingTilbakedatering?,
     val utdypendeSporsmal: PersistedSykmeldingUtdypendeSporsmal?,
+    val utdypendeSporsmalSvar: PersistedSykmeldingUtdypendeSporsmalSvar?,
     val annenFravarsgrunn: AnnenFravarsgrunn?,
     val regelResultat: PersistedSykmeldingRuleResult,
 )
@@ -136,6 +137,17 @@ data class PersistedSykmeldingUtdypendeSporsmal(
     val hensynPaArbeidsplassen: String?,
     val medisinskOppsummering: String?,
     val utfordringerMedArbeid: String?,
+)
+
+data class PersistedSykmeldingUtdypendeSporsmalSvar(
+    val hensynPaArbeidsplassen: PersistedSykmeldingSporsmalSvar?,
+    val medisinskOppsummering: PersistedSykmeldingSporsmalSvar?,
+    val utfordringerMedArbeid: PersistedSykmeldingSporsmalSvar?,
+)
+
+data class PersistedSykmeldingSporsmalSvar(
+    val sporsmal: String?,
+    val svar: String,
 )
 
 @JsonSubTypes(

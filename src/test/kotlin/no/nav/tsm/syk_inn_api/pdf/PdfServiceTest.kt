@@ -28,8 +28,10 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMedisinskArs
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeldinger
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentMeta
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentRuleResult
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSporsmalSvar
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentUtdypendeSporsmal
+import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentUtdypendeSporsmalSvar
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentValues
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
@@ -142,6 +144,24 @@ class PdfServiceTest {
                                     "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                                 utfordringerMedArbeid =
                                     "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                            ),
+                        utdypendeSporsmalSvar =
+                            SykmeldingDocumentUtdypendeSporsmalSvar(
+                                utfordringerMedArbeid =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Utfordringer med arbeid",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                medisinskOppsummering =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Medisinsk oppsummering",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                hensynPaArbeidsplassen =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Hensyn på arbeidsplassen",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    )
                             ),
                         annenFravarsgrunn = AnnenFravarsgrunn.BEHANDLING_FORHINDRER_ARBEID,
                     ),

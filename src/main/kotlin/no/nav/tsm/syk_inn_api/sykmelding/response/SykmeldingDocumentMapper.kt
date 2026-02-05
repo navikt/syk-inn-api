@@ -5,9 +5,11 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingAktivite
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingArbeidsgiver
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingDiagnoseInfo
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingMeldinger
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSporsmalSvar
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingSykmelder
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingTilbakedatering
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmal
+import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingUtdypendeSporsmalSvar
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedSykmeldingYrkesskade
 
 fun SykmeldingDocument.toRedactedSykmelding(): SykmeldingDocumentRedacted {
@@ -59,6 +61,8 @@ fun PersistedSykmelding.toSykmeldingDocumentValues(): SykmeldingDocumentValues {
         arbeidsgiver = this.arbeidsgiver.toExistingSykmeldingArbeidsgiver(),
         tilbakedatering = this.tilbakedatering.toExistingSykmeldingTilbakedatering(),
         utdypendeSporsmal = this.utdypendeSporsmal.toExistingSykmeldingUtdypendeSporsmal(),
+        utdypendeSporsmalSvar =
+            this.utdypendeSporsmalSvar.toExistingSykmeldingUtdypendeSporsmalSvar(),
         annenFravarsgrunn = this.annenFravarsgrunn,
     )
 }
@@ -158,6 +162,24 @@ private fun PersistedSykmeldingUtdypendeSporsmal?.toExistingSykmeldingUtdypendeS
             medisinskOppsummering = it.medisinskOppsummering,
             utfordringerMedArbeid = it.utfordringerMedArbeid
         )
+    }
+}
+
+private fun PersistedSykmeldingUtdypendeSporsmalSvar?.toExistingSykmeldingUtdypendeSporsmalSvar():
+    SykmeldingDocumentUtdypendeSporsmalSvar? {
+    return this?.let {
+        SykmeldingDocumentUtdypendeSporsmalSvar(
+            hensynPaArbeidsplassen = it.hensynPaArbeidsplassen.toExistingSykmeldingSporsmalSvar(),
+            medisinskOppsummering = it.medisinskOppsummering.toExistingSykmeldingSporsmalSvar(),
+            utfordringerMedArbeid = it.utfordringerMedArbeid.toExistingSykmeldingSporsmalSvar()
+        )
+    }
+}
+
+private fun PersistedSykmeldingSporsmalSvar?.toExistingSykmeldingSporsmalSvar():
+    SykmeldingDocumentSporsmalSvar? {
+    return this?.let {
+        SykmeldingDocumentSporsmalSvar(sporsmalstekst = it.sporsmal, svar = it.svar)
     }
 }
 
