@@ -948,6 +948,12 @@ object PersistedSykmeldingMapper {
                 tilArbeidsgiver = arbeidsgiver.meldingTilArbeidsgiver,
             )
         }
+        if (arbeidsgiver is EnArbeidsgiver) {
+            return PersistedSykmeldingMeldinger(
+                tilNav = bistandNav,
+                tilArbeidsgiver = arbeidsgiver.meldingTilArbeidsgiver,
+            )
+        }
         return PersistedSykmeldingMeldinger(
             tilNav = bistandNav,
             tilArbeidsgiver = null,
