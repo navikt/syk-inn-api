@@ -208,7 +208,7 @@ object SykmeldingKafkaMapper {
         arbeidsgiver: PersistedSykmeldingArbeidsgiver?,
         meldinger: PersistedSykmeldingMeldinger,
     ): ArbeidsgiverInfo {
-        if (arbeidsgiver == null) {
+        if (arbeidsgiver == null && meldinger.tilArbeidsgiver != null) {
             return EnArbeidsgiver(
                 meldingTilArbeidsgiver = meldinger.tilArbeidsgiver,
                 tiltakArbeidsplassen = null,
@@ -218,7 +218,7 @@ object SykmeldingKafkaMapper {
             )
         }
 
-        if (arbeidsgiver.harFlere) {
+        if (arbeidsgiver != null && arbeidsgiver.harFlere) {
             return FlereArbeidsgivere(
                 navn = arbeidsgiver.arbeidsgivernavn,
                 yrkesbetegnelse = null,
@@ -227,6 +227,7 @@ object SykmeldingKafkaMapper {
                 tiltakArbeidsplassen = null,
             )
         }
+
         return IngenArbeidsgiver()
     }
 

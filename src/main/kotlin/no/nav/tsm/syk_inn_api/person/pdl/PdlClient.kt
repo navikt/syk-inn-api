@@ -15,7 +15,6 @@ interface IPdlClient {
     fun getPerson(fnr: String): Result<PdlPerson>
 }
 
-
 class PersonNotFoundException(message: String) : IllegalStateException(message)
 
 @Profile("!local & !test")
