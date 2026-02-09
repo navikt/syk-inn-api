@@ -43,12 +43,7 @@ class SykmeldingConsumer(
     private val logger = logger()
     private val teamLogger = teamLogger()
     val objectMapper: ObjectMapper = jsonMapper {
-        // NOTE: SykmeldingModule from no.nav.tsm.sykmelding:input:22 is a Jackson 2 module
-        // and is incompatible with Jackson 3. This library needs to be updated to Jackson 3
-        // before we can use it here. For now, deserialization will work but may not handle
-        // custom types from that library correctly.
-        // TODO: Track issue with sykmelding-input library team to update to Jackson 3
-        // addModule(SykmeldingModule())
+        // TODO addModule(SykmeldingModule())
         addModule(kotlinModule())
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
