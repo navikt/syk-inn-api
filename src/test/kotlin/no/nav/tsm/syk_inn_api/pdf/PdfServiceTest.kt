@@ -37,6 +37,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
+import kotlin.io.path.createTempFile
 
 @ExtendWith(MockKExtension::class)
 class PdfServiceTest {
@@ -161,7 +162,39 @@ class PdfServiceTest {
                                     SykmeldingDocumentSporsmalSvar(
                                         sporsmalstekst = "Hensyn på arbeidsplassen",
                                         svar = "Lorem ipsum dolor sit amet",
-                                    )
+                                    ),
+                                sykdomsutvikling = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Sykdomsutvikling",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                arbeidsrelaterteUtfordringer = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Arbeidsrelaterte utfordringer",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                behandlingOgFremtidigArbeidArbeid = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Behandling og fremtidig arbeid",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                uavklarteForhold = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Uavklarte forhold",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                oppdatertMedisinskStatus = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Oppdatert medisinsk status",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                realistiskMestringArbeid = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Realistisk mestring arbeid",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                forventetHelsetilstandUtvikling = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Forventet helsetilstand og utvikling",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
+                                medisinskeHensyn = SykmeldingDocumentSporsmalSvar(
+                                    sporsmalstekst = "Medisinske hensyn",
+                                    svar = "Lorem ipsum dolor sit amet",
+                                ),
                             ),
                         annenFravarsgrunn = AnnenFravarsgrunn.BEHANDLING_FORHINDRER_ARBEID,
                     ),
@@ -203,7 +236,7 @@ fun openPdf(
     temp: Boolean = true
 ) {
     if (temp) {
-        val tmpFile = kotlin.io.path.createTempFile(suffix = ".pdf").toFile()
+        val tmpFile = createTempFile(suffix = ".pdf").toFile()
         tmpFile.writeBytes(bytes)
         Desktop.getDesktop().open(tmpFile)
     } else {
