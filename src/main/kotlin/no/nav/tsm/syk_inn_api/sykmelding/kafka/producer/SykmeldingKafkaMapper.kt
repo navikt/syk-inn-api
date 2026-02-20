@@ -201,6 +201,78 @@ object SykmeldingKafkaMapper {
                 ),
             )
         }
+        if (utdypendeSporsmalSvar.sykdomsutvikling != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.sykdomsutvikling.svar,
+                    Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    sporsmal = utdypendeSporsmalSvar.sykdomsutvikling.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer.svar,
+                    Sporsmalstype.UTFORDRINGER_MED_ARBEID,
+                    sporsmal = utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid.svar,
+                    Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID,
+                    sporsmal = utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.uavklarteForhold != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.uavklarteForhold.svar,
+                    Sporsmalstype.UAVKLARTE_FORHOLD,
+                    sporsmal = utdypendeSporsmalSvar.uavklarteForhold.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.oppdatertMedisinskStatus != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.oppdatertMedisinskStatus.svar,
+                    Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    sporsmal = utdypendeSporsmalSvar.oppdatertMedisinskStatus.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.realistiskMestringArbeid != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.realistiskMestringArbeid.svar,
+                    Sporsmalstype.UTFORDRINGER_MED_ARBEID,
+                    sporsmal = utdypendeSporsmalSvar.realistiskMestringArbeid.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.forventetHelsetilstandUtvikling != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.forventetHelsetilstandUtvikling.svar,
+                    Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING,
+                    sporsmal = utdypendeSporsmalSvar.forventetHelsetilstandUtvikling.sporsmal,
+                ),
+            )
+        }
+        if (utdypendeSporsmalSvar.medisinskeHensyn != null) {
+            utdypendeSporsmalList.add(
+                UtdypendeSporsmal(
+                    utdypendeSporsmalSvar.medisinskeHensyn.svar,
+                    Sporsmalstype.MEDISINSKE_HENSYN,
+                    sporsmal = utdypendeSporsmalSvar.medisinskeHensyn.sporsmal,
+                ),
+            )
+        }
         return utdypendeSporsmalList
     }
 
