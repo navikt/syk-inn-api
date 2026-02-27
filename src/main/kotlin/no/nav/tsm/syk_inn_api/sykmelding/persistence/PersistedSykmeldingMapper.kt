@@ -380,6 +380,8 @@ object PersistedSykmeldingMapper {
             sykdomsutvikling = sykdomsutvikling?.toPersistedSykmeldingSporsmalSvar(),
             arbeidsrelaterteUtfordringer =
                 arbeidsrelaterteUtfordringer?.toPersistedSykmeldingSporsmalSvar(),
+            behandlingOgFremtidigArbeidArbeid =
+                behandlingOgFremtidigArbeid?.toPersistedSykmeldingSporsmalSvar(),
             behandlingOgFremtidigArbeid =
                 behandlingOgFremtidigArbeid?.toPersistedSykmeldingSporsmalSvar(),
             uavklarteForhold = uavklarteForhold?.toPersistedSykmeldingSporsmalSvar(),
@@ -884,6 +886,7 @@ object PersistedSykmeldingMapper {
             utfordringerMedArbeid = uke7["6.3.2"]?.toPersistedSykmeldingSporsmalSvar(),
             sykdomsutvikling = uke17["6.4.1"]?.toPersistedSykmeldingSporsmalSvar(),
             arbeidsrelaterteUtfordringer = uke17["6.4.2"]?.toPersistedSykmeldingSporsmalSvar(),
+            behandlingOgFremtidigArbeidArbeid = uke17["6.4.3"]?.toPersistedSykmeldingSporsmalSvar(),
             behandlingOgFremtidigArbeid = uke17["6.4.3"]?.toPersistedSykmeldingSporsmalSvar(),
             uavklarteForhold = uke17["6.4.4"]?.toPersistedSykmeldingSporsmalSvar(),
             oppdatertMedisinskStatus = uke39["6.5.1"]?.toPersistedSykmeldingSporsmalSvar(),
@@ -948,6 +951,9 @@ object PersistedSykmeldingMapper {
                     svarMap[Sporsmalstype.UTFORDRINGER_MED_ARBEID]
                         ?.toPersistedSykmeldingSporsmalSvar()
                 } else null,
+            behandlingOgFremtidigArbeidArbeid =
+                svarMap[Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID]
+                    ?.toPersistedSykmeldingSporsmalSvar(),
             behandlingOgFremtidigArbeid =
                 svarMap[Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID]
                     ?.toPersistedSykmeldingSporsmalSvar(),

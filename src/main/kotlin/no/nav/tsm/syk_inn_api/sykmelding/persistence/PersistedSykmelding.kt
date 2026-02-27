@@ -145,6 +145,7 @@ data class PersistedSykmeldingUtdypendeSporsmalSvar(
     val utfordringerMedArbeid: PersistedSykmeldingSporsmalSvar?,
     val sykdomsutvikling: PersistedSykmeldingSporsmalSvar?,
     val arbeidsrelaterteUtfordringer: PersistedSykmeldingSporsmalSvar?,
+    val behandlingOgFremtidigArbeidArbeid: PersistedSykmeldingSporsmalSvar?,
     val behandlingOgFremtidigArbeid: PersistedSykmeldingSporsmalSvar?,
     val uavklarteForhold: PersistedSykmeldingSporsmalSvar?,
     val oppdatertMedisinskStatus: PersistedSykmeldingSporsmalSvar?,

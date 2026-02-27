@@ -219,12 +219,12 @@ object SykmeldingKafkaMapper {
                 ),
             )
         }
-        if (utdypendeSporsmalSvar.behandlingOgFremtidigArbeid != null) {
+        if (utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid != null) {
             utdypendeSporsmalList.add(
                 UtdypendeSporsmal(
-                    utdypendeSporsmalSvar.behandlingOgFremtidigArbeid.svar,
+                    utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid.svar,
                     Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID,
-                    sporsmal = utdypendeSporsmalSvar.behandlingOgFremtidigArbeid.sporsmal,
+                    sporsmal = utdypendeSporsmalSvar.behandlingOgFremtidigArbeidArbeid.sporsmal,
                 ),
             )
         }

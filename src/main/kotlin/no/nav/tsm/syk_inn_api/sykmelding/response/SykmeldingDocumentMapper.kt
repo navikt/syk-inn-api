@@ -176,7 +176,7 @@ private fun PersistedSykmeldingUtdypendeSporsmalSvar?.toExistingSykmeldingUtdype
             arbeidsrelaterteUtfordringer =
                 it.arbeidsrelaterteUtfordringer.toExistingSykmeldingSporsmalSvar(),
             behandlingOgFremtidigArbeidArbeid =
-                it.behandlingOgFremtidigArbeid.toExistingSykmeldingSporsmalSvar(),
+                it.behandlingOgFremtidigArbeidArbeid.toExistingSykmeldingSporsmalSvar(),
             uavklarteForhold = it.uavklarteForhold.toExistingSykmeldingSporsmalSvar(),
             oppdatertMedisinskStatus =
                 it.oppdatertMedisinskStatus.toExistingSykmeldingSporsmalSvar(),
