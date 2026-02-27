@@ -15,6 +15,7 @@
     <logger name="org.springframework.kafka" level="WARN"/>
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.hibernate" level="OFF"/>
 
     <springProfile name="local">
 
