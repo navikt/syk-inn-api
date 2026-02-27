@@ -173,12 +173,17 @@ private fun PersistedSykmeldingUtdypendeSporsmalSvar?.toExistingSykmeldingUtdype
             medisinskOppsummering = it.medisinskOppsummering.toExistingSykmeldingSporsmalSvar(),
             utfordringerMedArbeid = it.utfordringerMedArbeid.toExistingSykmeldingSporsmalSvar(),
             sykdomsutvikling = it.sykdomsutvikling.toExistingSykmeldingSporsmalSvar(),
-            arbeidsrelaterteUtfordringer = it.arbeidsrelaterteUtfordringer.toExistingSykmeldingSporsmalSvar(),
-            behandlingOgFremtidigArbeidArbeid = it.behandlingOgFremtidigArbeidArbeid.toExistingSykmeldingSporsmalSvar(),
+            arbeidsrelaterteUtfordringer =
+                it.arbeidsrelaterteUtfordringer.toExistingSykmeldingSporsmalSvar(),
+            behandlingOgFremtidigArbeidArbeid =
+                it.behandlingOgFremtidigArbeid.toExistingSykmeldingSporsmalSvar(),
             uavklarteForhold = it.uavklarteForhold.toExistingSykmeldingSporsmalSvar(),
-            oppdatertMedisinskStatus = it.oppdatertMedisinskStatus.toExistingSykmeldingSporsmalSvar(),
-            realistiskMestringArbeid = it.realistiskMestringArbeid.toExistingSykmeldingSporsmalSvar(),
-            forventetHelsetilstandUtvikling = it.forventetHelsetilstandUtvikling.toExistingSykmeldingSporsmalSvar(),
+            oppdatertMedisinskStatus =
+                it.oppdatertMedisinskStatus.toExistingSykmeldingSporsmalSvar(),
+            realistiskMestringArbeid =
+                it.realistiskMestringArbeid.toExistingSykmeldingSporsmalSvar(),
+            forventetHelsetilstandUtvikling =
+                it.forventetHelsetilstandUtvikling.toExistingSykmeldingSporsmalSvar(),
             medisinskeHensyn = it.medisinskeHensyn.toExistingSykmeldingSporsmalSvar()
         )
     }

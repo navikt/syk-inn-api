@@ -188,7 +188,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 tbody(classes = "keep-together") {
                                     tr {
                                         tableInfo(
-                                            utdypendeSporsmalSvar.utfordringerMedArbeid.sporsmalstekst
+                                            utdypendeSporsmalSvar.utfordringerMedArbeid
+                                                .sporsmalstekst
                                                 ?: "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
                                             colspan = "2",
                                         ) {
@@ -201,7 +202,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 tbody(classes = "keep-together") {
                                     tr {
                                         tableInfo(
-                                            utdypendeSporsmalSvar.medisinskOppsummering.sporsmalstekst
+                                            utdypendeSporsmalSvar.medisinskOppsummering
+                                                .sporsmalstekst
                                                 ?: "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
                                             colspan = "2",
                                         ) {
@@ -214,7 +216,8 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                 tbody(classes = "keep-together") {
                                     tr {
                                         tableInfo(
-                                            utdypendeSporsmalSvar.hensynPaArbeidsplassen.sporsmalstekst
+                                            utdypendeSporsmalSvar.hensynPaArbeidsplassen
+                                                .sporsmalstekst
                                                 ?: "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
                                             colspan = "2",
                                         ) {
@@ -223,8 +226,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     }
                                 }
                             }
-                        }
-                        else if (utdypendeSporsmal != null) {
+                        } else if (utdypendeSporsmal != null) {
                             if (utdypendeSporsmal.utfordringerMedArbeid != null) {
                                 tbody(classes = "keep-together") {
                                     tr {

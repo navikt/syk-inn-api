@@ -11,6 +11,7 @@ import java.io.OutputStream
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
+import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
@@ -37,7 +38,6 @@ import no.nav.tsm.syk_inn_api.sykmelding.response.SykmeldingDocumentYrkesskade
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
-import kotlin.io.path.createTempFile
 
 @ExtendWith(MockKExtension::class)
 class PdfServiceTest {
@@ -163,38 +163,46 @@ class PdfServiceTest {
                                         sporsmalstekst = "Hensyn på arbeidsplassen",
                                         svar = "Lorem ipsum dolor sit amet",
                                     ),
-                                sykdomsutvikling = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Sykdomsutvikling",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                arbeidsrelaterteUtfordringer = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Arbeidsrelaterte utfordringer",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                behandlingOgFremtidigArbeidArbeid = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Behandling og fremtidig arbeid",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                uavklarteForhold = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Uavklarte forhold",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                oppdatertMedisinskStatus = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Oppdatert medisinsk status",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                realistiskMestringArbeid = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Realistisk mestring arbeid",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                forventetHelsetilstandUtvikling = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Forventet helsetilstand og utvikling",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
-                                medisinskeHensyn = SykmeldingDocumentSporsmalSvar(
-                                    sporsmalstekst = "Medisinske hensyn",
-                                    svar = "Lorem ipsum dolor sit amet",
-                                ),
+                                sykdomsutvikling =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Sykdomsutvikling",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                arbeidsrelaterteUtfordringer =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Arbeidsrelaterte utfordringer",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                behandlingOgFremtidigArbeidArbeid =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Behandling og fremtidig arbeid",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                uavklarteForhold =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Uavklarte forhold",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                oppdatertMedisinskStatus =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Oppdatert medisinsk status",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                realistiskMestringArbeid =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Realistisk mestring arbeid",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                forventetHelsetilstandUtvikling =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Forventet helsetilstand og utvikling",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
+                                medisinskeHensyn =
+                                    SykmeldingDocumentSporsmalSvar(
+                                        sporsmalstekst = "Medisinske hensyn",
+                                        svar = "Lorem ipsum dolor sit amet",
+                                    ),
                             ),
                         annenFravarsgrunn = AnnenFravarsgrunn.BEHANDLING_FORHINDRER_ARBEID,
                     ),

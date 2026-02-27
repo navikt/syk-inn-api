@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmalQuestionAnswer
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.PersistedRuleType
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 

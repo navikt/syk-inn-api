@@ -1,6 +1,5 @@
 package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
-import kotlinx.html.emptyMap
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
@@ -379,12 +378,17 @@ object PersistedSykmeldingMapper {
             medisinskOppsummering = medisinskOppsummering?.toPersistedSykmeldingSporsmalSvar(),
             utfordringerMedArbeid = utfordringerMedArbeid?.toPersistedSykmeldingSporsmalSvar(),
             sykdomsutvikling = sykdomsutvikling?.toPersistedSykmeldingSporsmalSvar(),
-            arbeidsrelaterteUtfordringer = arbeidsrelaterteUtfordringer?.toPersistedSykmeldingSporsmalSvar(),
-            behandlingOgFremtidigArbeidArbeid = behandlingOgFremtidigArbeidArbeid?.toPersistedSykmeldingSporsmalSvar(),
+            arbeidsrelaterteUtfordringer =
+                arbeidsrelaterteUtfordringer?.toPersistedSykmeldingSporsmalSvar(),
+            behandlingOgFremtidigArbeid =
+                behandlingOgFremtidigArbeid?.toPersistedSykmeldingSporsmalSvar(),
             uavklarteForhold = uavklarteForhold?.toPersistedSykmeldingSporsmalSvar(),
-            oppdatertMedisinskStatus = oppdatertMedisinskStatus?.toPersistedSykmeldingSporsmalSvar(),
-            realistiskMestringArbeid = realistiskMestringArbeid?.toPersistedSykmeldingSporsmalSvar(),
-            forventetHelsetilstandUtvikling = forventetHelsetilstandUtvikling?.toPersistedSykmeldingSporsmalSvar(),
+            oppdatertMedisinskStatus =
+                oppdatertMedisinskStatus?.toPersistedSykmeldingSporsmalSvar(),
+            realistiskMestringArbeid =
+                realistiskMestringArbeid?.toPersistedSykmeldingSporsmalSvar(),
+            forventetHelsetilstandUtvikling =
+                forventetHelsetilstandUtvikling?.toPersistedSykmeldingSporsmalSvar(),
             medisinskeHensyn = medisinskeHensyn?.toPersistedSykmeldingSporsmalSvar(),
         )
     }
@@ -870,9 +874,9 @@ object PersistedSykmeldingMapper {
     ): PersistedSykmeldingUtdypendeSporsmalSvar? {
         if (utdypendeOpplysninger == null) return null
 
-        val uke7 = utdypendeOpplysninger ["6.3"] ?: emptyMap<String, SporsmalSvar>()
-        val uke17 = utdypendeOpplysninger ["6.4"] ?:  emptyMap<String, SporsmalSvar>()
-        val uke39 = utdypendeOpplysninger ["6.5"] ?:  emptyMap<String, SporsmalSvar>()
+        val uke7 = utdypendeOpplysninger["6.3"] ?: emptyMap<String, SporsmalSvar>()
+        val uke17 = utdypendeOpplysninger["6.4"] ?: emptyMap<String, SporsmalSvar>()
+        val uke39 = utdypendeOpplysninger["6.5"] ?: emptyMap<String, SporsmalSvar>()
 
         return PersistedSykmeldingUtdypendeSporsmalSvar(
             hensynPaArbeidsplassen = null,
@@ -880,7 +884,7 @@ object PersistedSykmeldingMapper {
             utfordringerMedArbeid = uke7["6.3.2"]?.toPersistedSykmeldingSporsmalSvar(),
             sykdomsutvikling = uke17["6.4.1"]?.toPersistedSykmeldingSporsmalSvar(),
             arbeidsrelaterteUtfordringer = uke17["6.4.2"]?.toPersistedSykmeldingSporsmalSvar(),
-            behandlingOgFremtidigArbeidArbeid = uke17["6.4.3"]?.toPersistedSykmeldingSporsmalSvar(),
+            behandlingOgFremtidigArbeid = uke17["6.4.3"]?.toPersistedSykmeldingSporsmalSvar(),
             uavklarteForhold = uke17["6.4.4"]?.toPersistedSykmeldingSporsmalSvar(),
             oppdatertMedisinskStatus = uke39["6.5.1"]?.toPersistedSykmeldingSporsmalSvar(),
             realistiskMestringArbeid = uke39["6.5.2"]?.toPersistedSykmeldingSporsmalSvar(),
@@ -926,29 +930,54 @@ object PersistedSykmeldingMapper {
             hensynPaArbeidsplassen =
                 svarMap[Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN]
                     ?.toPersistedSykmeldingSporsmalSvar(),
-            medisinskOppsummering = if (uke == "7") {
-                svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.toPersistedSykmeldingSporsmalSvar() } else null,
+            medisinskOppsummering =
+                if (uke == "7") {
+                    svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]
+                        ?.toPersistedSykmeldingSporsmalSvar()
+                } else null,
             utfordringerMedArbeid =
                 svarMap[Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID]
                     ?.toPersistedSykmeldingSporsmalSvar(),
-            sykdomsutvikling = if (uke == "17") {
-                svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.toPersistedSykmeldingSporsmalSvar() } else null,
-            arbeidsrelaterteUtfordringer = if (uke == "17") { svarMap[Sporsmalstype.UTFORDRINGER_MED_ARBEID]?.toPersistedSykmeldingSporsmalSvar() } else null,
-            behandlingOgFremtidigArbeidArbeid = svarMap[Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID]?.toPersistedSykmeldingSporsmalSvar(),
-            uavklarteForhold = svarMap[Sporsmalstype.UAVKLARTE_FORHOLD]?.toPersistedSykmeldingSporsmalSvar(),
-            oppdatertMedisinskStatus = if (uke == "39") {
-                svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]?.toPersistedSykmeldingSporsmalSvar() } else null,
-            realistiskMestringArbeid = if (uke == "39") { svarMap[Sporsmalstype.UTFORDRINGER_MED_ARBEID]?.toPersistedSykmeldingSporsmalSvar() } else null,
-            forventetHelsetilstandUtvikling = svarMap[Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING]?.toPersistedSykmeldingSporsmalSvar(),
-            medisinskeHensyn = svarMap[Sporsmalstype.MEDISINSKE_HENSYN]?.toPersistedSykmeldingSporsmalSvar(),
+            sykdomsutvikling =
+                if (uke == "17") {
+                    svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]
+                        ?.toPersistedSykmeldingSporsmalSvar()
+                } else null,
+            arbeidsrelaterteUtfordringer =
+                if (uke == "17") {
+                    svarMap[Sporsmalstype.UTFORDRINGER_MED_ARBEID]
+                        ?.toPersistedSykmeldingSporsmalSvar()
+                } else null,
+            behandlingOgFremtidigArbeid =
+                svarMap[Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID]
+                    ?.toPersistedSykmeldingSporsmalSvar(),
+            uavklarteForhold =
+                svarMap[Sporsmalstype.UAVKLARTE_FORHOLD]?.toPersistedSykmeldingSporsmalSvar(),
+            oppdatertMedisinskStatus =
+                if (uke == "39") {
+                    svarMap[Sporsmalstype.MEDISINSK_OPPSUMMERING]
+                        ?.toPersistedSykmeldingSporsmalSvar()
+                } else null,
+            realistiskMestringArbeid =
+                if (uke == "39") {
+                    svarMap[Sporsmalstype.UTFORDRINGER_MED_ARBEID]
+                        ?.toPersistedSykmeldingSporsmalSvar()
+                } else null,
+            forventetHelsetilstandUtvikling =
+                svarMap[Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING]
+                    ?.toPersistedSykmeldingSporsmalSvar(),
+            medisinskeHensyn =
+                svarMap[Sporsmalstype.MEDISINSKE_HENSYN]?.toPersistedSykmeldingSporsmalSvar(),
         )
     }
 
     private fun getUke(sporsmal: List<UtdypendeSporsmal>?): String {
         return when {
             sporsmal?.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } == true -> "39"
-            sporsmal?.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } == true-> "17"
-            sporsmal?.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } == true-> "7"
+            sporsmal?.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } == true ->
+                "17"
+            sporsmal?.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } == true ->
+                "7"
             else -> "Unknown"
         }
     }

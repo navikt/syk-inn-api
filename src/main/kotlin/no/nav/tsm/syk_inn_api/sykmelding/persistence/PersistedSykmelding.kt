@@ -8,7 +8,6 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import no.nav.tsm.syk_inn_api.common.DiagnoseSystem
 import no.nav.tsm.syk_inn_api.person.Navn
-import no.nav.tsm.syk_inn_api.sykmelding.OpprettSykmeldingUtdypendeSporsmalQuestionAnswer
 import no.nav.tsm.syk_inn_api.sykmelding.response.SykInnArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 
@@ -146,7 +145,7 @@ data class PersistedSykmeldingUtdypendeSporsmalSvar(
     val utfordringerMedArbeid: PersistedSykmeldingSporsmalSvar?,
     val sykdomsutvikling: PersistedSykmeldingSporsmalSvar?,
     val arbeidsrelaterteUtfordringer: PersistedSykmeldingSporsmalSvar?,
-    val behandlingOgFremtidigArbeidArbeid: PersistedSykmeldingSporsmalSvar?,
+    val behandlingOgFremtidigArbeid: PersistedSykmeldingSporsmalSvar?,
     val uavklarteForhold: PersistedSykmeldingSporsmalSvar?,
     val oppdatertMedisinskStatus: PersistedSykmeldingSporsmalSvar?,
     val realistiskMestringArbeid: PersistedSykmeldingSporsmalSvar?,

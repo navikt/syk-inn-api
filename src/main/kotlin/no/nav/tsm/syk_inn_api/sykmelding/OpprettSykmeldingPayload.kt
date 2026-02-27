@@ -69,7 +69,7 @@ data class OpprettSykmeldingUtdypendeSporsmalAnswerOptions(
     val utfordringerMedArbeid: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
     val sykdomsutvikling: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
     val arbeidsrelaterteUtfordringer: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
-    val behandlingOgFremtidigArbeidArbeid: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
+    val behandlingOgFremtidigArbeid: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
     val uavklarteForhold: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
     val oppdatertMedisinskStatus: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
     val realistiskMestringArbeid: OpprettSykmeldingUtdypendeSporsmalQuestionAnswer?,
