@@ -115,9 +115,7 @@ class SykmeldingConsumer(
             handleError(record, hprException)
         } catch (e: Exception) {
             logger.error(
-                "Kafka consumer failed, key: ${record.key()} - Error processing record",
-                e,
-            )
+                "Kafka consumer failed, key: ${record.key()} - Error processing record")
             teamLogger.error(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record, data: $value",
                 e,
@@ -129,7 +127,8 @@ class SykmeldingConsumer(
     }
 
     private fun handleError(record: ConsumerRecord<String, ByteArray?>, e: Exception) {
-        logger.error("Error processing record, key: ${record.key()}, error: ${e.message}", e)
+        logger.error("Error processing record, key: ${record.key()}")
+        teamLogger.error("Error processing record, key: ${record.key()}, error: ${e.message}", e)
         val kafkaProcessingError =
             KafkaProcessingError(
                 kafkaOffset = record.offset(),
