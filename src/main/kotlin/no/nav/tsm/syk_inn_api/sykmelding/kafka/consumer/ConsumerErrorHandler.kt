@@ -2,6 +2,7 @@ package no.nav.tsm.syk_inn_api.sykmelding.kafka.consumer
 
 import no.nav.tsm.syk_inn_api.person.pdl.PersonNotFoundException
 import no.nav.tsm.syk_inn_api.utils.logger
+import no.nav.tsm.syk_inn_api.utils.teamLogger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -18,6 +19,7 @@ class ConsumerErrorHandler :
     ) {
     companion object {
         private val appLog = logger()
+        private val teamLog = teamLogger()
         private const val BACKOFF_INTERVAL = 60_000L
     }
 
@@ -41,6 +43,17 @@ class ConsumerErrorHandler :
             - Cause: ${thrownException.cause?.let { "${it::class.simpleName}: ${it.message}" } ?: "None"}
             """
                 .trimIndent(),
+        )
+        teamLog.error(
+            """
+            handle one: Feil i prosesseringen av record:
+            - Topic: ${record.topic()}
+            - Offset: ${record.offset()}
+            - Key: ${record.key()}
+            - Exception: ${thrownException::class.simpleName}: ${thrownException.message}
+            - Cause: ${thrownException.cause?.let { "${it::class.simpleName}: ${it.message}" } ?: "None"}
+            """
+                .trimIndent(),
             thrownException,
         )
 
@@ -54,11 +67,15 @@ class ConsumerErrorHandler :
         container: MessageListenerContainer,
     ) {
         appLog.error(
+            "handle remaning: Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}. Exception in teamlogs",
+        )
+        teamLog.error(
             "handle remaning: Feil i prossesseringen av record med offset: ${records.first().offset()}, key: ${records.first().key()} på topic ${records.first().topic()}",
             thrownException,
         )
         if (records.isEmpty()) {
-            appLog.error("Feil i listener uten noen records", thrownException)
+            appLog.error("Feil i listener uten noen records, see secure logs")
+            teamLog.error("Feil i listener uten noen records", thrownException)
         }
 
         super.handleRemaining(thrownException, records, consumer, container)
@@ -72,10 +89,14 @@ class ConsumerErrorHandler :
         invokeListener: Runnable,
     ) {
         if (data.isEmpty) {
-            appLog.error("Feil i listener uten noen records", thrownException)
+            appLog.error("Feil i listener uten noen records")
+            teamLog.error("Feil i listener uten noen records", thrownException)
         }
         data.forEach { record ->
             appLog.error(
+                "handle Batch: Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+            )
+            teamLog.error(
                 "handle Batch: Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
                 thrownException,
             )
