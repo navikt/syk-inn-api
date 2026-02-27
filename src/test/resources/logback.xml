@@ -33,6 +33,7 @@
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="org.hibernate" level="OFF"/>
+    <logger name="org.springframework.orm.jpa" level="OFF"/>
     <logger name="org.testcontainers" level="WARN"/>
     <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR" />
 
