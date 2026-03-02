@@ -6,7 +6,9 @@ import no.nav.tsm.core.db.connectToPostgres
 import java.sql.Connection
 
 fun Application.configureDependencies() {
+    val config = environment.config
+
     dependencies {
-        provide<Connection> { connectToPostgres() }
+        provide<Connection> { connectToPostgres(config) }
     }
 }
