@@ -1,22 +1,21 @@
 package no.nav.tsm.modules.sykmeldinger
 
 import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.DependencyKey
-import io.ktor.server.plugins.di.create
 import io.ktor.server.plugins.di.dependencies
 
 fun Application.configureSykmeldingerApi() {
-    dependencies {
-        provide<SykmeldingRepo>(SykmeldingRepo::class)
-        provide<SykmeldingService>(SykmeldingService::class)
-    }
-
-    // DEPS
+    // TODO:
     // AUTH
     // ROUTES
     // PDF (NEI)
 
-    // val repo by SykmeldingRepo
-
+    configureSykmeldingDependencies()
     configureSykmeldingRoutes()
+}
+
+private fun Application.configureSykmeldingDependencies() {
+    dependencies {
+        provide<SykmeldingRepo>(SykmeldingRepo::class)
+        provide<SykmeldingService>(SykmeldingService::class)
+    }
 }

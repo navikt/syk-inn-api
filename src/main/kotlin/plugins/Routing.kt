@@ -2,5 +2,4 @@ package no.nav.tsm.plugins
 
 import io.ktor.server.application.*
 
-fun Application.configureRouting() {
-}
+fun Application.configureRouting() {}

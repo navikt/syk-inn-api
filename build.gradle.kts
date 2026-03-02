@@ -1,8 +1,11 @@
+import com.diffplug.gradle.spotless.SpotlessExtension
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.flyway)
+    alias(libs.plugins.spotless)
 }
 
 group = "no.nav.tsm"
@@ -43,6 +46,13 @@ tasks {
     shadowJar {
         mergeServiceFiles {
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+    }
+
+    configure<SpotlessExtension> {
+        kotlin { ktfmt("0.61").kotlinlangStyle() }
+        check {
+            dependsOn("spotlessApply")
         }
     }
 }
