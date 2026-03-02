@@ -13,7 +13,7 @@ import no.nav.tsm.syk_inn_api.sykmelding.persistence.Status
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingRepository
 import no.nav.tsm.syk_inn_api.sykmelding.persistence.SykmeldingStatusRepository
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 
 @DataJpaTest
 class SykmeldingKafkaTaskTest() : FullIntegrationTest() {
