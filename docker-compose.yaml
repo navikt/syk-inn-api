@@ -1,21 +1,10 @@
 services:
-  kafka:
-    image: confluentinc/confluent-local:8.1.0
-    container_name: kafka-kraft
-    ports:
-      - "9092:9092"
-
   postgres:
-    image: postgres:16
-    container_name: my-postgres
+    image: postgres:17
+    container_name: syk-inn-api-dev-postgres
     environment:
-      POSTGRES_DB: sykinnapi
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: syk-inn-api
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-volumes:
-  postgres-data:
+      - '7969:5432'
