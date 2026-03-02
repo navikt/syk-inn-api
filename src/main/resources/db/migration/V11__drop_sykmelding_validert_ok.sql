@@ -1,1 +1,0 @@
-Alter table sykmelding drop column validert_ok;

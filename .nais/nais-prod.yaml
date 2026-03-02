@@ -29,7 +29,10 @@ spec:
             value: "on"
           - name: cloudsql.logical_decoding
             value: "on"
-  image: {{ image }}
+  kafka:
+    pool: nav-prod
+
+  port: 8080
   replicas:
     min: 2
     max: 5
@@ -40,38 +43,38 @@ spec:
         consumerGroup: syk-inn-api-consumer
         threshold: 500
         topic: tsm.sykmeldinger
-  port: 8080
-  liveness:
-    path: /internal/health
-  readiness:
-    path: /internal/health
-  startup:
-    path: /internal/health
-    initialDelay: 30
-    failureThreshold: 60
-    periodSeconds: 10
-  prometheus:
-    enabled: true
-    path: /internal/prometheus
   resources:
     limits:
       memory: 2Gi
     requests:
       cpu: 100m
       memory: 256Mi
-  azure:
-    application:
-      enabled: true
-      tenant: nav.no
-  kafka:
-    pool: nav-prod
+
+  liveness:
+    path: /internal/health/alive
+  readiness:
+    path: /internal/health/ready
+  preStopHook:
+    http:
+      path: /internal/shutdown
+  prometheus:
+    enabled: true
+    path: /internal/metrics
   observability:
     autoInstrumentation:
       enabled: true
       runtime: java
-    logging:
-      destinations:
-        - id: loki
+
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+
+  filesFrom:
+    - emptyDir:
+        medium: Memory
+      mountPath: /app/docs
+
   accessPolicy:
     inbound:
       rules:

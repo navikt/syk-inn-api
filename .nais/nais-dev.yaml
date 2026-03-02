@@ -29,41 +29,46 @@ spec:
             value: "on"
           - name: cloudsql.logical_decoding
             value: "on"
-  image: {{ image }}
+  kafka:
+    pool: nav-dev
+
+  port: 8080
   replicas:
     min: 1
     max: 2
     cpuThresholdPercentage: 90
-  port: 8080
-  liveness:
-    path: /internal/health
-  readiness:
-    path: /internal/health
-  startup:
-    path: /internal/health
-    initialDelay: 60
-  prometheus:
-    enabled: true
-    path: /internal/prometheus
   resources:
     limits:
       memory: 1Gi
     requests:
       cpu: 30m
       memory: 512Mi
-  azure:
-    application:
-      enabled: true
-      tenant: trygdeetaten.no
-  kafka:
-    pool: nav-dev
+
+  liveness:
+    path: /internal/health/alive
+  readiness:
+    path: /internal/health/ready
+  preStopHook:
+    http:
+      path: /internal/shutdown
+  prometheus:
+    enabled: true
+    path: /internal/metrics
   observability:
     autoInstrumentation:
       enabled: true
       runtime: java
-    logging:
-      destinations:
-        - id: loki
+
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+
+  filesFrom:
+    - emptyDir:
+        medium: Memory
+      mountPath: /app/docs
+
   accessPolicy:
     inbound:
       rules:

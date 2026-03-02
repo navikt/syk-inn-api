@@ -1,70 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <!-- Reduces the spammy logback logging during startup -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 
-    <!-- Both prod and local should provide their own secure log appender -->
-    <logger name="teamlog" level="INFO" additivity="false">
-        <appender-ref ref="TEAM_LOG"/>
-    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT_JSON"/>
+    </root>
 
-    <!-- Stuff we wanna squelch, use sparingly -->
-    <logger name="org.apache.pdfbox.pdmodel.font" level="ERROR"/>
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
 
-    <logger name="org.apache.kafka" level="WARN"/>
-    <logger name="org.springframework.kafka" level="WARN"/>
-    <logger name="ch.qos.logback" level="WARN"/>
-    <logger name="com.zaxxer.hikari" level="WARN"/>
-    <logger name="org.hibernate" level="OFF"/>
-    <logger name="org.springframework.orm.jpa" level="OFF"/>
-
-    <springProfile name="local">
-
-        <root level="INFO">
-            <appender-ref ref="PRETTY-CONSOLE"/>
-        </root>
-
-        <!-- Local development, redirect secure logs to console with nice colors -->
-        <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>
-                    %d{HH:mm:ss.SSS} %red(\(TEAMLOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
-                </pattern>
-            </encoder>
-        </appender>
-
-        <!-- Pretty console appender for local development -->
-        <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>
-                    %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n
-                </pattern>
-            </encoder>
-        </appender>
-    </springProfile>
-
-    <!-- non-local profile (dev, prod, etc.) -->
-    <springProfile name="!local">
-        <root level="INFO">
-            <appender-ref ref="STDOUT_JSON"/>
-        </root>
-
-        <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <includeMdcKeyName>x_request_id</includeMdcKeyName>
-                <includeMdcKeyName>trace_id</includeMdcKeyName>
-                <includeMdcKeyName>span_id</includeMdcKeyName>
-            </encoder>
-        </appender>
-
-        <appender name="TEAM_LOG" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <destination>team-logs.nais-system:5170</destination>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <customFields>
-                    {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}
-                </customFields>
-                <includeContext>false</includeContext>
-            </encoder>
-        </appender>
-    </springProfile>
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>x_request_id</includeMdcKeyName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
+        </encoder>
+    </appender>
 </configuration>
