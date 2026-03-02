@@ -21,18 +21,11 @@ fun Application.configureMonitoring() {
         shutDownUrl = "/internal/shutdown"
         exitCodeSupplier = { 0 }
     }
-
 }
 
 private fun Application.configureMicrometer() {
     val appRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
-    install(MicrometerMetrics) {
-        registry = appRegistry
-    }
-    routing {
-        get("/internal/metrics") {
-            call.respond(appRegistry.scrape())
-        }
-    }
+    install(MicrometerMetrics) { registry = appRegistry }
+    routing { get("/internal/metrics") { call.respond(appRegistry.scrape()) } }
 }

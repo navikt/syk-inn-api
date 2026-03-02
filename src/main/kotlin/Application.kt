@@ -1,10 +1,11 @@
 package no.nav.tsm
 
 import io.ktor.server.application.*
+import no.nav.tsm.modules.kafka.configureKafka
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerApi
 import no.nav.tsm.plugins.configureDependencies
-import no.nav.tsm.plugins.configureOpenAPI
 import no.nav.tsm.plugins.configureMonitoring
+import no.nav.tsm.plugins.configureOpenAPI
 import no.nav.tsm.plugins.configureSerialization
 
 fun main(args: Array<String>) {
@@ -20,22 +21,5 @@ fun Application.module() {
 
     // Specific modules
     configureSykmeldingerApi()
+    configureKafka()
 }
-
-/**
- *
- * fun Application.module() {
- *     // Global Ktor configuration
- *     configureSerialization()
- *     configureSecurity()
- *     configureFrameworks()
- *     configureMonitoring()
- *     configureOpenAPI()
- *     configureDatabases()
- *
- *     // Different application modules
- *     epjFrontendModule()
- *     fhirAuthModule()
- * }
- *
- */
