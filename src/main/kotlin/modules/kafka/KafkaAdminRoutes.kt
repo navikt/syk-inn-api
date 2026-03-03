@@ -9,7 +9,7 @@ import no.nav.tsm.core.logger
 
 fun Application.configureKafkaAdminRoutes() {
     val logger = logger()
-    val service: KafkaConsumerService by dependencies
+    val service: KafkaConsumerJobManager by dependencies
 
     routing {
         // TODO: Obo auth token, verifiser team medlem (group?)
