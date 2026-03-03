@@ -3,6 +3,7 @@ package no.nav.tsm
 import io.ktor.server.application.*
 import no.nav.tsm.modules.kafka.configureKafka
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerApi
+import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
 import no.nav.tsm.plugins.configureOpenAPI
@@ -18,6 +19,7 @@ fun Application.module() {
     configureSerialization()
     configureMonitoring()
     configureOpenAPI()
+    configureDatabase()
 
     // Specific modules
     configureSykmeldingerApi()

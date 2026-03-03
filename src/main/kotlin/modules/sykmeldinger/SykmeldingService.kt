@@ -1,5 +1,13 @@
 package no.nav.tsm.modules.sykmeldinger
 
-class SykmeldingService(val repo: SykmeldingRepo) {
-    fun todo(): Unit {}
+import no.nav.tsm.modules.sykmeldinger.db.SykmeldingExposedRepo
+
+class SykmeldingService(val repo: SykmeldingExposedRepo) {
+    fun test() {
+        repo.test()
+    }
+
+    fun createBoio() {
+        repo.createBoio()
+    }
 }

@@ -4,6 +4,7 @@ ktor = "3.4.0"
 logback = "1.5.13"
 logbackEncoder = "8.1"
 postgres = "42.7.9"
+exposed = "1.1.1"
 prometheus = "1.6.13"
 flyway = "12.0.2"
 
@@ -28,6 +29,10 @@ micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-p
 
 # Database stuff
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed" }
+exposed-date = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
