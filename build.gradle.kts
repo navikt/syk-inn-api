@@ -93,7 +93,7 @@ tasks.register<JavaExec>("runLocal") {
     classpath = sourceSets["main"].runtimeClasspath
 
     args("-config=application-local.conf")
-    jvmArgs("-Dio.ktor.development=true")
+    jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
 
     dependsOn("preRunLocal")
 }
