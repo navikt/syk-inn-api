@@ -29,8 +29,6 @@ private fun initializeSykmeldingerConsumer(
             config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
         }
 
-    println(kafkaProperties.toString())
-
     kafkaProperties.apply {
         this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-ktor"
         this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"

@@ -6,8 +6,23 @@
         <appender-ref ref="STDOUT_JSON"/>
     </root>
 
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
+    <logger name="teamlog" level="INFO" additivity="false">
+        <appender-ref ref="TEAM_LOG"/>
+    </logger>
+
+    <!-- Stuff we wanna squelch, use sparingly -->
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
+
+    <appender name="TEAM_LOG" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>
+                {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}
+            </customFields>
+            <includeContext>false</includeContext>
+        </encoder>
+    </appender>
 
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
