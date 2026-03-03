@@ -7,6 +7,7 @@ postgres = "42.7.9"
 exposed = "1.1.1"
 prometheus = "1.6.13"
 flyway = "12.0.2"
+kafka = "4.2.0"
 mockk = "1.14.9"
 testcontainers = "2.0.3"
 
@@ -36,6 +37,7 @@ ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref 
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
 
 # Database stuff
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
@@ -45,6 +47,7 @@ exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "e
 exposed-date = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+kafka-client = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
