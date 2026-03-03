@@ -28,6 +28,9 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "prometheus" }
 
+# TSM Dependencies
+tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version = "24" }
+
 # Testing
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
