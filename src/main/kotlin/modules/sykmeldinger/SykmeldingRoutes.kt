@@ -13,9 +13,15 @@ import io.ktor.utils.io.ExperimentalKtorApi
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureSykmeldingRoutes() {
-    val repo: SykmeldingRepo by dependencies
+    val sir: SykmeldingService by dependencies
 
     routing {
+        get("/test") {
+            sir.test()
+        }
+        post("/create-boio") {
+            sir.createBoio()
+        }
         route("/api/sykmelding") {
             post { TODO("Stub for create sykmelding") }
                 .describe {
@@ -39,10 +45,10 @@ fun Application.configureSykmeldingRoutes() {
                     }
                 }
             get("/{id}") {
-                    val id = call.parameters["id"] ?: return@get call.respond("Missing id")
+                val id = call.parameters["id"] ?: return@get call.respond("Missing id")
 
-                    TODO("Stub for get sykmelding by id: $id")
-                }
+                TODO("Stub for get sykmelding by id: $id")
+            }
                 .describe {
                     summary = "Get a sykmelding by id"
                     description =
