@@ -18,10 +18,10 @@ fun Application.configureSykmeldingRoutes() {
     routing {
         get("/test") {
             sir.test()
+
+            call.respond(HttpStatusCode.Created, "Tihi!")
         }
-        post("/create-boio") {
-            sir.createBoio()
-        }
+        post("/create-boio") { sir.createBoio() }
         route("/api/sykmelding") {
             post { TODO("Stub for create sykmelding") }
                 .describe {
@@ -45,10 +45,10 @@ fun Application.configureSykmeldingRoutes() {
                     }
                 }
             get("/{id}") {
-                val id = call.parameters["id"] ?: return@get call.respond("Missing id")
+                    val id = call.parameters["id"] ?: return@get call.respond("Missing id")
 
-                TODO("Stub for get sykmelding by id: $id")
-            }
+                    TODO("Stub for get sykmelding by id: $id")
+                }
                 .describe {
                     summary = "Get a sykmelding by id"
                     description =
