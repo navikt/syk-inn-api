@@ -8,3 +8,8 @@ services:
       POSTGRES_DB: syk-inn-api
     ports:
       - '7969:5432'
+  kafka:
+    image: confluentinc/confluent-local:8.1.0
+    container_name: syk-inn-api-dev-kafka
+    ports:
+      - "9069:9092"

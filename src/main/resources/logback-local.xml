@@ -1,0 +1,26 @@
+<configuration>
+    <!-- Reduces the spammy logback logging during startup -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <root level="INFO">
+        <appender-ref ref="PRETTY-CONSOLE"/>
+    </root>
+
+    <!-- Local development, redirect secure logs to console with nice colors -->
+    <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %red(\(TEAMLOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Pretty console appender for local development -->1
+    <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+</configuration>
