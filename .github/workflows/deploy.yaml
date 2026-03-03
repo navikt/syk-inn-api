@@ -99,6 +99,7 @@ jobs:
         with:
           repository: navikt/syk-inn
           fetch-depth: 1
+          ref: ktor-tests
       - run: corepack enable
       - uses: actions/setup-node@v6
         id: setup-node
