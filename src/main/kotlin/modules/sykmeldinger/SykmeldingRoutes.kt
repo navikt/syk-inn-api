@@ -17,11 +17,15 @@ fun Application.configureSykmeldingRoutes() {
 
     routing {
         get("/test") {
-            sir.test()
+            val sykmeldinger = sir.test()
 
-            call.respond(HttpStatusCode.Created, "Tihi!")
+            call.respond(HttpStatusCode.Created, sykmeldinger)
         }
-        post("/create-boio") { sir.createBoio() }
+        post("/create-boio") {
+            val newSykmeldingh = sir.createBoio()
+
+            call.respond(HttpStatusCode.Created, newSykmeldingh)
+        }
         route("/api/sykmelding") {
             post { TODO("Stub for create sykmelding") }
                 .describe {

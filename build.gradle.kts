@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.ktor.server.openapi)
     implementation(libs.ktor.server.routing.openapi)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.client.content.negotiation)
     implementation(libs.logback.classic)
     implementation(libs.logback.encoder)
     implementation(libs.flyway.postgres)
@@ -45,6 +46,7 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.testcontainers.postgresql)
 }
 
 tasks {

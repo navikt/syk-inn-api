@@ -7,7 +7,6 @@ import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
 import no.nav.tsm.plugins.configureOpenAPI
-import no.nav.tsm.plugins.configureSerialization
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -16,7 +15,6 @@ fun main(args: Array<String>) {
 fun Application.module() {
     // Global configuration
     configureDependencies()
-    configureSerialization()
     configureMonitoring()
     configureOpenAPI()
     configureDatabase()
