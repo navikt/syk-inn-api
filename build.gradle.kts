@@ -19,7 +19,13 @@ kotlin {
     jvmToolchain(21)
 }
 
+repositories {
+    mavenCentral()
+    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
+}
+
 dependencies {
+    // Ktor
     implementation(libs.ktor.server.di)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.serialization.kotlinx.json)
@@ -32,8 +38,11 @@ dependencies {
     implementation(libs.ktor.server.routing.openapi)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.logback.classic)
-    implementation(libs.logback.encoder)
+
+    // TSM libraries
+    implementation(libs.tsm.sykmeldinger.input)
+
+    // Database and such
     implementation(libs.flyway.postgres)
     implementation(libs.flyway.core)
     implementation(libs.postgresql)
@@ -41,8 +50,14 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.json)
     implementation(libs.exposed.date)
+
+    // Monitoring and logging
     implementation(libs.micrometer.registry.prometheus)
     implementation(libs.khealth)
+    implementation(libs.logback.classic)
+    implementation(libs.logback.encoder)
+
+    // Test
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockk)
