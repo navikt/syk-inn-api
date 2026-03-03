@@ -21,6 +21,7 @@ kotlin {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
 }
 
@@ -50,6 +51,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.json)
     implementation(libs.exposed.date)
+    implementation(libs.kafka.client)
 
     // Monitoring and logging
     implementation(libs.micrometer.registry.prometheus)
@@ -62,6 +64,7 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.kafka)
 }
 
 tasks {

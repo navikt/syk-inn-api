@@ -16,9 +16,7 @@ fun Application.configureSykmeldingRoutes() {
     val sir: SykmeldingService by dependencies
 
     routing {
-        /**
-         * TODO Only test endpoints
-         */
+        /** TODO Only test endpoints */
         get("/test") {
             val sykmeldinger = sir.test()
 
@@ -30,13 +28,11 @@ fun Application.configureSykmeldingRoutes() {
             call.respond(HttpStatusCode.Created, newSykmeldingh)
         }
         /**
-         * This is a temporary endpoint, as the front integration tests rely on the old Spring Boot health check
-         * endpoint to determine whether or not the syk-inn-api image has started. Once V2 Ktorification of
-         * syk-inn-api is in production, we can update syk-inn and remove this.
+         * This is a temporary endpoint, as the front integration tests rely on the old Spring Boot
+         * health check endpoint to determine whether or not the syk-inn-api image has started. Once
+         * V2 Ktorification of syk-inn-api is in production, we can update syk-inn and remove this.
          */
-        get("/internal/health") {
-            call.respond(HttpStatusCode.OK, "Healthy")
-        }
+        get("/internal/health") { call.respond(HttpStatusCode.OK, "Healthy") }
         route("/api/sykmelding") {
             post { TODO("Stub for create sykmelding") }
                 .describe {
@@ -60,10 +56,10 @@ fun Application.configureSykmeldingRoutes() {
                     }
                 }
             get("/{id}") {
-                val id = call.parameters["id"] ?: return@get call.respond("Missing id")
+                    val id = call.parameters["id"] ?: return@get call.respond("Missing id")
 
-                TODO("Stub for get sykmelding by id: $id")
-            }
+                    TODO("Stub for get sykmelding by id: $id")
+                }
                 .describe {
                     summary = "Get a sykmelding by id"
                     description =
