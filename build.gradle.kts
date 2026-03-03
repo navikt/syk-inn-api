@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.khealth)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.mockk)
 }
 
 tasks {
