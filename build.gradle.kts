@@ -69,8 +69,13 @@ dependencies {
 
 tasks {
     shadowJar {
-        mergeServiceFiles {
-            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+        mergeServiceFiles {}
+
+        // wtf
+        from("src/main/resources/logback.xml") {
+            into("/")
         }
     }
 

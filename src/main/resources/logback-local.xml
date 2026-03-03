@@ -6,6 +6,10 @@
         <appender-ref ref="PRETTY-CONSOLE"/>
     </root>
 
+    <logger name="teamlog" level="INFO" additivity="false">
+        <appender-ref ref="TEAM_LOG"/>
+    </logger>
+
     <!-- Local development, redirect secure logs to console with nice colors -->
     <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

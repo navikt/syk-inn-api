@@ -14,5 +14,5 @@ With gradle:
 
 In IntelliJ:
 
-In IntelliJ run configuration, first run the main function, then edit it to add `-Pio.ktor.development=true` to the VM
+In IntelliJ run configuration, first run the main function, then edit it to add `-Dio.ktor.development=true` to the VM
 options, and `-config=application-local.conf` in "program options".
