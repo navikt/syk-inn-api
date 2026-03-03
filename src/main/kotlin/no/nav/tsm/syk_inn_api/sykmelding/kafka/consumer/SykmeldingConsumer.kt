@@ -114,8 +114,7 @@ class SykmeldingConsumer(
         } catch (hprException: HprException) {
             handleError(record, hprException)
         } catch (e: Exception) {
-            logger.error(
-                "Kafka consumer failed, key: ${record.key()} - Error processing record")
+            logger.error("Kafka consumer failed, key: ${record.key()} - Error processing record")
             teamLogger.error(
                 "Kafka consumer failed, key: ${record.key()} - Error processing record, data: $value",
                 e,
