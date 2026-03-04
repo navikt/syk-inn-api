@@ -5,10 +5,10 @@ import modules.behandler.configureBehandlerModule
 import modules.external.configureExternalModule
 import no.nav.tsm.modules.kafka.configureKafkaModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
-import no.nav.tsm.plugins.configureDatabase
-import no.nav.tsm.plugins.configureDependencies
-import no.nav.tsm.plugins.configureMonitoring
-import no.nav.tsm.plugins.configureOpenAPI
+import plugins.configureDatabase
+import plugins.configureDependencies
+import plugins.configureMonitoring
+import plugins.configureOpenAPI
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)

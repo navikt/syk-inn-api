@@ -5,15 +5,21 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
+import modules.external.clients.pdl.PdlClient
 import modules.external.clients.texas.TexasClient
 
 fun Application.configureExternalDependencies() {
     dependencies {
         key<HttpClient>("ExternalHttpClient") { createExternalApiHttpClient() }
         provide(TexasClient::class)
+        provide(PdlClient::class)
     }
 }
 
 private fun createExternalApiHttpClient() {
+    val baseHttp = HttpClient()
+
+    val retryHttp = baseHttp.config { install(ContentNegotiation) { jackson() } }
+
     HttpClient { install(ContentNegotiation) { jackson() } }
 }

@@ -38,6 +38,8 @@ dependencies {
     implementation(libs.ktor.server.openapi)
     implementation(libs.ktor.server.routing.openapi)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.apache)
     implementation(libs.ktor.client.content.negotiation)
 
     // TSM libraries
