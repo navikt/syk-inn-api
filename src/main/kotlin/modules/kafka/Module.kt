@@ -10,4 +10,3 @@ fun Application.configureKafka() {
     configureKafkaAdminRoutes()
     configureKafkaConsumerJob()
 }
-
