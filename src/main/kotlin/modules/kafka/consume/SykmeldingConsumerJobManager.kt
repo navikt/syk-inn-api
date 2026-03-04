@@ -1,6 +1,5 @@
-package no.nav.tsm.modules.kafka
+package no.nav.tsm.modules.kafka.consume
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -8,9 +7,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.tsm.core.logger
+import kotlin.coroutines.cancellation.CancellationException
 
-class KafkaConsumerJobManager(
-    val sykmeldingerConsumer: KafkaSykmeldingerConsumer,
+class SykmeldingConsumerJobManager(
+    val sykmeldingerConsumer: SykmeldingConsumerService,
     val applicationScope: CoroutineScope,
 ) {
     val logger = logger()
@@ -44,8 +44,6 @@ class KafkaConsumerJobManager(
                         logger.error("KafkaConsumerJob crashed unexpectedly", cause)
                     } finally {
                         logger.info("Job finished or failed, setting job reference to null")
-
-                        // TODO: Figure out if we should restart or something
                         job = null
                     }
                 }

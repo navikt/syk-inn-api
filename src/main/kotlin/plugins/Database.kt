@@ -1,15 +1,15 @@
 package no.nav.tsm.plugins
 
 import io.ktor.server.application.Application
+import io.ktor.server.plugins.di.dependencies
+import no.nav.tsm.core.Environment
 import no.nav.tsm.core.db.runFlywayMigrations
 import org.jetbrains.exposed.v1.jdbc.Database
 
 fun Application.configureDatabase() {
-    val url = environment.config.property("postgres.url").getString()
-    val user = environment.config.property("postgres.username").getString()
-    val password = environment.config.property("postgres.password").getString()
+    val env: Environment by dependencies
 
-    runFlywayMigrations(url, user, password)
+    runFlywayMigrations(env.postgres.url, env.postgres.username, env.postgres.password)
 
-    Database.connect(url = url, user = user, password = password)
+    Database.connect(url = env.postgres.url, user = env.postgres.username, password = env.postgres.password)
 }

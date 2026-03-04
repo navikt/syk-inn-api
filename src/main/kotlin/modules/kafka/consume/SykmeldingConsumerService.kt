@@ -1,6 +1,5 @@
-package no.nav.tsm.modules.kafka
+package no.nav.tsm.modules.kafka.consume
 
-import io.ktor.server.plugins.di.annotations.Named
 import java.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
@@ -8,14 +7,15 @@ import kotlinx.coroutines.withContext
 import no.nav.tsm.core.logger
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
-class KafkaSykmeldingerConsumer(
-    @Named("sykmeldinger") val consumer: KafkaConsumer<String, ByteArray?>
+class SykmeldingConsumerService(
+    private val consumer: KafkaConsumer<String, ByteArray?>,
 ) {
     private val topicName = "tsm.sykmeldinger"
     private val logger = logger()
 
     suspend fun consume() =
         withContext(Dispatchers.IO) {
+            logger.info("Subscribing $topicName")
             consumer.subscribe(listOf(topicName))
 
             try {
@@ -34,7 +34,11 @@ class KafkaSykmeldingerConsumer(
                         }
                     }
                 }
+            } catch (ex: Exception) {
+                logger.error("Kafka consumer loop threw an exception", ex)
+                throw ex
             } finally {
+                logger.info("Unsubscribing $topicName")
                 consumer.unsubscribe()
             }
         }
