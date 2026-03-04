@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.khealth)
     implementation(libs.logback.classic)
     implementation(libs.logback.encoder)
+    implementation(libs.otel.annotations)
 
     // Test
     testImplementation(libs.ktor.server.test.host)
