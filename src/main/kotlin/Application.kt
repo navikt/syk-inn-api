@@ -2,6 +2,7 @@ package no.nav.tsm
 
 import io.ktor.server.application.*
 import modules.behandler.configureBehandlerModule
+import modules.external.configureExternalModule
 import no.nav.tsm.modules.kafka.configureKafkaModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.plugins.configureDatabase
@@ -21,6 +22,7 @@ fun Application.module() {
     configureDatabase()
 
     // Specific modules
+    configureExternalModule()
     configureSykmeldingerModule()
     configureBehandlerModule()
     configureKafkaModule()
