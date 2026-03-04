@@ -8,9 +8,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlin.collections.mapOf
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.kafka.consume.SykmeldingConsumerJobManager
-import kotlin.collections.mapOf
 
 fun Application.configureKafkaAdminRoutes() {
     val logger = logger()
@@ -29,7 +29,7 @@ fun Application.configureKafkaAdminRoutes() {
                 val started = service.start()
                 call.respond(
                     if (started) HttpStatusCode.Accepted else HttpStatusCode.Conflict,
-                    mapOf("status" to service.status().name)
+                    mapOf("status" to service.status().name),
                 )
             }
             post("/stop") {
@@ -38,7 +38,7 @@ fun Application.configureKafkaAdminRoutes() {
                 val stopped = service.stop()
                 call.respond(
                     if (stopped) HttpStatusCode.Accepted else HttpStatusCode.Conflict,
-                    mapOf("status" to service.status().name)
+                    mapOf("status" to service.status().name),
                 )
             }
         }
