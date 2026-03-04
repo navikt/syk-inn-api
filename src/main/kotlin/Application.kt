@@ -1,8 +1,9 @@
 package no.nav.tsm
 
 import io.ktor.server.application.*
-import no.nav.tsm.modules.kafka.configureKafka
-import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerApi
+import no.nav.tsm.modules.behandler.configureBehandlerModule
+import no.nav.tsm.modules.kafka.configureKafkaModule
+import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
@@ -20,6 +21,7 @@ fun Application.module() {
     configureDatabase()
 
     // Specific modules
-    configureSykmeldingerApi()
-    configureKafka()
+    configureSykmeldingerModule()
+    configureBehandlerModule()
+    configureKafkaModule()
 }

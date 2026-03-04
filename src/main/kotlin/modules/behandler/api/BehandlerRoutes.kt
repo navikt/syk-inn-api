@@ -1,6 +1,7 @@
-package no.nav.tsm.modules.sykmeldinger
+package modules.behandler.api
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.response.respond
@@ -10,9 +11,11 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.utils.io.ExperimentalKtorApi
+import modules.behandler.api.payloads.OpprettSykmelding
+import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 
 @OptIn(ExperimentalKtorApi::class)
-fun Application.configureSykmeldingRoutes() {
+fun Application.configureBehandlerRoutes() {
     val sir: SykmeldingService by dependencies
 
     routing {
@@ -23,22 +26,18 @@ fun Application.configureSykmeldingRoutes() {
             call.respond(HttpStatusCode.Created, sykmeldinger)
         }
         post("/create-boio") {
-            val newSykmeldingh = sir.createBoio()
+            val newSykmelding = sir.createBoio()
 
-            call.respond(HttpStatusCode.Created, newSykmeldingh)
+            call.respond(HttpStatusCode.Created, newSykmelding)
         }
-        /**
-         * This is a temporary endpoint, as the front integration tests rely on the old Spring Boot
-         * health check endpoint to determine whether or not the syk-inn-api image has started. Once
-         * V2 Ktorification of syk-inn-api is in production, we can update syk-inn and remove this.
-         */
-        get("/internal/health") { call.respond(HttpStatusCode.OK, "Healthy") }
+
         route("/api/sykmelding") {
             post { TODO("Stub for create sykmelding") }
                 .describe {
                     summary = "Create a new sykmelding"
                     description =
                         "Will execute rules based on logged in users HPR authorizations and other metadata."
+                    requestBody { schema = jsonSchema<OpprettSykmelding.Payload>() }
                     responses {
                         HttpStatusCode.Created { description = "The newly created sykmelding" }
                     }
@@ -48,6 +47,7 @@ fun Application.configureSykmeldingRoutes() {
                     summary = "Verifying the contents of a sykmelding"
                     description =
                         "Verify what the rule execution will return, without actually creating the sykmelding"
+                    requestBody { schema = jsonSchema<OpprettSykmelding.Payload>() }
                     responses {
                         HttpStatusCode.OK {
                             description =

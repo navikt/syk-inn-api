@@ -2,10 +2,11 @@ package no.nav.tsm.modules.sykmeldinger
 
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
+import modules.behandler.api.configureBehandlerRoutes
 import no.nav.tsm.modules.sykmeldinger.db.SykmeldingExposedRepo
 import no.nav.tsm.plugins.configureSerialization
 
-fun Application.configureSykmeldingerApi() {
+fun Application.configureSykmeldingerModule() {
     // TODO:
     // AUTH
     // ROUTES
@@ -13,7 +14,7 @@ fun Application.configureSykmeldingerApi() {
 
     configureSerialization()
     configureSykmeldingDependencies()
-    configureSykmeldingRoutes()
+    configureBehandlerRoutes()
 }
 
 private fun Application.configureSykmeldingDependencies() {

@@ -9,8 +9,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlin.collections.mapOf
+import modules.kafka.consume.SykmeldingConsumerJobManager
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.kafka.consume.SykmeldingConsumerJobManager
 
 fun Application.configureKafkaAdminRoutes() {
     val logger = logger()

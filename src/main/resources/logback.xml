@@ -13,6 +13,7 @@
     <!-- Stuff we wanna squelch, use sparingly -->
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
+    <logger name="org.apache.kafka.clients.consumer" level="WARN"/>
 
     <appender name="TEAM_LOG" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>team-logs.nais-system:5170</destination>

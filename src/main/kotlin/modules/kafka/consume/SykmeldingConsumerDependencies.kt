@@ -3,6 +3,7 @@ package no.nav.tsm.modules.kafka.consume
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.launch
+import modules.kafka.consume.SykmeldingConsumerJobManager
 import no.nav.tsm.core.logger
 
 fun Application.configureSykmeldingerKafkaConsumerDependencies() {
