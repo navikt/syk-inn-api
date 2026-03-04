@@ -11,5 +11,9 @@ fun Application.configureDatabase() {
 
     runFlywayMigrations(env.postgres.url, env.postgres.username, env.postgres.password)
 
-    Database.connect(url = env.postgres.url, user = env.postgres.username, password = env.postgres.password)
+    Database.connect(
+        url = env.postgres.url,
+        user = env.postgres.username,
+        password = env.postgres.password,
+    )
 }
