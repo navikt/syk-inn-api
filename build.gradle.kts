@@ -42,6 +42,8 @@ dependencies {
 
     // TSM libraries
     implementation(libs.tsm.sykmeldinger.input)
+    implementation(libs.tsm.diagnoser)
+    implementation(libs.tsm.regula)
 
     // Database and such
     implementation(libs.flyway.postgres)

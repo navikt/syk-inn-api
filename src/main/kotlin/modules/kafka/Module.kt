@@ -5,7 +5,7 @@ import no.nav.tsm.modules.kafka.admin.configureKafkaAdminRoutes
 import no.nav.tsm.modules.kafka.consume.configureKafkaConsumerJob
 import no.nav.tsm.modules.kafka.consume.configureSykmeldingerKafkaConsumerDependencies
 
-fun Application.configureKafka() {
+fun Application.configureKafkaModule() {
     configureSykmeldingerKafkaConsumerDependencies()
     configureKafkaAdminRoutes()
     configureKafkaConsumerJob()

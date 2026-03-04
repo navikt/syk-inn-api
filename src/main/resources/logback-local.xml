@@ -10,6 +10,11 @@
         <appender-ref ref="TEAM_LOG"/>
     </logger>
 
+    <!-- Stuff we wanna squelch, use sparingly -->
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
+    <logger name="org.apache.kafka.clients.consumer" level="WARN"/>
+
     <!-- Local development, redirect secure logs to console with nice colors -->
     <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

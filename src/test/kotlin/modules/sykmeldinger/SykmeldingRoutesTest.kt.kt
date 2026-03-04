@@ -11,8 +11,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import modules.behandler.api.configureBehandlerRoutes
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
-import no.nav.tsm.modules.sykmeldinger.configureSykmeldingRoutes
 import no.nav.tsm.plugins.configureSerialization
 
 class SykmeldingRoutesTest {
@@ -26,7 +26,7 @@ class SykmeldingRoutesTest {
             dependencies.provide<SykmeldingService> { mocken }
 
             configureSerialization()
-            configureSykmeldingRoutes()
+            configureBehandlerRoutes()
         }
 
         every { mocken.test() } returns emptyList()

@@ -10,7 +10,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import no.nav.tsm.core.db.runFlywayMigrations
-import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerApi
+import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.postgresql.PostgreSQLContainer
@@ -34,7 +34,7 @@ class SykmeldingRoutesIntegrationTest {
     fun `example integration test`() = testApplication {
         client = createClient { install(ContentNegotiation) { jackson() } }
 
-        application { configureSykmeldingerApi() }
+        application { configureSykmeldingerModule() }
 
         client.post("/create-boio")
         client.post("/create-boio")

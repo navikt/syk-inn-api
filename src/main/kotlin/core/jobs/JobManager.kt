@@ -17,11 +17,12 @@ enum class JobStatus {
 }
 
 abstract class JobManager(private val applicationScope: CoroutineScope) {
+    private val logger = logger()
 
-    protected val logger = logger()
-    protected var job: Job? = null
-    protected var jobStatus: JobStatus = JobStatus.NOT_STARTED
+    private var job: Job? = null
+    private var jobStatus: JobStatus = JobStatus.NOT_STARTED
     private val mutex: Mutex = Mutex()
+
     protected abstract val jobName: String
 
     fun status(): JobStatus {
