@@ -1,7 +1,7 @@
 package no.nav.tsm
 
 import io.ktor.server.application.*
-import no.nav.tsm.modules.behandler.configureBehandlerModule
+import modules.behandler.configureBehandlerModule
 import no.nav.tsm.modules.kafka.configureKafkaModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.plugins.configureDatabase

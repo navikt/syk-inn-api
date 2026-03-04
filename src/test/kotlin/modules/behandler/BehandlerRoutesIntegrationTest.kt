@@ -1,12 +1,13 @@
-package modules.sykmeldinger
+package modules.behandler
 
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
-import io.ktor.server.testing.*
-import java.util.*
+import io.ktor.server.testing.testApplication
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import no.nav.tsm.core.db.runFlywayMigrations
@@ -15,7 +16,7 @@ import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.postgresql.PostgreSQLContainer
 
-class SykmeldingRoutesIntegrationTest {
+class BehandlerRoutesIntegrationTest {
 
     val postgres = PostgreSQLContainer("postgres:17-alpine")
 
@@ -27,6 +28,7 @@ class SykmeldingRoutesIntegrationTest {
             user = postgres.username,
             password = postgres.password,
         )
+
         Database.connect(postgres.jdbcUrl, user = postgres.username, password = postgres.password)
     }
 
@@ -34,7 +36,10 @@ class SykmeldingRoutesIntegrationTest {
     fun `example integration test`() = testApplication {
         client = createClient { install(ContentNegotiation) { jackson() } }
 
-        application { configureSykmeldingerModule() }
+        application {
+            configureSykmeldingerModule()
+            configureBehandlerModule()
+        }
 
         client.post("/create-boio")
         client.post("/create-boio")
