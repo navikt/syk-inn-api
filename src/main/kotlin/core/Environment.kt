@@ -1,6 +1,8 @@
 package no.nav.tsm.core
 
+import io.ktor.server.application.Application
 import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.plugins.di.dependencies
 import java.util.Properties
 
 enum class RuntimeEnvironments {
@@ -41,6 +43,12 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
         external = { ExternalApi(tsmPdlCache = config.property("tsm.pdl_cache").getString()) },
     )
+}
+
+fun Application.isLocal(): Boolean {
+    val env: Environment by dependencies
+
+    return env.runtimeEnv == RuntimeEnvironments.LOCAL
 }
 
 private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {

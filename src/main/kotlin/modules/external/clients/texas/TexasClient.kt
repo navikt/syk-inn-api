@@ -24,7 +24,7 @@ enum class TexasCluster(val nais: String) {
 }
 
 class TexasClient(
-    @Named("ExternalHttpClient") private val httpClient: HttpClient,
+    @Named("RetryHttpClient") private val httpClient: HttpClient,
     private val env: Environment,
 ) {
     private val logger = logger()
