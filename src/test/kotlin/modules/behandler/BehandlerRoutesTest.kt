@@ -1,21 +1,21 @@
-package modules.sykmeldinger
+package modules.behandler
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
-import io.ktor.server.plugins.di.*
-import io.ktor.server.testing.*
+import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.behandler.api.configureBehandlerRoutes
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
-import no.nav.tsm.plugins.configureSerialization
+import plugins.configureSerialization
 
-class SykmeldingRoutesTest {
+class BehandlerRoutesTest {
 
     @Test
     fun testen() = testApplication {

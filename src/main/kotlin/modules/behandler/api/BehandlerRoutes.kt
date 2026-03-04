@@ -4,18 +4,22 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.openapi.describe
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
 import modules.behandler.api.payloads.OpprettSykmelding
+import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
+    val logger = logger()
     val sir: SykmeldingService by dependencies
 
     routing {
@@ -32,7 +36,16 @@ fun Application.configureBehandlerRoutes() {
         }
 
         route("/api/sykmelding") {
-            post { TODO("Stub for create sykmelding") }
+            post {
+                    try {
+                        val payload: OpprettSykmelding.Payload = call.receive()
+
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                    } catch (ex: Exception) {
+                        logger.error(ex)
+                        throw ex
+                    }
+                }
                 .describe {
                     summary = "Create a new sykmelding"
                     description =
@@ -42,7 +55,16 @@ fun Application.configureBehandlerRoutes() {
                         HttpStatusCode.Created { description = "The newly created sykmelding" }
                     }
                 }
-            post("/verify") { TODO("Stub for verify sykmelding") }
+            post("/verify") {
+                    try {
+                        val payload: OpprettSykmelding.Payload = call.receive()
+
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                    } catch (ex: Exception) {
+                        logger.error(ex)
+                        throw ex
+                    }
+                }
                 .describe {
                     summary = "Verifying the contents of a sykmelding"
                     description =
