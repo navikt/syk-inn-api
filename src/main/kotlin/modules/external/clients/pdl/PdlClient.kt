@@ -11,7 +11,7 @@ import modules.external.clients.texas.TexasClient
 import no.nav.tsm.core.Environment
 
 class PdlClient(
-    @Named("ExternalHttpClient") val httpClient: HttpClient,
+    @Named("RetryHttpClient") val httpClient: HttpClient,
     val texasClient: TexasClient,
     val environment: Environment,
 ) {
