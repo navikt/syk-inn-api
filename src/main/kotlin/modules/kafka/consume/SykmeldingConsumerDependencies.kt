@@ -1,9 +1,7 @@
 package no.nav.tsm.modules.kafka.consume
 
-import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStarted
-import io.ktor.server.application.ApplicationStopping
-import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.application.*
+import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.launch
 import no.nav.tsm.core.logger
 
