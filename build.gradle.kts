@@ -64,6 +64,7 @@ dependencies {
 
     // Test
     testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.client.test.mock)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.testcontainers.postgresql)
