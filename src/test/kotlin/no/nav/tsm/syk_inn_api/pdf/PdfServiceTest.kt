@@ -173,7 +173,7 @@ class PdfServiceTest {
                                         sporsmalstekst = "Arbeidsrelaterte utfordringer",
                                         svar = "Lorem ipsum dolor sit amet",
                                     ),
-                                behandlingOgFremtidigArbeidArbeid =
+                                behandlingOgFremtidigArbeid =
                                     SykmeldingDocumentSporsmalSvar(
                                         sporsmalstekst = "Behandling og fremtidig arbeid",
                                         svar = "Lorem ipsum dolor sit amet",

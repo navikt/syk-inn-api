@@ -152,7 +152,7 @@ data class SykmeldingDocumentUtdypendeSporsmalSvar(
     val hensynPaArbeidsplassen: SykmeldingDocumentSporsmalSvar?,
     val sykdomsutvikling: SykmeldingDocumentSporsmalSvar?,
     val arbeidsrelaterteUtfordringer: SykmeldingDocumentSporsmalSvar?,
-    val behandlingOgFremtidigArbeidArbeid: SykmeldingDocumentSporsmalSvar?,
+    val behandlingOgFremtidigArbeid: SykmeldingDocumentSporsmalSvar?,
     val uavklarteForhold: SykmeldingDocumentSporsmalSvar?,
     val oppdatertMedisinskStatus: SykmeldingDocumentSporsmalSvar?,
     val realistiskMestringArbeid: SykmeldingDocumentSporsmalSvar?,
