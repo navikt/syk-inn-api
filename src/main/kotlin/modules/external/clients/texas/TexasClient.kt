@@ -23,14 +23,14 @@ enum class TexasCluster(val nais: String) {
     Dev("dev-gcp"),
 }
 
-class TexasClient(
+open class TexasClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,
     private val env: Environment,
 ) {
     private val logger = logger()
 
     @WithSpan("Texas.requestToken")
-    suspend fun requestToken(
+    open suspend fun requestToken(
         @SpanAttribute("namespace") namespace: String,
         @SpanAttribute("API") otherApiAppName: String,
     ): TexasToken {
