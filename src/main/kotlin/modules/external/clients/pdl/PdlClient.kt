@@ -10,13 +10,13 @@ import io.ktor.server.plugins.di.annotations.Named
 import modules.external.clients.texas.TexasClient
 import no.nav.tsm.core.Environment
 
-class PdlClient(
-    @Named("RetryHttpClient") val httpClient: HttpClient,
-    val texasClient: TexasClient,
-    val environment: Environment,
+open class PdlClient(
+    @Named("RetryHttpClient") private val httpClient: HttpClient,
+    private val texasClient: TexasClient,
+    private val environment: Environment,
 ) {
 
-    suspend fun getPerson(ident: String): PdlPerson? {
+    open suspend fun getPerson(ident: String): PdlPerson? {
         val (token) = getToken()
 
         val response =

@@ -26,4 +26,7 @@ fun Application.module() {
     configureSykmeldingerModule()
     configureBehandlerModule()
     configureKafkaModule()
+
+    // TODO: Temporary
+    configureTestStuff()
 }

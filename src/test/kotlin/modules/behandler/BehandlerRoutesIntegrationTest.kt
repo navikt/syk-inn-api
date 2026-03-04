@@ -10,11 +10,14 @@ import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import modules.external.configureExternalDependencies
+import no.nav.tsm.configureTestStuff
 import no.nav.tsm.core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.postgresql.PostgreSQLContainer
+import utils.configureTestEnvironment
 
 class BehandlerRoutesIntegrationTest {
 
@@ -37,8 +40,10 @@ class BehandlerRoutesIntegrationTest {
         client = createClient { install(ContentNegotiation) { jackson() } }
 
         application {
+            configureTestEnvironment()
+            configureExternalDependencies()
             configureSykmeldingerModule()
-            configureBehandlerModule()
+            configureTestStuff()
         }
 
         client.post("/create-boio")

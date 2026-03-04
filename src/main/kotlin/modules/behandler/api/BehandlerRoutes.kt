@@ -3,7 +3,6 @@ package modules.behandler.api
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -15,26 +14,12 @@ import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
 import modules.behandler.api.payloads.OpprettSykmelding
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
     val logger = logger()
-    val sir: SykmeldingService by dependencies
 
     routing {
-        /** TODO Only test endpoints */
-        get("/test") {
-            val sykmeldinger = sir.test()
-
-            call.respond(HttpStatusCode.Created, sykmeldinger)
-        }
-        post("/create-boio") {
-            val newSykmelding = sir.createBoio()
-
-            call.respond(HttpStatusCode.Created, newSykmelding)
-        }
-
         route("/api/sykmelding") {
             post {
                     try {
