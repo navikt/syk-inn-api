@@ -9,21 +9,33 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.tsm.core.logger
 
+enum class JobStatus {
+    NOT_STARTED,
+    RUNNING,
+    STOPPED,
+    FAILED,
+}
+
 class SykmeldingConsumerJobManager(
-    val sykmeldingerConsumer: SykmeldingConsumerService,
-    val applicationScope: CoroutineScope,
+    private val sykmeldingerConsumer: SykmeldingConsumerService,
+    private val applicationScope: CoroutineScope,
 ) {
-    val logger = logger()
+    private val logger = logger()
 
-    var job: Job? = null
-    val mutex: Mutex = Mutex()
+    private var job: Job? = null
+    private var jobStatus: JobStatus = JobStatus.NOT_STARTED
+    private val mutex: Mutex = Mutex()
 
-    suspend fun start() {
+    fun status(): JobStatus {
+        return this.jobStatus
+    }
+
+    suspend fun start(): Boolean {
         logger.info("Starting kafka consumer")
 
         if (job?.isActive == true) {
             logger.info("Kafka consumer is already running, not starting a new one")
-            return
+            return false
         }
 
         mutex.withLock {
@@ -31,42 +43,49 @@ class SykmeldingConsumerJobManager(
                 logger.info(
                     "Kafka consumer was started by another request while waiting for lock, not starting a new one"
                 )
-                return
+                return false
             }
 
             job =
                 applicationScope.launch {
                     try {
+                        jobStatus = JobStatus.RUNNING
                         sykmeldingerConsumer.consume()
+                        jobStatus = JobStatus.STOPPED
                     } catch (ex: CancellationException) {
                         logger.info("KafkaConsumerJob was cancelled gracefully", ex)
+                        jobStatus = JobStatus.STOPPED
                     } catch (cause: Exception) {
                         logger.error("KafkaConsumerJob crashed unexpectedly", cause)
+                        jobStatus = JobStatus.FAILED
                     } finally {
                         logger.info("Job finished or failed, setting job reference to null")
                         job = null
                     }
                 }
+            return true
         }
     }
 
-    suspend fun stop() {
+    suspend fun stop(): Boolean {
         if (job == null || job?.isCancelled == true) {
             logger.info("No job was running, nothing to stop")
-            return
+            return false
         }
 
         logger.info("Job is running, stopping it ...")
         mutex.withLock {
             if (job == null || job?.isCancelled == true) {
                 logger.info("Job was already stopped by another request, nothing to stop")
-                return
+                return false
             }
 
             job?.cancelAndJoin()
             job = null
+            jobStatus = JobStatus.STOPPED
 
             logger.info("Job stopped successfully")
+            return true
         }
     }
 }
