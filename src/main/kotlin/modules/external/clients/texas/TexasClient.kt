@@ -39,7 +39,7 @@ class TexasClient(
         val requestBody = TokenRequest(identity_provider = "entra_id", target = target)
 
         val response =
-            httpClient.post(env.texas.tokenEndpoint) {
+            httpClient.post(env.texas().tokenEndpoint) {
                 contentType(ContentType.Application.Json)
                 setBody(requestBody)
             }

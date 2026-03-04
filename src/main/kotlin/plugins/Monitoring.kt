@@ -1,4 +1,4 @@
-package no.nav.tsm.plugins
+package plugins
 
 import dev.hayden.KHealth
 import io.ktor.server.application.*

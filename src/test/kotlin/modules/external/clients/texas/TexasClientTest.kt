@@ -24,7 +24,7 @@ class TexasClientTest {
     @Test
     fun `should exchange token for correct target`() = testApplication {
         val mockEngine = MockEngine { request ->
-            assertEquals(request.url.toString(), testEnv.texas.tokenEndpoint)
+            assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
 
             val payload = request.body.toByteArray().parse<TexasClient.TokenRequest>()
             assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
@@ -53,7 +53,8 @@ class TexasClientTest {
 private val testEnv =
     Environment(
         runtimeEnv = RuntimeEnvironments.PROD,
-        texas = Texas(tokenEndpoint = "https://test.token.endpoint"),
+        texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
         kafka = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
+        external = mockk(relaxed = true),
     )

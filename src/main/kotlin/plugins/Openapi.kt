@@ -1,4 +1,4 @@
-package no.nav.tsm.plugins
+package plugins
 
 import io.ktor.openapi.OpenApiInfo
 import io.ktor.server.application.*

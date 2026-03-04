@@ -13,11 +13,14 @@ class PostgresConfig(val url: String, val username: String, val password: String
 
 class Texas(val tokenEndpoint: String)
 
+class ExternalApi(val tsmPdlCache: String)
+
 class Environment(
     val runtimeEnv: RuntimeEnvironments,
     val kafka: Properties,
     val postgres: PostgresConfig,
-    val texas: Texas,
+    val texas: () -> Texas,
+    val external: () -> ExternalApi,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -35,7 +38,8 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
             ),
-        texas = Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()),
+        texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
+        external = { ExternalApi(tsmPdlCache = config.property("tsm.pdl_cache").getString()) },
     )
 }
 

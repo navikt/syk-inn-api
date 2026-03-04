@@ -1,4 +1,4 @@
-package no.nav.tsm.plugins
+package plugins
 
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
