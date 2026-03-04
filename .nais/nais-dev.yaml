@@ -77,6 +77,7 @@ spec:
     inbound:
       rules:
         - application: syk-inn
+        - application: zara
     outbound:
       rules:
         - application: logging
