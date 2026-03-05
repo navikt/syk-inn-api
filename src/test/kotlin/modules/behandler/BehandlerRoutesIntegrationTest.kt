@@ -11,7 +11,7 @@ import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import modules.external.configureExternalDependencies
+import modules.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
@@ -41,7 +41,7 @@ class BehandlerRoutesIntegrationTest {
 
         application {
             configureTestEnvironment()
-            configureExternalDependencies()
+            configureSykmelderDependencies()
             configureSykmeldingerModule()
             configureTestStuff()
         }

@@ -14,7 +14,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import modules.external.clients.pdl.PdlClient
+import modules.sykmelder.clients.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 
 fun Application.configureTestStuff() {

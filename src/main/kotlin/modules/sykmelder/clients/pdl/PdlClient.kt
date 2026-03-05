@@ -1,4 +1,4 @@
-package modules.external.clients.pdl
+package modules.sykmelder.clients.pdl
 
 import core.Environment
 import io.ktor.client.HttpClient
@@ -8,7 +8,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
-import modules.external.clients.texas.TexasCloudClient
+import modules.sykmelder.clients.texas.TexasCloudClient
 
 sealed interface PdlClient {
     suspend fun getPerson(ident: String): PdlPerson?

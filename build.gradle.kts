@@ -27,8 +27,9 @@ repositories {
 
 dependencies {
     // Ktor
-    implementation(libs.ktor.server.di)
     implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.di)
+    implementation(libs.ktor.server.call.id)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.serialization.jackson)
@@ -41,6 +42,7 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.apache)
     implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.call.id)
 
     // TSM libraries
     implementation(libs.tsm.sykmeldinger.input)
