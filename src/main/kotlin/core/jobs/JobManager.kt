@@ -1,4 +1,4 @@
-package no.nav.tsm.core.jobs
+package core.jobs
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -7,7 +7,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import no.nav.tsm.core.logger
+import core.logger
 
 enum class JobStatus {
     NOT_STARTED,

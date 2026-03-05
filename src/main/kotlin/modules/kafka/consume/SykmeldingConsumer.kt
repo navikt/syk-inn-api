@@ -5,8 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.Properties
 import kotlin.to
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.logger
+import core.Environment
+import core.logger
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer

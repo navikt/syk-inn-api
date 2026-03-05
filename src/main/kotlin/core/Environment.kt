@@ -1,14 +1,14 @@
-package no.nav.tsm.core
+package core
 
 import io.ktor.server.application.Application
 import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.di.dependencies
 import java.util.Properties
 
-enum class RuntimeEnvironments {
-    LOCAL,
-    DEV,
-    PROD,
+enum class RuntimeEnvironments(val nais: String) {
+    LOCAL("local"),
+    DEV("dev-gcp"),
+    PROD("prod-gcp"),
 }
 
 class PostgresConfig(val url: String, val username: String, val password: String)
@@ -56,23 +56,12 @@ private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {
 
     return when (configEnv) {
         "local" -> RuntimeEnvironments.LOCAL
-        "cloud" -> this.inferRuntimeFromNaisCluster()
-        else ->
+        "prod-gcp" -> RuntimeEnvironments.PROD
+        "dev-gcp" -> RuntimeEnvironments.DEV
+        else -> {
             throw IllegalStateException(
-                "Unexpected 'app.runtime' configuration: ${configEnv}. Should be one of 'local' or 'cloud'."
+                "Unexpected 'app.runtime' configuration: ${configEnv}. Should be one of 'local', 'dev-gcp' or 'prod-gcp'"
             )
-    }
-}
-
-private fun ApplicationConfig.inferRuntimeFromNaisCluster(): RuntimeEnvironments {
-    val naisEnvironment = this.property("app.nais_cluster").getString()
-
-    return when (naisEnvironment) {
-        "dev" -> RuntimeEnvironments.DEV
-        "prod" -> RuntimeEnvironments.PROD
-        else ->
-            throw IllegalStateException(
-                "Unexpected 'app.nais_cluster' configuration: ${naisEnvironment}. Should be one of 'dev' or 'prod'."
-            )
+        }
     }
 }

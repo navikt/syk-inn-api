@@ -14,9 +14,9 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.core.Texas
+import core.Environment
+import core.RuntimeEnvironments
+import core.Texas
 import utils.parse
 
 class TexasClientTest {
@@ -26,7 +26,7 @@ class TexasClientTest {
         val mockEngine = MockEngine { request ->
             assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
 
-            val payload = request.body.toByteArray().parse<TexasClient.TokenRequest>()
+            val payload = request.body.toByteArray().parse<TexasCloudClient.TokenRequest>()
             assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
 
             respond(
@@ -40,7 +40,7 @@ class TexasClientTest {
         }
 
         val texas =
-            TexasClient(
+            TexasCloudClient(
                 env = testEnv,
                 httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
             )

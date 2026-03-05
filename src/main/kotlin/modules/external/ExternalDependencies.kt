@@ -4,16 +4,18 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import modules.external.clients.pdl.PdlClient
-import modules.external.clients.texas.TexasClient
-import no.nav.tsm.core.dynamicDependencies
-import no.nav.tsm.modules.external.clients.pdl.PdlLocalClient
-import no.nav.tsm.modules.external.clients.texas.TexasLocalClient
+import modules.external.clients.texas.TexasCloudClient
+import modules.external.clients.texas.TexasLocalClient
+import core.dynamicDependencies
+import modules.external.clients.pdl.PdlCloudClient
+import modules.external.clients.pdl.PdlLocalClient
 
 fun Application.configureExternalDependencies() {
     val baseHttpClient: HttpClient by dependencies
 
-    dependencies { provide("RetryHttpClient") { createExternalApiHttpClient(baseHttpClient) } }
+    dependencies {
+        provide<HttpClient>("RetryHttpClient") { createExternalApiHttpClient(baseHttpClient) }
+    }
 
     dynamicDependencies {
         local {
@@ -21,8 +23,8 @@ fun Application.configureExternalDependencies() {
             provide(PdlLocalClient::class)
         }
         cloud {
-            provide(TexasClient::class)
-            provide(PdlClient::class)
+            provide(TexasCloudClient::class)
+            provide(PdlCloudClient::class)
         }
     }
 }

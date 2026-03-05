@@ -7,16 +7,20 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
-import modules.external.clients.texas.TexasClient
-import no.nav.tsm.core.Environment
+import modules.external.clients.texas.TexasCloudClient
+import core.Environment
 
-open class PdlClient(
+sealed interface PdlClient {
+    suspend fun getPerson(ident: String): PdlPerson?
+}
+
+class PdlCloudClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,
-    private val texasClient: TexasClient,
+    private val texasClient: TexasCloudClient,
     private val environment: Environment,
-) {
+) : PdlClient {
 
-    open suspend fun getPerson(ident: String): PdlPerson? {
+    override suspend fun getPerson(ident: String): PdlPerson? {
         val (token) = getToken()
 
         val response =
