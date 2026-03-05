@@ -226,6 +226,115 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     }
                                 }
                             }
+                            if (utdypendeSporsmalSvar.sykdomsutvikling != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.sykdomsutvikling
+                                                .sporsmalstekst
+                                                ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.sykdomsutvikling.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer
+                                                .sporsmalstekst
+                                                ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.arbeidsrelaterteUtfordringer.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.behandlingOgFremtidigArbeid != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.behandlingOgFremtidigArbeid
+                                                .sporsmalstekst ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.behandlingOgFremtidigArbeid.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.uavklarteForhold != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.uavklarteForhold
+                                                .sporsmalstekst
+                                                ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.uavklarteForhold.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.oppdatertMedisinskStatus != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.oppdatertMedisinskStatus
+                                                .sporsmalstekst
+                                                ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.oppdatertMedisinskStatus.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.realistiskMestringArbeid != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.realistiskMestringArbeid
+                                                .sporsmalstekst ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.realistiskMestringArbeid.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.forventetHelsetilstandUtvikling != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.forventetHelsetilstandUtvikling
+                                                .sporsmalstekst ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.forventetHelsetilstandUtvikling.svar
+                                        }
+                                    }
+                                }
+                            }
+                            if (utdypendeSporsmalSvar.medisinskeHensyn != null) {
+                                tbody(classes = "keep-together") {
+                                    tr {
+                                        tableInfo(
+                                            utdypendeSporsmalSvar.medisinskeHensyn
+                                                .sporsmalstekst
+                                                ?: "",
+                                            colspan = "2",
+                                        ) {
+                                            utdypendeSporsmalSvar.medisinskeHensyn.svar
+                                        }
+                                    }
+                                }
+                            }
                         } else if (utdypendeSporsmal != null) {
                             if (utdypendeSporsmal.utfordringerMedArbeid != null) {
                                 tbody(classes = "keep-together") {
