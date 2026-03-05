@@ -4,9 +4,10 @@ import core.logger
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStarting
-import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.plugins.di.dependencies
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import modules.jobs.service.JobScheduler
 
 fun Application.configureJobSceduling() {
@@ -19,17 +20,19 @@ fun Application.configureJobSceduling() {
             jobScheduler.setup()
         }
     }
-    monitor.subscribe(ApplicationStopping) {
-        launch {
-            log.info("Job sceduling stopped")
-            jobScheduler.stop()
-        }
-    }
 
     monitor.subscribe(ApplicationStarted) {
         launch {
-            log.info("Job sceduling started")
-            jobScheduler.start()
+            try {
+                log.info("Job sceduling started")
+                jobScheduler.start()
+            } finally {
+                withContext(NonCancellable) {
+                    log.info("Job sceduling stopping")
+                    jobScheduler.stop()
+                    log.info("Job sceduling stopped")
+                }
+            }
         }
     }
 }
