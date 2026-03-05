@@ -1,35 +1,53 @@
 package no.nav.tsm
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.Application
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import modules.external.clients.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
-import plugins.configureSerialization
 
 fun Application.configureTestStuff() {
     val sir: SykmeldingService by dependencies
     val pdl: PdlClient by dependencies
 
-    configureSerialization()
-
     routing {
-        /** TODO Only test endpoints */
-        get("/test") {
-            println(pdl.getPerson("123213123"))
+        route("/test") {
+            configureRouteSerialization()
 
-            val sykmeldinger = sir.test()
+            /** TODO Only test endpoints */
+            get {
+                println(pdl.getPerson("123213123"))
 
-            call.respond(HttpStatusCode.Created, sykmeldinger)
+                val sykmeldinger = sir.test()
+
+                call.respond(HttpStatusCode.Created, sykmeldinger)
+            }
+            post("/create-boio") {
+                val newSykmelding = sir.createBoio()
+
+                call.respond(HttpStatusCode.Created, newSykmelding)
+            }
         }
-        post("/create-boio") {
-            val newSykmelding = sir.createBoio()
+    }
+}
 
-            call.respond(HttpStatusCode.Created, newSykmelding)
+fun Route.configureRouteSerialization() {
+    install(ContentNegotiation) {
+        jackson {
+            enable(SerializationFeature.INDENT_OUTPUT)
+            enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            registerModule(JavaTimeModule())
         }
     }
 }

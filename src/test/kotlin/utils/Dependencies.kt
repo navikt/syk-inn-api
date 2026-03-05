@@ -4,8 +4,8 @@ import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.RuntimeEnvironments
+import core.Environment
+import core.RuntimeEnvironments
 
 fun Application.configureTestEnvironment() {
     dependencies {

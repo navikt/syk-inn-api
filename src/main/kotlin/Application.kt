@@ -9,6 +9,7 @@ import plugins.configureDatabase
 import plugins.configureDependencies
 import plugins.configureMonitoring
 import plugins.configureOpenAPI
+import plugins.configureSerialization
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -20,6 +21,7 @@ fun Application.module() {
     configureMonitoring()
     configureOpenAPI()
     configureDatabase()
+    configureSerialization()
 
     // Specific modules
     configureExternalModule()

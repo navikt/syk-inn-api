@@ -5,7 +5,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import no.nav.tsm.core.logger
+import core.logger
 
 class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
     private val logger = logger()

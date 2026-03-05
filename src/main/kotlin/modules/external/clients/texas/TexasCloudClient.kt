@@ -12,29 +12,29 @@ import io.ktor.http.isTextType
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.core.logger
+import core.Environment
+import core.logger
 
-data class TexasToken(val token: String)
-
-enum class TexasCluster(val nais: String) {
-    Prod("prod-gcp"),
-    Dev("dev-gcp"),
+sealed interface TexasClient {
+    suspend fun requestToken(namespace: String, otherApiAppName: String): TexasToken
 }
 
-open class TexasClient(
+data class TexasToken(
+    val token: String
+)
+
+class TexasCloudClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,
     private val env: Environment,
-) {
+) : TexasClient {
     private val logger = logger()
 
     @WithSpan("Texas.requestToken")
-    open suspend fun requestToken(
+    override suspend fun requestToken(
         @SpanAttribute("namespace") namespace: String,
         @SpanAttribute("API") otherApiAppName: String,
     ): TexasToken {
-        val cluster = env.runtimeEnv.toCluster().nais
+        val cluster = env.runtimeEnv.nais
         val target = "api://${cluster}.$namespace.$otherApiAppName/.default"
         val requestBody = TokenRequest(identity_provider = "entra_id", target = target)
 
@@ -62,17 +62,6 @@ open class TexasClient(
             logger.error(
                 "Unable to request m2m token for: ${target}, texas responded with status ${this.status} and no content type"
             )
-        }
-    }
-
-    private fun RuntimeEnvironments.toCluster(): TexasCluster {
-        return when (this) {
-            RuntimeEnvironments.PROD -> TexasCluster.Prod
-            RuntimeEnvironments.DEV -> TexasCluster.Dev
-            RuntimeEnvironments.LOCAL ->
-                throw IllegalStateException(
-                    "Local environment should not request tokens from texas."
-                )
         }
     }
 

@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.external.configureExternalDependencies
 import no.nav.tsm.configureTestStuff
-import no.nav.tsm.core.db.runFlywayMigrations
+import core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -46,9 +46,9 @@ class BehandlerRoutesIntegrationTest {
             configureTestStuff()
         }
 
-        client.post("/create-boio")
-        client.post("/create-boio")
-        client.post("/create-boio")
+        client.post("/test/create-boio")
+        client.post("/test/create-boio")
+        client.post("/test/create-boio")
 
         val response = client.get("/test")
         assertEquals(HttpStatusCode.Created, response.status)

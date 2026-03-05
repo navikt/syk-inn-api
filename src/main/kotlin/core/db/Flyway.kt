@@ -1,4 +1,4 @@
-package no.nav.tsm.core.db
+package core.db
 
 import org.flywaydb.core.Flyway
 
