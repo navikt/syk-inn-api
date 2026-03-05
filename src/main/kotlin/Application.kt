@@ -2,8 +2,8 @@ package no.nav.tsm
 
 import io.ktor.server.application.*
 import modules.behandler.configureBehandlerModule
-import modules.external.configureExternalModule
 import modules.kafka.configureKafkaModule
+import modules.sykmelder.configureSykmelderModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import plugins.*
 
@@ -20,7 +20,7 @@ fun Application.module() {
     configureSerialization()
 
     // Specific modules
-    configureExternalModule()
+    configureSykmelderModule()
     configureSykmeldingerModule()
     configureBehandlerModule()
     configureKafkaModule()

@@ -19,7 +19,7 @@
     <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
-                %d{HH:mm:ss.SSS} %red(\(TEAMLOG\)) %highlight(%-5level) [%thread] %logger{36} - %msg%n
+                %d{HH:mm:ss.SSS} %red(\(TEAMLOG\)) %highlight(%-5level) %X{call-id} [%thread] %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -28,7 +28,7 @@
     <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
-                %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %logger{36} - %msg%n
+                %d{HH:mm:ss.SSS} %highlight(%-5level) %X{call-id} [%thread] %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>

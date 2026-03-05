@@ -1,16 +1,18 @@
-package modules.external
+package modules.sykmelder
 
 import core.dynamicDependencies
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import modules.external.clients.pdl.PdlCloudClient
-import modules.external.clients.pdl.PdlLocalClient
-import modules.external.clients.texas.TexasCloudClient
-import modules.external.clients.texas.TexasLocalClient
+import modules.sykmelder.clients.btsys.BtsysCloudClient
+import modules.sykmelder.clients.btsys.BtsysLocalClient
+import modules.sykmelder.clients.pdl.PdlCloudClient
+import modules.sykmelder.clients.pdl.PdlLocalClient
+import modules.sykmelder.clients.texas.TexasCloudClient
+import modules.sykmelder.clients.texas.TexasLocalClient
 
-fun Application.configureExternalDependencies() {
+fun Application.configureSykmelderDependencies() {
     val baseHttpClient: HttpClient by dependencies
 
     dependencies {
@@ -20,13 +22,17 @@ fun Application.configureExternalDependencies() {
     dynamicDependencies {
         local {
             provide(TexasLocalClient::class)
+            provide(BtsysLocalClient::class)
             provide(PdlLocalClient::class)
         }
         cloud {
             provide(TexasCloudClient::class)
+            provide(BtsysCloudClient::class)
             provide(PdlCloudClient::class)
         }
     }
+
+    dependencies { provide<SykmelderService>(SykmelderService::class) }
 }
 
 private fun createExternalApiHttpClient(baseHttpClient: HttpClient) =

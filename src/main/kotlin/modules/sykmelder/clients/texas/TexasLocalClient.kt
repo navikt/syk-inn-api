@@ -1,4 +1,4 @@
-package modules.external.clients.texas
+package modules.sykmelder.clients.texas
 
 class TexasLocalClient : TexasClient {
     override suspend fun requestToken(namespace: String, otherApiAppName: String): TexasToken {

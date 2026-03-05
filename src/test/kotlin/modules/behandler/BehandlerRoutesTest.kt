@@ -11,7 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import modules.external.configureExternalDependencies
+import modules.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
 import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 import utils.configureTestEnvironment
@@ -27,7 +27,7 @@ class BehandlerRoutesTest {
             dependencies.provide<SykmeldingService> { mocken }
 
             configureTestEnvironment()
-            configureExternalDependencies()
+            configureSykmelderDependencies()
             configureTestStuff()
         }
 

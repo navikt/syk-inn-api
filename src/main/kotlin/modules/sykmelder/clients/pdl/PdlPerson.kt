@@ -1,4 +1,4 @@
-package modules.external.clients.pdl
+package modules.sykmelder.clients.pdl
 
 import java.time.LocalDate
 
