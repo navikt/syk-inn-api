@@ -1,11 +1,11 @@
 package utils
 
+import core.Environment
+import core.RuntimeEnvironments
 import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
-import core.Environment
-import core.RuntimeEnvironments
 
 fun Application.configureTestEnvironment() {
     dependencies {

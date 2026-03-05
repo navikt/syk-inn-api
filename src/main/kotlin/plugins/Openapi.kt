@@ -7,6 +7,6 @@ import io.ktor.server.routing.*
 
 fun Application.configureOpenAPI() {
     routing {
-        openAPI(path = "openapi") { info = OpenApiInfo(title = "My API", version = "1.0.0") }
+        openAPI(path = "openapi") { info = OpenApiInfo(title = "Syk Inn API", version = "1.0.0") }
     }
 }

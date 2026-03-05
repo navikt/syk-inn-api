@@ -1,5 +1,6 @@
 package modules.behandler.api
 
+import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
@@ -13,7 +14,6 @@ import io.ktor.server.routing.routing
 import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
 import modules.behandler.api.payloads.OpprettSykmelding
-import core.logger
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
@@ -22,15 +22,15 @@ fun Application.configureBehandlerRoutes() {
     routing {
         route("/api/sykmelding") {
             post {
-                try {
-                    val payload: OpprettSykmelding.Payload = call.receive()
+                    try {
+                        val payload: OpprettSykmelding.Payload = call.receive()
 
-                    call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
-                } catch (ex: Exception) {
-                    logger.error(ex)
-                    throw ex
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                    } catch (ex: Exception) {
+                        logger.error(ex)
+                        throw ex
+                    }
                 }
-            }
                 .describe {
                     summary = "Create a new sykmelding"
                     description =
@@ -41,15 +41,15 @@ fun Application.configureBehandlerRoutes() {
                     }
                 }
             post("/verify") {
-                try {
-                    val payload: OpprettSykmelding.Payload = call.receive()
+                    try {
+                        val payload: OpprettSykmelding.Payload = call.receive()
 
-                    call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
-                } catch (ex: Exception) {
-                    logger.error(ex)
-                    throw ex
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                    } catch (ex: Exception) {
+                        logger.error(ex)
+                        throw ex
+                    }
                 }
-            }
                 .describe {
                     summary = "Verifying the contents of a sykmelding"
                     description =
@@ -63,10 +63,10 @@ fun Application.configureBehandlerRoutes() {
                     }
                 }
             get("/{id}") {
-                val id = call.parameters["id"] ?: return@get call.respond("Missing id")
+                    val id = call.parameters["id"] ?: return@get call.respond("Missing id")
 
-                TODO("Stub for get sykmelding by id: $id")
-            }
+                    TODO("Stub for get sykmelding by id: $id")
+                }
                 .describe {
                     summary = "Get a sykmelding by id"
                     description =

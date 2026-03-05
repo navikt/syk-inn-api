@@ -1,5 +1,7 @@
 package modules.external.clients.texas
 
+import core.Environment
+import core.logger
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -12,16 +14,12 @@ import io.ktor.http.isTextType
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import core.Environment
-import core.logger
 
 sealed interface TexasClient {
     suspend fun requestToken(namespace: String, otherApiAppName: String): TexasToken
 }
 
-data class TexasToken(
-    val token: String
-)
+data class TexasToken(val token: String)
 
 class TexasCloudClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,

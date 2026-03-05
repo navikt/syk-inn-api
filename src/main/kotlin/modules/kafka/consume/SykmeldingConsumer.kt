@@ -1,12 +1,12 @@
-package no.nav.tsm.modules.kafka.consume
+package modules.kafka.consume
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import core.Environment
+import core.logger
 import java.time.Duration
 import java.util.Properties
 import kotlin.to
-import core.Environment
-import core.logger
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -61,16 +61,4 @@ class SykmeldingConsumer(environment: Environment) {
                 ex,
             )
         }
-}
-
-fun initializeSykmeldingerConsumer(environment: Environment): KafkaConsumer<String, ByteArray?> {
-    val kafkaProperties = Properties(environment.kafka)
-
-    kafkaProperties.apply {
-        this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-ktor"
-        this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-        this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "true"
-    }
-
-    return KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
 }

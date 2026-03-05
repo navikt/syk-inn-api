@@ -1,5 +1,7 @@
 package plugins
 
+import core.Environment
+import core.initializeEnvironment
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache5.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -7,8 +9,6 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import kotlinx.coroutines.CoroutineScope
-import core.Environment
-import core.initializeEnvironment
 
 fun Application.configureDependencies() {
     val config = environment.config

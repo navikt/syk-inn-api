@@ -1,5 +1,6 @@
 package core.jobs
 
+import core.logger
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -7,7 +8,6 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import core.logger
 
 enum class JobStatus {
     NOT_STARTED,
