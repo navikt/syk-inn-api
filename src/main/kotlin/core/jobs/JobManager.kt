@@ -8,6 +8,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import modules.jobs.service.JobName
 
 enum class JobStatus {
     NOT_STARTED,
@@ -23,7 +24,7 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
     private var jobStatus: JobStatus = JobStatus.NOT_STARTED
     private val mutex: Mutex = Mutex()
 
-    protected abstract val jobName: String
+    abstract val jobName: JobName
 
     fun status(): JobStatus {
         return this.jobStatus
@@ -69,6 +70,8 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
     suspend fun stop(): Boolean {
         if (job == null || job?.isCancelled == true) {
             logger.info("No job was running, nothing to stop")
+
+            jobStatus = JobStatus.STOPPED
             return false
         }
 

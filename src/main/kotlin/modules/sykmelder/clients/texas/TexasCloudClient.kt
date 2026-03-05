@@ -32,7 +32,7 @@ class TexasCloudClient(
         @SpanAttribute("namespace") namespace: String,
         @SpanAttribute("API") otherApiAppName: String,
     ): TexasToken {
-        val cluster = env.runtimeEnv.nais
+        val cluster = env.runtime.env.nais
         val target = "api://${cluster}.$namespace.$otherApiAppName/.default"
         val requestBody = TokenRequest(identity_provider = "entra_id", target = target)
 

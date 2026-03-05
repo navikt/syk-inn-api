@@ -1,6 +1,7 @@
 package modules.sykmelder.clients.texas
 
 import core.Environment
+import core.Runtime
 import core.RuntimeEnvironments
 import core.Texas
 import io.ktor.client.HttpClient
@@ -52,7 +53,7 @@ class TexasClientTest {
 
 private val testEnv =
     Environment(
-        runtimeEnv = RuntimeEnvironments.PROD,
+        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app"),
         texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
         kafka = mockk(relaxed = true),
         postgres = mockk(relaxed = true),

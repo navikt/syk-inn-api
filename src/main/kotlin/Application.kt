@@ -2,6 +2,7 @@ package no.nav.tsm
 
 import io.ktor.server.application.*
 import modules.behandler.configureBehandlerModule
+import modules.jobs.configureJobsModule
 import modules.kafka.configureKafkaModule
 import modules.sykmelder.configureSykmelderModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
@@ -24,6 +25,7 @@ fun Application.module() {
     configureSykmeldingerModule()
     configureBehandlerModule()
     configureKafkaModule()
+    configureJobsModule()
 
     // TODO: Temporary
     configureTestStuff()

@@ -11,6 +11,7 @@ fun Application.configureSerialization() {
     routing {
         install(ContentNegotiation) {
             jackson {
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 enable(SerializationFeature.INDENT_OUTPUT)
                 registerModule(JavaTimeModule())
             }

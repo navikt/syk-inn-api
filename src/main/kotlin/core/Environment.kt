@@ -11,14 +11,16 @@ enum class RuntimeEnvironments(val nais: String) {
     PROD("prod-gcp"),
 }
 
+class Runtime(val env: RuntimeEnvironments, val name: String)
+
 class PostgresConfig(val url: String, val username: String, val password: String)
 
 class Texas(val tokenEndpoint: String)
 
-class ExternalApi(val tsmPdlCache: String)
+class ExternalApi(val tsmPdlCache: String, val helsenettproxy: String, val btsys: String)
 
 class Environment(
-    val runtimeEnv: RuntimeEnvironments,
+    val runtime: Runtime,
     val kafka: Properties,
     val postgres: PostgresConfig,
     val texas: () -> Texas,
@@ -32,7 +34,11 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         }
 
     return Environment(
-        runtimeEnv = config.inferRuntimeEnvironment(),
+        runtime =
+            Runtime(
+                env = config.inferRuntimeEnvironment(),
+                name = config.property("app.name").getString(),
+            ),
         kafka = kafkaProperties,
         postgres =
             PostgresConfig(
@@ -41,14 +47,20 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 password = config.property("postgres.password").getString(),
             ),
         texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
-        external = { ExternalApi(tsmPdlCache = config.property("tsm.pdl_cache").getString()) },
+        external = {
+            ExternalApi(
+                tsmPdlCache = config.property("tsm-pdl-cache").getString(),
+                helsenettproxy = config.property("syfohelsenettproxy").getString(),
+                btsys = config.property("btsys").getString(),
+            )
+        },
     )
 }
 
 fun Application.isLocal(): Boolean {
     val env: Environment by dependencies
 
-    return env.runtimeEnv == RuntimeEnvironments.LOCAL
+    return env.runtime.env == RuntimeEnvironments.LOCAL
 }
 
 private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {
