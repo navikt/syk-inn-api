@@ -8,6 +8,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class JobScheduler(private val jobManagers: List<JobManager>, private val jobService: JobService) {
     private val updateInterval = 10.seconds
@@ -17,17 +18,28 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
 
     suspend fun setup() {
         log.debug("Setting up JobScheduler")
-        updateJobStatuses()
-    }
-
-    private suspend fun updateJobStatuses() {
-        log.debug("Updating job statuses")
         jobManagers.forEach {
-            jobService.updateJobStatus(runner = uuid, jobName = it.jobName, jobStatus = it.status())
+            jobService.updateJobStatus(
+                runner = uuid,
+                jobName = it.jobName,
+                jobStatus = it.status.value,
+            )
         }
     }
 
     suspend fun start() = coroutineScope {
+        jobManagers.forEach { manager ->
+            launch {
+                manager.status.collect { newStatus ->
+                    log.debug("Job ${manager.jobName} status changed to $newStatus")
+                    jobService.updateJobStatus(
+                        runner = uuid,
+                        jobName = manager.jobName,
+                        jobStatus = newStatus,
+                    )
+                }
+            }
+        }
         while (isActive) {
             updateJobs()
             delay(updateInterval)
@@ -36,12 +48,11 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
 
     suspend fun updateJobs() {
         log.debug("Updating jobs statuses")
-        updateJobStatuses()
         val jobs = jobService.getJobs().associate { it.jobName to it.desiredState }
         jobManagers.forEach { manager ->
             val desiredState = jobs[manager.jobName]
             requireNotNull(desiredState) { "No desired state found for job ${manager.jobName}" }
-            if (desiredState != manager.status()) {
+            if (desiredState != manager.status.value) {
                 log.info("Updating job ${manager.jobName} to desired state $desiredState")
                 when (desiredState) {
                     JobStatus.RUNNING -> manager.start()

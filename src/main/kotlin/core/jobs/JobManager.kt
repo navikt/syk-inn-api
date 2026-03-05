@@ -5,6 +5,9 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -21,14 +24,11 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
     private val logger = logger()
 
     private var job: Job? = null
-    private var jobStatus: JobStatus = JobStatus.NOT_STARTED
+    private val _status = MutableStateFlow(JobStatus.NOT_STARTED)
+    val status: StateFlow<JobStatus> = _status.asStateFlow()
     private val mutex: Mutex = Mutex()
 
     abstract val jobName: JobName
-
-    fun status(): JobStatus {
-        return this.jobStatus
-    }
 
     suspend fun start(): Boolean {
         logger.info("Starting $jobName")
@@ -49,15 +49,15 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
             job =
                 applicationScope.launch {
                     try {
-                        jobStatus = JobStatus.RUNNING
+                        _status.value = JobStatus.RUNNING
                         runJob()
-                        jobStatus = JobStatus.STOPPED
+                        _status.value = JobStatus.STOPPED
                     } catch (ex: CancellationException) {
                         logger.info("KafkaConsumerJob was cancelled gracefully", ex)
-                        jobStatus = JobStatus.STOPPED
+                        _status.value = JobStatus.STOPPED
                     } catch (cause: Exception) {
                         logger.error("KafkaConsumerJob crashed unexpectedly", cause)
-                        jobStatus = JobStatus.FAILED
+                        _status.value = JobStatus.FAILED
                     } finally {
                         logger.info("Job finished or failed, setting job reference to null")
                         job = null
@@ -71,7 +71,7 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
         if (job == null || job?.isCancelled == true) {
             logger.info("No job was running, nothing to stop")
 
-            jobStatus = JobStatus.STOPPED
+            _status.value = JobStatus.STOPPED
             return false
         }
 
@@ -84,7 +84,7 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
 
             job?.cancelAndJoin()
             job = null
-            jobStatus = JobStatus.STOPPED
+            _status.value = JobStatus.STOPPED
 
             logger.info("Job stopped successfully")
             return true
