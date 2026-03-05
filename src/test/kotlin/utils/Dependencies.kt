@@ -1,6 +1,7 @@
 package utils
 
 import core.Environment
+import core.Runtime
 import core.RuntimeEnvironments
 import io.ktor.client.HttpClient
 import io.ktor.server.application.*
@@ -12,7 +13,7 @@ fun Application.configureTestEnvironment() {
         provide<HttpClient> { HttpClient() }
         provide<Environment>() {
             Environment(
-                runtimeEnv = RuntimeEnvironments.LOCAL,
+                runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
                 kafka = mockk(),
                 postgres = mockk(),
                 texas = { mockk() },
