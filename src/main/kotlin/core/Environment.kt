@@ -19,12 +19,17 @@ class Texas(val tokenEndpoint: String)
 
 class ExternalApi(val tsmPdlCache: String, val helsenettproxy: String, val btsys: String)
 
+class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
+
+class Auth(val entra: EntraAuth)
+
 class Environment(
     val runtime: Runtime,
     val kafka: Properties,
     val postgres: PostgresConfig,
     val texas: () -> Texas,
     val external: () -> ExternalApi,
+    val auth: () -> Auth,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -52,6 +57,16 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 tsmPdlCache = config.property("tsm-pdl-cache").getString(),
                 helsenettproxy = config.property("syfohelsenettproxy").getString(),
                 btsys = config.property("btsys").getString(),
+            )
+        },
+        auth = {
+            Auth(
+                entra =
+                    EntraAuth(
+                        audience = config.property("auth.entra.audience").getString(),
+                        jwksUri = config.property("auth.entra.openid.jwks").getString(),
+                        issuer = config.property("auth.entra.openid.issuer").getString(),
+                    )
             )
         },
     )

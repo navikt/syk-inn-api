@@ -5,8 +5,9 @@ import modules.behandler.configureBehandlerModule
 import modules.jobs.configureJobsModule
 import modules.kafka.configureKafkaModule
 import modules.sykmelder.configureSykmelderModule
-import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
+import modules.sykmeldinger.configureSykmeldingerModule
 import plugins.*
+import plugins.auth.configureAuthentication
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -19,6 +20,7 @@ fun Application.module() {
     configureOpenAPI()
     configureDatabase()
     configureSerialization()
+    configureAuthentication()
 
     // Specific modules
     configureSykmelderModule()

@@ -18,6 +18,7 @@ fun Application.configureTestEnvironment() {
                 postgres = mockk(),
                 texas = { mockk() },
                 external = { mockk() },
+                auth = { mockk() },
             )
         }
     }
