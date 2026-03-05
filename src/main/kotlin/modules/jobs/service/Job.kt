@@ -26,4 +26,4 @@ enum class JobUpdateAction {
     STOP,
 }
 
-data class JobUpdatePayload(val desiredState: JobUpdateAction, val updatedBy: String)
+data class JobUpdatePayload(val state: JobUpdateAction)

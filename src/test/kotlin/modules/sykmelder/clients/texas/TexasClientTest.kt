@@ -58,4 +58,5 @@ private val testEnv =
         kafka = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
         external = mockk(relaxed = true),
+        auth = mockk(relaxed = true),
     )

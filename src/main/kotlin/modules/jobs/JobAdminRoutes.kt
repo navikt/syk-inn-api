@@ -1,8 +1,10 @@
 package modules.jobs
 
 import core.jobs.JobStatus
+import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -15,6 +17,8 @@ import modules.jobs.service.JobName
 import modules.jobs.service.JobService
 import modules.jobs.service.JobUpdateAction
 import modules.jobs.service.JobUpdatePayload
+import plugins.auth.InternalSymfoniAuth
+import plugins.auth.internalSymfoniUser
 
 data class JobRunners(val runner: String, val state: JobStatus, val updatedAt: OffsetDateTime)
 
@@ -26,47 +30,56 @@ data class JobStatusResponse(
 )
 
 fun Application.configureJobAdminRoutes() {
+    val logger = logger()
     val jobService: JobService by dependencies
 
     routing {
-        route("/internal/admin/jobs") {
-            get {
-                val jobs = jobService.getJobs()
-                val statuses = jobService.getJobStatus().groupBy { it.job }
-                val response =
-                    jobs.map { job ->
-                        val jobStatuses = statuses[job.jobName] ?: emptyList()
-                        JobStatusResponse(
-                            name = job.jobName,
-                            desiredState = job.desiredState,
-                            updatedAt = job.updatedAt,
-                            runners =
-                                jobStatuses.map { runner ->
-                                    JobRunners(
-                                        runner = runner.runner,
-                                        state = runner.state,
-                                        updatedAt = runner.updatedAt,
-                                    )
-                                },
-                        )
-                    }
+        authenticate(InternalSymfoniAuth) {
+            route("/internal/admin/jobs") {
+                get {
+                    val jobs = jobService.getJobs()
+                    val statuses = jobService.getJobStatus().groupBy { it.job }
+                    val response =
+                        jobs.map { job ->
+                            val jobStatuses = statuses[job.jobName] ?: emptyList()
+                            JobStatusResponse(
+                                name = job.jobName,
+                                desiredState = job.desiredState,
+                                updatedAt = job.updatedAt,
+                                runners =
+                                    jobStatuses.map { runner ->
+                                        JobRunners(
+                                            runner = runner.runner,
+                                            state = runner.state,
+                                            updatedAt = runner.updatedAt,
+                                        )
+                                    },
+                            )
+                        }
 
-                call.respond(HttpStatusCode.OK, response)
-            }
-            post("{name}/status") {
-                val name =
-                    call.parameters["name"]?.let { JobName.valueOf(it) }
-                        ?: return@post call.respond(HttpStatusCode.BadRequest)
-                val job = call.receive<JobUpdatePayload>()
-                val desiredState =
-                    when (job.desiredState) {
-                        JobUpdateAction.START -> JobStatus.RUNNING
-                        JobUpdateAction.STOP -> JobStatus.STOPPED
-                    }
+                    call.respond(HttpStatusCode.OK, response)
+                }
+                post("{name}/status") {
+                    val name =
+                        call.parameters["name"]?.let { JobName.valueOf(it) }
+                            ?: return@post call.respond(HttpStatusCode.BadRequest)
+                    val job = call.receive<JobUpdatePayload>()
+                    val desiredState =
+                        when (job.state) {
+                            JobUpdateAction.START -> JobStatus.RUNNING
+                            JobUpdateAction.STOP -> JobStatus.STOPPED
+                        }
 
-                jobService.updateJob(name, desiredState, job.updatedBy)
+                    val principal = internalSymfoniUser()
 
-                call.respond(HttpStatusCode.Accepted, mapOf("ok" to true))
+                    logger.info(
+                        "User ${principal.name} has requested to change the status of job $name to $desiredState"
+                    )
+
+                    jobService.updateJob(name, desiredState, principal.userId)
+
+                    call.respond(HttpStatusCode.Accepted, mapOf("ok" to true))
+                }
             }
         }
     }
