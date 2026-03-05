@@ -1,7 +1,6 @@
 package no.nav.tsm.modules.kafka.admin
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
@@ -12,7 +11,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import kotlin.collections.mapOf
 import modules.kafka.consume.SykmeldingConsumerJobManager
-import core.logger
 
 fun Application.configureKafkaAdminRoutes() {
     val logger = logger()

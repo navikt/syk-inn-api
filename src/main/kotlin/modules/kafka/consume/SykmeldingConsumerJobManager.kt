@@ -1,8 +1,7 @@
 package modules.kafka.consume
 
-import kotlinx.coroutines.CoroutineScope
 import core.jobs.JobManager
-import no.nav.tsm.modules.kafka.consume.SykmeldingConsumerService
+import kotlinx.coroutines.CoroutineScope
 
 class SykmeldingConsumerJobManager(
     applicationScope: CoroutineScope,

@@ -1,5 +1,6 @@
 package modules.behandler
 
+import core.db.runFlywayMigrations
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
@@ -12,7 +13,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.external.configureExternalDependencies
 import no.nav.tsm.configureTestStuff
-import core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.jdbc.Database

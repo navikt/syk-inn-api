@@ -1,5 +1,8 @@
 package modules.external.clients.texas
 
+import core.Environment
+import core.RuntimeEnvironments
+import core.Texas
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -14,9 +17,6 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import core.Environment
-import core.RuntimeEnvironments
-import core.Texas
 import utils.parse
 
 class TexasClientTest {

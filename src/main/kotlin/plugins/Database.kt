@@ -1,9 +1,9 @@
 package plugins
 
-import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.dependencies
 import core.Environment
 import core.db.runFlywayMigrations
+import io.ktor.server.application.Application
+import io.ktor.server.plugins.di.dependencies
 import org.jetbrains.exposed.v1.jdbc.Database
 
 fun Application.configureDatabase() {

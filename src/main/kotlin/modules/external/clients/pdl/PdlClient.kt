@@ -1,5 +1,6 @@
 package modules.external.clients.pdl
 
+import core.Environment
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -8,7 +9,6 @@ import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import modules.external.clients.texas.TexasCloudClient
-import core.Environment
 
 sealed interface PdlClient {
     suspend fun getPerson(ident: String): PdlPerson?
