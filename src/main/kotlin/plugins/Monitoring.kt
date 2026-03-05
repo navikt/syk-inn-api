@@ -13,6 +13,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import org.slf4j.event.Level
 
 fun Application.configureMonitoring() {
     configureMicrometer()
@@ -29,7 +30,10 @@ fun Application.configureMonitoring() {
         retrieveFromHeader("Traceparent")
         retrieveFromHeader(HttpHeaders.XRequestId)
     }
-    install(CallLogging) { callIdMdc("call-id") }
+    install(CallLogging) {
+        level = Level.DEBUG
+        callIdMdc("call-id")
+    }
 }
 
 private fun Application.configureMicrometer() {
