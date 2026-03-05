@@ -16,12 +16,12 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
     private val uuid = UUID.randomUUID().toString()
 
     suspend fun setup() {
-        log.info("Setting up JobScheduler")
+        log.debug("Setting up JobScheduler")
         updateJobStatuses()
     }
 
     private suspend fun updateJobStatuses() {
-        log.info("Updating job statuses")
+        log.debug("Updating job statuses")
         jobManagers.forEach {
             jobService.updateJobStatus(runner = uuid, jobName = it.jobName, jobStatus = it.status())
         }
@@ -35,7 +35,7 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
     }
 
     suspend fun updateJobs() {
-        log.info("Updating jobs statuses")
+        log.debug("Updating jobs statuses")
         updateJobStatuses()
         val jobs = jobService.getJobs().associate { it.jobName to it.desiredState }
         jobManagers.forEach { manager ->
