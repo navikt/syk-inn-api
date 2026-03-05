@@ -3,24 +3,26 @@ package modules.jobs.service
 import core.jobs.JobManager
 import core.jobs.JobStatus
 import core.logger
-import java.util.UUID
+import io.ktor.server.plugins.di.annotations.Named
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class JobScheduler(private val jobManagers: List<JobManager>, private val jobService: JobService) {
+class JobScheduler(
+    private val jobManagers: List<JobManager>,
+    private val jobService: JobService,
+    @Named("runner") private val runner: String,
+) {
     private val updateInterval = 10.seconds
     private val log = logger()
-
-    private val uuid = UUID.randomUUID().toString()
 
     suspend fun setup() {
         log.debug("Setting up JobScheduler")
         jobManagers.forEach {
             jobService.updateJobStatus(
-                runner = uuid,
+                runner = runner,
                 jobName = it.jobName,
                 jobStatus = it.status.value,
             )
@@ -33,7 +35,7 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
                 manager.status.collect { newStatus ->
                     log.debug("Job ${manager.jobName} status changed to $newStatus")
                     jobService.updateJobStatus(
-                        runner = uuid,
+                        runner = runner,
                         jobName = manager.jobName,
                         jobStatus = newStatus,
                     )
@@ -66,6 +68,6 @@ class JobScheduler(private val jobManagers: List<JobManager>, private val jobSer
 
     suspend fun stop() {
         jobManagers.forEach { jobManager -> jobManager.stop() }
-        jobService.deleteRunner(uuid)
+        jobService.deleteRunner(runner)
     }
 }
