@@ -8,11 +8,11 @@ import io.ktor.server.plugins.di.dependencies
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import modules.jobs.service.JobScheduler
+import modules.jobs.service.JobSchedulerService
 
 fun Application.configureJobSceduling() {
     val log = logger()
-    val jobScheduler: JobScheduler by dependencies
+    val jobScheduler: JobSchedulerService by dependencies
 
     monitor.subscribe(ApplicationStarting) {
         launch {
