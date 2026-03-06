@@ -23,8 +23,8 @@ fun Application.module() {
     configureAuthentication()
 
     // Specific modules
-    configureSykmelderModule()
     configureSykmeldingerModule()
+    configureSykmelderModule()
     configureBehandlerModule()
     configureKafkaModule()
     configureJobsModule()

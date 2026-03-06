@@ -1,6 +1,6 @@
-package modules.behandler.api.mappers
+package modules.behandler.mappers
 
-import modules.behandler.api.payloads.OpprettSykmelding
+import modules.behandler.payloads.OpprettSykmelding
 import modules.sykmeldinger.SykInnAktivitet
 import modules.sykmeldinger.SykInnArbeidsgiver
 import modules.sykmeldinger.SykInnArbeidsrelatertArsak

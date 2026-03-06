@@ -6,8 +6,13 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import modules.sykmeldinger.SykInnSykmelding
+import modules.sykmeldinger.SykmeldingerService
 
-class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
+class SykmeldingConsumerService(
+    private val consumer: SykmeldingConsumer,
+    private val sykmeldingerService: SykmeldingerService,
+) {
     private val logger = logger()
 
     suspend fun consume() =
@@ -39,5 +44,16 @@ class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
                 )
             }"
         )
+
+        /**
+         * TODO: The rules are already executed here, should we handle this is service or should
+         *   Kafka rawdog Repo directly?
+         */
+        sykmeldingerService.create(value.toSykInnSykmelding())
     }
+}
+
+/** Just a stub, should map from SykmledingKafkaRecord → SykInnSykmelding */
+private fun Map<String, String>?.toSykInnSykmelding(): SykInnSykmelding {
+    TODO("Not yet implemented")
 }

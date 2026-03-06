@@ -1,9 +1,10 @@
-package modules.behandler.api
+package modules.behandler
 
 import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
+import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -13,12 +14,17 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
-import modules.behandler.api.mappers.toSykInnSykmelding
-import modules.behandler.api.payloads.OpprettSykmelding
+import modules.behandler.access.BehandlerAccessControlService
+import modules.behandler.mappers.toSykInnSykmelding
+import modules.behandler.payloads.BehandlerSykmelding
+import modules.behandler.payloads.BehandlerSykmeldingVerify
+import modules.behandler.payloads.OpprettSykmelding
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
     val logger = logger()
+    val accessControlService: BehandlerAccessControlService by dependencies
+    // val sykmeldingerService: SykmeldingerService by dependencies
 
     routing {
         route("/api/sykmelding") {
@@ -26,7 +32,27 @@ fun Application.configureBehandlerRoutes() {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
                         val sykInnSykmelding = payload.toSykInnSykmelding()
+                        val accessControlledSykmelding =
+                            accessControlService.toRedactedIfNeeded(sykInnSykmelding)
 
+                        // TODO: Access control is applied on the API level
+                        logger.info("$accessControlledSykmelding")
+
+                        /*
+                        val created = sykmeldingerService.createSykmelding(sykInnSykmelding)
+                        if (created) {
+                            call.respond(HttpStatusCode.Created, sykInnSykmelding.toCreatedPayload())
+                            return@post
+                        } else {
+                            // TODO: Handle errors properly
+                            call.respond(HttpStatusCode.InternalServerError)
+                            return@post
+                        }
+                        */
+
+                        /**
+                         * TODO: Can we make the return value for the API strictly typed somehow?
+                         */
                         call.respond(HttpStatusCode(418, "I'm a teapot!"), sykInnSykmelding)
                     } catch (ex: Exception) {
                         logger.error(ex)
@@ -39,7 +65,10 @@ fun Application.configureBehandlerRoutes() {
                         "Will execute rules based on logged in users HPR authorizations and other metadata."
                     requestBody { schema = jsonSchema<OpprettSykmelding.Payload>() }
                     responses {
-                        HttpStatusCode.Created { description = "The newly created sykmelding" }
+                        HttpStatusCode.Created {
+                            description = "The newly created sykmelding"
+                            schema = jsonSchema<BehandlerSykmelding>()
+                        }
                     }
                 }
             post("/verify") {
@@ -62,6 +91,7 @@ fun Application.configureBehandlerRoutes() {
                         HttpStatusCode.OK {
                             description =
                                 "The result of the rule execution, without creating the sykmelding"
+                            schema = jsonSchema<BehandlerSykmeldingVerify>()
                         }
                     }
                 }
@@ -75,7 +105,10 @@ fun Application.configureBehandlerRoutes() {
                     description =
                         "Will return the sykmelding with the given id, if it exists and the logged in user has access to it."
                     responses {
-                        HttpStatusCode.OK { description = "The sykmelding with the given id" }
+                        HttpStatusCode.OK {
+                            description = "The sykmelding with the given id"
+                            schema = jsonSchema<BehandlerSykmelding>()
+                        }
                         HttpStatusCode.NotFound {
                             description =
                                 "No sykmelding with the given id was found, or the logged in user does not have access to it."
@@ -91,6 +124,7 @@ fun Application.configureBehandlerRoutes() {
                         HttpStatusCode.OK {
                             description =
                                 "A list of sykmeldinger that the logged in user has access to"
+                            schema = jsonSchema<BehandlerSykmelding>()
                         }
                     }
                 }

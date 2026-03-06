@@ -1,18 +1,18 @@
 @file:OptIn(ExperimentalUuidApi::class)
 
-package no.nav.tsm.modules.sykmeldinger.db
+package modules.sykmeldinger.db
 
 import java.util.UUID
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingExposed
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
+import modules.sykmeldinger.db.exposed.SykmeldingExposed
+import modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
-class SykmeldingExposedRepo() {
+class SykmeldingerRepo() {
     fun test(): List<Pair<UUID, SykmeldingJsonb>> = transaction {
         val sykmeldinger: List<Pair<UUID, SykmeldingJsonb>> =
             SykmeldingExposed.selectAll()
