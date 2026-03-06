@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
+import modules.behandler.api.mappers.toSykInnSykmelding
 import modules.behandler.api.payloads.OpprettSykmelding
 
 @OptIn(ExperimentalKtorApi::class)
@@ -24,8 +25,9 @@ fun Application.configureBehandlerRoutes() {
             post {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
+                        val sykInnSykmelding = payload.toSykInnSykmelding()
 
-                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), sykInnSykmelding)
                     } catch (ex: Exception) {
                         logger.error(ex)
                         throw ex
@@ -43,8 +45,9 @@ fun Application.configureBehandlerRoutes() {
             post("/verify") {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
+                        val sykInnSykmelding = payload.toSykInnSykmelding()
 
-                        call.respond(HttpStatusCode(418, "I'm a teapot!"), payload)
+                        call.respond(HttpStatusCode(418, "I'm a teapot!"), sykInnSykmelding)
                     } catch (ex: Exception) {
                         logger.error(ex)
                         throw ex
