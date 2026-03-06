@@ -12,7 +12,7 @@ import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.sykmelder.configureSykmelderDependencies
-import modules.sykmeldinger.SykmeldingService
+import modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.configureTestStuff
 import utils.configureTestEnvironment
 
@@ -22,9 +22,9 @@ class BehandlerRoutesTest {
     fun testen() = testApplication {
         client = createClient { install(ContentNegotiation) { jackson() } }
 
-        val mocken = mockk<SykmeldingService>()
+        val mocken = mockk<SykmeldingerService>()
         application {
-            dependencies.provide<SykmeldingService> { mocken }
+            dependencies.provide<SykmeldingerService> { mocken }
 
             configureTestEnvironment()
             configureSykmelderDependencies()

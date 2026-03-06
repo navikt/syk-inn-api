@@ -2,15 +2,13 @@ package modules.sykmeldinger
 
 import java.time.LocalDate
 import java.util.UUID
-import modules.behandler.api.payloads.SykInnDiagnoseSystem
+import modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
 /**
- * Lite utgangspunkt på det sentrlare Domeneobjektet for Syk Inn API, ingenting her er satt
- * i stein.
+ * Lite utgangspunkt på det sentrlare Domeneobjektet for Syk Inn API, ingenting her er satt i stein.
  */
-
 data class SykInnSykmelding(val sykmeldingId: UUID, val values: SykInnSykmeldingValues)
 
 data class SykInnSykmeldingValues(
