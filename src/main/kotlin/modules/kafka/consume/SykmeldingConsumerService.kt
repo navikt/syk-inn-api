@@ -6,8 +6,8 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import modules.sykmeldinger.SykInnSykmelding
 import modules.sykmeldinger.SykmeldingerService
+import modules.sykmeldinger.domain.RuledSykInnSykmelding
 
 class SykmeldingConsumerService(
     private val consumer: SykmeldingConsumer,
@@ -36,7 +36,7 @@ class SykmeldingConsumerService(
         }
 
     @WithSpan
-    private fun handleSykmelding(key: String, value: Map<String, String>?) {
+    private suspend fun handleSykmelding(key: String, value: Map<String, String>?) {
         logger.info(
             "Handling record with key $key and value of size ${value?.size ?: "null"}, values: ${
                 jacksonObjectMapper().writeValueAsString(
@@ -49,11 +49,11 @@ class SykmeldingConsumerService(
          * TODO: The rules are already executed here, should we handle this is service or should
          *   Kafka rawdog Repo directly?
          */
-        sykmeldingerService.create(value.toSykInnSykmelding())
+        sykmeldingerService.insert(value.toSykInnSykmelding())
     }
 }
 
 /** Just a stub, should map from SykmledingKafkaRecord → SykInnSykmelding */
-private fun Map<String, String>?.toSykInnSykmelding(): SykInnSykmelding {
+private fun Map<String, String>?.toSykInnSykmelding(): RuledSykInnSykmelding {
     TODO("Not yet implemented")
 }

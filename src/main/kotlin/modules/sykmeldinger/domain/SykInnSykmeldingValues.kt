@@ -1,15 +1,9 @@
-package modules.sykmeldinger
+package modules.sykmeldinger.domain
 
 import java.time.LocalDate
-import java.util.UUID
 import modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
-
-/**
- * Lite utgangspunkt på det sentrlare Domeneobjektet for Syk Inn API, ingenting her er satt i stein.
- */
-data class SykInnSykmelding(val sykmeldingId: UUID, val values: SykInnSykmeldingValues)
 
 data class SykInnSykmeldingValues(
     val pasientenSkalSkjermes: Boolean,
@@ -48,41 +42,6 @@ data class SykInnUtdypendeSporsmal(
 )
 
 data class SykInnUtdypendeSporsmalSvar(val sporsmalstekst: String, val svar: String)
-
-sealed interface SykInnAktivitet {
-
-    val fom: LocalDate
-    val tom: LocalDate
-
-    data class IkkeMulig(
-        override val fom: LocalDate,
-        override val tom: LocalDate,
-        val medisinskArsak: SykInnMedisinskArsak,
-        val arbeidsrelatertArsak: SykInnArbeidsrelatertArsak,
-    ) : SykInnAktivitet
-
-    data class Gradert(
-        val grad: Int,
-        override val fom: LocalDate,
-        override val tom: LocalDate,
-        val reisetilskudd: Boolean,
-    ) : SykInnAktivitet
-
-    data class Behandlingsdager(
-        val antallBehandlingsdager: Int,
-        override val fom: LocalDate,
-        override val tom: LocalDate,
-    ) : SykInnAktivitet
-
-    data class Avventende(
-        val innspillTilArbeidsgiver: String,
-        override val fom: LocalDate,
-        override val tom: LocalDate,
-    ) : SykInnAktivitet
-
-    data class Reisetilskudd(override val fom: LocalDate, override val tom: LocalDate) :
-        SykInnAktivitet
-}
 
 data class SykInnMedisinskArsak(val isMedisinskArsak: Boolean)
 

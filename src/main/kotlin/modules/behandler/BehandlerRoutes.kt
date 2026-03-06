@@ -15,48 +15,40 @@ import io.ktor.server.routing.routing
 import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
 import modules.behandler.access.BehandlerAccessControlService
+import modules.behandler.mappers.toBehandlerSykmeldingVerify
 import modules.behandler.mappers.toSykInnSykmelding
 import modules.behandler.payloads.BehandlerSykmelding
 import modules.behandler.payloads.BehandlerSykmeldingVerify
 import modules.behandler.payloads.OpprettSykmelding
+import modules.sykmeldinger.SykmeldingerService
+import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import modules.sykmeldinger.domain.UnruledSykInnSykmelding
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
     val logger = logger()
     val accessControlService: BehandlerAccessControlService by dependencies
-    // val sykmeldingerService: SykmeldingerService by dependencies
+    val sykmeldingerService: SykmeldingerService by dependencies
 
     routing {
         route("/api/sykmelding") {
             post {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
-                        val sykInnSykmelding = payload.toSykInnSykmelding()
-                        val accessControlledSykmelding =
-                            accessControlService.toRedactedIfNeeded(sykInnSykmelding)
+                        val unruledSykmelding = payload.toSykInnSykmelding()
 
-                        // TODO: Access control is applied on the API level
-                        logger.info("$accessControlledSykmelding")
+                        val createdSykmelding = sykmeldingerService.create(unruledSykmelding)
 
-                        /*
-                        val created = sykmeldingerService.createSykmelding(sykInnSykmelding)
-                        if (created) {
-                            call.respond(HttpStatusCode.Created, sykInnSykmelding.toCreatedPayload())
-                            return@post
-                        } else {
-                            // TODO: Handle errors properly
-                            call.respond(HttpStatusCode.InternalServerError)
-                            return@post
-                        }
-                        */
-
-                        /**
-                         * TODO: Can we make the return value for the API strictly typed somehow?
-                         */
-                        call.respond(HttpStatusCode(418, "I'm a teapot!"), sykInnSykmelding)
+                        call.respond(
+                            HttpStatusCode.Created,
+                            accessControlService.toRedactedIfNeeded(createdSykmelding),
+                        )
                     } catch (ex: Exception) {
                         logger.error(ex)
-                        throw ex
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            "Unable to create sykmelding",
+                        )
                     }
                 }
                 .describe {
@@ -74,9 +66,16 @@ fun Application.configureBehandlerRoutes() {
             post("/verify") {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
-                        val sykInnSykmelding = payload.toSykInnSykmelding()
+                        val sykmelding: UnruledSykInnSykmelding = payload.toSykInnSykmelding()
+                        val rule: SykInnSykmeldingRuleResult =
+                            sykmeldingerService.verify(sykmelding)
 
-                        call.respond(HttpStatusCode(418, "I'm a teapot!"), sykInnSykmelding)
+                        when (rule) {
+                            is SykInnSykmeldingRuleResult.OK ->
+                                call.respond(HttpStatusCode.OK, true)
+                            is SykInnSykmeldingRuleResult.Outcome ->
+                                rule.toBehandlerSykmeldingVerify()
+                        }
                     } catch (ex: Exception) {
                         logger.error(ex)
                         throw ex

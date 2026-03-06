@@ -17,7 +17,7 @@ data class BtsysRespons(val suspendert: Boolean)
 class BtsysException(message: String, cause: Exception? = null) : Exception(message, cause)
 
 sealed interface BtsysClient {
-    suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean
+    suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean?
 }
 
 class BtsysCloudClient(
@@ -32,7 +32,7 @@ class BtsysCloudClient(
             }
         }
 
-    override suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean {
+    override suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean? {
         val (accessToken) = this.getToken()
 
         val response =
@@ -52,8 +52,7 @@ class BtsysCloudClient(
                 result.suspendert
             }
 
-            response.status == HttpStatusCode.NotFound ->
-                throw BtsysException("Btsys gave us 404 Not Found")
+            response.status == HttpStatusCode.NotFound -> null
 
             else -> {
                 // TODO Logg feil respons og ident i teamlogg
