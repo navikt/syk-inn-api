@@ -13,8 +13,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.OffsetDateTime
+import modules.jobs.db.JobRepository
 import modules.jobs.service.JobName
-import modules.jobs.service.JobService
 import modules.jobs.service.JobUpdateAction
 import modules.jobs.service.JobUpdatePayload
 import plugins.auth.InternalSymfoniAuth
@@ -31,14 +31,14 @@ data class JobStatusResponse(
 
 fun Application.configureJobAdminRoutes() {
     val logger = logger()
-    val jobService: JobService by dependencies
+    val jobRepository: JobRepository by dependencies
 
     routing {
         authenticate(InternalSymfoniAuth) {
             route("/internal/admin/jobs") {
                 get {
-                    val jobs = jobService.getJobs()
-                    val statuses = jobService.getJobStatus().groupBy { it.job }
+                    val jobs = jobRepository.getJobs()
+                    val statuses = jobRepository.getJobStatus().groupBy { it.job }
                     val response =
                         jobs.map { job ->
                             val jobStatuses = statuses[job.jobName] ?: emptyList()
@@ -76,7 +76,7 @@ fun Application.configureJobAdminRoutes() {
                         "User ${principal.name} has requested to change the status of job $name to $desiredState"
                     )
 
-                    jobService.updateJob(name, desiredState, principal.userId)
+                    jobRepository.updateJob(name, desiredState, principal.userId)
 
                     call.respond(HttpStatusCode.Accepted, mapOf("ok" to true))
                 }

@@ -9,10 +9,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import modules.jobs.db.JobRepository
 
-class JobScheduler(
+class JobSchedulerService(
     private val jobManagers: List<JobManager>,
-    private val jobService: JobService,
+    private val jobRepository: JobRepository,
     @Named("runner") private val runner: String,
 ) {
     private val updateInterval = 10.seconds
@@ -21,7 +22,7 @@ class JobScheduler(
     suspend fun setup() {
         log.debug("Setting up JobScheduler")
         jobManagers.forEach {
-            jobService.updateJobStatus(
+            jobRepository.updateJobStatus(
                 runner = runner,
                 jobName = it.jobName,
                 jobStatus = it.status.value,
@@ -34,7 +35,7 @@ class JobScheduler(
             launch {
                 manager.status.collect { newStatus ->
                     log.debug("Job ${manager.jobName} status changed to $newStatus")
-                    jobService.updateJobStatus(
+                    jobRepository.updateJobStatus(
                         runner = runner,
                         jobName = manager.jobName,
                         jobStatus = newStatus,
@@ -50,7 +51,7 @@ class JobScheduler(
 
     suspend fun updateJobs() {
         log.debug("Updating jobs statuses")
-        val jobs = jobService.getJobs().associate { it.jobName to it.desiredState }
+        val jobs = jobRepository.getJobs().associate { it.jobName to it.desiredState }
         jobManagers.forEach { manager ->
             val desiredState = jobs[manager.jobName]
             requireNotNull(desiredState) { "No desired state found for job ${manager.jobName}" }
@@ -68,6 +69,6 @@ class JobScheduler(
 
     suspend fun stop() {
         jobManagers.forEach { jobManager -> jobManager.stop() }
-        jobService.deleteRunner(runner)
+        jobRepository.deleteRunner(runner)
     }
 }

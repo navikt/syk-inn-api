@@ -4,8 +4,8 @@ import core.Environment
 import core.jobs.JobManager
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import modules.jobs.service.JobScheduler
-import modules.jobs.service.JobService
+import modules.jobs.db.JobRepository
+import modules.jobs.service.JobSchedulerService
 import modules.kafka.consume.SykmeldingConsumerJobManager
 
 fun Application.configureJobDependencies() {
@@ -16,7 +16,7 @@ fun Application.configureJobDependencies() {
     dependencies {
         provide<List<JobManager>> { list }
         provide<String>("runner") { environment.runtime.name }
-        provide(JobService::class)
-        provide(JobScheduler::class)
+        provide(JobRepository::class)
+        provide(JobSchedulerService::class)
     }
 }
