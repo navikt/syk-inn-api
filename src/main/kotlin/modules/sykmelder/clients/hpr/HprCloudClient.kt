@@ -3,7 +3,9 @@ package modules.sykmelder.clients.hpr
 import core.Environment
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.callid.CallId
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.http.isSuccess
@@ -15,17 +17,24 @@ class HprException(message: String, cause: Exception?) : Exception(message, caus
 
 sealed interface HprClient {
 
-    suspend fun getSykmelderByHpr(behandlerHpr: String, callId: String): SykmelderMedHpr?
+    suspend fun getSykmelderByHpr(behandlerHpr: String): SykmelderMedHpr?
 
-    suspend fun getSykmelderByIdent(behandlerIdent: String, callId: String): SykmelderMedHpr?
+    suspend fun getSykmelderByIdent(behandlerIdent: String): SykmelderMedHpr?
 }
 
-class HelsenettProxyClient(
-    @Named("RetryHttpClient") private val httpClient: HttpClient,
+class HprCloudClient(
+    @Named("RetryHttpClient") httpClient: HttpClient,
     private val texasClient: TexasCloudClient,
     private val environment: Environment,
 ) : HprClient {
-    override suspend fun getSykmelderByHpr(behandlerHpr: String, callId: String): SykmelderMedHpr? {
+    private val httpClient: HttpClient =
+        httpClient.config {
+            install(CallId) {
+                intercept { request, callId -> request.header("Nav-CallId", callId) }
+            }
+        }
+
+    override suspend fun getSykmelderByHpr(behandlerHpr: String): SykmelderMedHpr? {
         val (accessToken) = getToken()
 
         val response =
@@ -34,7 +43,6 @@ class HelsenettProxyClient(
             ) {
                 headers {
                     append("Content-Type", "application/json")
-                    append("Nav-CallId", callId)
                     append("HprNummer", behandlerHpr)
                     append("Authorization", "Bearer $accessToken")
                 }
@@ -55,17 +63,13 @@ class HelsenettProxyClient(
         }
     }
 
-    override suspend fun getSykmelderByIdent(
-        behandlerIdent: String,
-        callId: String,
-    ): SykmelderMedHpr? {
+    override suspend fun getSykmelderByIdent(behandlerIdent: String): SykmelderMedHpr? {
         val (accessToken) = getToken()
 
         val response =
             httpClient.get("${environment.external().helsenettproxy}/api/v2/behandler") {
                 headers {
                     append("Content-Type", "application/json")
-                    append("Nav-CallId", callId)
                     append("behandlerFnr", behandlerIdent)
                     append("Authorization", "Bearer $accessToken")
                 }
