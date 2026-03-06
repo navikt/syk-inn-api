@@ -7,6 +7,8 @@ import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 import modules.sykmelder.clients.btsys.BtsysCloudClient
 import modules.sykmelder.clients.btsys.BtsysLocalClient
+import modules.sykmelder.clients.hpr.HprCloudClient
+import modules.sykmelder.clients.hpr.HprLocalClient
 import modules.sykmelder.clients.pdl.PdlCloudClient
 import modules.sykmelder.clients.pdl.PdlLocalClient
 import modules.sykmelder.clients.texas.TexasCloudClient
@@ -23,11 +25,13 @@ fun Application.configureSykmelderDependencies() {
         local {
             provide(TexasLocalClient::class)
             provide(BtsysLocalClient::class)
+            provide(HprLocalClient::class)
             provide(PdlLocalClient::class)
         }
         cloud {
             provide(TexasCloudClient::class)
             provide(BtsysCloudClient::class)
+            provide(HprCloudClient::class)
             provide(PdlCloudClient::class)
         }
     }

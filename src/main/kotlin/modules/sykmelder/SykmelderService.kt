@@ -4,18 +4,29 @@ import core.logger
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import modules.sykmelder.clients.btsys.BtsysClient
+import modules.sykmelder.clients.hpr.HprClient
 
-class SykmelderService(private val btsys: BtsysClient) {
+class SykmelderService(private val btsys: BtsysClient, private val helsenettProxy: HprClient) {
     val logger = logger()
 
     @WithSpan
     suspend fun sykmelder(hpr: String): Sykmelder.Enkel? {
-        TODO("Stub")
+        val sykmelder =
+            helsenettProxy.getSykmelderByHpr(behandlerHpr = hpr)?.let {
+                Sykmelder.Enkel(hpr = it.hprNummer, ident = it.ident)
+            }
+
+        return sykmelder
     }
 
     @WithSpan
-    suspend fun sykmelderByIdent(ident: String): Sykmelder.Enkel {
-        TODO("Just a stub")
+    suspend fun sykmelderByIdent(ident: String): Sykmelder.Enkel? {
+        val sykmelder =
+            helsenettProxy.getSykmelderByIdent(behandlerIdent = ident)?.let {
+                Sykmelder.Enkel(hpr = it.hprNummer, ident = it.ident)
+            }
+
+        return sykmelder
     }
 
     @WithSpan
@@ -23,10 +34,9 @@ class SykmelderService(private val btsys: BtsysClient) {
         hpr: String,
         signaturDato: LocalDate,
     ): Sykmelder.MedSuspensjon? {
-        val sykmelder = this.sykmelder(hpr)
-        if (sykmelder == null) return null
+        val sykmelder = this.sykmelder(hpr) ?: return null
+        val suspendert = btsys.isSuspendert(sykmelder.ident, oppslagsdato = signaturDato)
 
-        val suspendert = TODO("Implement Btsys Client requset")
         return sykmelder.toMedSuspensjon(suspendert)
     }
 }
