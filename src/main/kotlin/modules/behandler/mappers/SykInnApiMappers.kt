@@ -1,22 +1,52 @@
 package modules.behandler.mappers
 
+import modules.behandler.payloads.BehandlerSykmeldingVerify
 import modules.behandler.payloads.OpprettSykmelding
-import modules.sykmeldinger.SykInnAktivitet
-import modules.sykmeldinger.SykInnArbeidsgiver
-import modules.sykmeldinger.SykInnArbeidsrelatertArsak
-import modules.sykmeldinger.SykInnDiagnoseInfo
-import modules.sykmeldinger.SykInnMedisinskArsak
-import modules.sykmeldinger.SykInnMeldinger
-import modules.sykmeldinger.SykInnSykmelding
-import modules.sykmeldinger.SykInnSykmeldingValues
-import modules.sykmeldinger.SykInnTilbakedatering
-import modules.sykmeldinger.SykInnUtdypendeSporsmal
-import modules.sykmeldinger.SykInnUtdypendeSporsmalSvar
-import modules.sykmeldinger.SykInnYrkesskade
+import modules.sykmeldinger.domain.SykInnAktivitet
+import modules.sykmeldinger.domain.SykInnArbeidsgiver
+import modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
+import modules.sykmeldinger.domain.SykInnDiagnoseInfo
+import modules.sykmeldinger.domain.SykInnMedisinskArsak
+import modules.sykmeldinger.domain.SykInnMeldinger
+import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import modules.sykmeldinger.domain.SykInnSykmeldingValues
+import modules.sykmeldinger.domain.SykInnTilbakedatering
+import modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
+import modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
+import modules.sykmeldinger.domain.SykInnYrkesskade
+import modules.sykmeldinger.domain.UnruledSykInnSykmelding
+import modules.sykmeldinger.domain.UnruledSykInnSykmledingMeta
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-fun OpprettSykmelding.Payload.toSykInnSykmelding(): SykInnSykmelding {
-    return SykInnSykmelding(
+fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerSykmeldingVerify =
+    when (this) {
+        is SykInnSykmeldingRuleResult.Outcome ->
+            BehandlerSykmeldingVerify(
+                status =
+                    when (this.type) {
+                        RuleType.PENDING -> RegulaOutcomeStatus.MANUAL_PROCESSING
+                        RuleType.INVALID -> RegulaOutcomeStatus.INVALID
+                        RuleType.OK ->
+                            throw IllegalStateException(
+                                "Outcome cannot be OK, only PENDING and INVALID should have message"
+                            )
+                    },
+                message = this.message,
+                rule = "TODO",
+                tree = "TODO",
+            )
+    }
+
+fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnruledSykInnSykmelding {
+    return UnruledSykInnSykmelding(
         sykmeldingId = this.submitId,
+        meta =
+            UnruledSykInnSykmledingMeta(
+                behandlerHpr = this.meta.sykmelderHpr,
+                pasientIdent = this.meta.pasientIdent,
+                legekontorOrgnr = this.meta.legekontorOrgnr,
+            ),
         values =
             SykInnSykmeldingValues(
                 pasientenSkalSkjermes = this.values.pasientenSkalSkjermes,

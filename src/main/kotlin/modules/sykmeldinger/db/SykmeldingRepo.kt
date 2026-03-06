@@ -7,12 +7,18 @@ import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import modules.sykmeldinger.db.exposed.SykmeldingExposed
 import modules.sykmeldinger.db.exposed.SykmeldingJsonb
+import modules.sykmeldinger.domain.SykInnSykmelding
+import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class SykmeldingerRepo() {
+    fun insertSykmelding(sykmelding: SykInnSykmelding, rules: SykInnSykmeldingRuleResult) {
+        transaction {}
+    }
+
     fun test(): List<Pair<UUID, SykmeldingJsonb>> = transaction {
         val sykmeldinger: List<Pair<UUID, SykmeldingJsonb>> =
             SykmeldingExposed.selectAll()

@@ -52,7 +52,6 @@ class HprCloudClient(
             response.status.isSuccess() -> {
                 mapHprSykmelderToSykmelderMedHpr(response.body())
             }
-
             response.status == HttpStatusCode.NotFound -> null
             else -> {
                 throw HprException(
