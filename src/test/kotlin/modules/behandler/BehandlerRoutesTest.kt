@@ -12,8 +12,8 @@ import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.sykmelder.configureSykmelderDependencies
+import modules.sykmeldinger.SykmeldingService
 import no.nav.tsm.configureTestStuff
-import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 import utils.configureTestEnvironment
 
 class BehandlerRoutesTest {

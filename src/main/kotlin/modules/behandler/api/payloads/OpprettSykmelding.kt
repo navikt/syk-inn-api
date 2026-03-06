@@ -3,7 +3,7 @@ package modules.behandler.api.payloads
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
@@ -108,4 +108,5 @@ object OpprettSykmelding {
     )
 
     data class DiagnoseInfo(val system: SykInnDiagnoseSystem, val code: String)
+    // Kvifor har vi egen diagnoseinfo når libben har ein ?
 }

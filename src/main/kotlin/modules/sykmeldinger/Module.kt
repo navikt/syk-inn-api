@@ -2,7 +2,6 @@ package modules.sykmeldinger
 
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import no.nav.tsm.modules.sykmeldinger.SykmeldingService
 import no.nav.tsm.modules.sykmeldinger.db.SykmeldingExposedRepo
 
 fun Application.configureSykmeldingerModule() {

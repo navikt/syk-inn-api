@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger
+package modules.sykmeldinger
 
 import no.nav.tsm.modules.sykmeldinger.db.SykmeldingExposedRepo
 
