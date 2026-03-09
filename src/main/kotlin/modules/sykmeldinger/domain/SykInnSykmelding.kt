@@ -12,7 +12,7 @@ sealed interface SykInnSykmelding {
 /**
  * Lite utgangspunkt på det sentrale Domeneobjektet for Syk Inn API, ingenting her er satt i stein.
  */
-data class RuledSykInnSykmelding(
+data class VerifiedSykInnSykmelding(
     override val sykmeldingId: UUID,
     override val values: SykInnSykmeldingValues,
     val meta: SykInnSykmeldingMeta,
@@ -33,13 +33,13 @@ sealed interface SykInnSykmeldingRuleResult {
     }
 }
 
-data class UnruledSykInnSykmelding(
+data class UnverifiedSykInnSykmelding(
     override val sykmeldingId: UUID,
     override val values: SykInnSykmeldingValues,
-    val meta: UnruledSykInnSykmledingMeta,
+    val meta: UnverifiedSykInnSykmledingMeta,
 ) : SykInnSykmelding
 
-data class UnruledSykInnSykmledingMeta(
+data class UnverifiedSykInnSykmledingMeta(
     val behandlerHpr: String,
     val pasientIdent: String,
     val legekontorOrgnr: String,

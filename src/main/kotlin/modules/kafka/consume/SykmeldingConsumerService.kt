@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import modules.sykmeldinger.SykmeldingerService
-import modules.sykmeldinger.domain.RuledSykInnSykmelding
+import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
 class SykmeldingConsumerService(
     private val consumer: SykmeldingConsumer,
@@ -54,6 +54,6 @@ class SykmeldingConsumerService(
 }
 
 /** Just a stub, should map from SykmledingKafkaRecord → SykInnSykmelding */
-private fun Map<String, String>?.toSykInnSykmelding(): RuledSykInnSykmelding {
+private fun Map<String, String>?.toSykInnSykmelding(): VerifiedSykInnSykmelding {
     TODO("Not yet implemented")
 }

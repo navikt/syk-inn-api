@@ -2,12 +2,12 @@ package modules.sykmeldinger.rules.mappers
 
 import java.time.LocalDateTime
 import modules.behandler.payloads.SykInnDiagnoseSystem
-import modules.sykmelder.Sykmelder
-import modules.sykmelder.clients.pdl.IDENT_GRUPPE
-import modules.sykmelder.clients.pdl.PdlPerson
 import modules.sykmeldinger.domain.SykInnAktivitet
 import modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import modules.sykmeldinger.domain.UnruledSykInnSykmelding
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import modules.sykmeldinger.sykmelder.Sykmelder
+import modules.sykmeldinger.sykmelder.clients.pdl.IDENT_GRUPPE
+import modules.sykmeldinger.sykmelder.clients.pdl.PdlPerson
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
@@ -54,7 +54,7 @@ fun PdlPerson.mapPdlPersonToRegulaPasient(): RegulaPasient? {
 
 fun mapUnruledSykInnSykmeldingToRegulaPayload(
     behandletTidspunkt: LocalDateTime,
-    sykmelding: UnruledSykInnSykmelding,
+    sykmelding: UnverifiedSykInnSykmelding,
     behandler: RegulaBehandler,
     pasient: RegulaPasient,
 ): RegulaPayload {

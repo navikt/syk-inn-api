@@ -18,6 +18,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
 import utils.parse
 
 class TexasClientTest {

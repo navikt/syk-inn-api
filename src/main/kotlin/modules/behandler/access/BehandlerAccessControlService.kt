@@ -1,10 +1,10 @@
 package modules.behandler.access
 
 import modules.behandler.payloads.BehandlerSykmelding
-import modules.sykmeldinger.domain.RuledSykInnSykmelding
+import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
 class BehandlerAccessControlService {
-    fun toRedactedIfNeeded(sykInnSykmelding: RuledSykInnSykmelding): BehandlerSykmelding {
+    fun toRedactedIfNeeded(sykInnSykmelding: VerifiedSykInnSykmelding): BehandlerSykmelding {
         TODO()
     }
 }

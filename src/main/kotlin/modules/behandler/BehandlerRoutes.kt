@@ -22,7 +22,7 @@ import modules.behandler.payloads.BehandlerSykmeldingVerify
 import modules.behandler.payloads.OpprettSykmelding
 import modules.sykmeldinger.SykmeldingerService
 import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnruledSykInnSykmelding
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
@@ -34,9 +34,11 @@ fun Application.configureBehandlerRoutes() {
         route("/api/sykmelding") {
             post {
                     try {
+                        // PAYLODA
                         val payload: OpprettSykmelding.Payload = call.receive()
+                        // MAPPE TIL DOMONE OBJEKT
                         val unruledSykmelding = payload.toSykInnSykmelding()
-
+                        // NESTE BOUNDED COETEXT INPUT
                         val createdSykmelding = sykmeldingerService.create(unruledSykmelding)
 
                         call.respond(
@@ -66,7 +68,7 @@ fun Application.configureBehandlerRoutes() {
             post("/verify") {
                     try {
                         val payload: OpprettSykmelding.Payload = call.receive()
-                        val sykmelding: UnruledSykInnSykmelding = payload.toSykInnSykmelding()
+                        val sykmelding: UnverifiedSykInnSykmelding = payload.toSykInnSykmelding()
                         val rule: SykInnSykmeldingRuleResult =
                             sykmeldingerService.verify(sykmelding)
 

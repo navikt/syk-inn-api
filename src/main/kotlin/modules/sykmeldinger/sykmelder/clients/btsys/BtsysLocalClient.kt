@@ -1,4 +1,4 @@
-package modules.sykmelder.clients.btsys
+package modules.sykmeldinger.sykmelder.clients.btsys
 
 import java.time.LocalDate
 

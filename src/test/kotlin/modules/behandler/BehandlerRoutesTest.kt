@@ -11,8 +11,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import modules.sykmelder.configureSykmelderDependencies
 import modules.sykmeldinger.SykmeldingerService
+import modules.sykmeldinger.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
 import utils.configureTestEnvironment
 
