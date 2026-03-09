@@ -40,11 +40,11 @@ fun Application.configureBehandlerRoutes() {
                         val unruledSykmelding = payload.toSykInnSykmelding()
                         // NESTE BOUNDED COETEXT INPUT
                         val createdSykmelding = sykmeldingerService.create(unruledSykmelding)
+                        // Apply access control
+                        val responseForApi =
+                            accessControlService.toRedactedIfNeeded(createdSykmelding)
 
-                        call.respond(
-                            HttpStatusCode.Created,
-                            accessControlService.toRedactedIfNeeded(createdSykmelding),
-                        )
+                        call.respond<BehandlerSykmelding>(HttpStatusCode.Created, responseForApi)
                     } catch (ex: Exception) {
                         logger.error(ex)
                         call.respond(
@@ -74,9 +74,13 @@ fun Application.configureBehandlerRoutes() {
 
                         when (rule) {
                             is SykInnSykmeldingRuleResult.OK ->
-                                call.respond(HttpStatusCode.OK, true)
+                                call.respond<Boolean>(HttpStatusCode.OK, true)
+
                             is SykInnSykmeldingRuleResult.Outcome ->
-                                rule.toBehandlerSykmeldingVerify()
+                                call.respond<BehandlerSykmeldingVerify>(
+                                    HttpStatusCode.OK,
+                                    rule.toBehandlerSykmeldingVerify(),
+                                )
                         }
                     } catch (ex: Exception) {
                         logger.error(ex)
@@ -92,6 +96,8 @@ fun Application.configureBehandlerRoutes() {
                         HttpStatusCode.OK {
                             description =
                                 "The result of the rule execution, without creating the sykmelding"
+                            // TODO: How to represent union between boolean and
+                            // BehandlerSykmeldingVerify?
                             schema = jsonSchema<BehandlerSykmeldingVerify>()
                         }
                     }
