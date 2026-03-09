@@ -11,7 +11,7 @@ import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import modules.sykmeldinger.sykmelder.SykmelderMedHpr
-import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
+import plugins.auth.TexasClient
 
 class HprException(message: String, cause: Exception?) : Exception(message, cause)
 
@@ -24,7 +24,7 @@ sealed interface HprClient {
 
 class HprCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
-    private val texasClient: TexasCloudClient,
+    private val texasClient: TexasClient,
     private val environment: Environment,
 ) : HprClient {
     private val httpClient: HttpClient =
@@ -52,6 +52,7 @@ class HprCloudClient(
             response.status.isSuccess() -> {
                 mapHprSykmelderToSykmelderMedHpr(response.body())
             }
+
             response.status == HttpStatusCode.NotFound -> null
             else -> {
                 throw HprException(

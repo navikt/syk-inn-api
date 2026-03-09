@@ -1,4 +1,4 @@
-package modules.sykmelder.clients.texas
+package modules.auth
 
 import core.Environment
 import core.Runtime
@@ -18,7 +18,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
+import plugins.auth.TexasClient
 import utils.parse
 
 class TexasClientTest {
@@ -28,7 +28,7 @@ class TexasClientTest {
         val mockEngine = MockEngine { request ->
             assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
 
-            val payload = request.body.toByteArray().parse<TexasCloudClient.TokenRequest>()
+            val payload = request.body.toByteArray().parse<TexasClient.TokenRequest>()
             assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
 
             respond(
@@ -42,7 +42,7 @@ class TexasClientTest {
         }
 
         val texas =
-            TexasCloudClient(
+            TexasClient(
                 env = testEnv,
                 httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
             )

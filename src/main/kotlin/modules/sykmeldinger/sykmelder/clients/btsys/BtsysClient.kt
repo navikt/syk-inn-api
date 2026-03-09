@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.http.headers
 import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
-import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
+import plugins.auth.TexasClient
 
 data class BtsysRespons(val suspendert: Boolean)
 
@@ -22,7 +22,7 @@ sealed interface BtsysClient {
 
 class BtsysCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
-    private val texasClient: TexasCloudClient,
+    private val texasClient: TexasClient,
     private val environment: Environment,
 ) : BtsysClient {
     private val httpClient: HttpClient =
