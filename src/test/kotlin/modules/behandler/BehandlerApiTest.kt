@@ -16,18 +16,23 @@ import kotlin.test.assertIs
 import modules.behandler.payloads.BehandlerSykmelding
 import modules.behandler.payloads.BehandlerSykmeldingFull
 import modules.behandler.payloads.BehandlerSykmeldingRedacted
-import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import modules.behandler.payloads.BehandlerSykmeldingVerify
+import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.intellij.lang.annotations.Language
+import org.junit.BeforeClass
 import org.testcontainers.postgresql.PostgreSQLContainer
 import utils.configureIntegrationTestDependencies
 
 class SykmeldingApiTest {
+    companion object {
+        val postgres = PostgreSQLContainer("postgres:17-alpine")
 
-    val postgres = PostgreSQLContainer("postgres:17-alpine")
-
-    init {
-        postgres.start()
+        @JvmStatic
+        @BeforeClass
+        fun beforeAll() {
+            postgres.start()
+        }
     }
 
     @Test
@@ -135,11 +140,11 @@ class SykmeldingApiTest {
                 setBody(fullExampleSykmeldingPayload.replace("L73", "Bad"))
             }
 
-        val created = requireNotNull(response.body<SykInnSykmeldingRuleResult>())
+        val created = requireNotNull(response.body<BehandlerSykmeldingVerify>())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertIs<SykInnSykmeldingRuleResult.Outcome>(created)
-        assertEquals(created.type, RuleType.INVALID)
+        assertIs<BehandlerSykmeldingVerify>(created)
+        assertEquals(created.status, RegulaOutcomeStatus.INVALID)
         // TODO: /verify må ha rule tree navn og sånt
         // assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
     }
