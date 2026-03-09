@@ -6,13 +6,9 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import modules.sykmeldinger.SykmeldingerService
 import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
-class SykmeldingConsumerService(
-    private val consumer: SykmeldingConsumer,
-    private val sykmeldingerService: SykmeldingerService,
-) {
+class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
     private val logger = logger()
 
     suspend fun consume() =
@@ -49,7 +45,6 @@ class SykmeldingConsumerService(
          * TODO: The rules are already executed here, should we handle this is service or should
          *   Kafka rawdog Repo directly?
          */
-        sykmeldingerService.insert(value.toSykInnSykmelding())
     }
 }
 

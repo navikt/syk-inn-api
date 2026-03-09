@@ -4,6 +4,14 @@ import java.time.LocalDate
 
 class BtsysLocalClient : BtsysClient {
     override suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean {
-        return sykmelderIdent == "12345678910"
+        if (sykmelderIdent == "brokenFnr") {
+            throw IllegalStateException("MockBtsysClient: Simulated failure for brokenFnr")
+        }
+
+        if (sykmelderIdent == "suspendertFnr") {
+            return true
+        }
+
+        return false
     }
 }

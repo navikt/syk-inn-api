@@ -36,7 +36,8 @@ data class SykInnSykmeldingMeta(
 sealed interface SykInnSykmeldingRuleResult {
     class OK : SykInnSykmeldingRuleResult
 
-    data class Outcome(val type: RuleType, val message: String) : SykInnSykmeldingRuleResult {
+    data class Outcome(val type: RuleType, val message: String, val rule: String) :
+        SykInnSykmeldingRuleResult {
         init {
             require(type != RuleType.OK) {
                 "Outcome cannot be OK, only PENDING and INVALID should have message"
