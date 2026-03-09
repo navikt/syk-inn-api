@@ -9,8 +9,6 @@ import modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
 import modules.sykmeldinger.sykmelder.clients.btsys.BtsysLocalClient
 import modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
 import modules.sykmeldinger.sykmelder.clients.hpr.HprLocalClient
-import modules.sykmeldinger.sykmelder.clients.pdl.PdlCloudClient
-import modules.sykmeldinger.sykmelder.clients.pdl.PdlLocalClient
 
 fun Application.configureSykmelderDependencies() {
     val baseHttpClient: HttpClient by dependencies
@@ -23,12 +21,10 @@ fun Application.configureSykmelderDependencies() {
         local {
             provide(BtsysLocalClient::class)
             provide(HprLocalClient::class)
-            provide(PdlLocalClient::class)
         }
         cloud {
             provide(BtsysCloudClient::class)
             provide(HprCloudClient::class)
-            provide(PdlCloudClient::class)
         }
     }
 

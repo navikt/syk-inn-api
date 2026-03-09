@@ -15,7 +15,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import modules.sykmeldinger.SykmeldingerService
-import modules.sykmeldinger.sykmelder.clients.pdl.PdlClient
+import modules.sykmeldinger.pdl.PdlClient
 
 fun Application.configureTestStuff() {
     val sir: SykmeldingerService by dependencies
