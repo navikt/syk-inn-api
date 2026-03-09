@@ -14,9 +14,6 @@ class SykmeldingerService(
     private val ruleService: RuleService,
     private val repo: SykmeldingerRepo,
 ) {
-    fun test() = repo.test()
-
-    fun createBoio() = repo.createBoio()
 
     suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): SykInnSykmeldingRuleResult {
         val sykmelder = sykmelderService.byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())

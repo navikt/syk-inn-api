@@ -8,19 +8,21 @@ CREATE TABLE job
 
 CREATE TABLE job_status
 (
-    runner        TEXT        NOT NULL,
-    job           TEXT        NOT NULL,
-    state         TEXT        NOT NULL,
-    updated_at    TIMESTAMPTZ NOT NULL,
+    runner     TEXT        NOT NULL,
+    job        TEXT        NOT NULL,
+    state      TEXT        NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (runner, job)
 );
 
-insert into job(name, desired_state, updated_at, updated_by) values ('SYKMELDING_CONSUMER', 'STOPPED', now(), 'system');
+insert into job(name, desired_state, updated_at, updated_by)
+values ('SYKMELDING_CONSUMER', 'STOPPED', now(), 'system');
 
 CREATE TABLE sykmelding
 (
-    id         UUID PRIMARY KEY,
-    data       JSONB       NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL
+    id            UUID PRIMARY KEY,
+    data          JSONB       NOT NULL,
+    pasient_ident TEXT        NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL,
+    updated_at    TIMESTAMPTZ NOT NULL
 );
