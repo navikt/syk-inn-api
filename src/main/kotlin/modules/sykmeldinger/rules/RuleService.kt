@@ -6,11 +6,11 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
 import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import modules.sykmeldinger.pdl.PdlClient
 import modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
 import modules.sykmeldinger.sykmelder.Sykmelder
-import modules.sykmeldinger.sykmelder.clients.pdl.PdlClient
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult

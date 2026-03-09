@@ -5,9 +5,9 @@ import modules.behandler.payloads.SykInnDiagnoseSystem
 import modules.sykmeldinger.domain.SykInnAktivitet
 import modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import modules.sykmeldinger.pdl.IDENT_GRUPPE
+import modules.sykmeldinger.pdl.PdlPerson
 import modules.sykmeldinger.sykmelder.Sykmelder
-import modules.sykmeldinger.sykmelder.clients.pdl.IDENT_GRUPPE
-import modules.sykmeldinger.sykmelder.clients.pdl.PdlPerson
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
