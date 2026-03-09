@@ -11,9 +11,9 @@ import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import modules.sykmelder.configureSykmelderDependencies
 import modules.sykmeldinger.configureSykmeldingerModule
 import modules.sykmeldinger.db.exposed.SykmeldingJsonb
+import modules.sykmeldinger.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.postgresql.PostgreSQLContainer

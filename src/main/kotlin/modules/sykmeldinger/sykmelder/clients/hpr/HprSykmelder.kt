@@ -1,4 +1,4 @@
-package modules.sykmelder.clients.hpr
+package modules.sykmeldinger.sykmelder.clients.hpr
 
 import kotlinx.datetime.LocalDateTime
 import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori

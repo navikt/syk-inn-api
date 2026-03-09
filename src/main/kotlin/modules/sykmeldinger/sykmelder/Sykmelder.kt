@@ -1,4 +1,4 @@
-package modules.sykmelder
+package modules.sykmeldinger.sykmelder
 
 sealed interface Sykmelder {
     val hpr: String

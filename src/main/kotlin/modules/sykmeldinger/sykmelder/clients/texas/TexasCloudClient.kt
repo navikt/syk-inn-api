@@ -1,4 +1,4 @@
-package modules.sykmelder.clients.texas
+package modules.sykmeldinger.sykmelder.clients.texas
 
 import core.Environment
 import core.logger

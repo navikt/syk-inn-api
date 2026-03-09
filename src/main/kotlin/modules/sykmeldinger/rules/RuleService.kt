@@ -4,13 +4,13 @@ import core.logger
 import core.otel.failSpan
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
-import modules.sykmelder.SykmelderService
-import modules.sykmelder.clients.pdl.PdlClient
 import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnruledSykInnSykmelding
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
+import modules.sykmeldinger.sykmelder.SykmelderService
+import modules.sykmeldinger.sykmelder.clients.pdl.PdlClient
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult
@@ -26,7 +26,7 @@ class RuleService(
     private val logger = logger()
 
     @WithSpan
-    suspend fun verify(sykmelding: UnruledSykInnSykmelding): SykInnSykmeldingRuleResult {
+    suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): SykInnSykmeldingRuleResult {
         val now = LocalDateTime.now()
         val pasient =
             pdlClient.getPerson(sykmelding.meta.pasientIdent)
@@ -52,7 +52,7 @@ class RuleService(
     @WithSpan
     private fun executeRegulaRules(
         behandletTidspunkt: LocalDateTime,
-        sykmelding: UnruledSykInnSykmelding,
+        sykmelding: UnverifiedSykInnSykmelding,
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
     ): SykInnSykmeldingRuleResult {

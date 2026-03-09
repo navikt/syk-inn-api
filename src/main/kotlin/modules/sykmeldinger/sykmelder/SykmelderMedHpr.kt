@@ -1,4 +1,4 @@
-package modules.sykmelder
+package modules.sykmeldinger.sykmelder
 
 data class SykmelderMedHpr(
     val ident: String,

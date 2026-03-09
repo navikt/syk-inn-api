@@ -14,8 +14,8 @@ import modules.sykmeldinger.domain.SykInnTilbakedatering
 import modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
 import modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import modules.sykmeldinger.domain.SykInnYrkesskade
-import modules.sykmeldinger.domain.UnruledSykInnSykmelding
-import modules.sykmeldinger.domain.UnruledSykInnSykmledingMeta
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmledingMeta
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
@@ -38,11 +38,11 @@ fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerS
             )
     }
 
-fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnruledSykInnSykmelding {
-    return UnruledSykInnSykmelding(
+fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
+    return UnverifiedSykInnSykmelding(
         sykmeldingId = this.submitId,
         meta =
-            UnruledSykInnSykmledingMeta(
+            UnverifiedSykInnSykmledingMeta(
                 behandlerHpr = this.meta.sykmelderHpr,
                 pasientIdent = this.meta.pasientIdent,
                 legekontorOrgnr = this.meta.legekontorOrgnr,

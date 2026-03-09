@@ -4,7 +4,6 @@ import io.ktor.server.application.*
 import modules.behandler.configureBehandlerModule
 import modules.jobs.configureJobsModule
 import modules.kafka.configureKafkaModule
-import modules.sykmelder.configureSykmelderModule
 import modules.sykmeldinger.configureSykmeldingerModule
 import plugins.*
 import plugins.auth.configureAuthentication
@@ -24,7 +23,6 @@ fun Application.module() {
 
     // Specific modules
     configureSykmeldingerModule()
-    configureSykmelderModule()
     configureBehandlerModule()
     configureKafkaModule()
     configureJobsModule()

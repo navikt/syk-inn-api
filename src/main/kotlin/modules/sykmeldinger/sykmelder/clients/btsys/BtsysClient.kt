@@ -1,4 +1,4 @@
-package modules.sykmelder.clients.btsys
+package modules.sykmeldinger.sykmelder.clients.btsys
 
 import core.Environment
 import io.ktor.client.*
@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.http.headers
 import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
-import modules.sykmelder.clients.texas.TexasCloudClient
+import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
 
 data class BtsysRespons(val suspendert: Boolean)
 
