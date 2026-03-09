@@ -50,7 +50,7 @@ fun Application.configureIntegrationTestDependencies(
     configureBehandlerModule()
 }
 
-fun Application.configureTestEnvironment() {
+fun Application.configureMockedEnvironment() {
     dependencies {
         provide<HttpClient> { HttpClient() }
         provide<Environment>() {

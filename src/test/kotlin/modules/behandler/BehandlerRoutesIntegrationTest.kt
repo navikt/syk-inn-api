@@ -1,48 +1,30 @@
 package modules.behandler
 
-import core.db.runFlywayMigrations
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.testing.testApplication
-import java.util.UUID
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.testing.*
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import modules.sykmeldinger.configureSykmeldingerModule
 import modules.sykmeldinger.db.exposed.SykmeldingJsonb
-import modules.sykmeldinger.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.testcontainers.postgresql.PostgreSQLContainer
-import utils.configureTestEnvironment
+import utils.WithPostgresql
+import utils.configureIntegrationTestDependencies
 
-class BehandlerRoutesIntegrationTest {
-
-    val postgres = PostgreSQLContainer("postgres:17-alpine")
-
-    init {
-        postgres.start()
-
-        runFlywayMigrations(
-            postgres.jdbcUrl,
-            user = postgres.username,
-            password = postgres.password,
-        )
-
-        Database.connect(postgres.jdbcUrl, user = postgres.username, password = postgres.password)
-    }
+class BehandlerRoutesIntegrationTest : WithPostgresql() {
 
     @Test
     fun `example integration test`() = testApplication {
         client = createClient { install(ContentNegotiation) { jackson() } }
 
         application {
-            configureTestEnvironment()
-            configureSykmelderDependencies()
+            configureIntegrationTestDependencies(postgres)
             configureSykmeldingerModule()
+            configureBehandlerModule()
             configureTestStuff()
         }
 

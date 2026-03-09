@@ -1,14 +1,11 @@
 package modules.behandler
 
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.testing.testApplication
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.testing.*
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,25 +17,20 @@ import modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.intellij.lang.annotations.Language
-import org.junit.BeforeClass
-import org.testcontainers.postgresql.PostgreSQLContainer
+import utils.WithPostgresql
 import utils.configureIntegrationTestDependencies
+import utils.testClient
 
-class SykmeldingApiTest {
-    companion object {
-        val postgres = PostgreSQLContainer("postgres:17-alpine")
+class SykmeldingApiTest : WithPostgresql() {
 
-        @JvmStatic
-        @BeforeClass
-        fun beforeAll() {
-            postgres.start()
-        }
+    private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
+        client = testClient()
+        application { configureIntegrationTestDependencies(postgres) }
     }
 
     @Test
     fun `sanity test - simple create test`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding") {
@@ -75,8 +67,7 @@ class SykmeldingApiTest {
     @Test
     fun `idempotency test - should not create multiple with same idempotency key`() =
         testApplication {
-            val client = createClient { install(ContentNegotiation) { jackson() } }
-            application { configureIntegrationTestDependencies(postgres) }
+            configureSykmeldingApiTest()
 
             val response =
                 client.post("/api/sykmelding") {
@@ -102,8 +93,7 @@ class SykmeldingApiTest {
     @Test
     fun `fetching single sykmelding not written by you should return 'Redacted' version`() =
         testApplication {
-            val client = createClient { install(ContentNegotiation) { jackson() } }
-            application { configureIntegrationTestDependencies(postgres) }
+            configureSykmeldingApiTest()
 
             val response =
                 client.post("/api/sykmelding") {
@@ -187,8 +177,7 @@ class SykmeldingApiTest {
     @Test
     fun `Broken input data - should fail with 400 due to invalid DiagnoseSystem`() =
         testApplication {
-            val client = createClient { install(ContentNegotiation) { jackson() } }
-            application { configureIntegrationTestDependencies(postgres) }
+            configureSykmeldingApiTest()
 
             val response =
                 client.post("/api/sykmelding") {
@@ -224,8 +213,7 @@ class SykmeldingApiTest {
     @Test
     fun `Broken input data - should fail with 400 due to unknown Aktivitet type`() =
         testApplication {
-            val client = createClient { install(ContentNegotiation) { jackson() } }
-            application { configureIntegrationTestDependencies(postgres) }
+            configureSykmeldingApiTest()
 
             val response =
                 client.post("/api/sykmelding") {
@@ -267,8 +255,7 @@ class SykmeldingApiTest {
     @Test
     fun `Expected rule hit - should OK with 200 even if sykmelder is suspended`() =
         testApplication {
-            val client = createClient { install(ContentNegotiation) { jackson() } }
-            application { configureIntegrationTestDependencies(postgres) }
+            configureSykmeldingApiTest()
 
             val response =
                 client.post("/api/sykmelding") {
