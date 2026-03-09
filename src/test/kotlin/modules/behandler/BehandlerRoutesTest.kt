@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import modules.sykmeldinger.SykmeldingerService
 import modules.sykmeldinger.sykmelder.configureSykmelderDependencies
 import no.nav.tsm.configureTestStuff
-import utils.configureTestEnvironment
+import utils.configureMockedEnvironment
 
 class BehandlerRoutesTest {
 
@@ -26,7 +26,7 @@ class BehandlerRoutesTest {
         application {
             dependencies.provide<SykmeldingerService> { mocken }
 
-            configureTestEnvironment()
+            configureMockedEnvironment()
             configureSykmelderDependencies()
             configureTestStuff()
         }
