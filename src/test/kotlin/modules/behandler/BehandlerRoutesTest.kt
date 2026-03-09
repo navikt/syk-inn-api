@@ -1,10 +1,8 @@
 package modules.behandler
 
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import java.time.LocalDate
 import kotlin.test.Test
@@ -14,6 +12,7 @@ import modules.behandler.payloads.BehandlerSykmelding
 import modules.behandler.payloads.BehandlerSykmeldingFull
 import modules.behandler.payloads.BehandlerSykmeldingRedacted
 import modules.behandler.payloads.BehandlerSykmeldingVerify
+import no.nav.tsm.plugins.auth.configureLocalMachineTokenAuth
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.intellij.lang.annotations.Language
@@ -24,7 +23,10 @@ import utils.testClient
 class SykmeldingApiTest : WithPostgresql() {
     private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
         client = testClient()
-        application { configureIntegrationTestDependencies(postgres) }
+        application {
+            configureLocalMachineTokenAuth()
+            configureIntegrationTestDependencies(postgres)
+        }
     }
 
     @Test
@@ -120,8 +122,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
     @Test
     fun `verify - rule hits should return why`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding/verify") {
@@ -133,15 +134,13 @@ class SykmeldingApiTest : WithPostgresql() {
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertIs<BehandlerSykmeldingVerify>(created)
-        assertEquals(created.status, RegulaOutcomeStatus.INVALID)
-        // TODO: /verify må ha rule tree navn og sånt
-        // assertEquals(created.rule, "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE")
+        assertEquals(RegulaOutcomeStatus.INVALID, created.status)
+        assertEquals("UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE", created.rule)
     }
 
     @Test
     fun `Verify - should reply with 422 when person does not exist in PDL`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding/verify") {
@@ -155,8 +154,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
     @Test
     fun `sanity test - are tests independent`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val allResponse =
             client.get("/api/sykmelding") {
@@ -189,8 +187,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
     @Test
     fun `Should NOT automatically downgrade ICPC2B to ICPC2`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding") {
@@ -225,8 +222,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
     @Test
     fun `Broken input data - should fail with 500 due to invalid sykmelderHpr`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding") {
@@ -239,8 +235,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
     @Test
     fun `Broken input data - should fail with 500 due to invalid sykmelderFnr`() = testApplication {
-        val client = createClient { install(ContentNegotiation) { jackson() } }
-        application { configureIntegrationTestDependencies(postgres) }
+        configureSykmeldingApiTest()
 
         val response =
             client.post("/api/sykmelding") {

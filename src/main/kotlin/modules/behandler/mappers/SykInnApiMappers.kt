@@ -33,8 +33,7 @@ fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerS
                             )
                     },
                 message = this.message,
-                rule = "TODO",
-                tree = "TODO",
+                rule = this.rule,
             )
     }
 

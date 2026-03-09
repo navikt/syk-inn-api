@@ -31,10 +31,6 @@ class SykmeldingerService(
         return verified
     }
 
-    suspend fun insert(sykmelding: VerifiedSykInnSykmelding): VerifiedSykInnSykmelding {
-        TODO("implement")
-    }
-
     fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding {
         TODO("implement")
     }

@@ -89,6 +89,7 @@ class RuleService(private val pdlClient: PdlClient) {
             is RegulaResult.NotOk ->
                 SykInnSykmeldingRuleResult.Outcome(
                     message = this.outcome.reason.sykmelder,
+                    rule = this.outcome.rule,
                     type =
                         when (this.status) {
                             RegulaStatus.MANUAL_PROCESSING -> RuleType.PENDING
