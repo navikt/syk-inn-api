@@ -9,7 +9,7 @@ import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
-import modules.sykmeldinger.sykmelder.SykmelderService
+import modules.sykmeldinger.sykmelder.Sykmelder
 import modules.sykmeldinger.sykmelder.clients.pdl.PdlClient
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaPasient
@@ -19,14 +19,14 @@ import no.nav.tsm.regulus.regula.executeRegulaRules
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-class RuleService(
-    private val pdlClient: PdlClient,
-    private val sykmelderService: SykmelderService,
-) {
+class RuleService(private val pdlClient: PdlClient) {
     private val logger = logger()
 
     @WithSpan
-    suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): SykInnSykmeldingRuleResult {
+    suspend fun verify(
+        sykmelding: UnverifiedSykInnSykmelding,
+        sykmelder: Sykmelder,
+    ): SykInnSykmeldingRuleResult {
         val now = LocalDateTime.now()
         val pasient =
             pdlClient.getPerson(sykmelding.meta.pasientIdent)
@@ -37,9 +37,7 @@ class RuleService(
                     "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
                 )
         val regulaBehandler =
-            sykmelderService
-                .byHpr(sykmelding.meta.behandlerHpr, oppslagsdato = now.toLocalDate())
-                .mapSykmelderToRegulaBehandler(sykmelding.meta.legekontorOrgnr)
+            sykmelder.mapSykmelderToRegulaBehandler(sykmelding.meta.legekontorOrgnr)
 
         return this.executeRegulaRules(
             behandletTidspunkt = now,

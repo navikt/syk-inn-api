@@ -42,7 +42,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
         assertEquals(HttpStatusCode.Created, response.status)
         assertEquals(created.meta.pasientIdent, "21037712323")
-        assertEquals(created.meta.sykmelder.hprNummer, "9144889")
+        assertEquals(created.meta.sykmelder.hpr, "9144889")
         assertEquals(created.meta.legekontorOrgnr, "123456789")
 
         // Diagnose
@@ -103,7 +103,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             assertEquals(HttpStatusCode.Created, response.status)
-            assertEquals(created.meta.sykmelder.hprNummer, "someone-else")
+            assertEquals(created.meta.sykmelder.hpr, "someone-else")
 
             val specificSykmeldingResponse =
                 client.get("/api/sykmelding/${created.sykmeldingId}") {

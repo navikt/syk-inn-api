@@ -11,8 +11,9 @@ import org.jetbrains.exposed.v1.json.jsonb
 
 data class SykmeldingJsonb(val sykmeldingId: String)
 
-object SykmeldingExposed : Table("sykmelding") {
+object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
+    val pasientIdent = text("pasient_ident")
     val data =
         jsonb(
             "data",

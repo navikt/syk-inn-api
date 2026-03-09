@@ -1,27 +1,37 @@
 package modules.sykmeldinger
 
+import java.time.LocalDate
 import java.util.UUID
 import modules.sykmeldinger.db.SykmeldingerRepo
 import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import modules.sykmeldinger.rules.RuleService
+import modules.sykmeldinger.sykmelder.SykmelderService
 
-class SykmeldingerService(val ruleService: RuleService, val repo: SykmeldingerRepo) {
+class SykmeldingerService(
+    private val sykmelderService: SykmelderService,
+    private val ruleService: RuleService,
+    private val repo: SykmeldingerRepo,
+) {
     fun test() = repo.test()
 
     fun createBoio() = repo.createBoio()
 
     suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): SykInnSykmeldingRuleResult {
-        return ruleService.verify(sykmelding)
+        val sykmelder = sykmelderService.byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
+        return ruleService.verify(sykmelding, sykmelder)
     }
 
     suspend fun create(sykmelding: UnverifiedSykInnSykmelding): VerifiedSykInnSykmelding {
-        val rules = ruleService.verify(sykmelding)
+        val sykmelder = sykmelderService.byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
+        val rules = ruleService.verify(sykmelding, sykmelder)
 
-        repo.insertSykmelding(sykmelding, rules)
+        val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
 
-        TODO("implement")
+        repo.insertSykmelding(verified)
+
+        return verified
     }
 
     suspend fun insert(sykmelding: VerifiedSykInnSykmelding): VerifiedSykInnSykmelding {
@@ -33,6 +43,8 @@ class SykmeldingerService(val ruleService: RuleService, val repo: SykmeldingerRe
     }
 
     fun byIdent(ident: String): List<VerifiedSykInnSykmelding> {
-        TODO("implement")
+        // TODO: need to call PDL to get all idents for ident
+
+        return repo.sykmeldinger(ident)
     }
 }
