@@ -1,4 +1,4 @@
-package modules.sykmeldinger.sykmelder.clients.texas
+package plugins.auth
 
 import core.Environment
 import core.logger
@@ -15,20 +15,16 @@ import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 
-sealed interface TexasClient {
-    suspend fun requestToken(namespace: String, otherApiAppName: String): TexasToken
-}
-
 data class TexasToken(val token: String)
 
-class TexasCloudClient(
+class TexasClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,
     private val env: Environment,
-) : TexasClient {
+) {
     private val logger = logger()
 
     @WithSpan("Texas.requestToken")
-    override suspend fun requestToken(
+    suspend fun requestToken(
         @SpanAttribute("namespace") namespace: String,
         @SpanAttribute("API") otherApiAppName: String,
     ): TexasToken {

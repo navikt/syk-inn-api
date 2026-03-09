@@ -8,7 +8,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
-import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
+import plugins.auth.TexasClient
 
 sealed interface PdlClient {
     suspend fun getPerson(ident: String): PdlPerson?
@@ -16,7 +16,7 @@ sealed interface PdlClient {
 
 class PdlCloudClient(
     @Named("RetryHttpClient") private val httpClient: HttpClient,
-    private val texasClient: TexasCloudClient,
+    private val texasClient: TexasClient,
     private val environment: Environment,
 ) : PdlClient {
 

@@ -11,8 +11,6 @@ import modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
 import modules.sykmeldinger.sykmelder.clients.hpr.HprLocalClient
 import modules.sykmeldinger.sykmelder.clients.pdl.PdlCloudClient
 import modules.sykmeldinger.sykmelder.clients.pdl.PdlLocalClient
-import modules.sykmeldinger.sykmelder.clients.texas.TexasCloudClient
-import modules.sykmeldinger.sykmelder.clients.texas.TexasLocalClient
 
 fun Application.configureSykmelderDependencies() {
     val baseHttpClient: HttpClient by dependencies
@@ -23,13 +21,11 @@ fun Application.configureSykmelderDependencies() {
 
     dynamicDependencies {
         local {
-            provide(TexasLocalClient::class)
             provide(BtsysLocalClient::class)
             provide(HprLocalClient::class)
             provide(PdlLocalClient::class)
         }
         cloud {
-            provide(TexasCloudClient::class)
             provide(BtsysCloudClient::class)
             provide(HprCloudClient::class)
             provide(PdlCloudClient::class)
