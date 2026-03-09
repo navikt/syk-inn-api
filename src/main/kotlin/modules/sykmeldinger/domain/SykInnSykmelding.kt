@@ -19,6 +19,12 @@ data class VerifiedSykInnSykmelding(
     val result: SykInnSykmeldingRuleResult,
 ) : SykInnSykmelding
 
+data class UnverifiedSykInnSykmelding(
+    override val sykmeldingId: UUID,
+    override val values: SykInnSykmeldingValues,
+    val meta: UnverifiedSykInnSykmledingMeta,
+) : SykInnSykmelding
+
 data class SykInnSykmeldingMeta(val mottatt: OffsetDateTime)
 
 sealed interface SykInnSykmeldingRuleResult {
@@ -32,12 +38,6 @@ sealed interface SykInnSykmeldingRuleResult {
         }
     }
 }
-
-data class UnverifiedSykInnSykmelding(
-    override val sykmeldingId: UUID,
-    override val values: SykInnSykmeldingValues,
-    val meta: UnverifiedSykInnSykmledingMeta,
-) : SykInnSykmelding
 
 data class UnverifiedSykInnSykmledingMeta(
     val behandlerHpr: String,
