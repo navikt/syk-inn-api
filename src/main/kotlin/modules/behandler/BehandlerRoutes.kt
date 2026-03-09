@@ -34,17 +34,14 @@ fun Application.configureBehandlerRoutes() {
         route("/api/sykmelding") {
             post {
                     try {
-                        // PAYLODA
                         val payload: OpprettSykmelding.Payload = call.receive()
-                        // MAPPE TIL DOMONE OBJEKT
                         val unruledSykmelding = payload.toSykInnSykmelding()
-                        // NESTE BOUNDED COETEXT INPUT
                         val createdSykmelding = sykmeldingerService.create(unruledSykmelding)
-                        // Apply access control
-                        val responseForApi =
-                            accessControlService.toRedactedIfNeeded(createdSykmelding)
 
-                        call.respond<BehandlerSykmelding>(HttpStatusCode.Created, responseForApi)
+                        call.respond<BehandlerSykmelding>(
+                            HttpStatusCode.Created,
+                            accessControlService.toRedactedIfNeeded(createdSykmelding),
+                        )
                     } catch (ex: Exception) {
                         logger.error(ex)
                         call.respond(
@@ -122,7 +119,21 @@ fun Application.configureBehandlerRoutes() {
                         }
                     }
                 }
-            get { TODO("Stub for get all sykmeldinger") }
+            get {
+                    // TODO: Husk å tilgangstyre!
+                    /*
+                           @RequestHeader("Ident") ident: String,
+                           @RequestHeader("HPR") hpr: String,
+                    */
+
+                    val ident =
+                        requireNotNull(call.request.headers["Ident"]) { "Missing Ident header" }
+                    val allSykmeldinger = sykmeldingerService.byIdent(ident)
+                    val response =
+                        allSykmeldinger.map { accessControlService.toRedactedIfNeeded(it) }
+
+                    call.respond<List<BehandlerSykmelding>>(HttpStatusCode.OK, response)
+                }
                 .describe {
                     summary = "Get all sykmeldinger for the logged in user"
                     description =
@@ -131,7 +142,7 @@ fun Application.configureBehandlerRoutes() {
                         HttpStatusCode.OK {
                             description =
                                 "A list of sykmeldinger that the logged in user has access to"
-                            schema = jsonSchema<BehandlerSykmelding>()
+                            schema = jsonSchema<List<BehandlerSykmelding>>()
                         }
                     }
                 }

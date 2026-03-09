@@ -5,6 +5,8 @@ import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
 class BehandlerAccessControlService {
     fun toRedactedIfNeeded(sykInnSykmelding: VerifiedSykInnSykmelding): BehandlerSykmelding {
-        TODO()
+        // TODO: Faktisk tilgangsstyring
+
+        return sykInnSykmelding.toSykmelding()
     }
 }

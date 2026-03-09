@@ -15,7 +15,7 @@ import modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
 import modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import modules.sykmeldinger.domain.SykInnYrkesskade
 import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmledingMeta
+import modules.sykmeldinger.domain.UnverifiedSykInnSykmeldingMeta
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
@@ -42,10 +42,11 @@ fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     return UnverifiedSykInnSykmelding(
         sykmeldingId = this.submitId,
         meta =
-            UnverifiedSykInnSykmledingMeta(
+            UnverifiedSykInnSykmeldingMeta(
                 behandlerHpr = this.meta.sykmelderHpr,
                 pasientIdent = this.meta.pasientIdent,
                 legekontorOrgnr = this.meta.legekontorOrgnr,
+                legekontorTlf = this.meta.legekontorTlf,
             ),
         values =
             SykInnSykmeldingValues(

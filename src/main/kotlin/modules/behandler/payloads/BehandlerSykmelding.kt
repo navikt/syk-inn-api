@@ -1,21 +1,24 @@
 package modules.behandler.payloads
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 /** This sealed interface allows both "Full" and "Redacted" versions of the sykmelding response. */
 sealed interface BehandlerSykmelding {
-    val sykmeldingId: String
+    val sykmeldingId: UUID
     val meta: BehandlerSykmeldingMeta
-    val utfall: BehandlerSykmeldingRuleResult
 }
 
 data class BehandlerSykmeldingFull(
-    override val sykmeldingId: String,
+    override val sykmeldingId: UUID,
     override val meta: BehandlerSykmeldingMeta,
-    override val utfall: BehandlerSykmeldingRuleResult,
+    val utfall: BehandlerSykmeldingRuleResult,
     val values: BehandlerSykmeldingValues,
 ) : BehandlerSykmelding
 
@@ -38,10 +41,20 @@ data class BehandlerSykmeldingValues(
     val arbeidsgiver: BehandlerSykmeldingArbeidsgiver?,
     val tilbakedatering: BehandlerSykmeldingTilbakedatering?,
     val utdypendeSporsmal: BehandlerSykmeldingUtdypendeSporsmal?,
-    val utdypendeSporsmalSvar: BehandlerSykmeldingUtdypendeSporsmalSvar?,
     val annenFravarsgrunn: AnnenFravarsgrunn?,
 )
 
+@JsonSubTypes(
+    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
+    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Gradert::class, name = "GRADERT"),
+    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Avventende::class, name = "AVVENTENDE"),
+    JsonSubTypes.Type(
+        BehandlerSykmeldingAktivitet.Behandlingsdager::class,
+        name = "BEHANDLINGSDAGER",
+    ),
+    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
+)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BehandlerSykmeldingAktivitet(open val fom: LocalDate, open val tom: LocalDate) {
     data class IkkeMulig(
         override val fom: LocalDate,
@@ -77,14 +90,9 @@ data class BehandlerSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)
 
 data class BehandlerSykmeldingArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,
-    val arbeidsrelaterteArsaker: List<SykInnArbeidsrelatertArsakType>,
+    val arbeidsrelaterteArsaker: List<ArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?,
 )
-
-enum class SykInnArbeidsrelatertArsakType {
-    TILRETTELEGGING_IKKE_MULIG,
-    ANNET,
-}
 
 data class BehandlerSykmeldingDiagnoseInfo(
     val system: SykInnDiagnoseSystem,
@@ -103,19 +111,13 @@ data class BehandlerSykmeldingYrkesskade(val yrkesskade: Boolean, val skadedato:
 data class BehandlerSykmeldingMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 
 data class BehandlerSykmeldingSykmelder(
-    val hprNummer: String,
-    val fornavn: String?,
-    val mellomnavn: String?,
-    val etternavn: String?,
+    // TODO: Fikse i syk-inn schema
+    val hpr: String,
+    // TODO: Fikse i syk-inn schema
+    val navn: String,
 )
 
 data class BehandlerSykmeldingUtdypendeSporsmal(
-    val utfordringerMedArbeid: String?,
-    val medisinskOppsummering: String?,
-    val hensynPaArbeidsplassen: String?,
-)
-
-data class BehandlerSykmeldingUtdypendeSporsmalSvar(
     val utfordringerMedArbeid: BehandlerSykmeldingSporsmalSvar?,
     val medisinskOppsummering: BehandlerSykmeldingSporsmalSvar?,
     val hensynPaArbeidsplassen: BehandlerSykmeldingSporsmalSvar?,
@@ -129,4 +131,4 @@ data class BehandlerSykmeldingUtdypendeSporsmalSvar(
     val medisinskeHensyn: BehandlerSykmeldingSporsmalSvar?,
 )
 
-data class BehandlerSykmeldingSporsmalSvar(val sporsmalstekst: String?, val svar: String)
+data class BehandlerSykmeldingSporsmalSvar(val sporsmalstekst: String, val svar: String)

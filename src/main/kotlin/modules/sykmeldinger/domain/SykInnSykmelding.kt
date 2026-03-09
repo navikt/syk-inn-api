@@ -22,10 +22,16 @@ data class VerifiedSykInnSykmelding(
 data class UnverifiedSykInnSykmelding(
     override val sykmeldingId: UUID,
     override val values: SykInnSykmeldingValues,
-    val meta: UnverifiedSykInnSykmledingMeta,
+    val meta: UnverifiedSykInnSykmeldingMeta,
 ) : SykInnSykmelding
 
-data class SykInnSykmeldingMeta(val mottatt: OffsetDateTime)
+data class SykInnSykmeldingMeta(
+    val mottatt: OffsetDateTime,
+    val pasientIdent: String,
+    val hpr: String,
+    val legekontorOrgnr: String,
+    val legekontorTlf: String,
+)
 
 sealed interface SykInnSykmeldingRuleResult {
     class OK : SykInnSykmeldingRuleResult
@@ -39,8 +45,9 @@ sealed interface SykInnSykmeldingRuleResult {
     }
 }
 
-data class UnverifiedSykInnSykmledingMeta(
+data class UnverifiedSykInnSykmeldingMeta(
     val behandlerHpr: String,
     val pasientIdent: String,
     val legekontorOrgnr: String,
+    val legekontorTlf: String,
 )
