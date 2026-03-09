@@ -26,7 +26,4 @@ fun Application.module() {
     configureBehandlerModule()
     configureKafkaModule()
     configureJobsModule()
-
-    // TODO: Temporary
-    configureTestStuff()
 }

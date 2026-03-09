@@ -42,28 +42,4 @@ class SykmeldingerRepo() {
                 )
             }
     }
-
-    fun test(): List<Pair<UUID, SykmeldingJsonb>> = transaction {
-        val sykmeldinger: List<Pair<UUID, SykmeldingJsonb>> =
-            SykmeldingTable.selectAll()
-                .where { SykmeldingTable.createdAt lessEq Clock.System.now() }
-                .map { it[SykmeldingTable.id] to it[SykmeldingTable.data] }
-
-        println("Test exposed query")
-        println(sykmeldinger)
-
-        sykmeldinger
-    }
-
-    fun createBoio(): List<Pair<UUID, SykmeldingJsonb>> = transaction {
-        val uuid = UUID.randomUUID()
-
-        SykmeldingTable.insertReturning {
-                it[id] = uuid
-                it[createdAt] = Clock.System.now()
-                it[updatedAt] = Clock.System.now()
-                it[data] = SykmeldingJsonb(sykmeldingId = uuid.toString())
-            }
-            .map { it[SykmeldingTable.id] to it[SykmeldingTable.data] }
-    }
 }
