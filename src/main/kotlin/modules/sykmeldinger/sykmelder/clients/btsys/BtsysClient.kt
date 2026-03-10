@@ -12,7 +12,7 @@ import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
 import plugins.auth.TexasClient
 
-data class BtsysRespons(val suspendert: Boolean)
+data class BtsysResponse(val suspendert: Boolean)
 
 class BtsysException(message: String, cause: Exception? = null) : Exception(message, cause)
 
@@ -47,7 +47,7 @@ class BtsysCloudClient(
 
         return when {
             response.status.isSuccess() -> {
-                val result: BtsysRespons = response.body<BtsysRespons>()
+                val result: BtsysResponse = response.body<BtsysResponse>()
 
                 result.suspendert
             }
