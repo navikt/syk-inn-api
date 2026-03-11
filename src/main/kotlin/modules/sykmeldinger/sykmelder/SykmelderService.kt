@@ -18,6 +18,8 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
         val suspendert =
             btsys.isSuspendert(sykmelderIdent = sykmelderMedHpr.ident, oppslagsdato = oppslagsdato)
                 ?: return Sykmelder.UtenSuspensjon(hpr = hpr, ident = sykmelderMedHpr.ident)
+        // TODO vi må håndtere exceptions som blir kasta frå klientane. Skal vi catche det her eller
+        // lenger opp? vi må hard stoppe. Må prate om korleis vi vil handtere det.
 
         return Sykmelder.MedSuspensjon(
             hpr = hpr,
