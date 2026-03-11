@@ -6,8 +6,8 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.headers
 import io.ktor.http.*
-import io.ktor.http.headers
 import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
 import plugins.auth.TexasClient

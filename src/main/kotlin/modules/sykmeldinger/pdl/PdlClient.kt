@@ -4,8 +4,8 @@ import core.Environment
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.http.*
-import io.ktor.http.headers
 import io.ktor.server.plugins.di.annotations.*
 import plugins.auth.TexasClient
 
