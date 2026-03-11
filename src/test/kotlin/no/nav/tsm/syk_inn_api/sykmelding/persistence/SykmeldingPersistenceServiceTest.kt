@@ -5,13 +5,13 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import no.nav.tsm.syk_inn_api.sykmelding.getTestSykmelding
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskHenvisningRepository
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.test.FullIntegrationTest
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.transaction.annotation.Propagation

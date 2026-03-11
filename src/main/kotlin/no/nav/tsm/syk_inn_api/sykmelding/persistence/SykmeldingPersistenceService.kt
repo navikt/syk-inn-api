@@ -2,8 +2,8 @@ package no.nav.tsm.syk_inn_api.sykmelding.persistence
 
 import java.time.OffsetDateTime
 import java.util.UUID
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskHenvisningRepository
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskHenvisningRepository
+import no.nav.tsm.syk_inn_api.sykmelding.rules.juridiskvurdering.JuridiskVurderingResult
 import no.nav.tsm.syk_inn_api.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

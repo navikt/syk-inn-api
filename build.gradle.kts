@@ -14,6 +14,7 @@ val arrowVersion = "2.2.0"
 val regulaVersion = "47"
 val sykmeldingInputVersion = "24"
 val diagnoserVersion = "2026.1.10"
+val hypersistenceUtilsHibernateVersion = "3.14.1"
 
 // Dev deps
 val testContainersVersion = "2.0.2"
@@ -28,7 +29,7 @@ plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
     kotlin("plugin.jpa") version "2.2.21"
-    id("org.springframework.boot") version "3.5.9"
+    id("org.springframework.boot") version "4.0.1"
 
     // Other plugins
     id("io.spring.dependency-management") version "1.1.7"
@@ -53,12 +54,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-jackson")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.0.3")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:${kotlinxHtmlVersion}")
@@ -74,7 +76,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api:$otelVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelAnnotationsVersion")
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.11.0")
+    implementation("io.hypersistence:hypersistence-utils-hibernate-71:$hypersistenceUtilsHibernateVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-pdfbox:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-slf4j:$openHtmlToPdfVersion")
     implementation("io.github.openhtmltopdf:openhtmltopdf-svg-support:$openHtmlToPdfVersion")
@@ -83,10 +85,14 @@ dependencies {
 
     runtimeOnly("org.postgresql:postgresql")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
-    testImplementation("org.springframework.kafka:spring-kafka-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-jackson-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")

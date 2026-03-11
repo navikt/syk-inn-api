@@ -12,7 +12,6 @@ import no.nav.tsm.regulus.regula.RegulaLovverk
 import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.regulus.regula.RegulaStatus
 import no.nav.tsm.regulus.regula.TreeResult
-import no.nav.tsm.syk_inn_api.sykmelding.rules.JuridiskVurderingResult
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -31,6 +30,7 @@ class JuridiskHenvisningService(
         sykmeldtIdent: String,
         regulaResult: RegulaResult
     ): JuridiskVurderingResult {
+
         val juridiskeHenvisninger =
             regulaResult.results.mapNotNull { result ->
                 result.juridisk?.let {
@@ -87,9 +87,6 @@ class JuridiskHenvisningService(
                 JuridiskUtfall.VILKAR_IKKE_OPPFYLT
             }
             RegulaStatus.MANUAL_PROCESSING -> {
-                JuridiskUtfall.VILKAR_UAVKLART
-            }
-            else -> {
                 JuridiskUtfall.VILKAR_UAVKLART
             }
         }

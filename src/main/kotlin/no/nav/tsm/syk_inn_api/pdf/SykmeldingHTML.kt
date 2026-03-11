@@ -136,7 +136,7 @@ fun buildSykmeldingHtml(sykmelding: SykmeldingDocument, pasient: Person): String
                                     tr {
                                         tableInfo(
                                             "Arbeidsgiver",
-                                            italic = sykmelding.values.arbeidsgiver == null,
+                                            italic = false
                                         ) {
                                             sykmelding.values.arbeidsgiver.arbeidsgivernavn
                                         }

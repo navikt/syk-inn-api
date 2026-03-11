@@ -73,7 +73,7 @@ class SykmeldingStatusRepository(
             """
                 .trimIndent(),
             mapOf("sykmelding_id" to sykmeldingId),
-            ResultSetExtractor<SykmeldingStatus>() {
+            ResultSetExtractor {
                 if (it.next()) {
                     SykmeldingStatus(
                         sykmeldingId = it.getString("sykmelding_id"),
