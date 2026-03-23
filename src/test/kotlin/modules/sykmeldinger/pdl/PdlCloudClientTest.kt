@@ -1,7 +1,5 @@
-package modules.sykmeldinger.pdl
+package no.nav.tsm.modules.sykmeldinger.pdl
 
-import core.Environment
-import core.ExternalApi
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -14,8 +12,10 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import plugins.auth.TexasClient
-import plugins.auth.TexasToken
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.ExternalApi
+import no.nav.tsm.plugins.auth.TexasClient
+import no.nav.tsm.plugins.auth.TexasToken
 
 class PdlCloudClientTest {
 

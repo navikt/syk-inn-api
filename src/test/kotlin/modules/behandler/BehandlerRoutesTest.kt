@@ -1,4 +1,4 @@
-package modules.behandler
+package no.nav.tsm.modules.behandler
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -8,17 +8,17 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import modules.behandler.payloads.BehandlerSykmelding
-import modules.behandler.payloads.BehandlerSykmeldingFull
-import modules.behandler.payloads.BehandlerSykmeldingRedacted
-import modules.behandler.payloads.BehandlerSykmeldingVerify
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.plugins.auth.configureLocalMachineTokenAuth
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.configureIntegrationTestDependencies
+import no.nav.tsm.utils.testClient
 import org.intellij.lang.annotations.Language
-import utils.WithPostgresql
-import utils.configureIntegrationTestDependencies
-import utils.testClient
 
 class SykmeldingApiTest : WithPostgresql() {
     private fun ApplicationTestBuilder.configureSykmeldingApiTest() {

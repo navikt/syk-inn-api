@@ -1,6 +1,5 @@
-package modules.behandler
+package no.nav.tsm.modules.behandler
 
-import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
@@ -15,15 +14,16 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.logging.error
 import io.ktor.utils.io.ExperimentalKtorApi
-import modules.behandler.access.BehandlerAccessControlService
-import modules.behandler.mappers.toBehandlerSykmeldingVerify
-import modules.behandler.mappers.toSykInnSykmelding
-import modules.behandler.payloads.BehandlerSykmelding
-import modules.behandler.payloads.BehandlerSykmeldingVerify
-import modules.behandler.payloads.OpprettSykmelding
-import modules.sykmeldinger.SykmeldingerService
-import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
+import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
+import no.nav.tsm.modules.behandler.mappers.toSykInnSykmelding
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
+import no.nav.tsm.modules.behandler.payloads.OpprettSykmelding
+import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.plugins.auth.MachineTokenAuth
 
 @OptIn(ExperimentalKtorApi::class)

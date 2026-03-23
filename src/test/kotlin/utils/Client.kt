@@ -1,4 +1,4 @@
-package utils
+package no.nav.tsm.utils
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient

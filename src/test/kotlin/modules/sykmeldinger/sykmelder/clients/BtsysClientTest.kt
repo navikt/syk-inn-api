@@ -1,10 +1,6 @@
-package modules.sykmeldinger.sykmelder.clients
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import core.Environment
-import core.ExternalApi
-import core.Runtime
-import core.RuntimeEnvironments
 import io.ktor.client.engine.mock.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
@@ -14,8 +10,12 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysResponse
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.ExternalApi
+import no.nav.tsm.core.Runtime
+import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysResponse
 
 class BtsysClientTest {
     private val objectMapper = jacksonObjectMapper()

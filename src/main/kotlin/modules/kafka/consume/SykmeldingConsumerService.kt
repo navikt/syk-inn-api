@@ -1,12 +1,12 @@
-package modules.kafka.consume
+package no.nav.tsm.modules.kafka.consume
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import core.logger
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
 class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
     private val logger = logger()

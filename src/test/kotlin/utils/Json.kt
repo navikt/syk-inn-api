@@ -1,4 +1,4 @@
-package utils
+package no.nav.tsm.utils
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

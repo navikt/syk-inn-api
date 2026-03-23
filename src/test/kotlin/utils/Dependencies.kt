@@ -1,21 +1,21 @@
-package utils
+package no.nav.tsm.utils
 
-import core.Environment
-import core.PostgresConfig
-import core.Runtime
-import core.RuntimeEnvironments
 import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
 import java.util.Properties
-import modules.behandler.configureBehandlerModule
-import modules.sykmeldinger.configureSykmeldingerModule
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.PostgresConfig
+import no.nav.tsm.core.Runtime
+import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.modules.behandler.configureBehandlerModule
+import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
+import no.nav.tsm.plugins.configureDatabase
+import no.nav.tsm.plugins.configureDependencies
+import no.nav.tsm.plugins.configureSerialization
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
-import plugins.configureDatabase
-import plugins.configureDependencies
-import plugins.configureSerialization
 
 fun Application.configureIntegrationTestDependencies(
     postgres: PostgreSQLContainer,

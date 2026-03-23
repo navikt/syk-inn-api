@@ -1,6 +1,6 @@
-package modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
-import modules.sykmeldinger.sykmelder.SykmelderMedHpr
+import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderMedHpr
 
 class HprLocalClient : HprClient {
 

@@ -1,16 +1,16 @@
-package modules.sykmeldinger.rules.mappers
+package no.nav.tsm.modules.sykmeldinger.rules.mappers
 
 import java.time.LocalDateTime
-import modules.behandler.payloads.SykInnDiagnoseSystem
-import modules.sykmeldinger.domain.SykInnAktivitet
-import modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import modules.sykmeldinger.pdl.IDENT_GRUPPE
-import modules.sykmeldinger.pdl.PdlPerson
-import modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
+import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
+import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.pdl.IDENT_GRUPPE
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.regulus.regula.RegulaAvsender
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaMeta

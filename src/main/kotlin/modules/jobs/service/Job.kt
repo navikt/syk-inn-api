@@ -1,7 +1,7 @@
-package modules.jobs.service
+package no.nav.tsm.modules.jobs.service
 
-import core.jobs.JobStatus
 import java.time.OffsetDateTime
+import no.nav.tsm.core.jobs.JobStatus
 
 enum class JobName {
     SYKMELDING_CONSUMER

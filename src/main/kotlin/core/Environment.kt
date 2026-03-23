@@ -1,4 +1,4 @@
-package core
+package no.nav.tsm.core
 
 import io.ktor.server.application.Application
 import io.ktor.server.config.ApplicationConfig

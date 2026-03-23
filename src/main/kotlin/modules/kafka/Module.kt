@@ -1,7 +1,7 @@
-package modules.kafka
+package no.nav.tsm.modules.kafka
 
 import io.ktor.server.application.Application
-import modules.kafka.consume.configureSykmeldingerKafkaConsumerDependencies
+import no.nav.tsm.modules.kafka.consume.configureSykmeldingerKafkaConsumerDependencies
 
 fun Application.configureKafkaModule() {
     configureSykmeldingerKafkaConsumerDependencies()

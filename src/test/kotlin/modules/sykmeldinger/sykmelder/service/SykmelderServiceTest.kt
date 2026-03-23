@@ -1,4 +1,4 @@
-package modules.sykmeldinger.sykmelder.service
+package no.nav.tsm.modules.sykmeldinger.sykmelder.service
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -7,11 +7,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
-import modules.sykmeldinger.sykmelder.Sykmelder
-import modules.sykmeldinger.sykmelder.SykmelderMedHpr
-import modules.sykmeldinger.sykmelder.SykmelderService
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
-import modules.sykmeldinger.sykmelder.clients.hpr.HprClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderMedHpr
+import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 
 class SykmelderServiceTest {
 

@@ -1,15 +1,15 @@
-package modules.jobs.db
+package no.nav.tsm.modules.jobs.db
 
-import core.jobs.JobStatus
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinInstant
-import modules.jobs.db.exposed.JobStatusTable
-import modules.jobs.db.exposed.JobTable
-import modules.jobs.service.Job
-import modules.jobs.service.JobName
-import modules.jobs.service.RunnerJobStatus
+import no.nav.tsm.core.jobs.JobStatus
+import no.nav.tsm.modules.jobs.db.exposed.JobStatusTable
+import no.nav.tsm.modules.jobs.db.exposed.JobTable
+import no.nav.tsm.modules.jobs.service.Job
+import no.nav.tsm.modules.jobs.service.JobName
+import no.nav.tsm.modules.jobs.service.RunnerJobStatus
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere

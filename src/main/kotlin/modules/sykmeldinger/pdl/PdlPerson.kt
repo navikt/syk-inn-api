@@ -1,4 +1,4 @@
-package modules.sykmeldinger.pdl
+package no.nav.tsm.modules.sykmeldinger.pdl
 
 import java.time.LocalDate
 

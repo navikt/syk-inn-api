@@ -1,4 +1,4 @@
-package core.otel
+package no.nav.tsm.core.otel
 
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.StatusCode

@@ -1,12 +1,12 @@
 @file:OptIn(ExperimentalUuidApi::class)
 
-package modules.sykmeldinger.db
+package no.nav.tsm.modules.sykmeldinger.db
 
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
-import modules.sykmeldinger.db.exposed.SykmeldingJsonb
-import modules.sykmeldinger.db.exposed.SykmeldingTable
-import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll

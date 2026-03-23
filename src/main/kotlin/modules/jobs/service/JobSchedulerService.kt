@@ -1,15 +1,15 @@
-package modules.jobs.service
+package no.nav.tsm.modules.jobs.service
 
-import core.jobs.JobManager
-import core.jobs.JobStatus
-import core.logger
 import io.ktor.server.plugins.di.annotations.Named
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import modules.jobs.db.JobRepository
+import no.nav.tsm.core.jobs.JobManager
+import no.nav.tsm.core.jobs.JobStatus
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.jobs.db.JobRepository
 
 class JobSchedulerService(
     private val jobManagers: List<JobManager>,

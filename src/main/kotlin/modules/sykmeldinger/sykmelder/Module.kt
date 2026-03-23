@@ -1,4 +1,4 @@
-package modules.sykmeldinger.sykmelder
+package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 import io.ktor.server.application.Application
 

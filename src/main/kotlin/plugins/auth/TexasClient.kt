@@ -1,7 +1,5 @@
-package plugins.auth
+package no.nav.tsm.plugins.auth
 
-import core.Environment
-import core.logger
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -14,6 +12,8 @@ import io.ktor.http.isTextType
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.logger
 
 data class TexasToken(val token: String)
 

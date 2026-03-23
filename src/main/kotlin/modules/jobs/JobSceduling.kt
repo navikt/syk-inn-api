@@ -1,6 +1,5 @@
-package modules.jobs
+package no.nav.tsm.modules.jobs
 
-import core.logger
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStarting
@@ -8,7 +7,8 @@ import io.ktor.server.plugins.di.dependencies
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import modules.jobs.service.JobSchedulerService
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.jobs.service.JobSchedulerService
 
 fun Application.configureJobSceduling() {
     val log = logger()

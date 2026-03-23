@@ -1,12 +1,12 @@
-package modules.jobs
+package no.nav.tsm.modules.jobs
 
-import core.Environment
-import core.jobs.JobManager
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import modules.jobs.db.JobRepository
-import modules.jobs.service.JobSchedulerService
-import modules.kafka.consume.SykmeldingConsumerJobManager
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.jobs.JobManager
+import no.nav.tsm.modules.jobs.db.JobRepository
+import no.nav.tsm.modules.jobs.service.JobSchedulerService
+import no.nav.tsm.modules.kafka.consume.SykmeldingConsumerJobManager
 
 fun Application.configureJobDependencies() {
     val consumerJobManager: SykmeldingConsumerJobManager by dependencies

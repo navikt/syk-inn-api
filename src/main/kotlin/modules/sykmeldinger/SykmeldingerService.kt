@@ -1,13 +1,13 @@
-package modules.sykmeldinger
+package no.nav.tsm.modules.sykmeldinger
 
 import java.time.LocalDate
 import java.util.UUID
-import modules.sykmeldinger.db.SykmeldingerRepo
-import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import modules.sykmeldinger.rules.RuleService
-import modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.modules.sykmeldinger.db.SykmeldingerRepo
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.rules.RuleService
+import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
 
 class SykmeldingerService(
     private val sykmelderService: SykmelderService,

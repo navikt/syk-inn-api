@@ -1,13 +1,13 @@
 package no.nav.tsm.plugins.auth
 
 import com.auth0.jwk.JwkProviderBuilder
-import core.Environment
-import core.isLocal
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.di.dependencies
 import java.net.URI
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.isLocal
 
 val MachineTokenAuth = "internal-entra-m2m"
 

@@ -1,4 +1,4 @@
-package plugins
+package no.nav.tsm.plugins
 
 import dev.hayden.KHealth
 import io.ktor.http.HttpHeaders

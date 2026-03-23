@@ -1,4 +1,4 @@
-package utils
+package no.nav.tsm.utils
 
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer

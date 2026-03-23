@@ -1,6 +1,5 @@
-package modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
-import core.Environment
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.callid.CallId
@@ -11,8 +10,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
-import modules.sykmeldinger.sykmelder.SykmelderMedHpr
-import plugins.auth.TexasClient
+import no.nav.tsm.core.Environment
+import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderMedHpr
+import no.nav.tsm.plugins.auth.TexasClient
 
 class HprException(message: String, cause: Exception?) : Exception(message, cause)
 

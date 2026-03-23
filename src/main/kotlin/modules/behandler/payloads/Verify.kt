@@ -1,4 +1,4 @@
-package modules.behandler.payloads
+package no.nav.tsm.modules.behandler.payloads
 
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 

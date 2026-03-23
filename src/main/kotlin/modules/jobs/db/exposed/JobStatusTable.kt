@@ -1,4 +1,4 @@
-package modules.jobs.db.exposed
+package no.nav.tsm.modules.jobs.db.exposed
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.timestamp

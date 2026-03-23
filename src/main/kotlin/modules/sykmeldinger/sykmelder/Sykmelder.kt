@@ -1,4 +1,4 @@
-package modules.sykmeldinger.sykmelder
+package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 sealed interface Sykmelder {
     val hpr: String

@@ -1,9 +1,9 @@
-package plugins
+package no.nav.tsm.plugins
 
-import core.Environment
-import core.db.runFlywayMigrations
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.db.runFlywayMigrations
 import org.jetbrains.exposed.v1.jdbc.Database
 
 fun Application.configureDatabase() {

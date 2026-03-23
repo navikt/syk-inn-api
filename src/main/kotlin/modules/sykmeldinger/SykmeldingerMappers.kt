@@ -1,12 +1,12 @@
-package modules.sykmeldinger
+package no.nav.tsm.modules.sykmeldinger
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import modules.sykmeldinger.domain.SykInnSykmeldingMeta
-import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 
 fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
     rules: SykInnSykmeldingRuleResult,

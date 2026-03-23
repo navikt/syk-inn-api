@@ -1,10 +1,10 @@
-package modules.sykmeldinger.sykmelder
+package no.nav.tsm.modules.sykmeldinger.sykmelder
 
-import core.logger
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
-import modules.sykmeldinger.sykmelder.clients.hpr.HprClient
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 
 class SykmelderService(private val btsys: BtsysClient, private val helsenettProxy: HprClient) {
     private val logger = logger()

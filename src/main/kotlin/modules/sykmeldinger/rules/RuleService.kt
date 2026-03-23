@@ -1,16 +1,16 @@
-package modules.sykmeldinger.rules
+package no.nav.tsm.modules.sykmeldinger.rules
 
-import core.logger
-import core.otel.failSpan
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
-import modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import modules.sykmeldinger.pdl.PdlClient
-import modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
-import modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
-import modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
-import modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.core.logger
+import no.nav.tsm.core.otel.failSpan
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
+import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
+import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
+import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
+import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaResult

@@ -1,4 +1,4 @@
-package plugins
+package no.nav.tsm.plugins
 
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

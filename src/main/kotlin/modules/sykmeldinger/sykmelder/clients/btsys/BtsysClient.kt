@@ -1,6 +1,5 @@
-package modules.sykmeldinger.sykmelder.clients.btsys
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 
-import core.Environment
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
@@ -10,7 +9,8 @@ import io.ktor.client.request.headers
 import io.ktor.http.*
 import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
-import plugins.auth.TexasClient
+import no.nav.tsm.core.Environment
+import no.nav.tsm.plugins.auth.TexasClient
 
 data class BtsysResponse(val suspendert: Boolean)
 

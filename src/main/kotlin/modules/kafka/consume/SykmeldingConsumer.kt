@@ -1,12 +1,12 @@
-package modules.kafka.consume
+package no.nav.tsm.modules.kafka.consume
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import core.Environment
-import core.logger
 import java.time.Duration
 import java.util.Properties
 import kotlin.to
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.logger
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer

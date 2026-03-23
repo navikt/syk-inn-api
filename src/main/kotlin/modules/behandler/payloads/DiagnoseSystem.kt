@@ -1,4 +1,4 @@
-package modules.behandler.payloads
+package no.nav.tsm.modules.behandler.payloads
 
 /** TODO: Move some place central? */
 enum class SykInnDiagnoseSystem {

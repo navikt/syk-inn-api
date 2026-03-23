@@ -1,14 +1,14 @@
-package modules.sykmeldinger.sykmelder
+package no.nav.tsm.modules.sykmeldinger.sykmelder
 
-import core.dynamicDependencies
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
-import modules.sykmeldinger.sykmelder.clients.btsys.BtsysLocalClient
-import modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
-import modules.sykmeldinger.sykmelder.clients.hpr.HprLocalClient
+import no.nav.tsm.core.dynamicDependencies
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysLocalClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprLocalClient
 
 fun Application.configureSykmelderDependencies() {
     val baseHttpClient: HttpClient by dependencies

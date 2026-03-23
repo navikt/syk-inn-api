@@ -1,4 +1,4 @@
-package modules.behandler.payloads
+package no.nav.tsm.modules.behandler.payloads
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo

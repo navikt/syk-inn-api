@@ -1,7 +1,7 @@
-package modules.behandler.access
+package no.nav.tsm.modules.behandler.access
 
-import modules.behandler.payloads.BehandlerSykmelding
-import modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
 class BehandlerAccessControlService {
     fun toRedactedIfNeeded(sykInnSykmelding: VerifiedSykInnSykmelding): BehandlerSykmelding {

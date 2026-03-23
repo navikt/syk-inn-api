@@ -1,4 +1,4 @@
-package modules.behandler
+package no.nav.tsm.modules.behandler
 
 import io.ktor.server.application.Application
 

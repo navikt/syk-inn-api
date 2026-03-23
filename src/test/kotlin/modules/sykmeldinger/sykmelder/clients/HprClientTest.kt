@@ -1,10 +1,6 @@
-package modules.sykmeldinger.sykmelder.clients
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import core.Environment
-import core.ExternalApi
-import core.Runtime
-import core.RuntimeEnvironments
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -16,8 +12,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlinx.coroutines.test.runTest
-import modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
-import modules.sykmeldinger.sykmelder.clients.hpr.HprSykmelder
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.ExternalApi
+import no.nav.tsm.core.Runtime
+import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprSykmelder
 
 class HprClientTest {
     private val objectMapper = jacksonObjectMapper()

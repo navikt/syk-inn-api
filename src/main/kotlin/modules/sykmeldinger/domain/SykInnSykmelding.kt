@@ -1,4 +1,4 @@
-package modules.sykmeldinger.domain
+package no.nav.tsm.modules.sykmeldinger.domain
 
 import java.time.OffsetDateTime
 import java.util.UUID

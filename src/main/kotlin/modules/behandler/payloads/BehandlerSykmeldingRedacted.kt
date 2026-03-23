@@ -1,4 +1,4 @@
-package modules.behandler.payloads
+package no.nav.tsm.modules.behandler.payloads
 
 import java.time.LocalDate
 import java.util.UUID

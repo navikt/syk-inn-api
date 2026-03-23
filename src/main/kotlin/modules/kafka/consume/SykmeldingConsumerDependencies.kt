@@ -1,4 +1,4 @@
-package modules.kafka.consume
+package no.nav.tsm.modules.kafka.consume
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*

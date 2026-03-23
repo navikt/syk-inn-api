@@ -1,7 +1,7 @@
-package modules.sykmeldinger.domain
+package no.nav.tsm.modules.sykmeldinger.domain
 
 import java.time.LocalDate
-import modules.behandler.payloads.SykInnDiagnoseSystem
+import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 

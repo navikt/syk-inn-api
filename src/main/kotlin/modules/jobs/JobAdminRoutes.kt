@@ -1,7 +1,5 @@
-package modules.jobs
+package no.nav.tsm.modules.jobs
 
-import core.jobs.JobStatus
-import core.logger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
@@ -13,12 +11,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.OffsetDateTime
-import modules.jobs.db.JobRepository
-import modules.jobs.service.JobName
-import modules.jobs.service.JobUpdateAction
-import modules.jobs.service.JobUpdatePayload
-import plugins.auth.InternalSymfoniAuth
-import plugins.auth.internalSymfoniUser
+import no.nav.tsm.core.jobs.JobStatus
+import no.nav.tsm.core.logger
+import no.nav.tsm.modules.jobs.db.JobRepository
+import no.nav.tsm.modules.jobs.service.JobName
+import no.nav.tsm.modules.jobs.service.JobUpdateAction
+import no.nav.tsm.modules.jobs.service.JobUpdatePayload
+import no.nav.tsm.plugins.auth.InternalSymfoniAuth
+import no.nav.tsm.plugins.auth.internalSymfoniUser
 
 data class JobRunners(val runner: String, val state: JobStatus, val updatedAt: OffsetDateTime)
 

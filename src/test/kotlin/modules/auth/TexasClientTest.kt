@@ -1,9 +1,5 @@
-package modules.auth
+package no.nav.tsm.modules.auth
 
-import core.Environment
-import core.Runtime
-import core.RuntimeEnvironments
-import core.Texas
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -18,8 +14,12 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import plugins.auth.TexasClient
-import utils.parse
+import no.nav.tsm.core.Environment
+import no.nav.tsm.core.Runtime
+import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.core.Texas
+import no.nav.tsm.plugins.auth.TexasClient
+import no.nav.tsm.utils.parse
 
 class TexasClientTest {
 

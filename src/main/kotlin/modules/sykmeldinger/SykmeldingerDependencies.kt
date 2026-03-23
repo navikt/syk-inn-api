@@ -1,12 +1,12 @@
-package modules.sykmeldinger
+package no.nav.tsm.modules.sykmeldinger
 
-import core.dynamicDependencies
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
-import modules.sykmeldinger.db.SykmeldingerRepo
-import modules.sykmeldinger.pdl.PdlCloudClient
-import modules.sykmeldinger.pdl.PdlLocalClient
-import modules.sykmeldinger.rules.RuleService
+import no.nav.tsm.core.dynamicDependencies
+import no.nav.tsm.modules.sykmeldinger.db.SykmeldingerRepo
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlCloudClient
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlLocalClient
+import no.nav.tsm.modules.sykmeldinger.rules.RuleService
 
 fun Application.configureSykmeldingerDependencies() {
     dynamicDependencies {
