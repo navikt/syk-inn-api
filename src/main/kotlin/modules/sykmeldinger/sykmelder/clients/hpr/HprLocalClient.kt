@@ -19,9 +19,6 @@ class HprLocalClient : HprClient {
             return SykmelderMedHpr(
                 ident = "brokenFnr",
                 hprNummer = "hprButHasBrokenFnrAndNoGodkjenninger",
-                fornavn = "James",
-                mellomnavn = "007",
-                etternavn = "Bond",
             )
         }
 
@@ -29,23 +26,11 @@ class HprLocalClient : HprClient {
             logger.info(
                 "HprMock: Got hprButFnrIsSuspended, returning as normal and letting btsys mock handle the rest"
             )
-            return SykmelderMedHpr(
-                ident = "suspendertFnr",
-                hprNummer = "hprButFnrIsSuspended",
-                fornavn = "James",
-                mellomnavn = "007",
-                etternavn = "Bond",
-            )
+            return SykmelderMedHpr(ident = "suspendertFnr", hprNummer = "hprButFnrIsSuspended")
         }
 
         logger.info("HprMock: Got $behandlerHpr, mocking normal response.")
-        return SykmelderMedHpr(
-            ident = "09099012345",
-            hprNummer = behandlerHpr,
-            fornavn = "James",
-            mellomnavn = "007",
-            etternavn = "Bond",
-        )
+        return SykmelderMedHpr(ident = "09099012345", hprNummer = behandlerHpr)
     }
 
     override suspend fun getSykmelderByIdent(behandlerIdent: String): SykmelderMedHpr {
@@ -55,12 +40,6 @@ class HprLocalClient : HprClient {
         }
 
         logger.info("HprMock: Got $behandlerIdent, mocking normal response.")
-        return SykmelderMedHpr(
-            ident = behandlerIdent,
-            hprNummer = "123456789",
-            fornavn = "James",
-            mellomnavn = "007",
-            etternavn = "Bond",
-        )
+        return SykmelderMedHpr(ident = behandlerIdent, hprNummer = "123456789")
     }
 }

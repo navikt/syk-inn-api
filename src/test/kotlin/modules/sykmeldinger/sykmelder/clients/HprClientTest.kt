@@ -64,8 +64,6 @@ class HprClientTest {
         assertNotNull(response)
         assertEquals("12345678901", response.ident)
         assertEquals(hprNummer, response.hprNummer)
-        assertEquals("Cooper", response.fornavn)
-        assertEquals("Howard", response.etternavn)
     }
 
     @Test

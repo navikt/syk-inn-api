@@ -7,7 +7,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.headers
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import no.nav.tsm.core.Environment
@@ -92,19 +91,14 @@ class HprCloudClient(
         }
     }
 
-    suspend fun getToken() = texasClient.requestToken("teamsykmelding", "syfohelsenettproxy")
+    private suspend fun getToken() =
+        texasClient.requestToken("teamsykmelding", "syfohelsenettproxy")
 
-    fun mapHprSykmelderToSykmelderMedHpr(hprSykmelder: HprSykmelder): SykmelderMedHpr {
+    private fun mapHprSykmelderToSykmelderMedHpr(hprSykmelder: HprSykmelder): SykmelderMedHpr {
         requireNotNull(hprSykmelder.hprNummer, { "HprSykmelder må ha hprNummer" })
         requireNotNull(hprSykmelder.fornavn, { "HprSykmelder må ha fornavn" })
         requireNotNull(hprSykmelder.etternavn, { "HprSykmelder må ha etternavn" })
 
-        return SykmelderMedHpr(
-            ident = hprSykmelder.fnr,
-            hprNummer = hprSykmelder.hprNummer,
-            fornavn = hprSykmelder.fornavn,
-            mellomnavn = hprSykmelder.mellomnavn,
-            etternavn = hprSykmelder.etternavn,
-        )
+        return SykmelderMedHpr(ident = hprSykmelder.fnr, hprNummer = hprSykmelder.hprNummer)
     }
 }
