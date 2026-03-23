@@ -6,7 +6,7 @@ import no.nav.tsm.core.logger
 import no.nav.tsm.core.otel.failSpan
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
@@ -19,20 +19,19 @@ import no.nav.tsm.regulus.regula.executeRegulaRules
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-class RuleService(private val pdlClient: PdlClient) {
+class RuleService {
     private val logger = logger()
 
     @WithSpan
     suspend fun verify(
         sykmelding: UnverifiedSykInnSykmelding,
         sykmelder: Sykmelder,
+        sykmeldt: PdlPerson,
     ): SykInnSykmeldingRuleResult {
+
         val now = LocalDateTime.now()
-        val pasient =
-            pdlClient.getPerson(sykmelding.meta.pasientIdent)
-                ?: throw IllegalStateException("Unable to execute rules for pasient not in PDL")
         val regulaPasient =
-            pasient.mapPdlPersonToRegulaPasient()
+            sykmeldt.mapPdlPersonToRegulaPasient()
                 ?: throw IllegalStateException(
                     "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
                 )

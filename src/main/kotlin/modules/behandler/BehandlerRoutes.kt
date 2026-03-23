@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.behandler
 
+import arrow.core.getOrElse
 import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.Application
@@ -49,7 +50,7 @@ fun Application.configureBehandlerRoutes() {
                             logger.error(ex)
                             call.respond(
                                 HttpStatusCode.InternalServerError,
-                                "Unable to create sykmelding",
+                                GenericError("Unable to create sykmelding"),
                             )
                         }
                     }
@@ -66,26 +67,34 @@ fun Application.configureBehandlerRoutes() {
                         }
                     }
                 post("/verify") {
-                        try {
-                            val payload: OpprettSykmelding.Payload = call.receive()
-                            val sykmelding: UnverifiedSykInnSykmelding =
-                                payload.toSykInnSykmelding()
-                            val rule: SykInnSykmeldingRuleResult =
-                                sykmeldingerService.verify(sykmelding)
+                        val payload: OpprettSykmelding.Payload = call.receive()
+                        val sykmelding: UnverifiedSykInnSykmelding = payload.toSykInnSykmelding()
+                        val rule: SykInnSykmeldingRuleResult =
+                            sykmeldingerService.verify(sykmelding).getOrElse {
+                                return@post when (it) {
+                                    SykmeldingerService.VerifyErrors.PersonNotInPdl ->
+                                        call.respond<GenericError>(
+                                            HttpStatusCode.UnprocessableEntity,
+                                            GenericError("Person does not exist"),
+                                        )
 
-                            when (rule) {
-                                is SykInnSykmeldingRuleResult.OK ->
-                                    call.respond<Boolean>(HttpStatusCode.OK, true)
-
-                                is SykInnSykmeldingRuleResult.Outcome ->
-                                    call.respond<BehandlerSykmeldingVerify>(
-                                        HttpStatusCode.OK,
-                                        rule.toBehandlerSykmeldingVerify(),
-                                    )
+                                    SykmeldingerService.VerifyErrors.UnknownResourceError ->
+                                        call.respond<GenericError>(
+                                            HttpStatusCode.InternalServerError,
+                                            GenericError("Internal server error"),
+                                        )
+                                }
                             }
-                        } catch (ex: Exception) {
-                            logger.error(ex)
-                            throw ex
+
+                        when (rule) {
+                            is SykInnSykmeldingRuleResult.OK ->
+                                call.respond<Boolean>(HttpStatusCode.OK, true)
+
+                            is SykInnSykmeldingRuleResult.Outcome ->
+                                call.respond<BehandlerSykmeldingVerify>(
+                                    HttpStatusCode.OK,
+                                    rule.toBehandlerSykmeldingVerify(),
+                                )
                         }
                     }
                     .describe {
@@ -100,6 +109,11 @@ fun Application.configureBehandlerRoutes() {
                                 // TODO: How to represent union between boolean and
                                 // BehandlerSykmeldingVerify?
                                 schema = jsonSchema<BehandlerSykmeldingVerify>()
+                            }
+                            HttpStatusCode.UnprocessableEntity {
+                                description =
+                                    "The person does not exist in PDL and therefore can't be verified"
+                                schema = jsonSchema<GenericError>()
                             }
                         }
                     }
@@ -154,3 +168,5 @@ fun Application.configureBehandlerRoutes() {
         }
     }
 }
+
+private data class GenericError(val message: String)

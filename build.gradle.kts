@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.ktor.client.apache)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.call.id)
+    implementation(libs.arrow.core)
 
     // TSM libraries
     implementation(libs.tsm.sykmeldinger.input)

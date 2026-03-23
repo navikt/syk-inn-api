@@ -11,6 +11,7 @@ kafka = "4.2.0"
 mockk = "1.14.9"
 testcontainers = "2.0.3"
 otel = "2.25.0"
+arrow = "2.2.1.1"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -30,6 +31,7 @@ ktor-client-apache = { module = "io.ktor:ktor-client-apache5", version.ref = "kt
 ktor-client-call-id = { module = "io.ktor:ktor-client-call-id", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
 khealth = { module = "dev.hayden:khealth", version = "3.0.2" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 
 # Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
