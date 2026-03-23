@@ -2,11 +2,16 @@
 
 package no.nav.tsm.modules.sykmeldinger.db
 
+import java.time.OffsetDateTime
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -28,16 +33,35 @@ class SykmeldingerRepo() {
     fun sykmeldinger(ident: String): List<VerifiedSykInnSykmelding> = transaction {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.pasientIdent eq ident }
-            .map {
-                it[SykmeldingTable.data]
-                // her må det mappes over en lav sko
+            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+    }
 
-                VerifiedSykInnSykmelding(
-                    sykmeldingId = it[SykmeldingTable.id],
-                    values = TODO("tihi"),
-                    meta = TODO("tihi"),
-                    result = TODO("tihi"),
-                )
-            }
+    private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnSykmelding {
+        return VerifiedSykInnSykmelding(
+            sykmeldingId = this[SykmeldingTable.id],
+            values =
+                SykInnSykmeldingValues(
+                    pasientenSkalSkjermes = false,
+                    hoveddiagnose = null,
+                    bidiagnoser = emptyList(),
+                    aktivitet = emptyList(),
+                    svangerskapsrelatert = false,
+                    meldinger = null,
+                    yrkesskade = null,
+                    arbeidsgiver = null,
+                    tilbakedatering = null,
+                    utdypendeSporsmal = null,
+                    annenFravarsgrunn = null,
+                ),
+            meta =
+                SykInnSykmeldingMeta(
+                    mottatt = OffsetDateTime.now(),
+                    pasientIdent = "",
+                    hpr = "",
+                    legekontorOrgnr = "",
+                    legekontorTlf = "",
+                ),
+            result = SykInnSykmeldingRuleResult.OK(),
+        )
     }
 }

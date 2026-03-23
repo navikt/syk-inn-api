@@ -67,6 +67,7 @@ class SykmeldingApiTest : WithPostgresql() {
 
         val allSykmeldinger = requireNotNull(allResponse.body<List<BehandlerSykmelding>>())
         assertEquals(1, allSykmeldinger.size)
+        assertIs<BehandlerSykmeldingFull>(allSykmeldinger.first())
     }
 
     @Test

@@ -83,12 +83,12 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
 
 fun SykInnSykmeldingValues.toSykmeldingDocumentValues(): BehandlerSykmeldingValues {
     return BehandlerSykmeldingValues(
-        hoveddiagnose = this.hoveddiagnose.toExistingSykmeldingDiagnoseInfo(),
+        hoveddiagnose = this.hoveddiagnose?.toExistingSykmeldingDiagnoseInfo(),
         bidiagnoser = this.bidiagnoser.toExistingSykmeldingDiagnoseInfo(),
         aktivitet = this.aktivitet.toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet(),
         svangerskapsrelatert = this.svangerskapsrelatert,
         pasientenSkalSkjermes = this.pasientenSkalSkjermes,
-        meldinger = this.meldinger.toExistingSykmeldingMeldinger(),
+        meldinger = this.meldinger?.toExistingSykmeldingMeldinger(),
         yrkesskade = this.yrkesskade?.toExistingSykmeldingYrkesskade(),
         arbeidsgiver = this.arbeidsgiver?.toExistingSykmeldingArbeidsgiver(),
         tilbakedatering = this.tilbakedatering?.toExistingSykmeldingTilbakedatering(),

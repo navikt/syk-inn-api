@@ -7,11 +7,11 @@ import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
 data class SykInnSykmeldingValues(
     val pasientenSkalSkjermes: Boolean,
-    val hoveddiagnose: SykInnDiagnoseInfo,
+    val hoveddiagnose: SykInnDiagnoseInfo?,
     val bidiagnoser: List<SykInnDiagnoseInfo>,
     val aktivitet: List<SykInnAktivitet>,
     val svangerskapsrelatert: Boolean,
-    val meldinger: SykInnMeldinger,
+    val meldinger: SykInnMeldinger?,
     val yrkesskade: SykInnYrkesskade?,
     val arbeidsgiver: SykInnArbeidsgiver?,
     val tilbakedatering: SykInnTilbakedatering?,

@@ -1,7 +1,5 @@
 package no.nav.tsm.modules.behandler.payloads
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -36,7 +34,7 @@ data class BehandlerSykmeldingValues(
     val aktivitet: List<BehandlerSykmeldingAktivitet>,
     val svangerskapsrelatert: Boolean,
     val pasientenSkalSkjermes: Boolean,
-    val meldinger: BehandlerSykmeldingMeldinger,
+    val meldinger: BehandlerSykmeldingMeldinger?,
     val yrkesskade: BehandlerSykmeldingYrkesskade?,
     val arbeidsgiver: BehandlerSykmeldingArbeidsgiver?,
     val tilbakedatering: BehandlerSykmeldingTilbakedatering?,
@@ -44,46 +42,47 @@ data class BehandlerSykmeldingValues(
     val annenFravarsgrunn: AnnenFravarsgrunn?,
 )
 
-@JsonSubTypes(
-    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
-    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Gradert::class, name = "GRADERT"),
-    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Avventende::class, name = "AVVENTENDE"),
-    JsonSubTypes.Type(
-        BehandlerSykmeldingAktivitet.Behandlingsdager::class,
-        name = "BEHANDLINGSDAGER",
-    ),
-    JsonSubTypes.Type(BehandlerSykmeldingAktivitet.Reisetilskudd::class, name = "REISETILSKUDD"),
-)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class BehandlerSykmeldingAktivitet(open val fom: LocalDate, open val tom: LocalDate) {
+sealed class BehandlerSykmeldingAktivitet(
+    val type: BehandlerSykmeldingType,
+    open val fom: LocalDate,
+    open val tom: LocalDate,
+) {
+    enum class BehandlerSykmeldingType {
+        AKTIVITET_IKKE_MULIG,
+        GRADERT,
+        AVVENTENDE,
+        BEHANDLINGSDAGER,
+        REISETILSKUDD,
+    }
+
     data class IkkeMulig(
         override val fom: LocalDate,
         override val tom: LocalDate,
         val medisinskArsak: BehandlerSykmeldingMedisinskArsak,
         val arbeidsrelatertArsak: BehandlerSykmeldingArbeidsrelatertArsak,
-    ) : BehandlerSykmeldingAktivitet(fom, tom)
+    ) : BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.AKTIVITET_IKKE_MULIG, fom, tom)
 
     data class Gradert(
         override val fom: LocalDate,
         override val tom: LocalDate,
         val grad: Int,
         val reisetilskudd: Boolean,
-    ) : BehandlerSykmeldingAktivitet(fom, tom)
+    ) : BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.GRADERT, fom, tom)
 
     data class Behandlingsdager(
         override val fom: LocalDate,
         override val tom: LocalDate,
         val antallBehandlingsdager: Int,
-    ) : BehandlerSykmeldingAktivitet(fom, tom)
+    ) : BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.BEHANDLINGSDAGER, fom, tom)
 
     data class Avventende(
         val innspillTilArbeidsgiver: String,
         override val fom: LocalDate,
         override val tom: LocalDate,
-    ) : BehandlerSykmeldingAktivitet(fom, tom)
+    ) : BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.AVVENTENDE, fom, tom)
 
     data class Reisetilskudd(override val fom: LocalDate, override val tom: LocalDate) :
-        BehandlerSykmeldingAktivitet(fom, tom)
+        BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.REISETILSKUDD, fom, tom)
 }
 
 data class BehandlerSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)

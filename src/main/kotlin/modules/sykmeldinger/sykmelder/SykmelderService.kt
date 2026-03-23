@@ -13,11 +13,15 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
     suspend fun byHpr(hpr: String, oppslagsdato: LocalDate): Sykmelder {
         val sykmelderMedHpr =
             helsenettProxy.getSykmelderByHpr(behandlerHpr = hpr)
-                ?: return Sykmelder.FinnesIkke(hpr = hpr)
+                ?: return Sykmelder.FinnesIkke(hpr = hpr, godkjenninger = emptyList())
 
         val suspendert =
             btsys.isSuspendert(sykmelderIdent = sykmelderMedHpr.ident, oppslagsdato = oppslagsdato)
-                ?: return Sykmelder.UtenSuspensjon(hpr = hpr, ident = sykmelderMedHpr.ident)
+                ?: return Sykmelder.UtenSuspensjon(
+                    hpr = hpr,
+                    ident = sykmelderMedHpr.ident,
+                    godkjenninger = sykmelderMedHpr.godkjenninger,
+                )
         // TODO vi må håndtere exceptions som blir kasta frå klientane. Skal vi catche det her eller
         // lenger opp? vi må hard stoppe. Må prate om korleis vi vil handtere det.
 
@@ -25,6 +29,7 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
             hpr = hpr,
             ident = sykmelderMedHpr.ident,
             suspendert = suspendert,
+            godkjenninger = sykmelderMedHpr.godkjenninger,
         )
     }
 }

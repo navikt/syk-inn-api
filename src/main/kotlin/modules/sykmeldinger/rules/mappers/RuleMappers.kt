@@ -36,8 +36,7 @@ fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): Regula
         is Sykmelder.MedSuspensjon ->
             RegulaBehandler.Finnes(
                 suspendert = this.suspendert,
-                // TODO: Provide
-                godkjenninger = emptyList(),
+                godkjenninger = this.godkjenninger,
                 legekontorOrgnr = legekontorOrgnummer,
                 fnr = this.ident,
             )
@@ -69,7 +68,7 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
         behandler = behandler,
         avsender = avsender,
         hoveddiagnose =
-            sykmelding.values.hoveddiagnose.let { diagnose ->
+            sykmelding.values.hoveddiagnose?.let { diagnose ->
                 Diagnose(
                     kode = diagnose.code,
                     system =

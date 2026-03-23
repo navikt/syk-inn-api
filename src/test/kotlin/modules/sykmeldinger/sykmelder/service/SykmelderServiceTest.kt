@@ -8,10 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
-import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderMedHpr
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderServiceTest {
 
@@ -26,7 +26,7 @@ class SykmelderServiceTest {
         val oppslagsdato = LocalDate.now()
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
-            SykmelderMedHpr(hprNummer = hprNummer, ident = ident)
+            SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
         coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns false
 
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato)
@@ -57,7 +57,7 @@ class SykmelderServiceTest {
         val oppslagsdato = LocalDate.of(2026, 3, 11)
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
-            SykmelderMedHpr(hprNummer = hprNummer, ident = ident)
+            SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
         coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns true
 
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato)

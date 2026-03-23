@@ -10,7 +10,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import no.nav.tsm.core.Environment
-import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderMedHpr
 import no.nav.tsm.plugins.auth.TexasClient
 
 class HprException(message: String, cause: Exception?) : Exception(message, cause)
@@ -99,6 +98,32 @@ class HprCloudClient(
         requireNotNull(hprSykmelder.fornavn, { "HprSykmelder må ha fornavn" })
         requireNotNull(hprSykmelder.etternavn, { "HprSykmelder må ha etternavn" })
 
-        return SykmelderMedHpr(ident = hprSykmelder.fnr, hprNummer = hprSykmelder.hprNummer)
+        return SykmelderMedHpr(
+            ident = hprSykmelder.fnr,
+            hprNummer = hprSykmelder.hprNummer,
+            godkjenninger =
+                hprSykmelder.godkjenninger.map { godkjenning ->
+                    SykmelderGodkjenning(
+                        autorisasjon = godkjenning.autorisasjon?.koddeverkkk(),
+                        helsepersonellkategori = godkjenning.helsepersonellkategori?.koddeverkkk(),
+                        tillegskompetanse =
+                            godkjenning.tillegskompetanse?.map {
+                                SykmelderTilleggskompetanse(
+                                    avsluttetStatus = it.avsluttetStatus?.koddeverkkk(),
+                                    gyldig =
+                                        SykmelderPeriode(
+                                            fra = it.gyldig?.fra,
+                                            til = it.gyldig?.til,
+                                        ),
+                                    type = it.type?.koddeverkkk(),
+                                )
+                            },
+                    )
+                },
+        )
+    }
+
+    private fun HprKode.koddeverkkk(): SykmelderKode {
+        return SykmelderKode(aktiv = this.aktiv, oid = this.oid, verdi = this.verdi)
     }
 }
