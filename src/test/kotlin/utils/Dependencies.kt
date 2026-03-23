@@ -1,6 +1,5 @@
 package no.nav.tsm.utils
 
-import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
@@ -9,59 +8,55 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.modules.behandler.configureBehandlerModule
-import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
+import no.nav.tsm.module
+import no.nav.tsm.plugins.auth.configureAuthentication
 import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureSerialization
-import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 
-fun Application.configureIntegrationTestDependencies(
-    postgres: PostgreSQLContainer,
-    kafka: KafkaContainer? = null,
-) {
-    // Integration test specific Environment configu
-    dependencies {
-        provide<Environment>() {
-            Environment(
-                runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
-                postgres =
-                    PostgresConfig(
-                        url = postgres.jdbcUrl,
-                        username = postgres.username,
-                        password = postgres.password,
-                    ),
-                kafka = if (kafka != null) Properties() else mockk(),
-                texas = { mockk() },
-                external = { mockk() },
-                auth = { mockk() },
-            )
-        }
-    }
+fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer) {
+    // Integration test specific Environment configuration
+    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, null) } }
 
     // Global
+    configureAuthentication()
     configureDependencies()
     configureDatabase()
     configureSerialization()
 
-    // Modules
-    configureSykmeldingerModule()
-    configureBehandlerModule()
+    // #1: Postgres specific tests will have to provide their own "in test" set of modules
 }
 
-fun Application.configureMockedEnvironment() {
-    dependencies {
-        provide<HttpClient> { HttpClient() }
-        provide<Environment>() {
-            Environment(
-                runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
-                kafka = mockk(),
-                postgres = mockk(),
-                texas = { mockk() },
-                external = { mockk() },
-                auth = { mockk() },
-            )
-        }
-    }
+fun Application.configureFullIntegrationTests(
+    postgres: PostgreSQLContainer,
+    kafka: ConfluentKafkaContainer,
+) {
+    // Integration test specific Environment configuration
+    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, kafka) } }
+
+    // #2: Postgresql + Kafka tests just set up the entire application
+    module()
 }
+
+private fun createIntegrationEnvironment(
+    postgres: PostgreSQLContainer,
+    kafka: ConfluentKafkaContainer?,
+) =
+    Environment(
+        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
+        postgres =
+            PostgresConfig(
+                url = postgres.jdbcUrl,
+                username = postgres.username,
+                password = postgres.password,
+            ),
+        kafka =
+            if (kafka != null)
+                Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
+            else mockk(),
+        texas = { mockk() },
+        external = { mockk() },
+        auth = { mockk() },
+    )

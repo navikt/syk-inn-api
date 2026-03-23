@@ -12,20 +12,24 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
-import no.nav.tsm.plugins.auth.configureLocalMachineTokenAuth
+import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.utils.WithPostgresql
-import no.nav.tsm.utils.configureIntegrationTestDependencies
+import no.nav.tsm.utils.configurePostgresIntegrationTests
 import no.nav.tsm.utils.testClient
 import org.intellij.lang.annotations.Language
 
 class SykmeldingApiTest : WithPostgresql() {
     private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
         client = testClient()
+
         application {
-            configureLocalMachineTokenAuth()
-            configureIntegrationTestDependencies(postgres)
+            configurePostgresIntegrationTests(postgres)
+
+            // Modules in test
+            configureSykmeldingerModule()
+            configureBehandlerModule()
         }
     }
 

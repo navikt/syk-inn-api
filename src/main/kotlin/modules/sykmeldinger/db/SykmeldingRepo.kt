@@ -19,6 +19,7 @@ class SykmeldingerRepo() {
                 it[id] = sykmelding.sykmeldingId
                 it[createdAt] = Clock.System.now()
                 it[updatedAt] = Clock.System.now()
+                it[pasientIdent] = sykmelding.meta.pasientIdent
                 it[data] = SykmeldingJsonb(sykmeldingId = sykmelding.sykmeldingId.toString())
             }
         }
