@@ -1,5 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.service
 
+import arrow.core.left
+import arrow.core.right
 import io.mockk.coEvery
 import io.mockk.mockk
 import java.time.LocalDate
@@ -27,9 +29,10 @@ class SykmelderServiceTest {
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
             SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
-        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns false
+                .right()
+        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns false.right()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato)
+        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
         assertIs<Sykmelder.MedSuspensjon>(result)
         assertEquals(hprNummer, result.hpr)
@@ -42,9 +45,10 @@ class SykmelderServiceTest {
         val hprNummer = "99999"
         val oppslagsdato = LocalDate.of(2026, 3, 11)
 
-        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns null
+        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
+            HprClient.HprErrors.NotFound.left()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato)
+        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
         assertIs<Sykmelder.FinnesIkke>(result)
         assertEquals(hprNummer, result.hpr)
@@ -58,36 +62,14 @@ class SykmelderServiceTest {
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
             SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
-        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns true
+                .right()
+        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns true.right()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato)
+        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
         assertIs<Sykmelder.MedSuspensjon>(result)
         assertEquals(hprNummer, result.hpr)
         assertEquals(ident, result.ident)
         assertEquals(true, result.suspendert)
     }
-
-    //    @Test
-    //    fun `should handle BtsysException when btsys client throws`() = runTest {
-    //        val hprNummer = "12345"
-    //        val ident = "12345678901"
-    //        val oppslagsdato = LocalDate.of(2026, 3, 11)
-    //
-    //        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns SykmelderMedHpr(
-    //            hprNummer = hprNummer,
-    //            ident = ident,
-    //            fornavn = "Howard",
-    //            mellomnavn = null,
-    //            etternavn = "Walowicz",
-    //        )
-    //        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } throws BtsysException("Btsys
-    // responded with status 500 Internal Server Error")
-    //
-    //        val result = sykmelderService.byHpr(hprNummer, oppslagsdato)
-    //
-    //        //TODO this needs to be asserted depending on how we handle the exceptions in the
-    // service. Fix this after fixing the service. CUrrently it will fail with 500 internal server
-    // error as the exception is not handled in the service.
-    //    }
 }

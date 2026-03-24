@@ -10,12 +10,13 @@ import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprSykmelder
 
@@ -44,9 +45,6 @@ class HprClientTest {
                         HprSykmelder(
                             fnr = "12345678901",
                             hprNummer = hprNummer,
-                            fornavn = "Cooper",
-                            mellomnavn = null,
-                            etternavn = "Howard",
                             godkjenninger = emptyList(),
                         )
                     ),
@@ -60,7 +58,7 @@ class HprClientTest {
                 environment = testEnv,
             )
 
-        val response = hprClient.getSykmelderByHpr(hprNummer)
+        val response = hprClient.getSykmelderByHpr(hprNummer).getOrNull()
         assertNotNull(response)
         assertEquals("12345678901", response.ident)
         assertEquals(hprNummer, response.hprNummer)
@@ -91,7 +89,10 @@ class HprClientTest {
             )
 
         val response = hprClient.getSykmelderByHpr(hprNummer)
-        assertNull(response)
+
+        response.fold({ assertEquals(HprClient.HprErrors.NotFound, it) }) {
+            fail("Should not be right")
+        }
     }
 }
 

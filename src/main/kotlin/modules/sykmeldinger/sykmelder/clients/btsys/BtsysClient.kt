@@ -1,5 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
@@ -10,14 +13,20 @@ import io.ktor.http.*
 import io.ktor.server.plugins.di.annotations.*
 import java.time.LocalDate
 import no.nav.tsm.core.Environment
+import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
 
-data class BtsysResponse(val suspendert: Boolean)
-
-class BtsysException(message: String, cause: Exception? = null) : Exception(message, cause)
-
 sealed interface BtsysClient {
-    suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean?
+
+    enum class SuspendertErrors {
+        NotFound,
+        UnknownError,
+    }
+
+    suspend fun isSuspendert(
+        sykmelderIdent: String,
+        oppslagsdato: LocalDate,
+    ): Either<SuspendertErrors, Boolean>
 }
 
 class BtsysCloudClient(
@@ -25,6 +34,8 @@ class BtsysCloudClient(
     private val texasClient: TexasClient,
     private val environment: Environment,
 ) : BtsysClient {
+    private val logger = logger()
+
     private val httpClient: HttpClient =
         httpClient.config {
             install(CallId) {
@@ -32,7 +43,12 @@ class BtsysCloudClient(
             }
         }
 
-    override suspend fun isSuspendert(sykmelderIdent: String, oppslagsdato: LocalDate): Boolean? {
+    data class BtsysResponse(val suspendert: Boolean)
+
+    override suspend fun isSuspendert(
+        sykmelderIdent: String,
+        oppslagsdato: LocalDate,
+    ): Either<BtsysClient.SuspendertErrors, Boolean> {
         val (accessToken) = this.getToken()
 
         val response =
@@ -49,15 +65,16 @@ class BtsysCloudClient(
             response.status.isSuccess() -> {
                 val result: BtsysResponse = response.body<BtsysResponse>()
 
-                result.suspendert
+                result.suspendert.right()
             }
 
-            response.status == HttpStatusCode.NotFound -> null
+            response.status == HttpStatusCode.NotFound -> {
+                BtsysClient.SuspendertErrors.NotFound.left()
+            }
 
             else -> {
-                // TODO Logg feil respons og ident i teamlogg
-                // TODO handter andre feil enn berre not found.
-                throw BtsysException("Btysys responded with status ${response.status}")
+                logger.error("Btysys responded with status ${response.status}")
+                BtsysClient.SuspendertErrors.UnknownError.left()
             }
         }
     }

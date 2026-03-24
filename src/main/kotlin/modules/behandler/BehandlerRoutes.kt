@@ -40,11 +40,29 @@ fun Application.configureBehandlerRoutes() {
                         try {
                             val payload: OpprettSykmelding.Payload = call.receive()
                             val unruledSykmelding = payload.toSykInnSykmelding()
-                            val createdSykmelding = sykmeldingerService.create(unruledSykmelding)
+                            val createdSykmelding =
+                                sykmeldingerService
+                                    .create(unruledSykmelding)
+                                    .map { accessControlService.toRedactedIfNeeded(it) }
+                                    .getOrElse {
+                                        return@post when (it) {
+                                            SykmeldingerService.VerifyErrors.PersonNotInPdl ->
+                                                call.respond<GenericError>(
+                                                    HttpStatusCode.UnprocessableEntity,
+                                                    GenericError("Person does not exist"),
+                                                )
+
+                                            SykmeldingerService.VerifyErrors.UnknownResourceError ->
+                                                call.respond<GenericError>(
+                                                    HttpStatusCode.InternalServerError,
+                                                    GenericError("Internal server error"),
+                                                )
+                                        }
+                                    }
 
                             call.respond<BehandlerSykmelding>(
                                 HttpStatusCode.Created,
-                                accessControlService.toRedactedIfNeeded(createdSykmelding),
+                                createdSykmelding,
                             )
                         } catch (ex: Exception) {
                             logger.error(ex)

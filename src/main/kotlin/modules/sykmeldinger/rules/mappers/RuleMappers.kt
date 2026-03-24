@@ -27,12 +27,6 @@ fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): Regula
                 fnr = ""
             )
 
-        is Sykmelder.UtenSuspensjon ->
-            RegulaBehandler.FinnesIkke(
-                // TODO: Fix this quirk in regulus-regula
-                fnr = this.ident
-            )
-
         is Sykmelder.MedSuspensjon ->
             RegulaBehandler.Finnes(
                 suspendert = this.suspendert,

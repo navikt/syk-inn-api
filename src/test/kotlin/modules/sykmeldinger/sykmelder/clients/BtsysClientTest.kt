@@ -15,7 +15,6 @@ import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysResponse
 
 class BtsysClientTest {
     private val objectMapper = jacksonObjectMapper()
@@ -31,7 +30,10 @@ class BtsysClientTest {
             respond(
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                content = objectMapper.writeValueAsString(BtsysResponse(suspendert = true)),
+                content =
+                    objectMapper.writeValueAsString(
+                        BtsysCloudClient.BtsysResponse(suspendert = true)
+                    ),
             )
         }
 
@@ -45,7 +47,7 @@ class BtsysClientTest {
                 environment = testEnv,
             )
 
-        val response = btsys.isSuspendert("12345678910", LocalDate.now())
+        val response = btsys.isSuspendert("12345678910", LocalDate.now()).getOrNull()
         assertEquals(true, response)
     }
 
@@ -60,7 +62,10 @@ class BtsysClientTest {
             respond(
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                content = objectMapper.writeValueAsString(BtsysResponse(suspendert = false)),
+                content =
+                    objectMapper.writeValueAsString(
+                        BtsysCloudClient.BtsysResponse(suspendert = false)
+                    ),
             )
         }
 
@@ -74,7 +79,7 @@ class BtsysClientTest {
                 environment = testEnv,
             )
 
-        val response = btsys.isSuspendert("12345678910", LocalDate.now())
+        val response = btsys.isSuspendert("12345678910", LocalDate.now()).getOrNull()
         assertEquals(false, response)
     }
 }

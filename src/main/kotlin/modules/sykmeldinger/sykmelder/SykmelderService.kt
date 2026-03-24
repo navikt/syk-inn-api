@@ -1,35 +1,50 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder
 
+import arrow.core.Either
+import arrow.core.raise.context.bind
+import arrow.core.raise.either
+import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
-import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderService(private val btsys: BtsysClient, private val helsenettProxy: HprClient) {
-    private val logger = logger()
+    enum class SykmelderErrors {
+        SuspendertError,
+        HprError,
+    }
 
     @WithSpan
-    suspend fun byHpr(hpr: String, oppslagsdato: LocalDate): Sykmelder {
-        val sykmelderMedHpr =
-            helsenettProxy.getSykmelderByHpr(behandlerHpr = hpr)
-                ?: return Sykmelder.FinnesIkke(hpr = hpr, godkjenninger = emptyList())
+    suspend fun byHpr(hpr: String, oppslagsdato: LocalDate): Either<SykmelderErrors, Sykmelder> =
+        either {
+            val sykmelderMedHpr: SykmelderMedHpr =
+                helsenettProxy
+                    .getSykmelderByHpr(behandlerHpr = hpr)
+                    .mapLeft {
+                        when (it) {
+                            HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke(hpr)
+                            HprClient.HprErrors.UnknownError -> SykmelderErrors.HprError
+                        }
+                    }
+                    .bind()
 
-        val suspendert =
-            btsys.isSuspendert(sykmelderIdent = sykmelderMedHpr.ident, oppslagsdato = oppslagsdato)
-                ?: return Sykmelder.UtenSuspensjon(
+            val suspendert: Boolean =
+                btsys
+                    .isSuspendert(
+                        sykmelderIdent = sykmelderMedHpr.ident,
+                        oppslagsdato = oppslagsdato,
+                    )
+                    .mapLeft { raise(SykmelderErrors.SuspendertError) }
+                    .bind()
+
+            return Sykmelder.MedSuspensjon(
                     hpr = hpr,
                     ident = sykmelderMedHpr.ident,
+                    suspendert = suspendert,
                     godkjenninger = sykmelderMedHpr.godkjenninger,
                 )
-        // TODO vi må håndtere exceptions som blir kasta frå klientane. Skal vi catche det her eller
-        // lenger opp? vi må hard stoppe. Må prate om korleis vi vil handtere det.
-
-        return Sykmelder.MedSuspensjon(
-            hpr = hpr,
-            ident = sykmelderMedHpr.ident,
-            suspendert = suspendert,
-            godkjenninger = sykmelderMedHpr.godkjenninger,
-        )
-    }
+                .right()
+        }
 }

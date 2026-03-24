@@ -1,5 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.pdl
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.get
@@ -7,10 +10,16 @@ import io.ktor.client.request.headers
 import io.ktor.http.*
 import io.ktor.server.plugins.di.annotations.*
 import no.nav.tsm.core.Environment
+import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
 
 sealed interface PdlClient {
-    suspend fun getPerson(ident: String): PdlPerson?
+    enum class PdlErrors {
+        NotFound,
+        UnknownError,
+    }
+
+    suspend fun getPerson(ident: String): Either<PdlErrors, PdlPerson>
 }
 
 class PdlCloudClient(
@@ -18,8 +27,9 @@ class PdlCloudClient(
     private val texasClient: TexasClient,
     private val environment: Environment,
 ) : PdlClient {
+    private val logger = logger()
 
-    override suspend fun getPerson(ident: String): PdlPerson? {
+    override suspend fun getPerson(ident: String): Either<PdlClient.PdlErrors, PdlPerson> {
         val (token) = getToken()
 
         val response =
@@ -32,10 +42,11 @@ class PdlCloudClient(
             }
 
         return when {
-            response.status.isSuccess() -> response.body<PdlPerson>()
-            response.status == HttpStatusCode.NotFound -> null
+            response.status.isSuccess() -> response.body<PdlPerson>().right()
+            response.status == HttpStatusCode.NotFound -> PdlClient.PdlErrors.NotFound.left()
             else -> {
-                throw RuntimeException("Unable to get person from pdl for ident: $ident")
+                logger.error("Unable to get person from pdl, see team logs for ident")
+                PdlClient.PdlErrors.UnknownError.left()
             }
         }
     }
