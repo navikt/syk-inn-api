@@ -25,6 +25,7 @@ class SykmeldingRepo {
                 it[createdAt] = Clock.System.now()
                 it[updatedAt] = Clock.System.now()
                 it[pasientIdent] = sykmelding.meta.pasientIdent
+                it[hpr] = sykmelding.meta.hpr
                 it[data] = SykmeldingJsonb(sykmeldingId = sykmelding.sykmeldingId.toString())
             }
         }
@@ -57,7 +58,7 @@ class SykmeldingRepo {
                 SykInnSykmeldingMeta(
                     mottatt = OffsetDateTime.now(),
                     pasientIdent = "",
-                    hpr = "",
+                    hpr = this[SykmeldingTable.hpr],
                     legekontorOrgnr = "",
                     legekontorTlf = "",
                 ),

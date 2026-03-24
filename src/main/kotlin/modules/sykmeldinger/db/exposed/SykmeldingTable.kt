@@ -14,6 +14,7 @@ data class SykmeldingJsonb(val sykmeldingId: String)
 object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
     val pasientIdent = text("pasient_ident")
+    val hpr = text("hpr")
     val data =
         jsonb(
             "data",

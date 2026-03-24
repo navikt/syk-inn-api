@@ -43,7 +43,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 setBody(fullExampleSykmeldingPayload)
             }
 
-        val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+        val created = requireNotNull(response.body<BehandlerSykmelding>())
 
         assertEquals(HttpStatusCode.Created, response.status)
         assertEquals(created.meta.pasientIdent, "21037712323")
@@ -51,6 +51,7 @@ class BehandlerRoutesTest : WithPostgresql() {
         assertEquals(created.meta.legekontorOrgnr, "123456789")
 
         // Diagnose
+        assertIs<BehandlerSykmeldingFull>(created)
         assertEquals(created.values.hoveddiagnose?.code, "L73")
         assertEquals(created.values.hoveddiagnose?.system?.name, "ICPC2")
 
@@ -107,7 +108,8 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(fullExampleSykmeldingPayload.replace("9144889", "someone-else"))
                 }
 
-            val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+            val created = requireNotNull(response.body<BehandlerSykmelding>())
+            assertIs<BehandlerSykmeldingFull>(created)
             assertEquals(HttpStatusCode.Created, response.status)
             assertEquals(created.meta.sykmelder.hpr, "someone-else")
 
@@ -291,7 +293,7 @@ private val fullExampleSykmeldingPayload =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
+    |        "medisinskArsak": {"isMedisinskArsak":true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],

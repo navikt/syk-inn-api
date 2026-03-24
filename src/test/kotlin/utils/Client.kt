@@ -27,15 +27,15 @@ fun ApplicationTestBuilder.testClient(): HttpClient {
 
 class SykmeldingModule : SimpleModule() {
     init {
-        addDeserializer(BehandlerSykmelding::class.java, SykmeldingUnionDeserializer())
+        addDeserializer(BehandlerSykmelding::class.java, BehandlerSykmeldingUnionDeserializer())
         addDeserializer(
             BehandlerSykmeldingAktivitet::class.java,
-            SykmeldingAktivitetUnionDeserializer(),
+            BehandlerSykmeldingAktivitetUnionDeserializer(),
         )
     }
 }
 
-class SykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmelding>() {
+class BehandlerSykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmelding>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BehandlerSykmelding {
         val json = ctxt.readTree(p)
         val type =
@@ -48,7 +48,8 @@ class SykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmelding>() {
     }
 }
 
-class SykmeldingAktivitetUnionDeserializer : JsonDeserializer<BehandlerSykmeldingAktivitet>() {
+class BehandlerSykmeldingAktivitetUnionDeserializer :
+    JsonDeserializer<BehandlerSykmeldingAktivitet>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,

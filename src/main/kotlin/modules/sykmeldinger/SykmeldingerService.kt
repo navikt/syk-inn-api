@@ -20,19 +20,19 @@ class SykmeldingerService(
     private val ruleService: RuleService,
     private val repo: SykmeldingRepo,
 ) {
-    enum class VerifyErrors {
+    enum class CreateErrors {
         PersonNotInPdl,
         UnknownResourceError,
     }
 
     suspend fun verify(
         sykmelding: UnverifiedSykInnSykmelding
-    ): Either<VerifyErrors, SykInnSykmeldingRuleResult> = either {
+    ): Either<CreateErrors, SykInnSykmeldingRuleResult> = either {
         parZip(
             {
                 sykmelderService
                     .byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
-                    .mapLeft { VerifyErrors.UnknownResourceError }
+                    .mapLeft { CreateErrors.UnknownResourceError }
                     .bind()
             },
             {
@@ -40,8 +40,8 @@ class SykmeldingerService(
                     .getPerson(sykmelding.meta.pasientIdent)
                     .mapLeft {
                         when (it) {
-                            PdlClient.PdlErrors.NotFound -> VerifyErrors.PersonNotInPdl
-                            PdlClient.PdlErrors.UnknownError -> VerifyErrors.UnknownResourceError
+                            PdlClient.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
+                            PdlClient.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
                         }
                     }
                     .bind()
@@ -53,45 +53,47 @@ class SykmeldingerService(
 
     suspend fun create(
         sykmelding: UnverifiedSykInnSykmelding
-    ): Either<VerifyErrors, VerifiedSykInnSykmelding> = either {
-        val (sykmelder, rules) =
-            parZip(
-                {
-                    sykmelderService
-                        .byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
-                        .mapLeft { VerifyErrors.UnknownResourceError }
-                        .bind()
-                },
-                {
-                    pdlClient
-                        .getPerson(sykmelding.meta.pasientIdent)
-                        .mapLeft {
-                            when (it) {
-                                PdlClient.PdlErrors.NotFound -> VerifyErrors.PersonNotInPdl
-                                PdlClient.PdlErrors.UnknownError ->
-                                    VerifyErrors.UnknownResourceError
-                            }
+    ): Either<CreateErrors, VerifiedSykInnSykmelding> = either {
+        parZip(
+            {
+                sykmelderService
+                    .byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
+                    .mapLeft { CreateErrors.UnknownResourceError }
+                    .bind()
+            },
+            {
+                pdlClient
+                    .getPerson(sykmelding.meta.pasientIdent)
+                    .mapLeft {
+                        when (it) {
+                            PdlClient.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
+                            PdlClient.PdlErrors.UnknownError ->
+                                CreateErrors.UnknownResourceError
                         }
-                        .bind()
-                },
-            ) { sykmelder, pasient ->
-                sykmelder to ruleService.verify(sykmelding, sykmelder, pasient)
-            }
+                    }
+                    .bind()
+            },
+        ) { sykmelder, pasient ->
+            val rules = ruleService.verify(sykmelding, sykmelder, pasient)
+            val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
 
-        val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
+            repo.insertSykmelding(verified)
 
-        repo.insertSykmelding(verified)
-
-        return verified.right()
+            verified
+        }
     }
 
-    fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding {
+    enum class GetErrors {
+        NotFound,
+        UnknownError,
+    }
+
+    fun byId(sykmeldingId: UUID): Either<GetErrors, VerifiedSykInnSykmelding> {
         TODO("implement")
     }
 
-    fun byIdent(ident: String): List<VerifiedSykInnSykmelding> {
+    fun byIdent(ident: String): Either<GetErrors, List<VerifiedSykInnSykmelding>> {
         // TODO: need to call PDL to get all idents for ident
-
-        return repo.sykmeldinger(ident)
+        return repo.sykmeldinger(ident).right()
     }
 }

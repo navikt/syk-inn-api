@@ -23,6 +23,7 @@ CREATE TABLE sykmelding
     id            UUID PRIMARY KEY,
     data          JSONB       NOT NULL,
     pasient_ident TEXT        NOT NULL,
+    hpr           TEXT        NOT NULL,
     created_at    TIMESTAMPTZ NOT NULL,
     updated_at    TIMESTAMPTZ NOT NULL
 );
