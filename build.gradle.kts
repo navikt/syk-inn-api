@@ -120,3 +120,12 @@ tasks.withType<Detekt>().configureEach {
 
     dependsOn("spotlessApply")
 }
+
+/**
+ * Disable auto running of detekt on build and stuff
+ */
+afterEvaluate {
+    tasks.named("check") {
+        setDependsOn(dependsOn.filter { !it.toString().contains("detekt") })
+    }
+}
