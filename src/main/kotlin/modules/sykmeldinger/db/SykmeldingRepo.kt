@@ -3,6 +3,7 @@
 package no.nav.tsm.modules.sykmeldinger.db
 
 import java.time.OffsetDateTime
+import java.util.UUID
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
@@ -18,7 +19,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class SykmeldingRepo {
-    fun insertSykmelding(sykmelding: VerifiedSykInnSykmelding) {
+    fun insert(sykmelding: VerifiedSykInnSykmelding) {
         transaction {
             SykmeldingTable.insert {
                 it[id] = sykmelding.sykmeldingId
@@ -31,10 +32,17 @@ class SykmeldingRepo {
         }
     }
 
-    fun sykmeldinger(ident: String): List<VerifiedSykInnSykmelding> = transaction {
+    fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = transaction {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.pasientIdent eq ident }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+    }
+
+    fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = transaction {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.id eq sykmeldingId }
+            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+            .firstOrNull()
     }
 
     private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnSykmelding {

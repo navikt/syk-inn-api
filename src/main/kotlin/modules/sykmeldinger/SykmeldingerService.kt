@@ -1,6 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger
 
 import arrow.core.Either
+import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
 import arrow.fx.coroutines.parZip
@@ -67,8 +68,7 @@ class SykmeldingerService(
                     .mapLeft {
                         when (it) {
                             PdlClient.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
-                            PdlClient.PdlErrors.UnknownError ->
-                                CreateErrors.UnknownResourceError
+                            PdlClient.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
                         }
                     }
                     .bind()
@@ -77,7 +77,7 @@ class SykmeldingerService(
             val rules = ruleService.verify(sykmelding, sykmelder, pasient)
             val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
 
-            repo.insertSykmelding(verified)
+            repo.insert(verified)
 
             verified
         }
@@ -89,11 +89,13 @@ class SykmeldingerService(
     }
 
     fun byId(sykmeldingId: UUID): Either<GetErrors, VerifiedSykInnSykmelding> {
-        TODO("implement")
+        val sykmelding = repo.byId(sykmeldingId) ?: return GetErrors.NotFound.left()
+
+        return sykmelding.right()
     }
 
     fun byIdent(ident: String): Either<GetErrors, List<VerifiedSykInnSykmelding>> {
         // TODO: need to call PDL to get all idents for ident
-        return repo.sykmeldinger(ident).right()
+        return repo.allByIdent(ident).right()
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 import arrow.core.Either
+import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
