@@ -1,10 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.engine.mock.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.Test
@@ -15,9 +13,9 @@ import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
+import utils.client
 
 class BtsysClientTest {
-    private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `should return true when sykmelder is suspendert`() = runTest {
@@ -30,19 +28,13 @@ class BtsysClientTest {
             respond(
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                content =
-                    objectMapper.writeValueAsString(
-                        BtsysCloudClient.BtsysResponse(suspendert = true)
-                    ),
+                content = ByteReadChannel("""{"suspendert":true}"""),
             )
         }
 
         val btsys =
             BtsysCloudClient(
-                httpClient =
-                    io.ktor.client.HttpClient(mockEngine) {
-                        install(ContentNegotiation) { jackson() }
-                    },
+                httpClient = mockEngine.client(),
                 texasClient = mockk(relaxed = true),
                 environment = testEnv,
             )
@@ -62,19 +54,13 @@ class BtsysClientTest {
             respond(
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                content =
-                    objectMapper.writeValueAsString(
-                        BtsysCloudClient.BtsysResponse(suspendert = false)
-                    ),
+                content = ByteReadChannel("""{"suspendert":false}"""),
             )
         }
 
         val btsys =
             BtsysCloudClient(
-                httpClient =
-                    io.ktor.client.HttpClient(mockEngine) {
-                        install(ContentNegotiation) { jackson() }
-                    },
+                httpClient = mockEngine.client(),
                 texasClient = mockk(relaxed = true),
                 environment = testEnv,
             )

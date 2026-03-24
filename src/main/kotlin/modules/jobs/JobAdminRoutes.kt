@@ -17,7 +17,7 @@ import no.nav.tsm.modules.jobs.db.JobRepository
 import no.nav.tsm.modules.jobs.service.JobName
 import no.nav.tsm.modules.jobs.service.JobUpdateAction
 import no.nav.tsm.modules.jobs.service.JobUpdatePayload
-import no.nav.tsm.plugins.auth.InternalSymfoniAuth
+import no.nav.tsm.plugins.auth.INTERNAL_SYMFONI_AUTH
 import no.nav.tsm.plugins.auth.internalSymfoniUser
 
 data class JobRunners(val runner: String, val state: JobStatus, val updatedAt: OffsetDateTime)
@@ -34,7 +34,7 @@ fun Application.configureJobAdminRoutes() {
     val jobRepository: JobRepository by dependencies
 
     routing {
-        authenticate(InternalSymfoniAuth) {
+        authenticate(INTERNAL_SYMFONI_AUTH) {
             route("/internal/admin/jobs") {
                 get {
                     val jobs = jobRepository.getJobs()

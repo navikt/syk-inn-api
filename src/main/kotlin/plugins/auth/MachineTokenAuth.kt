@@ -9,7 +9,7 @@ import java.net.URI
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.isLocal
 
-val MachineTokenAuth = "internal-entra-m2m"
+const val MACHINE_TOKEN_AUTH = "internal-entra-m2m"
 
 fun Application.configureMachineTokenAuth() {
     val env: Environment by dependencies
@@ -23,12 +23,12 @@ fun Application.configureMachineTokenAuth() {
     val jwkProvider = JwkProviderBuilder(URI(entra.jwksUri).toURL()).build()
 
     authentication {
-        jwt(MachineTokenAuth) {
+        jwt(MACHINE_TOKEN_AUTH) {
             verifier(jwkProvider, entra.issuer) { withAudience(entra.audience) }
         }
     }
 }
 
 fun Application.configureLocalMachineTokenAuth() {
-    authentication { provider(MachineTokenAuth) { authenticate {} } }
+    authentication { provider(MACHINE_TOKEN_AUTH) { authenticate {} } }
 }

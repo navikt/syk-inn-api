@@ -35,6 +35,7 @@ class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
     private suspend fun handleSykmelding(key: String, value: Map<String, String>?) {
         logger.info(
             "Handling record with key $key and value of size ${value?.size ?: "null"}, values: ${
+                // TODO: Debug only
                 jacksonObjectMapper().writeValueAsString(
                     value
                 )

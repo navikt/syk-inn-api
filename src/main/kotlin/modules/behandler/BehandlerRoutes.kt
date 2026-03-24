@@ -25,7 +25,7 @@ import no.nav.tsm.modules.behandler.payloads.OpprettSykmelding
 import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import no.nav.tsm.plugins.auth.MachineTokenAuth
+import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
@@ -34,35 +34,35 @@ fun Application.configureBehandlerRoutes() {
     val sykmeldingerService: SykmeldingerService by dependencies
 
     routing {
-        authenticate(MachineTokenAuth) {
+        authenticate(MACHINE_TOKEN_AUTH) {
             route("/api/sykmelding") {
                 post {
                         try {
                             val payload: OpprettSykmelding.Payload = call.receive()
                             val unruledSykmelding = payload.toSykInnSykmelding()
                             val createdSykmelding =
-                                sykmeldingerService
-                                    .create(unruledSykmelding)
-                                    .map { accessControlService.toRedactedIfNeeded(it) }
-                                    .getOrElse {
-                                        return@post when (it) {
-                                            SykmeldingerService.VerifyErrors.PersonNotInPdl ->
-                                                call.respond<GenericError>(
-                                                    HttpStatusCode.UnprocessableEntity,
-                                                    GenericError("Person does not exist"),
-                                                )
+                                sykmeldingerService.create(unruledSykmelding).getOrElse {
+                                    return@post when (it) {
+                                        SykmeldingerService.VerifyErrors.PersonNotInPdl ->
+                                            call.respond<GenericError>(
+                                                HttpStatusCode.UnprocessableEntity,
+                                                GenericError("Person does not exist"),
+                                            )
 
-                                            SykmeldingerService.VerifyErrors.UnknownResourceError ->
-                                                call.respond<GenericError>(
-                                                    HttpStatusCode.InternalServerError,
-                                                    GenericError("Internal server error"),
-                                                )
-                                        }
+                                        SykmeldingerService.VerifyErrors.UnknownResourceError ->
+                                            call.respond<GenericError>(
+                                                HttpStatusCode.InternalServerError,
+                                                GenericError("Internal server error"),
+                                            )
                                     }
+                                }
+
+                            val accessControlledSykmelding =
+                                accessControlService.toRedactedIfNeeded(createdSykmelding)
 
                             call.respond<BehandlerSykmelding>(
                                 HttpStatusCode.Created,
-                                createdSykmelding,
+                                accessControlledSykmelding,
                             )
                         } catch (ex: Exception) {
                             logger.error(ex)
@@ -81,6 +81,11 @@ fun Application.configureBehandlerRoutes() {
                             HttpStatusCode.Created {
                                 description = "The newly created sykmelding"
                                 schema = jsonSchema<BehandlerSykmelding>()
+                            }
+                            HttpStatusCode.UnprocessableEntity {
+                                description =
+                                    "The person does not exist in PDL and therefore can't be verified"
+                                schema = jsonSchema<GenericError>()
                             }
                         }
                     }

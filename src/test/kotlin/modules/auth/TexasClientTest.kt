@@ -1,5 +1,8 @@
 package no.nav.tsm.modules.auth
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -19,16 +22,21 @@ import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.Texas
 import no.nav.tsm.plugins.auth.TexasClient
-import no.nav.tsm.utils.parse
 
 class TexasClientTest {
+
+    val texasObjectMapper =
+        jacksonObjectMapper().apply {
+            setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+        }
 
     @Test
     fun `should exchange token for correct target`() = testApplication {
         val mockEngine = MockEngine { request ->
             assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
 
-            val payload = request.body.toByteArray().parse<TexasClient.TokenRequest>()
+            val payload =
+                texasObjectMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
             assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
 
             respond(
@@ -44,7 +52,14 @@ class TexasClientTest {
         val texas =
             TexasClient(
                 env = testEnv,
-                httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
+                httpClient =
+                    HttpClient(mockEngine) {
+                        install(ContentNegotiation) {
+                            jackson {
+                                setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                            }
+                        }
+                    },
             )
 
         val response = texas.requestToken("tsm", "tsm-pdl-cache")

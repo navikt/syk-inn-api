@@ -1,0 +1,19 @@
+naming:
+  active: true
+  InvalidPackageDeclaration:
+    active: true
+    aliases: ['PackageDirectoryMismatch']
+    rootPackage: 'no.nav.tsm'
+    requireRootInDeclaration: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+
+style:
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    max: 5
+  WildcardImport:
+    active: false

@@ -12,7 +12,7 @@ import java.net.URI
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.isLocal
 
-val InternalSymfoniAuth = "internal-tsm-obo"
+const val INTERNAL_SYMFONI_AUTH = "internal-tsm-obo"
 
 data class InternalSymfoniPrincipal(val name: String, val userId: String)
 
@@ -37,7 +37,7 @@ fun Application.configureInternalSymfoniUserAuth() {
     val jwkProvider = JwkProviderBuilder(URI(entra.jwksUri).toURL()).build()
 
     authentication {
-        jwt(InternalSymfoniAuth) {
+        jwt(INTERNAL_SYMFONI_AUTH) {
             verifier(jwkProvider, entra.issuer) { withAudience(entra.audience) }
             validate { credential ->
                 val name =
@@ -62,6 +62,6 @@ private fun Application.configureLocalInternalSymfoniUserAuth() {
         InternalSymfoniPrincipal(name = "Local Symfoni User", userId = "local-symfoni-user")
 
     authentication {
-        provider(InternalSymfoniAuth) { authenticate { ctx -> ctx.principal(localPrincipal) } }
+        provider(INTERNAL_SYMFONI_AUTH) { authenticate { ctx -> ctx.principal(localPrincipal) } }
     }
 }

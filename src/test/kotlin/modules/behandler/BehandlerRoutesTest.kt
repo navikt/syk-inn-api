@@ -20,7 +20,7 @@ import no.nav.tsm.utils.configurePostgresIntegrationTests
 import no.nav.tsm.utils.testClient
 import org.intellij.lang.annotations.Language
 
-class SykmeldingApiTest : WithPostgresql() {
+class BehandlerRoutesTest : WithPostgresql() {
     private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
         client = testClient()
 

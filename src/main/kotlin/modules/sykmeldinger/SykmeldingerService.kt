@@ -1,13 +1,12 @@
 package no.nav.tsm.modules.sykmeldinger
 
 import arrow.core.Either
-import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.right
 import arrow.fx.coroutines.parZip
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.tsm.modules.sykmeldinger.db.SykmeldingerRepo
+import no.nav.tsm.modules.sykmeldinger.db.SykmeldingRepo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
@@ -19,7 +18,7 @@ class SykmeldingerService(
     private val pdlClient: PdlClient,
     private val sykmelderService: SykmelderService,
     private val ruleService: RuleService,
-    private val repo: SykmeldingerRepo,
+    private val repo: SykmeldingRepo,
 ) {
     enum class VerifyErrors {
         PersonNotInPdl,

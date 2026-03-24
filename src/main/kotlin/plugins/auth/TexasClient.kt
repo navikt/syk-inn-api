@@ -1,7 +1,9 @@
 package no.nav.tsm.plugins.auth
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -9,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.isTextType
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
@@ -17,11 +20,15 @@ import no.nav.tsm.core.logger
 
 data class TexasToken(val token: String)
 
-class TexasClient(
-    @Named("RetryHttpClient") private val httpClient: HttpClient,
-    private val env: Environment,
-) {
+class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val env: Environment) {
     private val logger = logger()
+
+    private val texasHttpClient =
+        httpClient.config {
+            install(ContentNegotiation) {
+                jackson { setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) }
+            }
+        }
 
     @WithSpan("Texas.requestToken")
     suspend fun requestToken(
@@ -30,21 +37,21 @@ class TexasClient(
     ): TexasToken {
         val cluster = env.runtime.env.nais
         val target = "api://${cluster}.$namespace.$otherApiAppName/.default"
-        val requestBody = TokenRequest(identity_provider = "entra_id", target = target)
+        val requestBody = TokenRequest(identityProvider = "entra_id", target = target)
 
         val response =
-            httpClient.post(env.texas().tokenEndpoint) {
+            texasHttpClient.post(env.texas().tokenEndpoint) {
                 contentType(ContentType.Application.Json)
                 setBody(requestBody)
             }
 
         if (!response.status.isSuccess()) {
             response.logNonSuccess(target)
-            throw RuntimeException("Unable to request m2m token for: $target")
+            throw IllegalStateException("Unable to request m2m token for: $target")
         }
 
         val body = response.body<TokenResponse>()
-        return TexasToken(body.access_token)
+        return TexasToken(body.accessToken)
     }
 
     private suspend fun HttpResponse.logNonSuccess(target: String) {
@@ -59,11 +66,11 @@ class TexasClient(
         }
     }
 
-    internal data class TokenRequest(val identity_provider: String, val target: String)
+    internal data class TokenRequest(val identityProvider: String, val target: String)
 
     internal data class TokenResponse(
-        val access_token: String,
-        val expires_in: Int,
-        val token_type: String,
+        val accessToken: String,
+        val expiresIn: Int,
+        val tokenType: String,
     )
 }

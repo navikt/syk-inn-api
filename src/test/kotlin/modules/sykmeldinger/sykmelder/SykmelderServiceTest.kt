@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.service
+package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 import arrow.core.left
 import arrow.core.right
@@ -9,8 +9,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
-import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr

@@ -1,4 +1,5 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
+import dev.detekt.gradle.Detekt
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -6,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.flyway)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
 }
 
 group = "no.nav.tsm"
@@ -110,4 +112,11 @@ tasks.register<JavaExec>("runLocal") {
     jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
 
     dependsOn("preRunLocal")
+}
+
+tasks.withType<Detekt>().configureEach {
+    config.setFrom(file("detekt.yml"))
+    buildUponDefaultConfig = true
+
+    dependsOn("spotlessApply")
 }
