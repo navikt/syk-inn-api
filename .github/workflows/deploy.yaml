@@ -13,7 +13,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.ref_name != 'main' && !startsWith(github.ref_name, 'dev')
     steps:
       - uses: navikt/tsm-workflows/actions/gradle/test@main
 
