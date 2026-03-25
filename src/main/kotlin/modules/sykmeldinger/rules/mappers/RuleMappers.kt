@@ -1,6 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.rules.mappers
 
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
@@ -56,7 +57,9 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
         else RegulaAvsender.IngenAvsender
 
     return RegulaPayload(
-        sykmeldingId = sykmelding.sykmeldingId.toString(),
+        // TODO: Can be removed from regula, see:
+        // https://github.com/navikt/regulus-regula/pull/14/changes
+        sykmeldingId = UUID.randomUUID().toString(),
         meta = RegulaMeta.Meta(sendtTidspunkt = LocalDateTime.now()),
         pasient = pasient,
         behandler = behandler,

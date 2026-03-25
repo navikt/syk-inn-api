@@ -90,7 +90,6 @@ class SykmeldingerService(
                     .bind()
 
             val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
-
             repo.insert(verified)
 
             verified

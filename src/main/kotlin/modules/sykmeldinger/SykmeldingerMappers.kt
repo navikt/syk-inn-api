@@ -2,6 +2,7 @@ package no.nav.tsm.modules.sykmeldinger
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
@@ -13,7 +14,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
     sykmelder: Sykmelder,
 ): VerifiedSykInnSykmelding {
     return VerifiedSykInnSykmelding(
-        sykmeldingId = sykmeldingId,
+        sykmeldingId = UUID.randomUUID(),
         values = values,
         meta =
             SykInnSykmeldingMeta(

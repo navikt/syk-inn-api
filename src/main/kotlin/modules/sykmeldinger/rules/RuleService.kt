@@ -6,7 +6,6 @@ import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
 import no.nav.tsm.core.logger
-import no.nav.tsm.core.otel.failSpan
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
@@ -30,7 +29,7 @@ class RuleService {
     private val logger = logger()
 
     @WithSpan
-    suspend fun verify(
+    fun verify(
         sykmelding: UnverifiedSykInnSykmelding,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
@@ -65,33 +64,21 @@ class RuleService {
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
     ): SykInnSykmeldingRuleResult {
-        return try {
-            val regulaExecutionPayload =
-                mapUnruledSykInnSykmeldingToRegulaPayload(
-                    behandletTidspunkt = behandletTidspunkt,
-                    sykmelding = sykmelding,
-                    behandler = behandler,
-                    pasient = pasient,
-                )
-
-            val result =
-                executeRegulaRules(
-                    ruleExecutionPayload = regulaExecutionPayload,
-                    mode = ExecutionMode.NORMAL,
-                )
-
-            logger.info(
-                "Sykmelding med id=${sykmelding.sykmeldingId} er validering ${result.status.name} mot regler"
+        val regulaExecutionPayload =
+            mapUnruledSykInnSykmeldingToRegulaPayload(
+                behandletTidspunkt = behandletTidspunkt,
+                sykmelding = sykmelding,
+                behandler = behandler,
+                pasient = pasient,
             )
 
-            result.toSykInnRuleResult()
-        } catch (e: Exception) {
-            throw RuntimeException(
-                    "Error while executing Regula rules for sykmeldingId=${sykmelding.sykmeldingId}",
-                    e,
-                )
-                .failSpan()
-        }
+        val result =
+            executeRegulaRules(
+                ruleExecutionPayload = regulaExecutionPayload,
+                mode = ExecutionMode.NORMAL,
+            )
+
+        return result.toSykInnRuleResult()
     }
 
     private fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =
