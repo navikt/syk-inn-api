@@ -4,7 +4,8 @@ import java.time.OffsetDateTime
 import no.nav.tsm.core.jobs.JobStatus
 
 enum class JobName {
-    SYKMELDING_CONSUMER
+    SYKMELDING_CONSUMER,
+    SYKMELDING_PRODUCER,
 }
 
 data class Job(
