@@ -189,6 +189,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(brokenExampleSykmeldingPayloadBadDiagnoseSystem)
                 }
 
+            println(response.body<String>())
             assertEquals(HttpStatusCode.BadRequest, response.status)
         }
 
