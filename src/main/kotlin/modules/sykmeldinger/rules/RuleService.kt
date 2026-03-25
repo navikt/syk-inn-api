@@ -1,5 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.rules
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
 import no.nav.tsm.core.logger
@@ -19,6 +22,10 @@ import no.nav.tsm.regulus.regula.executeRegulaRules
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
+sealed class RuleErrors
+
+class InvalidPatient : RuleErrors()
+
 class RuleService {
     private val logger = logger()
 
@@ -27,23 +34,28 @@ class RuleService {
         sykmelding: UnverifiedSykInnSykmelding,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
-    ): SykInnSykmeldingRuleResult {
-
+    ): Either<RuleErrors, SykInnSykmeldingRuleResult> {
         val now = LocalDateTime.now()
-        val regulaPasient =
-            sykmeldt.mapPdlPersonToRegulaPasient()
-                ?: throw IllegalStateException(
-                    "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
-                )
+
+        val regulaPasient = sykmeldt.mapPdlPersonToRegulaPasient()
+        if (regulaPasient == null) {
+            logger.error(
+                "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
+            )
+
+            return InvalidPatient().left()
+        }
+
         val regulaBehandler =
             sykmelder.mapSykmelderToRegulaBehandler(sykmelding.meta.legekontorOrgnr)
 
         return this.executeRegulaRules(
-            behandletTidspunkt = now,
-            sykmelding = sykmelding,
-            behandler = regulaBehandler,
-            pasient = regulaPasient,
-        )
+                behandletTidspunkt = now,
+                sykmelding = sykmelding,
+                behandler = regulaBehandler,
+                pasient = regulaPasient,
+            )
+            .right()
     }
 
     @WithSpan

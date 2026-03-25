@@ -53,7 +53,8 @@ fun Application.configureBehandlerRoutes() {
                                                 GenericError("Person does not exist"),
                                             )
 
-                                        SykmeldingerService.CreateErrors.UnknownResourceError ->
+                                        SykmeldingerService.CreateErrors.UnknownResourceError,
+                                        SykmeldingerService.CreateErrors.RuleError ->
                                             call.respond<GenericError>(
                                                 HttpStatusCode.InternalServerError,
                                                 GenericError("Internal server error"),
@@ -128,6 +129,7 @@ fun Application.configureBehandlerRoutes() {
                                             GenericError("Person does not exist"),
                                         )
 
+                                    SykmeldingerService.CreateErrors.RuleError,
                                     SykmeldingerService.CreateErrors.UnknownResourceError ->
                                         call.respond<GenericError>(
                                             HttpStatusCode.InternalServerError,

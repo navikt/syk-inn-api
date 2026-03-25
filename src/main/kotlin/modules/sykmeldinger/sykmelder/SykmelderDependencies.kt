@@ -31,10 +31,9 @@ fun Application.configureSykmelderDependencies() {
     dependencies { provide<SykmelderService>(SykmelderService::class) }
 }
 
-private fun createExternalApiHttpClient(baseHttpClient: HttpClient) =
-    baseHttpClient.config {
-        install(HttpRequestRetry) {
-            retryOnServerErrors(maxRetries = 5)
-            exponentialDelay()
-        }
+private fun createExternalApiHttpClient(baseHttpClient: HttpClient) = baseHttpClient.config {
+    install(HttpRequestRetry) {
+        retryOnServerErrors(maxRetries = 5)
+        exponentialDelay()
     }
+}

@@ -39,23 +39,22 @@ fun Application.configureJobAdminRoutes() {
                 get {
                     val jobs = jobRepository.getJobs()
                     val statuses = jobRepository.getJobStatus().groupBy { it.job }
-                    val response =
-                        jobs.map { job ->
-                            val jobStatuses = statuses[job.jobName] ?: emptyList()
-                            JobStatusResponse(
-                                name = job.jobName,
-                                desiredState = job.desiredState,
-                                updatedAt = job.updatedAt,
-                                runners =
-                                    jobStatuses.map { runner ->
-                                        JobRunners(
-                                            runner = runner.runner,
-                                            state = runner.state,
-                                            updatedAt = runner.updatedAt,
-                                        )
-                                    },
-                            )
-                        }
+                    val response = jobs.map { job ->
+                        val jobStatuses = statuses[job.jobName] ?: emptyList()
+                        JobStatusResponse(
+                            name = job.jobName,
+                            desiredState = job.desiredState,
+                            updatedAt = job.updatedAt,
+                            runners =
+                                jobStatuses.map { runner ->
+                                    JobRunners(
+                                        runner = runner.runner,
+                                        state = runner.state,
+                                        updatedAt = runner.updatedAt,
+                                    )
+                                },
+                        )
+                    }
 
                     call.respond(HttpStatusCode.OK, response)
                 }

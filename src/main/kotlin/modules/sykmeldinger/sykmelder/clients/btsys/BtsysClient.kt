@@ -36,12 +36,9 @@ class BtsysCloudClient(
 ) : BtsysClient {
     private val logger = logger()
 
-    private val httpClient: HttpClient =
-        httpClient.config {
-            install(CallId) {
-                intercept { request, callId -> request.header("Nav-Call-Id", callId) }
-            }
-        }
+    private val httpClient: HttpClient = httpClient.config {
+        install(CallId) { intercept { request, callId -> request.header("Nav-Call-Id", callId) } }
+    }
 
     data class BtsysResponse(val suspendert: Boolean)
 

@@ -17,6 +17,8 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
         values = values,
         meta =
             SykInnSykmeldingMeta(
+                // TODO
+                source = "TODO",
                 // TODO: Ikke .now()?
                 mottatt = OffsetDateTime.now(ZoneOffset.UTC),
                 pasientIdent = meta.pasientIdent,

@@ -35,12 +35,9 @@ class HprCloudClient(
 ) : HprClient {
     private val logger = logger()
 
-    private val httpClient: HttpClient =
-        httpClient.config {
-            install(CallId) {
-                intercept { request, callId -> request.header("Nav-CallId", callId) }
-            }
-        }
+    private val httpClient: HttpClient = httpClient.config {
+        install(CallId) { intercept { request, callId -> request.header("Nav-CallId", callId) } }
+    }
 
     override suspend fun getSykmelderByHpr(
         behandlerHpr: String

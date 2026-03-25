@@ -2,6 +2,7 @@ package no.nav.tsm.modules.sykmeldinger
 
 import arrow.core.Either
 import arrow.core.left
+import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.right
 import arrow.fx.coroutines.parZip
@@ -23,6 +24,7 @@ class SykmeldingerService(
 ) {
     enum class CreateErrors {
         PersonNotInPdl,
+        RuleError,
         UnknownResourceError,
     }
 
@@ -48,13 +50,20 @@ class SykmeldingerService(
                     .bind()
             },
         ) { sykmelder, pasient ->
-            ruleService.verify(sykmelding, sykmelder, pasient)
+            ruleService
+                .verify(sykmelding, sykmelder, pasient)
+                .mapLeft { CreateErrors.RuleError }
+                .bind()
         }
     }
 
     suspend fun create(
         sykmelding: UnverifiedSykInnSykmelding
     ): Either<CreateErrors, VerifiedSykInnSykmelding> = either {
+        /**
+         * parZip runs both these resource lookups in parallel and gives us a callback at the end
+         * with both.
+         */
         parZip(
             {
                 sykmelderService
@@ -74,7 +83,12 @@ class SykmeldingerService(
                     .bind()
             },
         ) { sykmelder, pasient ->
-            val rules = ruleService.verify(sykmelding, sykmelder, pasient)
+            val rules =
+                ruleService
+                    .verify(sykmelding, sykmelder, pasient)
+                    .mapLeft { CreateErrors.RuleError }
+                    .bind()
+
             val verified = sykmelding.toVerifiedSykmelding(rules, sykmelder)
 
             repo.insert(verified)

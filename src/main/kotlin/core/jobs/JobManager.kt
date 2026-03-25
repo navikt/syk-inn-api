@@ -46,23 +46,22 @@ abstract class JobManager(private val applicationScope: CoroutineScope) {
                 return false
             }
 
-            job =
-                applicationScope.launch {
-                    try {
-                        _status.value = JobStatus.RUNNING
-                        runJob()
-                        _status.value = JobStatus.STOPPED
-                    } catch (ex: CancellationException) {
-                        logger.info("KafkaConsumerJob was cancelled gracefully", ex)
-                        _status.value = JobStatus.STOPPED
-                    } catch (cause: Exception) {
-                        logger.error("KafkaConsumerJob crashed unexpectedly", cause)
-                        _status.value = JobStatus.FAILED
-                    } finally {
-                        logger.info("Job finished or failed, setting job reference to null")
-                        job = null
-                    }
+            job = applicationScope.launch {
+                try {
+                    _status.value = JobStatus.RUNNING
+                    runJob()
+                    _status.value = JobStatus.STOPPED
+                } catch (ex: CancellationException) {
+                    logger.info("KafkaConsumerJob was cancelled gracefully", ex)
+                    _status.value = JobStatus.STOPPED
+                } catch (cause: Exception) {
+                    logger.error("KafkaConsumerJob crashed unexpectedly", cause)
+                    _status.value = JobStatus.FAILED
+                } finally {
+                    logger.info("Job finished or failed, setting job reference to null")
+                    job = null
                 }
+            }
             return true
         }
     }

@@ -26,6 +26,7 @@ data class UnverifiedSykInnSykmelding(
 ) : SykInnSykmelding
 
 data class SykInnSykmeldingMeta(
+    val source: String,
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
     val hpr: String,

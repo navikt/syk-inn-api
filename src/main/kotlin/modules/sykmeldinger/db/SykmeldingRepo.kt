@@ -4,10 +4,11 @@ package no.nav.tsm.modules.sykmeldinger.db
 
 import java.time.OffsetDateTime
 import java.util.UUID
-import kotlin.time.Clock
+import kotlin.collections.emptyList
 import kotlin.uuid.ExperimentalUuidApi
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonb
+import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -19,22 +20,43 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class SykmeldingRepo {
+    private val logger = logger()
+
     fun insert(sykmelding: VerifiedSykInnSykmelding) {
-        transaction {
-            SykmeldingTable.insert {
-                it[id] = sykmelding.sykmeldingId
-                it[createdAt] = Clock.System.now()
-                it[updatedAt] = Clock.System.now()
-                it[pasientIdent] = sykmelding.meta.pasientIdent
-                it[hpr] = sykmelding.meta.hpr
-                it[data] = SykmeldingJsonb(sykmeldingId = sykmelding.sykmeldingId.toString())
+        try {
+            transaction {
+                SykmeldingTable.insert {
+                    it[id] = sykmelding.sykmeldingId
+                    it[rules] = sykmelding.result.toRuleResultColumn()
+                    it[metaSource] = sykmelding.meta.source
+                    it[metaMottatt] = sykmelding.meta.mottatt
+                    it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
+                    it[metaTelefonnummer] = sykmelding.meta.legekontorTlf
+                    it[metaPasientIdent] = sykmelding.meta.pasientIdent
+                    it[metaBehandlerHpr] = sykmelding.meta.hpr
+                    it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
+                    it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
+                    it[valuesHoveddiagnose] = null
+                    it[valuesBidiagnoser] = "[]"
+                    it[valuesAktivitet] = "[]"
+                    it[valuesMeldinger] = null
+                    it[valuesYrkesskade] = null
+                    it[valuesArbeidsgiver] = null
+                    it[valuesTilbakedatering] = null
+                    it[valuesUtdypendeSporsmal] = null
+                    it[valuesAnnenFravarsgrunn] = null
+                }
             }
+        } catch (e: Exception) {
+            logger.error("Sykmelding insert failed", e)
+
+            throw e
         }
     }
 
     fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = transaction {
         SykmeldingTable.selectAll()
-            .where { SykmeldingTable.pasientIdent eq ident }
+            .where { SykmeldingTable.metaPasientIdent eq ident }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
     }
 
@@ -64,9 +86,10 @@ class SykmeldingRepo {
                 ),
             meta =
                 SykInnSykmeldingMeta(
+                    source = "tihi",
                     mottatt = OffsetDateTime.now(),
                     pasientIdent = "",
-                    hpr = this[SykmeldingTable.hpr],
+                    hpr = this[SykmeldingTable.metaBehandlerHpr],
                     legekontorOrgnr = "",
                     legekontorTlf = "",
                 ),

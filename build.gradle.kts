@@ -91,7 +91,7 @@ tasks {
     }
 
     configure<SpotlessExtension> {
-        kotlin { ktfmt("0.61").kotlinlangStyle() }
+        kotlin { ktfmt("0.62").kotlinlangStyle() }
         check {
             dependsOn("spotlessApply")
         }

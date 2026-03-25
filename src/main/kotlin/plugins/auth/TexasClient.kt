@@ -23,12 +23,11 @@ data class TexasToken(val token: String)
 class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val env: Environment) {
     private val logger = logger()
 
-    private val texasHttpClient =
-        httpClient.config {
-            install(ContentNegotiation) {
-                jackson { setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) }
-            }
+    private val texasHttpClient = httpClient.config {
+        install(ContentNegotiation) {
+            jackson { setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) }
         }
+    }
 
     @WithSpan("Texas.requestToken")
     suspend fun requestToken(
