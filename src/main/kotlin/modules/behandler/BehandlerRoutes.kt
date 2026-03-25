@@ -4,23 +4,20 @@ import arrow.core.Either
 import arrow.core.getOrElse
 import arrow.core.raise.catch
 import arrow.core.raise.either
-import io.ktor.http.HttpStatusCode
-import io.ktor.openapi.jsonSchema
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.di.dependencies
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.RoutingCall
-import io.ktor.server.routing.get
-import io.ktor.server.routing.openapi.describe
-import io.ktor.server.routing.post
-import io.ktor.server.routing.route
-import io.ktor.server.routing.routing
-import io.ktor.util.logging.error
-import io.ktor.utils.io.ExperimentalKtorApi
-import java.util.UUID
+import arrow.core.raise.ensure
+import arrow.core.raise.ensureNotNull
+import io.ktor.http.*
+import io.ktor.openapi.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
+import io.ktor.server.plugins.di.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.*
+import io.ktor.utils.io.*
+import java.util.*
 import no.nav.tsm.core.logger
 import no.nav.tsm.core.otel.failSpan
 import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
@@ -28,12 +25,10 @@ import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
 import no.nav.tsm.modules.behandler.mappers.toSykInnSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
-import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.modules.behandler.payloads.OpprettSykmelding
 import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
@@ -41,7 +36,6 @@ val logger = logger()
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
-    val logger = logger()
     val accessControlService: BehandlerAccessControlService by dependencies
     val sykmeldingerService: SykmeldingerService by dependencies
 
@@ -49,62 +43,30 @@ fun Application.configureBehandlerRoutes() {
         authenticate(MACHINE_TOKEN_AUTH) {
             route("/api/sykmelding") {
                 post {
-                        val payload: OpprettSykmelding.Payload =
-                            call.receiveOpprettPayload().getOrElse {
-                                return@post call.respond<GenericError>(
-                                    HttpStatusCode.BadRequest,
-                                    GenericError("Unable to parse body"),
-                                )
-                            }
-                        val unruledSykmelding = payload.toSykInnSykmelding()
-                        val createdSykmelding =
-                            sykmeldingerService.create(unruledSykmelding).getOrElse {
-                                return@post when (it) {
-                                    SykmeldingerService.CreateErrors.PersonNotInPdl ->
-                                        call.respond<GenericError>(
-                                            HttpStatusCode.UnprocessableEntity,
-                                            GenericError("Person does not exist"),
-                                        )
+                        either<GenericHttpError, BehandlerSykmeldingFull> {
+                                val payload = call.receiveOpprettPayload().bind()
+                                val sykmelding = payload.toSykInnSykmelding()
+                                val created: VerifiedSykInnSykmelding =
+                                    sykmeldingerService
+                                        .create(sykmelding)
+                                        .mapLeft { it.createdToHttpError() }
+                                        .bind()
 
-                                    SykmeldingerService.CreateErrors.UnknownResourceError,
-                                    SykmeldingerService.CreateErrors.RuleError ->
-                                        call.respond<GenericError>(
-                                            HttpStatusCode.InternalServerError,
-                                            GenericError("Internal server error"),
-                                        )
-                                }
-                            }
+                                val result =
+                                    accessControlService.toRedactedIfNeeded(
+                                        sykInnSykmelding = created,
+                                        currentBehandlerHpr = created.meta.hpr,
+                                    )
 
-                        val accessControlledSykmelding =
-                            accessControlService.toRedactedIfNeeded(
-                                sykInnSykmelding = createdSykmelding,
-                                currentBehandlerHpr = createdSykmelding.meta.hpr,
+                                ensureNotNull(result) { InternalServerError }
+                                ensure(result is BehandlerSykmeldingFull) { InternalServerError }
+
+                                result
+                            }
+                            .fold(
+                                { call.respond(it.code, MessageBody(it.message)) },
+                                { call.respond(HttpStatusCode.Created, it) },
                             )
-
-                        when (accessControlledSykmelding) {
-                            null -> {
-                                logger.error("Freshly created sykmelding cannot be null")
-                                call.respond<GenericError>(
-                                    HttpStatusCode.InternalServerError,
-                                    GenericError("Internal server error"),
-                                )
-                            }
-
-                            is BehandlerSykmeldingRedacted -> {
-                                logger.error("Freshly created sykmelding cannot be redacted")
-                                call.respond<GenericError>(
-                                    HttpStatusCode.InternalServerError,
-                                    GenericError("Internal server error"),
-                                )
-                            }
-
-                            is BehandlerSykmeldingFull -> {
-                                call.respond<BehandlerSykmeldingFull>(
-                                    HttpStatusCode.Created,
-                                    accessControlledSykmelding,
-                                )
-                            }
-                        }
                     }
                     .describe {
                         summary = "Create a new sykmelding"
@@ -119,47 +81,37 @@ fun Application.configureBehandlerRoutes() {
                             HttpStatusCode.UnprocessableEntity {
                                 description =
                                     "The person does not exist in PDL and therefore can't be verified"
-                                schema = jsonSchema<GenericError>()
+                                schema = jsonSchema<MessageBody>()
                             }
                         }
                     }
                 post("/verify") {
-                        val payload: OpprettSykmelding.Payload =
-                            call.receiveOpprettPayload().getOrElse {
-                                return@post call.respond<GenericError>(
-                                    HttpStatusCode.BadRequest,
-                                    GenericError("Unable to parse body"),
-                                )
+                        either {
+                                val payload = call.receiveOpprettPayload().bind()
+                                val sykmelding = payload.toSykInnSykmelding()
+
+                                sykmeldingerService
+                                    .verify(sykmelding)
+                                    .mapLeft { it.createdToHttpError() }
+                                    .bind()
                             }
-                        val sykmelding: UnverifiedSykInnSykmelding = payload.toSykInnSykmelding()
-                        val rule: SykInnSykmeldingRuleResult =
-                            sykmeldingerService.verify(sykmelding).getOrElse {
-                                return@post when (it) {
-                                    SykmeldingerService.CreateErrors.PersonNotInPdl ->
-                                        call.respond<GenericError>(
-                                            HttpStatusCode.UnprocessableEntity,
-                                            GenericError("Person does not exist"),
-                                        )
+                            .fold(
+                                { error: GenericHttpError ->
+                                    call.respond(error.code, MessageBody(error.message))
+                                },
+                                { rule: SykInnSykmeldingRuleResult ->
+                                    when (rule) {
+                                        is SykInnSykmeldingRuleResult.OK ->
+                                            call.respond<Boolean>(HttpStatusCode.OK, true)
 
-                                    SykmeldingerService.CreateErrors.RuleError,
-                                    SykmeldingerService.CreateErrors.UnknownResourceError ->
-                                        call.respond<GenericError>(
-                                            HttpStatusCode.InternalServerError,
-                                            GenericError("Internal server error"),
-                                        )
-                                }
-                            }
-
-                        when (rule) {
-                            is SykInnSykmeldingRuleResult.OK ->
-                                call.respond<Boolean>(HttpStatusCode.OK, true)
-
-                            is SykInnSykmeldingRuleResult.Outcome ->
-                                call.respond<BehandlerSykmeldingVerify>(
-                                    HttpStatusCode.OK,
-                                    rule.toBehandlerSykmeldingVerify(),
-                                )
-                        }
+                                        is SykInnSykmeldingRuleResult.Outcome ->
+                                            call.respond<BehandlerSykmeldingVerify>(
+                                                HttpStatusCode.OK,
+                                                rule.toBehandlerSykmeldingVerify(),
+                                            )
+                                    }
+                                },
+                            )
                     }
                     .describe {
                         summary = "Verifying the contents of a sykmelding"
@@ -177,7 +129,7 @@ fun Application.configureBehandlerRoutes() {
                             HttpStatusCode.UnprocessableEntity {
                                 description =
                                     "The person does not exist in PDL and therefore can't be verified"
-                                schema = jsonSchema<GenericError>()
+                                schema = jsonSchema<MessageBody>()
                             }
                         }
                     }
@@ -186,22 +138,22 @@ fun Application.configureBehandlerRoutes() {
                             call.parameters["id"]?.let { UUID.fromString(it) }
                                 ?: return@get call.respond(
                                     HttpStatusCode.BadRequest,
-                                    GenericError("Invalid ID"),
+                                    MessageBody("Invalid ID"),
                                 )
 
                         val sykmelding: VerifiedSykInnSykmelding =
                             sykmeldingerService.byId(id).getOrElse {
                                 return@get when (it) {
                                     SykmeldingerService.GetErrors.NotFound ->
-                                        call.respond<GenericError>(
+                                        call.respond<MessageBody>(
                                             HttpStatusCode.NotFound,
-                                            GenericError("Unable to find sykmelding"),
+                                            MessageBody("Unable to find sykmelding"),
                                         )
 
                                     SykmeldingerService.GetErrors.UnknownError ->
-                                        call.respond<GenericError>(
+                                        call.respond<MessageBody>(
                                             HttpStatusCode.InternalServerError,
-                                            GenericError("Internal server error"),
+                                            MessageBody("Internal server error"),
                                         )
                                 }
                             }
@@ -209,9 +161,9 @@ fun Application.configureBehandlerRoutes() {
                         val accessControlledSykmelding =
                             accessControlService.toRedactedIfNeeded(sykmelding, "TODO")
                                 // Don't reveal anything, pretend its a simple 404
-                                ?: return@get call.respond<GenericError>(
+                                ?: return@get call.respond<MessageBody>(
                                     HttpStatusCode.NotFound,
-                                    GenericError("Unable to find sykmelding"),
+                                    MessageBody("Unable to find sykmelding"),
                                 )
 
                         call.respond<BehandlerSykmelding>(
@@ -231,12 +183,12 @@ fun Application.configureBehandlerRoutes() {
                             HttpStatusCode.NotFound {
                                 description =
                                     "No sykmelding with the given id was found, or the logged in user does not have access to it."
-                                schema = jsonSchema<GenericError>()
+                                schema = jsonSchema<MessageBody>()
                             }
                             HttpStatusCode.InternalServerError {
-                                schema = jsonSchema<GenericError>()
+                                schema = jsonSchema<MessageBody>()
                             }
-                            HttpStatusCode.BadRequest { schema = jsonSchema<GenericError>() }
+                            HttpStatusCode.BadRequest { schema = jsonSchema<MessageBody>() }
                         }
                     }
                 get {
@@ -247,9 +199,9 @@ fun Application.configureBehandlerRoutes() {
                             requireNotNull(call.request.headers["Ident"]) { "Missing Ident header" }
                         val allSykmeldinger: List<VerifiedSykInnSykmelding> =
                             sykmeldingerService.byIdent(identHeader).getOrElse {
-                                return@get call.respond<GenericError>(
+                                return@get call.respond<MessageBody>(
                                     HttpStatusCode.InternalServerError,
-                                    GenericError("Internal server error"),
+                                    MessageBody("Internal server error"),
                                 )
                             }
                         val accessControlledSykmeldinger: List<BehandlerSykmelding> =
@@ -276,7 +228,7 @@ fun Application.configureBehandlerRoutes() {
                                 schema = jsonSchema<List<BehandlerSykmelding>>()
                             }
                             HttpStatusCode.InternalServerError {
-                                schema = jsonSchema<GenericError>()
+                                schema = jsonSchema<MessageBody>()
                             }
                         }
                     }
@@ -285,16 +237,47 @@ fun Application.configureBehandlerRoutes() {
     }
 }
 
-private suspend fun RoutingCall.receiveOpprettPayload(): Either<String, OpprettSykmelding.Payload> =
-    either {
-        catch(
-            { this@receiveOpprettPayload.receive<OpprettSykmelding.Payload>() },
-            { e: BadRequestException ->
-                logger.error("OpprettSykmelding.Payload body parsing failed", e.failSpan())
+private fun Either<SykmeldingerService.CreateErrors, VerifiedSykInnSykmelding>.mapCreatedErrors():
+    Either<GenericHttpError, VerifiedSykInnSykmelding> = mapLeft { error ->
+    when (error) {
+        SykmeldingerService.CreateErrors.PersonNotInPdl ->
+            GenericHttpError(HttpStatusCode.UnprocessableEntity, "Person does not exist")
 
-                raise(e.message ?: "Unknown OpprettSykmelding.Payload error")
-            },
-        )
+        SykmeldingerService.CreateErrors.UnknownResourceError,
+        SykmeldingerService.CreateErrors.RuleError ->
+            GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
+    }
+}
+
+private fun SykmeldingerService.CreateErrors.createdToHttpError(): GenericHttpError =
+    when (this) {
+        SykmeldingerService.CreateErrors.PersonNotInPdl ->
+            GenericHttpError(HttpStatusCode.UnprocessableEntity, "Person does not exist")
+
+        SykmeldingerService.CreateErrors.UnknownResourceError,
+        SykmeldingerService.CreateErrors.RuleError ->
+            GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
     }
 
-private data class GenericError(val message: String)
+private suspend fun RoutingCall.receiveOpprettPayload():
+    Either<GenericHttpError, OpprettSykmelding.Payload> = either {
+    catch(
+        { receive<OpprettSykmelding.Payload>() },
+        { e: BadRequestException ->
+            logger.error("OpprettSykmelding.Payload body parsing failed", e.failSpan())
+
+            raise(GenericHttpError(HttpStatusCode.BadRequest, "Unable to parse body"))
+        },
+    )
+}
+
+/**
+ * The actual payload of any non-2xx responses. Used for OpenAPI generation and call.respond(...).
+ */
+private data class MessageBody(val message: String)
+
+/** Normalized representation of HttpErrors, used in Either<GenericHttpError, ...> */
+private data class GenericHttpError(val code: HttpStatusCode, val message: String)
+
+private val InternalServerError =
+    GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
