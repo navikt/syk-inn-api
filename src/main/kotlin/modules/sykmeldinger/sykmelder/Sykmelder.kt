@@ -7,6 +7,7 @@ sealed interface Sykmelder {
 
     data class MedSuspensjon(
         override val hpr: String,
+        val navn: String,
         val godkjenninger: List<SykmelderGodkjenning>,
         val ident: String,
         val suspendert: Boolean,

@@ -18,7 +18,9 @@ data class BehandlerSykmeldingFull(
     override val meta: BehandlerSykmeldingMeta,
     val utfall: BehandlerSykmeldingRuleResult,
     val values: BehandlerSykmeldingValues,
-) : BehandlerSykmelding
+) : BehandlerSykmelding {
+    val isFull: Boolean = true
+}
 
 data class BehandlerSykmeldingMeta(
     val mottatt: OffsetDateTime,
@@ -99,7 +101,7 @@ data class BehandlerSykmeldingDiagnoseInfo(
     val text: String,
 )
 
-data class BehandlerSykmeldingRuleResult(val result: RuleType, val melding: String?)
+data class BehandlerSykmeldingRuleResult(val result: RuleType, val cause: String?)
 
 data class BehandlerSykmeldingTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
 
@@ -109,12 +111,7 @@ data class BehandlerSykmeldingYrkesskade(val yrkesskade: Boolean, val skadedato:
 
 data class BehandlerSykmeldingMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 
-data class BehandlerSykmeldingSykmelder(
-    // TODO: Fikse i syk-inn schema
-    val hpr: String,
-    // TODO: Fikse i syk-inn schema
-    val navn: String,
-)
+data class BehandlerSykmeldingSykmelder(val hpr: String, val navn: String)
 
 data class BehandlerSykmeldingUtdypendeSporsmal(
     val utfordringerMedArbeid: BehandlerSykmeldingSporsmalSvar?,

@@ -24,6 +24,7 @@ class HprLocalClient : HprClient {
             return SykmelderMedHpr(
                     ident = "brokenFnr",
                     hprNummer = "hprButHasBrokenFnrAndNoGodkjenninger",
+                    navn = "Test Testesen",
                     godkjenninger = emptyList(),
                 )
                 .right()
@@ -37,6 +38,7 @@ class HprLocalClient : HprClient {
             return SykmelderMedHpr(
                     ident = "suspendertFnr",
                     hprNummer = "hprButFnrIsSuspended",
+                    navn = "Test Testesen",
                     godkjenninger = aktivLegeGodnkjenninger,
                 )
                 .right()
@@ -46,6 +48,7 @@ class HprLocalClient : HprClient {
         return SykmelderMedHpr(
                 ident = "09099012345",
                 hprNummer = behandlerHpr,
+                navn = "Test Testesen",
                 godkjenninger = aktivLegeGodnkjenninger,
             )
             .right()
@@ -63,6 +66,7 @@ class HprLocalClient : HprClient {
         return SykmelderMedHpr(
                 ident = behandlerIdent,
                 hprNummer = "123456789",
+                navn = "Test Testesen",
                 godkjenninger = emptyList(),
             )
             .right()

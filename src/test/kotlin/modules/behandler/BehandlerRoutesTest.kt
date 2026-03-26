@@ -114,6 +114,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
 
             val created = requireNotNull(response.body<BehandlerSykmelding>())
+            println("createdø1")
             assertIs<BehandlerSykmeldingFull>(created)
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(created.meta.sykmelder.hpr, "someone-else")
@@ -127,8 +128,11 @@ class BehandlerRoutesTest : WithPostgresql() {
                     }
                 }
 
+            println("fetched!")
             val specificSykmelding =
                 requireNotNull(specificSykmeldingResponse.body<BehandlerSykmelding>())
+
+            println(specificSykmelding)
             assertIs<BehandlerSykmeldingRedacted>(specificSykmelding)
         }
 

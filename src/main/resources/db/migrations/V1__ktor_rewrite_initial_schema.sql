@@ -30,6 +30,7 @@ CREATE TABLE sykmelding
     meta_mottatt                   TIMESTAMPTZ NOT NULL,
     meta_pasient_ident             TEXT        NOT NULL,
     meta_behandler_hpr             TEXT        NOT NULL,
+    meta_behandler_navn            TEXT        NOT NULL,
     meta_orgnummer                 TEXT        NOT NULL,
     meta_telefonnummer             TEXT        NOT NULL,
     values_pasienten_skal_skjermes BOOLEAN     NOT NULL,
@@ -58,7 +59,6 @@ create table sykmelding_status
 
 create index idx_sykmelding_status_event_timestamp on sykmelding_status (status, event_timestamp);
 create index idx_sykmelding_status_sendt_timestamp on sykmelding_status (status, send_timestamp);
-
 
 create table rule_status
 (

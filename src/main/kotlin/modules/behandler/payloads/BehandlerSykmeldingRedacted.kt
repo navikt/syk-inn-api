@@ -7,7 +7,11 @@ data class BehandlerSykmeldingRedacted(
     override val sykmeldingId: UUID,
     override val meta: BehandlerSykmeldingMeta,
     val values: BehandlerSykmeldingRedactedValues,
-) : BehandlerSykmelding
+    /** Should only ever be OK */
+    val utfall: BehandlerSykmeldingRuleResult,
+) : BehandlerSykmelding {
+    val isFull: Boolean = false
+}
 
 data class BehandlerSykmeldingRedactedValues(
     val aktivitet: List<BehandlerSykmeldingRedactedAktivitet>

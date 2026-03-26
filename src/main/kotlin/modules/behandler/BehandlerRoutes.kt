@@ -1,7 +1,6 @@
 package no.nav.tsm.modules.behandler
 
 import arrow.core.Either
-import arrow.core.getOrElse
 import arrow.core.raise.catch
 import arrow.core.raise.either
 import arrow.core.raise.ensure
@@ -13,7 +12,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.server.routing.openapi.*
 import io.ktor.utils.io.*
@@ -32,7 +31,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
-val logger = logger()
+private val logger = logger()
 
 @OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
@@ -55,7 +54,7 @@ fun Application.configureBehandlerRoutes() {
                                 val result =
                                     accessControlService.toRedactedIfNeeded(
                                         sykInnSykmelding = created,
-                                        currentBehandlerHpr = created.meta.hpr,
+                                        currentBehandlerHpr = created.meta.behandlerHpr,
                                     )
 
                                 ensureNotNull(result) { InternalServerError }
@@ -134,42 +133,41 @@ fun Application.configureBehandlerRoutes() {
                         }
                     }
                 get("/{id}") {
-                        val id: UUID =
-                            call.parameters["id"]?.let { UUID.fromString(it) }
-                                ?: return@get call.respond(
-                                    HttpStatusCode.BadRequest,
-                                    MessageBody("Invalid ID"),
-                                )
+                        either<GenericHttpError, BehandlerSykmelding> {
+                                val id: UUID = call.uuidPathParam("id").bind()
+                                val hpr = call.hprHeader().bind()
+                                println("okey lets go $id $hpr")
 
-                        val sykmelding: VerifiedSykInnSykmelding =
-                            sykmeldingerService.byId(id).getOrElse {
-                                return@get when (it) {
-                                    SykmeldingerService.GetErrors.NotFound ->
-                                        call.respond<MessageBody>(
-                                            HttpStatusCode.NotFound,
-                                            MessageBody("Unable to find sykmelding"),
-                                        )
+                                val sykmelding: VerifiedSykInnSykmelding =
+                                    sykmeldingerService
+                                        .byId(id)
+                                        .mapLeft { it.getToHttpError() }
+                                        .bind()
 
-                                    SykmeldingerService.GetErrors.UnknownError ->
-                                        call.respond<MessageBody>(
-                                            HttpStatusCode.InternalServerError,
-                                            MessageBody("Internal server error"),
-                                        )
+                                println(sykmelding.meta.behandlerHpr)
+                                println(hpr)
+
+                                val accessControlledSykmelding =
+                                    accessControlService.toRedactedIfNeeded(sykmelding, hpr)
+
+                                ensureNotNull(accessControlledSykmelding) {
+                                    logger.warn(
+                                        "User $hpr tried to access someone else's non-OK sykmelding with id $id"
+                                    )
+
+                                    SykmeldingNotFound
                                 }
+
+                                println(accessControlledSykmelding)
+
+                                accessControlledSykmelding
                             }
-
-                        val accessControlledSykmelding =
-                            accessControlService.toRedactedIfNeeded(sykmelding, "TODO")
-                                // Don't reveal anything, pretend its a simple 404
-                                ?: return@get call.respond<MessageBody>(
-                                    HttpStatusCode.NotFound,
-                                    MessageBody("Unable to find sykmelding"),
-                                )
-
-                        call.respond<BehandlerSykmelding>(
-                            HttpStatusCode.Created,
-                            accessControlledSykmelding,
-                        )
+                            .fold(
+                                { error: GenericHttpError ->
+                                    call.respond(error.code, MessageBody(error.message))
+                                },
+                                { call.respond(HttpStatusCode.OK, it) },
+                            )
                     }
                     .describe {
                         summary = "Get a sykmelding by id"
@@ -192,30 +190,30 @@ fun Application.configureBehandlerRoutes() {
                         }
                     }
                 get {
-                        val hprHeader =
-                            requireNotNull(call.request.headers["HPR"]) { "HPR header is missing" }
+                        either<GenericHttpError, List<BehandlerSykmelding>> {
+                                val hprHeader = call.hprHeader().bind()
+                                val identHeader = call.identHeader().bind()
 
-                        val identHeader =
-                            requireNotNull(call.request.headers["Ident"]) { "Missing Ident header" }
-                        val allSykmeldinger: List<VerifiedSykInnSykmelding> =
-                            sykmeldingerService.byIdent(identHeader).getOrElse {
-                                return@get call.respond<MessageBody>(
-                                    HttpStatusCode.InternalServerError,
-                                    MessageBody("Internal server error"),
-                                )
-                            }
-                        val accessControlledSykmeldinger: List<BehandlerSykmelding> =
-                            allSykmeldinger.mapNotNull {
-                                accessControlService.toRedactedIfNeeded(
-                                    it,
-                                    currentBehandlerHpr = hprHeader,
-                                )
-                            }
+                                val allSykmeldinger: List<VerifiedSykInnSykmelding> =
+                                    sykmeldingerService
+                                        .byIdent(identHeader)
+                                        .mapLeft { it.getToHttpError() }
+                                        .bind()
 
-                        call.respond<List<BehandlerSykmelding>>(
-                            HttpStatusCode.OK,
-                            accessControlledSykmeldinger,
-                        )
+                                val accessControlledSykmeldinger: List<BehandlerSykmelding> =
+                                    allSykmeldinger.mapNotNull {
+                                        accessControlService.toRedactedIfNeeded(
+                                            it,
+                                            currentBehandlerHpr = hprHeader,
+                                        )
+                                    }
+
+                                accessControlledSykmeldinger
+                            }
+                            .fold(
+                                { call.respond(it.code, MessageBody(it.message)) },
+                                { call.respond(HttpStatusCode.OK, it) },
+                            )
                     }
                     .describe {
                         summary = "Get all sykmeldinger for the logged in user"
@@ -247,6 +245,12 @@ private fun SykmeldingerService.CreateErrors.createdToHttpError(): GenericHttpEr
             GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
     }
 
+private fun SykmeldingerService.GetErrors.getToHttpError(): GenericHttpError =
+    when (this) {
+        SykmeldingerService.GetErrors.NotFound -> SykmeldingNotFound
+        SykmeldingerService.GetErrors.UnknownError -> InternalServerError
+    }
+
 private suspend fun RoutingCall.receiveOpprettPayload():
     Either<GenericHttpError, OpprettSykmelding.Payload> = either {
     catch(
@@ -259,6 +263,31 @@ private suspend fun RoutingCall.receiveOpprettPayload():
     )
 }
 
+private fun RoutingCall.hprHeader(): Either<GenericHttpError, String> = either {
+    ensureNotNull(request.headers["HPR"]) {
+        GenericHttpError(HttpStatusCode.BadRequest, "HPR header is missing")
+    }
+}
+
+private fun RoutingCall.identHeader(): Either<GenericHttpError, String> = either {
+    ensureNotNull(request.headers["Ident"]) {
+        GenericHttpError(HttpStatusCode.BadRequest, "HPR header is missing")
+    }
+}
+
+/**
+ * Path params should always be found if the path and name matches. Any error that occurs here is
+ * purely a developer mistake.
+ */
+private fun RoutingCall.uuidPathParam(name: String): Either<GenericHttpError, UUID> = either {
+    ensureNotNull(parameters[name]) {
+            logger.error("Invalid path parameter: $name, path is ${request.path()}")
+
+            InternalServerError
+        }
+        .let { UUID.fromString(it) }
+}
+
 /**
  * The actual payload of any non-2xx responses. Used for OpenAPI generation and call.respond(...).
  */
@@ -269,3 +298,6 @@ private data class GenericHttpError(val code: HttpStatusCode, val message: Strin
 
 private val InternalServerError =
     GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
+
+private val SykmeldingNotFound =
+    GenericHttpError(HttpStatusCode.NotFound, "Unable to find sykmelding")

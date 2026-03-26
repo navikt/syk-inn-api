@@ -111,7 +111,7 @@ class HprCloudClient(
         texasClient.requestToken("teamsykmelding", "syfohelsenettproxy")
 
     private fun mapHprSykmelderToSykmelderMedHpr(hprSykmelder: HprSykmelder): SykmelderMedHpr {
-        requireNotNull(hprSykmelder.hprNummer, { "HprSykmelder må ha hprNummer" })
+        requireNotNull(hprSykmelder.hprNummer) { "HprSykmelder må ha hprNummer" }
 
         val godkjenninger: List<SykmelderGodkjenning> =
             hprSykmelder.godkjenninger.map { godkjenning ->
@@ -134,10 +134,18 @@ class HprCloudClient(
             ident = hprSykmelder.fnr,
             hprNummer = hprSykmelder.hprNummer,
             godkjenninger = godkjenninger,
+            navn = hprSykmelder.toNavn(),
         )
     }
 
     private fun HprKodeverk.mapKodeverk(): SykmelderKodeverk {
         return SykmelderKodeverk(aktiv = this.aktiv, oid = this.oid, verdi = this.verdi)
+    }
+
+    private fun HprSykmelder.toNavn(): String {
+        requireNotNull(fornavn) { "HprSykmelder må ha fornavn" }
+        requireNotNull(etternavn) { "HprSykmelder må ha etternavn" }
+
+        return listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
     }
 }

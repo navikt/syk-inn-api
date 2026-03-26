@@ -40,6 +40,7 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
 
             return Sykmelder.MedSuspensjon(
                     hpr = hpr,
+                    navn = sykmelderMedHpr.navn,
                     ident = sykmelderMedHpr.ident,
                     suspendert = suspendert,
                     godkjenninger = sykmelderMedHpr.godkjenninger,

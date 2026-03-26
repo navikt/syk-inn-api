@@ -26,7 +26,12 @@ class SykmelderServiceTest {
         val oppslagsdato = LocalDate.now()
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
-            SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
+            SykmelderMedHpr(
+                    hprNummer = hprNummer,
+                    ident = ident,
+                    navn = "Test Testesen",
+                    godkjenninger = emptyList(),
+                )
                 .right()
         coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns false.right()
 
@@ -59,7 +64,12 @@ class SykmelderServiceTest {
         val oppslagsdato = LocalDate.of(2026, 3, 11)
 
         coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
-            SykmelderMedHpr(hprNummer = hprNummer, ident = ident, godkjenninger = emptyList())
+            SykmelderMedHpr(
+                    hprNummer = hprNummer,
+                    ident = ident,
+                    navn = "Test Testesen",
+                    godkjenninger = emptyList(),
+                )
                 .right()
         coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns true.right()
 

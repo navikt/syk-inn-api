@@ -6,6 +6,9 @@ data class HprSykmelder(
     val godkjenninger: List<HprGodkjenning> = emptyList(),
     val fnr: String,
     val hprNummer: String?,
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
 )
 
 data class HprGodkjenning(

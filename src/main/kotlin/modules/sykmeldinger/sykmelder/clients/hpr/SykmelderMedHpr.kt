@@ -7,6 +7,7 @@ import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 
 data class SykmelderMedHpr(
     val ident: String,
+    val navn: String,
     val hprNummer: String,
     val godkjenninger: List<SykmelderGodkjenning>,
 )

@@ -39,9 +39,9 @@ class BehandlerSykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmeldin
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BehandlerSykmelding {
         val json = ctxt.readTree(p)
         val type =
-            when (json["utfall"]) {
-                null -> BehandlerSykmeldingRedacted::class
-                else -> BehandlerSykmeldingFull::class
+            when (json["isFull"].booleanValue()) {
+                false -> BehandlerSykmeldingRedacted::class
+                true -> BehandlerSykmeldingFull::class
             }
 
         return p.codec.treeToValue(json, type.java)

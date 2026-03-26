@@ -39,7 +39,8 @@ class SykmeldingRepo {
                     it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
                     it[metaTelefonnummer] = sykmelding.meta.legekontorTlf
                     it[metaPasientIdent] = sykmelding.meta.pasientIdent
-                    it[metaBehandlerHpr] = sykmelding.meta.hpr
+                    it[metaBehandlerNavn] = sykmelding.meta.behandlerNavn
+                    it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
                     it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                     it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
                     it[valuesHoveddiagnose] = null
@@ -118,7 +119,9 @@ class SykmeldingRepo {
                     source = "tihi",
                     mottatt = OffsetDateTime.now(),
                     pasientIdent = "",
-                    hpr = this[SykmeldingTable.metaBehandlerHpr],
+                    // TODO
+                    behandlerNavn = this[SykmeldingTable.metaBehandlerNavn],
+                    behandlerHpr = this[SykmeldingTable.metaBehandlerHpr],
                     legekontorOrgnr = "",
                     legekontorTlf = "",
                 ),

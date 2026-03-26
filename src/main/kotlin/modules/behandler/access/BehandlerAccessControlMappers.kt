@@ -44,6 +44,7 @@ fun VerifiedSykInnSykmelding.toRedactedSykmelding(): BehandlerSykmeldingRedacted
     BehandlerSykmeldingRedacted(
         sykmeldingId = sykmeldingId,
         meta = meta.toBehandlerSykmeldingMeta(),
+        utfall = BehandlerSykmeldingRuleResult(result = RuleType.OK, cause = null),
         values =
             BehandlerSykmeldingRedactedValues(
                 aktivitet =
@@ -67,16 +68,16 @@ fun VerifiedSykInnSykmelding.toRedactedSykmelding(): BehandlerSykmeldingRedacted
 private fun SykInnSykmeldingRuleResult.resultToUtfall() =
     when (this) {
         is SykInnSykmeldingRuleResult.OK ->
-            BehandlerSykmeldingRuleResult(result = RuleType.OK, melding = null)
+            BehandlerSykmeldingRuleResult(result = RuleType.OK, cause = null)
         is SykInnSykmeldingRuleResult.Outcome ->
-            BehandlerSykmeldingRuleResult(result = this.type, melding = this.message)
+            BehandlerSykmeldingRuleResult(result = this.type, cause = this.message)
     }
 
 private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
     BehandlerSykmeldingMeta(
         mottatt = mottatt,
         pasientIdent = pasientIdent,
-        sykmelder = BehandlerSykmeldingSykmelder(hpr = hpr, navn = "TODO: WHAT"),
+        sykmelder = BehandlerSykmeldingSykmelder(hpr = behandlerHpr, navn = behandlerNavn),
         legekontorOrgnr = legekontorOrgnr,
         legekontorTlf = legekontorTlf,
     )

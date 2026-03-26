@@ -45,6 +45,9 @@ class HprClientTest {
                         HprSykmelder(
                             fnr = "12345678901",
                             hprNummer = hprNummer,
+                            fornavn = "Test",
+                            mellomnavn = null,
+                            etternavn = "Testessen",
                             godkjenninger = emptyList(),
                         )
                     ),

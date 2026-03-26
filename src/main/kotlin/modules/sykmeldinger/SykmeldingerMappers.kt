@@ -11,7 +11,7 @@ import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 
 fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
     rules: SykInnSykmeldingRuleResult,
-    sykmelder: Sykmelder,
+    sykmelder: Sykmelder.MedSuspensjon,
 ): VerifiedSykInnSykmelding {
     return VerifiedSykInnSykmelding(
         sykmeldingId = UUID.randomUUID(),
@@ -23,7 +23,8 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                 // TODO: Ikke .now()?
                 mottatt = OffsetDateTime.now(ZoneOffset.UTC),
                 pasientIdent = meta.pasientIdent,
-                hpr = sykmelder.hpr,
+                behandlerHpr = sykmelder.hpr,
+                behandlerNavn = sykmelder.navn,
                 legekontorOrgnr = meta.legekontorOrgnr,
                 legekontorTlf = meta.legekontorTlf,
             ),

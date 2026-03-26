@@ -2,20 +2,21 @@ package no.nav.tsm.modules.sykmeldinger
 
 import arrow.core.Either
 import arrow.core.left
-import arrow.core.raise.context.bind
 import arrow.core.raise.either
+import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import arrow.fx.coroutines.parZip
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.tsm.modules.behandler.logger
+import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.SykmeldingRepo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
+import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
 
 class SykmeldingerService(
@@ -24,6 +25,8 @@ class SykmeldingerService(
     private val ruleService: RuleService,
     private val repo: SykmeldingRepo,
 ) {
+    private val logger = logger()
+
     enum class CreateErrors {
         PersonNotInPdl,
         RuleError,
@@ -100,6 +103,14 @@ class SykmeldingerService(
                         .verify(sykmelding, sykmelder, pasient)
                         .mapLeft { CreateErrors.RuleError }
                         .bind()
+
+                ensure(sykmelder is Sykmelder.MedSuspensjon) {
+                    logger.error(
+                        "Behandler that does not exist in HPR/Btsys tried to create a sykmelding! :O"
+                    )
+
+                    CreateErrors.UnknownResourceError
+                }
 
                 sykmelding.toVerifiedSykmelding(rules, sykmelder)
             }
