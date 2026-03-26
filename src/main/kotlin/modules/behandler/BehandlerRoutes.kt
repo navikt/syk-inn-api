@@ -65,7 +65,7 @@ fun Application.configureBehandlerRoutes() {
                             }
                             .fold(
                                 { call.respond(it.code, MessageBody(it.message)) },
-                                { call.respond(HttpStatusCode.Created, it) },
+                                { call.respond(HttpStatusCode.OK, it) },
                             )
                     }
                     .describe {
@@ -234,18 +234,6 @@ fun Application.configureBehandlerRoutes() {
                     }
             }
         }
-    }
-}
-
-private fun Either<SykmeldingerService.CreateErrors, VerifiedSykInnSykmelding>.mapCreatedErrors():
-    Either<GenericHttpError, VerifiedSykInnSykmelding> = mapLeft { error ->
-    when (error) {
-        SykmeldingerService.CreateErrors.PersonNotInPdl ->
-            GenericHttpError(HttpStatusCode.UnprocessableEntity, "Person does not exist")
-
-        SykmeldingerService.CreateErrors.UnknownResourceError,
-        SykmeldingerService.CreateErrors.RuleError ->
-            GenericHttpError(HttpStatusCode.InternalServerError, "Internal server error")
     }
 }
 

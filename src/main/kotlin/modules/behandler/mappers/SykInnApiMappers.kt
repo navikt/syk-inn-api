@@ -39,6 +39,7 @@ fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerS
 
 fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     return UnverifiedSykInnSykmelding(
+        submitId = this.submitId,
         meta =
             UnverifiedSykInnSykmeldingMeta(
                 behandlerHpr = this.meta.sykmelderHpr,

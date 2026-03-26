@@ -45,7 +45,7 @@ class BehandlerRoutesTest : WithPostgresql() {
 
         val created = requireNotNull(response.body<BehandlerSykmelding>())
 
-        assertEquals(HttpStatusCode.Created, response.status)
+        assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(created.meta.pasientIdent, "21037712323")
         assertEquals(created.meta.sykmelder.hpr, "9144889")
         assertEquals(created.meta.legekontorOrgnr, "123456789")
@@ -83,8 +83,9 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+            val initialId = created.sykmeldingId
 
-            assertEquals(HttpStatusCode.Created, response.status)
+            assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(created.meta.pasientIdent, "21037712323")
 
             val nextRequest =
@@ -93,8 +94,12 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(fullExampleSykmeldingPayload)
                 }
 
-            // TODO: Ser ut som 208 er brukt litt feil
-            assertEquals(HttpStatusCode(208, "Already Reported"), nextRequest.status)
+            val nextResult = requireNotNull(nextRequest.body<BehandlerSykmeldingFull>())
+            assertEquals(HttpStatusCode.OK, nextRequest.status)
+
+            // The same ID means the system didn't generate another ID, but instead returned the one
+            // in the DB
+            assertEquals(initialId, nextResult.sykmeldingId)
         }
 
     @Test
@@ -110,7 +115,7 @@ class BehandlerRoutesTest : WithPostgresql() {
 
             val created = requireNotNull(response.body<BehandlerSykmelding>())
             assertIs<BehandlerSykmeldingFull>(created)
-            assertEquals(HttpStatusCode.Created, response.status)
+            assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(created.meta.sykmelder.hpr, "someone-else")
 
             val specificSykmeldingResponse =
@@ -207,7 +212,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 )
             }
 
-        assertEquals(HttpStatusCode.Created, response.status)
+        assertEquals(HttpStatusCode.OK, response.status)
 
         val result = response.body<BehandlerSykmeldingFull>()
         assertEquals(result.values.hoveddiagnose?.system?.name, "ICPC2B")
@@ -265,7 +270,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(exampleSykmeldingPayloadValidHprButSuspendedIdent)
                 }
 
-            assertEquals(HttpStatusCode.Created, response.status)
+            assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(response.body<BehandlerSykmeldingFull>().utfall.result, RuleType.INVALID)
         }
 }

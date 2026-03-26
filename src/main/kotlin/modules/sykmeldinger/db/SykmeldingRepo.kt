@@ -2,6 +2,9 @@
 
 package no.nav.tsm.modules.sykmeldinger.db
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.collections.emptyList
@@ -15,17 +18,20 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.postgresql.util.PSQLException
 
 class SykmeldingRepo {
     private val logger = logger()
 
-    fun insert(sykmelding: VerifiedSykInnSykmelding) {
+    fun insert(submitKey: UUID, sykmelding: VerifiedSykInnSykmelding): Either<String, Boolean> {
         try {
             transaction {
                 SykmeldingTable.insert {
+                    it[idempotencyKey] = submitKey
                     it[id] = sykmelding.sykmeldingId
                     it[rules] = sykmelding.result.toRuleResultColumn()
                     it[metaSource] = sykmelding.meta.source
@@ -47,8 +53,24 @@ class SykmeldingRepo {
                     it[valuesAnnenFravarsgrunn] = null
                 }
             }
-        } catch (e: Exception) {
-            logger.error("Sykmelding insert failed", e)
+            return true.right()
+        } catch (e: ExposedSQLException) {
+            if (
+                e.message?.contains(
+                    """violates unique constraint "sykmelding_idempotency_key_key""""
+                ) == true
+            ) {
+                return "Idempotency Key triggered".left()
+            }
+
+            if (e.cause is PSQLException) {
+                /**
+                 * Parts of the stack trace contains all values, these appear on the second line+
+                 */
+                val firstLine = e.message?.split("\n")?.firstOrNull() ?: "No message"
+                logger.error("Sykmelding insert failed: $firstLine")
+                throw IllegalStateException("Sykmelding insert failed: ${firstLine}")
+            }
 
             throw e
         }
@@ -63,6 +85,13 @@ class SykmeldingRepo {
     fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = transaction {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.id eq sykmeldingId }
+            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+            .firstOrNull()
+    }
+
+    fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? = transaction {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
             .firstOrNull()
     }

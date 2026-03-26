@@ -14,6 +14,7 @@ data class SykmeldingColumnRuleResult(val type: RuleType, val message: String?, 
 
 object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
+    val idempotencyKey = javaUUID("idempotency_key")
     val rules =
         jsonb<SykmeldingColumnRuleResult>(
             "rules",

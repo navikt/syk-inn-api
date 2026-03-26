@@ -19,6 +19,7 @@ data class VerifiedSykInnSykmelding(
 ) : SykInnSykmelding
 
 data class UnverifiedSykInnSykmelding(
+    val submitId: UUID,
     override val values: SykInnSykmeldingValues,
     val meta: UnverifiedSykInnSykmeldingMeta,
 ) : SykInnSykmelding
