@@ -21,6 +21,12 @@ values ('SYKMELDING_CONSUMER', 'STOPPED', now(), 'system');
 insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_PRODUCER', 'STOPPED', now(), 'system');
 
+insert into job(name, desired_state, updated_at, updated_by)
+values ('SYKMELDING_DELETE', 'STOPPED', now(), 'system');
+
+insert into job(name, desired_state, updated_at, updated_by)
+values ('JURIDISK_PRODUCER', 'STOPPED', now(), 'system');
+
 CREATE TABLE sykmelding
 (
     id                             UUID PRIMARY KEY,
@@ -61,7 +67,7 @@ create table sykmelding_status
 create index idx_sykmelding_status_event_timestamp on sykmelding_status (status, event_timestamp);
 create index idx_sykmelding_status_sendt_timestamp on sykmelding_status (status, send_timestamp);
 
-create table rule_status
+create table juridisk_status
 (
     sykmelding_id      UUID primary key,
     status             text        not null,
@@ -69,4 +75,4 @@ create table rule_status
     juridisk_vurdering jsonb       not null
 );
 
-create index idx_rule_status_event_timestamp on rule_status (status, event_timestamp);
+create index idx_rule_status_event_timestamp on juridisk_status (status, event_timestamp);

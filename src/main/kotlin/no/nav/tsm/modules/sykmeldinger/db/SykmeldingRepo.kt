@@ -60,7 +60,7 @@ class SykmeldingRepo {
                 }
                 JuridiskVurderingTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
-                    it[status] = JuridiskVurderingStatus.PENDING
+                    it[status] = JuridiskVurderingStatus.PENDING.name
                     it[eventTimestamp] = OffsetDateTime.now()
                     it[juridiskVurdering] = juridisk
                 }
