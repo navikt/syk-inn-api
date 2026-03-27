@@ -29,6 +29,7 @@ CREATE TABLE sykmelding
     meta_source                    TEXT        NOT NULL,
     meta_mottatt                   TIMESTAMPTZ NOT NULL,
     meta_pasient_ident             TEXT        NOT NULL,
+    meta_pasient_navn              TEXT        NOT NULL,
     meta_behandler_hpr             TEXT        NOT NULL,
     meta_behandler_navn            TEXT        NOT NULL,
     meta_orgnummer                 TEXT        NOT NULL,

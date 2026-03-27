@@ -28,6 +28,7 @@ data class SykInnSykmeldingMeta(
     val source: String,
     val mottatt: OffsetDateTime,
     val pasientIdent: String,
+    val pasientNavn: String,
     val behandlerHpr: String,
     val behandlerNavn: String,
     val legekontorOrgnr: String,

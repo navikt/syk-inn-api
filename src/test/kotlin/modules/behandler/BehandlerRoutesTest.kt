@@ -46,7 +46,7 @@ class BehandlerRoutesTest : WithPostgresql() {
         val created = requireNotNull(response.body<BehandlerSykmelding>())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(created.meta.pasientIdent, "21037712323")
+        assertEquals(created.meta.pasient.ident, "21037712323")
         assertEquals(created.meta.sykmelder.hpr, "9144889")
         assertEquals(created.meta.legekontorOrgnr, "123456789")
 
@@ -86,7 +86,7 @@ class BehandlerRoutesTest : WithPostgresql() {
             val initialId = created.sykmeldingId
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(created.meta.pasientIdent, "21037712323")
+            assertEquals(created.meta.pasient.ident, "21037712323")
 
             val nextRequest =
                 client.post("/api/sykmelding") {

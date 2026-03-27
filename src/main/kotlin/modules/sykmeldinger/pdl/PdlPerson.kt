@@ -2,7 +2,14 @@ package no.nav.tsm.modules.sykmeldinger.pdl
 
 import java.time.LocalDate
 
-data class PdlPerson(val navn: PdlNavn?, val foedselsdato: LocalDate?, val identer: List<Ident>)
+data class PdlPerson(val navn: PdlNavn?, val foedselsdato: LocalDate?, val identer: List<Ident>) {
+    fun toNavn(): String {
+        requireNotNull(navn) { "Person name must not be null" }
+
+        return listOfNotNull(this.navn.fornavn, this.navn.mellomnavn, this.navn.etternavn).joinToString(" ")
+
+    }
+}
 
 data class PdlNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 

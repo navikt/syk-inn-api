@@ -36,7 +36,7 @@ class EverythingTest : WithAll() {
         val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(created.meta.pasientIdent, "21037712323")
+        assertEquals(created.meta.pasient.ident, "21037712323")
         assertEquals(created.meta.sykmelder.hpr, "9144889")
         assertEquals(created.meta.legekontorOrgnr, "123456789")
 

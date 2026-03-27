@@ -112,7 +112,7 @@ class SykmeldingerService(
                     CreateErrors.UnknownResourceError
                 }
 
-                sykmelding.toVerifiedSykmelding(rules, sykmelder)
+                sykmelding.toVerifiedSykmelding(rules, sykmelder, pasient)
             }
 
         val created = repo.insert(sykmelding.submitId, verified)

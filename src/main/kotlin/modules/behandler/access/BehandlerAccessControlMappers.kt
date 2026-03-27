@@ -14,6 +14,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedactedValues
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRuleResult
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingSporsmalSvar
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingSykmelder
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingSykmeldt
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingTilbakedatering
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingUtdypendeSporsmal
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingValues
@@ -76,7 +77,7 @@ private fun SykInnSykmeldingRuleResult.resultToUtfall() =
 private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
     BehandlerSykmeldingMeta(
         mottatt = mottatt,
-        pasientIdent = pasientIdent,
+        pasient = BehandlerSykmeldingSykmeldt(ident = pasientIdent, navn = pasientNavn),
         sykmelder = BehandlerSykmeldingSykmelder(hpr = behandlerHpr, navn = behandlerNavn),
         legekontorOrgnr = legekontorOrgnr,
         legekontorTlf = legekontorTlf,

@@ -39,6 +39,7 @@ class SykmeldingRepo {
                     it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
                     it[metaTelefonnummer] = sykmelding.meta.legekontorTlf
                     it[metaPasientIdent] = sykmelding.meta.pasientIdent
+                    it[metaPasientNavn] = sykmelding.meta.pasientNavn
                     it[metaBehandlerNavn] = sykmelding.meta.behandlerNavn
                     it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
                     it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
@@ -118,7 +119,8 @@ class SykmeldingRepo {
                 SykInnSykmeldingMeta(
                     source = "tihi",
                     mottatt = OffsetDateTime.now(),
-                    pasientIdent = "",
+                    pasientIdent = this[SykmeldingTable.metaPasientIdent],
+                    pasientNavn = this[SykmeldingTable.metaPasientNavn],
                     // TODO
                     behandlerNavn = this[SykmeldingTable.metaBehandlerNavn],
                     behandlerHpr = this[SykmeldingTable.metaBehandlerHpr],

@@ -24,6 +24,7 @@ object SykmeldingTable : Table("sykmelding") {
     val metaSource = text("meta_source")
     val metaMottatt = timestampWithTimeZone("meta_mottatt")
     val metaPasientIdent = text("meta_pasient_ident")
+    val metaPasientNavn = text("meta_pasient_navn")
     val metaBehandlerHpr = text("meta_behandler_hpr")
     val metaBehandlerNavn = text("meta_behandler_navn")
     val metaOrgnummer = text("meta_orgnummer")

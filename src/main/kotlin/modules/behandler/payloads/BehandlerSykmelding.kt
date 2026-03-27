@@ -24,7 +24,7 @@ data class BehandlerSykmeldingFull(
 
 data class BehandlerSykmeldingMeta(
     val mottatt: OffsetDateTime,
-    val pasientIdent: String,
+    val pasient: BehandlerSykmeldingSykmeldt,
     val sykmelder: BehandlerSykmeldingSykmelder,
     val legekontorOrgnr: String?,
     val legekontorTlf: String?,
@@ -110,6 +110,8 @@ data class BehandlerSykmeldingArbeidsgiver(val harFlere: Boolean, val arbeidsgiv
 data class BehandlerSykmeldingYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)
 
 data class BehandlerSykmeldingMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
+
+data class BehandlerSykmeldingSykmeldt(val ident: String, val navn: String)
 
 data class BehandlerSykmeldingSykmelder(val hpr: String, val navn: String)
 
