@@ -20,7 +20,7 @@ enum class JobStatus {
     FAILED,
 }
 
-abstract class JobManager(private val applicationScope: CoroutineScope) {
+abstract class Job(private val applicationScope: CoroutineScope) {
     private val logger = logger()
 
     private var job: Job? = null

@@ -2,9 +2,12 @@ package no.nav.tsm.modules.sykmeldinger.rules
 
 import arrow.core.Either
 import arrow.core.left
+import arrow.core.raise.result
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
+import no.nav.syfo.rules.juridiskvurdering.JuridiskVurderingResult
+import no.nav.syfo.rules.juridiskvurdering.toJuridiskVurdering
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
@@ -13,17 +16,13 @@ import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
-import no.nav.tsm.regulus.regula.RegulaBehandler
-import no.nav.tsm.regulus.regula.RegulaPasient
-import no.nav.tsm.regulus.regula.RegulaResult
-import no.nav.tsm.regulus.regula.RegulaStatus
-import no.nav.tsm.regulus.regula.executeRegulaRules
+import no.nav.tsm.regulus.regula.*
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-sealed class RuleErrors
-
-class InvalidPatient : RuleErrors()
+enum class RuleErrors {
+    InvalidPatient
+}
 
 class RuleService {
     private val logger = logger()
@@ -33,7 +32,7 @@ class RuleService {
         sykmelding: UnverifiedSykInnSykmelding,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
-    ): Either<RuleErrors, SykInnSykmeldingRuleResult> {
+    ): Either<RuleErrors, Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult>> {
         val now = LocalDateTime.now()
 
         val regulaPasient = sykmeldt.mapPdlPersonToRegulaPasient()
@@ -42,7 +41,7 @@ class RuleService {
                 "Unable to execute rules for pasient with missing or invalid ident or fødselsdato in PDL"
             )
 
-            return InvalidPatient().left()
+            return RuleErrors.InvalidPatient.left()
         }
 
         val regulaBehandler =
@@ -63,7 +62,7 @@ class RuleService {
         sykmelding: UnverifiedSykInnSykmelding,
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
-    ): SykInnSykmeldingRuleResult {
+    ): Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult> {
         val regulaExecutionPayload =
             mapUnruledSykInnSykmeldingToRegulaPayload(
                 behandletTidspunkt = behandletTidspunkt,
@@ -78,7 +77,7 @@ class RuleService {
                 mode = ExecutionMode.NORMAL,
             )
 
-        return result.toSykInnRuleResult()
+        return result.toSykInnRuleResult() to result.toJuridiskVurdering()
     }
 
     private fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =

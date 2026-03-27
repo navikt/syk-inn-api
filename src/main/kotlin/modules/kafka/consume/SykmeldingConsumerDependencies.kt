@@ -7,6 +7,6 @@ fun Application.configureSykmeldingerKafkaConsumerDependencies() {
     dependencies {
         provide<SykmeldingConsumer>(SykmeldingConsumer::class)
         provide<SykmeldingConsumerService>(SykmeldingConsumerService::class)
-        provide<SykmeldingConsumerJobManager>(SykmeldingConsumerJobManager::class)
+        provide<SykmeldingConsumerJob>(SykmeldingConsumerJob::class)
     }
 }

@@ -6,13 +6,13 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import no.nav.tsm.core.jobs.JobManager
+import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.jobs.JobStatus
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.db.JobRepository
 
 class JobSchedulerService(
-    private val jobManagers: List<JobManager>,
+    private val jobs: List<Job>,
     private val jobRepository: JobRepository,
     @Named("runner") private val runner: String,
 ) {
@@ -21,7 +21,7 @@ class JobSchedulerService(
 
     suspend fun setup() {
         log.debug("Setting up JobScheduler")
-        jobManagers.forEach {
+        jobs.forEach {
             jobRepository.updateJobStatus(
                 runner = runner,
                 jobName = it.jobName,
@@ -31,7 +31,7 @@ class JobSchedulerService(
     }
 
     suspend fun start() = coroutineScope {
-        jobManagers.forEach { manager ->
+        jobs.forEach { manager ->
             launch {
                 manager.status.collect { newStatus ->
                     log.debug("Job ${manager.jobName} status changed to $newStatus")
@@ -51,9 +51,9 @@ class JobSchedulerService(
 
     suspend fun updateJobs() {
         log.debug("Updating jobs statuses")
-        val jobs = jobRepository.getJobs().associate { it.jobName to it.desiredState }
-        jobManagers.forEach { manager ->
-            val desiredState = jobs[manager.jobName]
+        val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }
+        jobs.forEach { manager ->
+            val desiredState = jobStates[manager.jobName]
             requireNotNull(desiredState) { "No desired state found for job ${manager.jobName}" }
             if (desiredState != manager.status.value) {
                 log.info("Updating job ${manager.jobName} to desired state $desiredState")
@@ -68,7 +68,7 @@ class JobSchedulerService(
     }
 
     suspend fun stop() {
-        jobManagers.forEach { jobManager -> jobManager.stop() }
+        jobs.forEach { jobManager -> jobManager.stop() }
         jobRepository.deleteRunner(runner)
     }
 }

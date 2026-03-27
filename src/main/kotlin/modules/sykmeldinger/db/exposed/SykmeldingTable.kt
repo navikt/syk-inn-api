@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package no.nav.tsm.modules.sykmeldinger.db.exposed
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlin.uuid.ExperimentalUuidApi
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID

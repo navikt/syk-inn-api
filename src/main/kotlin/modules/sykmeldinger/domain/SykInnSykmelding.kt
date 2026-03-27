@@ -1,7 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.domain
 
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 sealed interface SykInnSykmelding {
@@ -11,7 +11,7 @@ sealed interface SykInnSykmelding {
 /**
  * Lite utgangspunkt på det sentrale Domeneobjektet for Syk Inn API, ingenting her er satt i stein.
  */
-data class VerifiedSykInnSykmelding(
+class VerifiedSykInnSykmelding(
     val sykmeldingId: UUID,
     override val values: SykInnSykmeldingValues,
     val meta: SykInnSykmeldingMeta,
@@ -36,7 +36,8 @@ data class SykInnSykmeldingMeta(
 )
 
 sealed interface SykInnSykmeldingRuleResult {
-    class OK : SykInnSykmeldingRuleResult
+
+    class OK() : SykInnSykmeldingRuleResult
 
     data class Outcome(val type: RuleType, val message: String, val rule: String) :
         SykInnSykmeldingRuleResult {

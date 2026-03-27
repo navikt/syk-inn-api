@@ -9,6 +9,9 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.collections.emptyList
 import kotlin.uuid.ExperimentalUuidApi
+import modules.sykmeldinger.db.exposed.JuridiskVurderingTable
+import no.nav.syfo.rules.juridiskvurdering.JuridiskVurderingResult
+import no.nav.syfo.rules.juridiskvurdering.JuridiskVurderingStatus
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
@@ -27,7 +30,11 @@ import org.postgresql.util.PSQLException
 class SykmeldingRepo {
     private val logger = logger()
 
-    fun insert(submitKey: UUID, sykmelding: VerifiedSykInnSykmelding): Either<String, Boolean> {
+    fun insert(
+        submitKey: UUID,
+        sykmelding: VerifiedSykInnSykmelding,
+        juridisk: JuridiskVurderingResult,
+    ): Either<String, Boolean> {
         try {
             transaction {
                 SykmeldingTable.insert {
@@ -54,6 +61,12 @@ class SykmeldingRepo {
                     it[valuesUtdypendeSporsmal] = null
                     it[valuesAnnenFravarsgrunn] = null
                 }
+                JuridiskVurderingTable.insert {
+                    it[sykmeldingId] = sykmelding.sykmeldingId
+                    it[status] = JuridiskVurderingStatus.PENDING
+                    it[eventTimestamp] = OffsetDateTime.now()
+                    it[juridiskVurdering] = juridisk
+                }
             }
             return true.right()
         } catch (e: ExposedSQLException) {
@@ -77,6 +90,8 @@ class SykmeldingRepo {
             throw e
         }
     }
+
+    fun rawdogSykmeldingFormKafka() {}
 
     fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = transaction {
         SykmeldingTable.selectAll()
@@ -127,7 +142,7 @@ class SykmeldingRepo {
                     legekontorOrgnr = "",
                     legekontorTlf = "",
                 ),
-            result = SykInnSykmeldingRuleResult.OK(),
+            result = SykInnSykmeldingRuleResult.OK(), // TODO
         )
     }
 }

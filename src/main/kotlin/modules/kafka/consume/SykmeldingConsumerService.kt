@@ -14,7 +14,6 @@ class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
     suspend fun consume() =
         withContext(Dispatchers.IO) {
             consumer.subscribe()
-
             try {
                 while (isActive) {
                     val records = consumer.poll()

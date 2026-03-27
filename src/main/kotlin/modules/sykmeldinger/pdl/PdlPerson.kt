@@ -6,8 +6,8 @@ data class PdlPerson(val navn: PdlNavn?, val foedselsdato: LocalDate?, val ident
     fun toNavn(): String {
         requireNotNull(navn) { "Person name must not be null" }
 
-        return listOfNotNull(this.navn.fornavn, this.navn.mellomnavn, this.navn.etternavn).joinToString(" ")
-
+        return listOfNotNull(this.navn.fornavn, this.navn.mellomnavn, this.navn.etternavn)
+            .joinToString(" ")
     }
 }
 
