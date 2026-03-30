@@ -13,7 +13,7 @@ import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysCloudClient
-import utils.client
+import no.nav.tsm.utils.client
 
 class BtsysClientTest {
 
