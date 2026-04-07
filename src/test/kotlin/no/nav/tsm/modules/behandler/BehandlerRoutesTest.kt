@@ -275,7 +275,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(RuleType.INVALID,response.body<BehandlerSykmeldingFull>().utfall.result)
+            assertEquals(RuleType.INVALID, response.body<BehandlerSykmeldingFull>().utfall.result)
         }
 }
 
