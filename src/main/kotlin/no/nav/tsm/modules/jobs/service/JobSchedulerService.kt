@@ -1,6 +1,8 @@
 package no.nav.tsm.modules.jobs.service
 
 import io.ktor.server.plugins.di.annotations.Named
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -49,26 +51,30 @@ class JobSchedulerService(
         }
     }
 
-    suspend fun updateJobs() {
-        log.debug("Updating jobs statuses")
-        val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }
-        jobs.forEach { manager ->
-            val desiredState = jobStates[manager.jobName]
-            requireNotNull(desiredState) { "No desired state found for job ${manager.jobName}" }
-            if (desiredState != manager.status.value) {
-                log.info("Updating job ${manager.jobName} to desired state $desiredState")
-                when (desiredState) {
-                    JobStatus.RUNNING -> manager.start()
-                    JobStatus.STOPPED -> manager.stop()
-                    else ->
-                        log.warn("Unknown desired state $desiredState for job ${manager.jobName}")
-                }
-            }
-        }
-    }
-
     suspend fun stop() {
         jobs.forEach { jobManager -> jobManager.stop() }
         jobRepository.deleteRunner(runner)
+    }
+
+    @WithSpan
+    private suspend fun updateJobs() {
+        log.debug("Updating jobs statuses")
+        val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }
+
+        val span = Span.current()
+        span.setAttribute("job.count", jobStates.size.toLong())
+
+        jobs.forEach { job ->
+            val desiredState = jobStates[job.jobName]
+            requireNotNull(desiredState) { "No desired state found for job ${job.jobName}" }
+            if (desiredState != job.status.value) {
+                log.info("Updating job ${job.jobName} to desired state $desiredState")
+                when (desiredState) {
+                    JobStatus.RUNNING -> job.start()
+                    JobStatus.STOPPED -> job.stop()
+                    else -> log.warn("Unknown desired state $desiredState for job ${job.jobName}")
+                }
+            }
+        }
     }
 }
