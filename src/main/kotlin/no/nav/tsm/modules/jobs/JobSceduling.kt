@@ -4,6 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStarting
 import io.ktor.server.plugins.di.dependencies
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,7 +23,7 @@ fun Application.configureJobSceduling() {
     }
 
     monitor.subscribe(ApplicationStarted) {
-        launch {
+        launch(Dispatchers.IO) {
             try {
                 log.info("Job sceduling started")
                 jobScheduler.start()
