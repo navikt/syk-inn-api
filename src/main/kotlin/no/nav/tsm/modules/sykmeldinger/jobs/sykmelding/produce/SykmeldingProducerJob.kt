@@ -1,17 +1,13 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.modules.jobs.service.JobName
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import org.apache.kafka.clients.producer.KafkaProducer
+import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 
 class SykmeldingProducerJob(
-    val sykmeldingProducer: KafkaProducer<String, SykmeldingRecord>,
+    val sykmeldingProducer: SykmeldingInputProducer,
+    val sykmeldingProducerRepo: SykmeldingProducerRepo,
     applicationScope: CoroutineScope,
 ) : Job(applicationScope) {
 
