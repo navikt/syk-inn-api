@@ -20,6 +20,7 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.postgresql.util.PSQLException
@@ -31,10 +32,17 @@ class SykmeldingRepo {
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
         juridisk: JuridiskVurderingResult,
-    ): Either<String, Boolean> {
+    ): Either<String, VerifiedSykInnSykmelding> {
         try {
-            transaction {
-                SykmeldingTable.insert {
+            val inserted = transaction {
+                JuridiskVurderingTable.insert {
+                    it[sykmeldingId] = sykmelding.sykmeldingId
+                    it[status] = JuridiskVurderingStatus.PENDING.name
+                    it[eventTimestamp] = OffsetDateTime.now()
+                    it[juridiskVurdering] = juridisk
+                }
+
+                SykmeldingTable.insertReturning {
                     it[idempotencyKey] = submitKey
                     it[id] = sykmelding.sykmeldingId
                     it[rules] = sykmelding.result.toRuleResultColumn()
@@ -57,16 +65,15 @@ class SykmeldingRepo {
                     it[valuesTilbakedatering] = null
                     it[valuesUtdypendeSporsmal] = null
                     it[valuesAnnenFravarsgrunn] = null
-                }
-                JuridiskVurderingTable.insert {
-                    it[sykmeldingId] = sykmelding.sykmeldingId
-                    it[status] = JuridiskVurderingStatus.PENDING.name
-                    it[eventTimestamp] = OffsetDateTime.now()
-                    it[juridiskVurdering] = juridisk
-                }
+                }.single().sykmeldingRowToVerifiedSykInnSykmelding()
             }
-            return true.right()
+
+
+            return inserted.right()
         } catch (e: ExposedSQLException) {
+            /**
+             * TODO: This cannot possibly be the best way to handle idempotency contraint errors
+             */
             if (
                 e.message?.contains(
                     """violates unique constraint "sykmelding_idempotency_key_key""""
@@ -129,15 +136,14 @@ class SykmeldingRepo {
                 ),
             meta =
                 SykInnSykmeldingMeta(
-                    source = "tihi",
-                    mottatt = OffsetDateTime.now(),
+                    mottatt = this[SykmeldingTable.metaMottatt],
+                    source = this[SykmeldingTable.metaSource],
                     pasientIdent = this[SykmeldingTable.metaPasientIdent],
                     pasientNavn = this[SykmeldingTable.metaPasientNavn],
-                    // TODO
                     behandlerNavn = this[SykmeldingTable.metaBehandlerNavn],
                     behandlerHpr = this[SykmeldingTable.metaBehandlerHpr],
-                    legekontorOrgnr = "",
-                    legekontorTlf = "",
+                    legekontorOrgnr = this[SykmeldingTable.metaOrgnummer],
+                    legekontorTlf = this[SykmeldingTable.metaTelefonnummer],
                 ),
             result = SykInnSykmeldingRuleResult.OK(), // TODO
         )

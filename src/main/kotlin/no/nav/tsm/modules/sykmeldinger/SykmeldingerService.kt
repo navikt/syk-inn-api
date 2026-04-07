@@ -99,9 +99,9 @@ class SykmeldingerService(
                     },
                     {
                         logger.info(
-                            "Sykmelding with ID ${verifiedSykmelding.sykmeldingId} was created successfully!"
+                            "Sykmelding with ID ${it.sykmeldingId} was created successfully!"
                         )
-                        verifiedSykmelding
+                        it
                     },
                 )
             }
