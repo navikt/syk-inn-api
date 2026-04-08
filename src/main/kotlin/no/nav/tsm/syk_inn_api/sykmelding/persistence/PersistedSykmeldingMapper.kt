@@ -1071,7 +1071,7 @@ private fun MedisinskVurdering.toAnnenfravarsgrunn(): AnnenFravarsgrunn? {
     when (this) {
         is DigitalMedisinskVurdering -> return this.annenFravarsgrunn
         is LegacyMedisinskVurdering -> {
-            val oldEnum = this.annenFraversArsak?.arsak?.first()
+            val oldEnum = this.annenFraversArsak?.arsak?.firstOrNull()
 
             return when (oldEnum) {
                 AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON ->
