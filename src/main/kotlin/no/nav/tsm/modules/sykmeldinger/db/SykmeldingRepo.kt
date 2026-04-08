@@ -10,11 +10,14 @@ import no.nav.tsm.core.logger
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbDiagnose
+import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbMeldinger
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbRuleResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toDiagnoseJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toMeldingerJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -66,7 +69,7 @@ class SykmeldingRepo {
                         it[valuesBidiagnoser] =
                             sykmelding.values.bidiagnoser.mapNotNull { bi -> bi.toDiagnoseJsonb() }
                         it[valuesAktivitet] = "[]"
-                        it[valuesMeldinger] = null
+                        it[valuesMeldinger] = sykmelding.values.meldinger.toMeldingerJsonb()
                         it[valuesYrkesskade] = null
                         it[valuesArbeidsgiver] = null
                         it[valuesTilbakedatering] = null
@@ -133,7 +136,7 @@ class SykmeldingRepo {
                             ?: emptyList(),
                     aktivitet = emptyList(),
                     svangerskapsrelatert = this[SykmeldingTable.valuesSvangerskapsrelatert],
-                    meldinger = null,
+                    meldinger = this[SykmeldingTable.valuesMeldinger]?.toSykInnMeldinger(),
                     yrkesskade = null,
                     arbeidsgiver = null,
                     tilbakedatering = null,
@@ -169,4 +172,7 @@ class SykmeldingRepo {
 
     private fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
         SykInnDiagnoseInfo(system = SykInnDiagnoseSystem.valueOf(this.system), code = this.code)
+
+    private fun SykmeldingJsonbMeldinger.toSykInnMeldinger(): SykInnMeldinger =
+        SykInnMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver)
 }

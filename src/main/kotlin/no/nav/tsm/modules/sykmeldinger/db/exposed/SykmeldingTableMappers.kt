@@ -1,6 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.db.exposed
 
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.RuleType
@@ -14,3 +15,6 @@ fun SykInnSykmeldingRuleResult.toRuleResultColumn(): SykmeldingJsonbRuleResult =
 
 fun SykInnDiagnoseInfo?.toDiagnoseJsonb(): SykmeldingJsonbDiagnose? =
     this?.let { SykmeldingJsonbDiagnose(system = it.system.name, text = it.text(), code = it.code) }
+
+fun SykInnMeldinger?.toMeldingerJsonb(): SykmeldingJsonbMeldinger? =
+    this?.let { SykmeldingJsonbMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver) }

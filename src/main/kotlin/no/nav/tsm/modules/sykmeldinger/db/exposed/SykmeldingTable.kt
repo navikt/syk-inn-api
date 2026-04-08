@@ -11,6 +11,8 @@ data class SykmeldingJsonbRuleResult(val type: RuleType, val message: String?, v
 
 data class SykmeldingJsonbDiagnose(val system: String, val text: String, val code: String)
 
+data class SykmeldingJsonbMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
+
 object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
     val idempotencyKey = javaUUID("idempotency_key")
@@ -30,7 +32,7 @@ object SykmeldingTable : Table("sykmelding") {
     val valuesBidiagnoser =
         jacksonJsonb<List<SykmeldingJsonbDiagnose>>("values_bidiagnoser").nullable()
     val valuesAktivitet = jsonb("values_aktivitet", { it }, { it })
-    val valuesMeldinger = jsonb("values_meldinger", { it }, { it }).nullable()
+    val valuesMeldinger = jacksonJsonb<SykmeldingJsonbMeldinger>("values_meldinger").nullable()
     val valuesYrkesskade = jsonb("values_yrkesskade", { it }, { it }).nullable()
     val valuesArbeidsgiver = jsonb("values_arbeidsgiver", { it }, { it }).nullable()
     val valuesTilbakedatering = jsonb("values_tilbakedatering", { it }, { it }).nullable()
