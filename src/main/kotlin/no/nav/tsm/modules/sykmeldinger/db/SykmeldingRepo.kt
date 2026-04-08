@@ -5,7 +5,6 @@ import arrow.core.left
 import arrow.core.right
 import java.time.OffsetDateTime
 import java.util.UUID
-import kotlin.collections.emptyList
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
@@ -13,9 +12,11 @@ import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbDiagnose
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbMeldinger
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbRuleResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toAktivitetJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toDiagnoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toMeldingerJsonb
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultJson
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toSykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
@@ -54,7 +55,7 @@ class SykmeldingRepo {
                 SykmeldingTable.insertReturning {
                         it[idempotencyKey] = submitKey
                         it[id] = sykmelding.sykmeldingId
-                        it[rules] = sykmelding.result.toRuleResultColumn()
+                        it[rules] = sykmelding.result.toRuleResultJson()
                         it[metaSource] = sykmelding.meta.source
                         it[metaMottatt] = sykmelding.meta.mottatt
                         it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
@@ -68,7 +69,8 @@ class SykmeldingRepo {
                         it[valuesHoveddiagnose] = sykmelding.values.hoveddiagnose.toDiagnoseJsonb()
                         it[valuesBidiagnoser] =
                             sykmelding.values.bidiagnoser.mapNotNull { bi -> bi.toDiagnoseJsonb() }
-                        it[valuesAktivitet] = "[]"
+                        it[valuesAktivitet] =
+                            sykmelding.values.aktivitet.map { a -> a.toAktivitetJsonb() }
                         it[valuesMeldinger] = sykmelding.values.meldinger.toMeldingerJsonb()
                         it[valuesYrkesskade] = null
                         it[valuesArbeidsgiver] = null
@@ -134,7 +136,8 @@ class SykmeldingRepo {
                     bidiagnoser =
                         this[SykmeldingTable.valuesBidiagnoser]?.map { it.toSykInnDiagnose() }
                             ?: emptyList(),
-                    aktivitet = emptyList(),
+                    aktivitet =
+                        this[SykmeldingTable.valuesAktivitet].map { it.toSykInnAktivitet() },
                     svangerskapsrelatert = this[SykmeldingTable.valuesSvangerskapsrelatert],
                     meldinger = this[SykmeldingTable.valuesMeldinger]?.toSykInnMeldinger(),
                     yrkesskade = null,
