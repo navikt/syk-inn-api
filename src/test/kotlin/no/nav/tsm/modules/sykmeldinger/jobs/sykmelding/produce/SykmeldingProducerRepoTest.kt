@@ -9,8 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import no.nav.tsm.core.db.runFlywayMigrations
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingStatusStatus
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingStatusTable
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteAll

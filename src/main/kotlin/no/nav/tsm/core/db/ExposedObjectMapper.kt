@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.db.exposed
+package no.nav.tsm.core.db
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

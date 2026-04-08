@@ -3,8 +3,8 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingStatusStatus
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingStatusTable
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.inList

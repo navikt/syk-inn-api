@@ -11,7 +11,7 @@ import arrow.fx.coroutines.parZip
 import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.sykmeldinger.db.SykmeldingRepo
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding

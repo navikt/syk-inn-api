@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.db.exposed
+package no.nav.tsm.modules.sykmeldinger.db.status
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID

@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.db.exposed
+package no.nav.tsm.modules.sykmeldinger.db.status
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

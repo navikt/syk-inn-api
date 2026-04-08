@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.db.exposed
+package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.OptBoolean
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
+import no.nav.tsm.core.db.exposedJacksonObjectMapper
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import org.jetbrains.exposed.v1.core.Column

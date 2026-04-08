@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.db.exposed
+package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
@@ -15,6 +15,11 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
+/**
+ * Any mappers that go from the domain types to database internal jsonb objects
+ *
+ * domain → jsonb
+ */
 object toJsonb {
     fun SykInnSykmeldingRuleResult.toRuleResultJson(): SykmeldingJsonbRuleResult =
         when (this) {
@@ -128,6 +133,11 @@ object toJsonb {
     }
 }
 
+/**
+ * Any mappers that go from database internal jsonb objects to the domain types
+ *
+ * jsonb → domain
+ */
 object fromJsonb {
 
     fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =

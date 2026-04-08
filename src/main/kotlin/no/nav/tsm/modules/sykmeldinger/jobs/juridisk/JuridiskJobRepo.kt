@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
 import org.jetbrains.exposed.v1.core.TextColumnType

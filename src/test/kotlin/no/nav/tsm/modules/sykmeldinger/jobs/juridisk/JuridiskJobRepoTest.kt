@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import no.nav.tsm.core.db.runFlywayMigrations
-import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskHenvisning
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskUtfall
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurdering
