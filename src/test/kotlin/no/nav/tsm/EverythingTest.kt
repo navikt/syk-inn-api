@@ -19,6 +19,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.utils.WithAll
@@ -77,6 +78,7 @@ class EverythingTest : WithAll() {
             // values
             values.pasientenSkalSkjermes shouldBe true
             values.svangerskapsrelatert shouldBe true
+            values.annenFravarsgrunn shouldBe AnnenFravarsgrunn.ARBEIDSRETTET_TILTAK
 
             // hoveddiagnose
             values.hoveddiagnose?.code shouldBe "L73"
@@ -252,6 +254,7 @@ private val fullExampleSykmeldingPayload =
     |      "tilArbeidsgiver": "Dette er en melding til arbeidsgiver"
     |    },
     |    "svangerskapsrelatert": true,
+    |    "annenFravarsgrunn": "ARBEIDSRETTET_TILTAK",
     |    "yrkesskade": {
     |      "yrkesskade": true,
     |      "skadedato": "2024-01-01"

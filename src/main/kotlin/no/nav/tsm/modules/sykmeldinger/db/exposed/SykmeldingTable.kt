@@ -20,6 +20,12 @@ data class SykmeldingJsonbDiagnose(val system: String, val text: String, val cod
 
 data class SykmeldingJsonbMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 
+data class SykmeldingJsonbYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)
+
+data class SykmeldingJsonbArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String)
+
+data class SykmeldingJsonbTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
+
 @JsonSubTypes(
     JsonSubTypes.Type(SykmeldingJsonbAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
     JsonSubTypes.Type(SykmeldingJsonbAktivitet.Gradert::class, name = "GRADERT"),
@@ -89,17 +95,19 @@ object SykmeldingTable : Table("sykmelding") {
     val metaTelefonnummer = text("meta_telefonnummer")
     val valuesPasientenSkalSkjermes = bool("values_pasienten_skal_skjermes")
     val valuesSvangerskapsrelatert = bool("values_svangerskapsrelatert")
+    val valuesAnnenFravarsgrunn = text("values_annen_fravarsgrunn").nullable()
     val valuesHoveddiagnose =
         jacksonJsonb<SykmeldingJsonbDiagnose>("values_hoveddiagnose").nullable()
     val valuesBidiagnoser =
         jacksonJsonb<List<SykmeldingJsonbDiagnose>>("values_bidiagnoser").nullable()
     val valuesAktivitet = jacksonJsonb<List<SykmeldingJsonbAktivitet>>("values_aktivitet")
     val valuesMeldinger = jacksonJsonb<SykmeldingJsonbMeldinger>("values_meldinger").nullable()
-    val valuesYrkesskade = jsonb("values_yrkesskade", { it }, { it }).nullable()
-    val valuesArbeidsgiver = jsonb("values_arbeidsgiver", { it }, { it }).nullable()
-    val valuesTilbakedatering = jsonb("values_tilbakedatering", { it }, { it }).nullable()
+    val valuesYrkesskade = jacksonJsonb<SykmeldingJsonbYrkesskade>("values_yrkesskade").nullable()
+    val valuesArbeidsgiver =
+        jacksonJsonb<SykmeldingJsonbArbeidsgiver>("values_arbeidsgiver").nullable()
+    val valuesTilbakedatering =
+        jacksonJsonb<SykmeldingJsonbTilbakedatering>("values_tilbakedatering").nullable()
     val valuesUtdypendeSporsmal = jsonb("values_utdypende_sporsmal", { it }, { it }).nullable()
-    val valuesAnnenFravarsgrunn = jsonb("values_annen_fravarsgrunn", { it }, { it }).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

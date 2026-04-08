@@ -4,28 +4,30 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbDiagnose
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbMeldinger
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbRuleResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toAktivitetJsonb
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toDiagnoseJsonb
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toMeldingerJsonb
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultJson
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toSykInnAktivitet
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toAktivitetJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnAktivitet
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnArbeidsgiver
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnDiagnose
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnResult
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnTilbakedatering
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnYrkesskade
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toArbeidsgiverJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toDiagnoseJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toMeldingerJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toRuleResultJson
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toTilbakedateringJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toYrkesskadeJsonb
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
-import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
@@ -66,17 +68,19 @@ class SykmeldingRepo {
                         it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
                         it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                         it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
+                        it[valuesAnnenFravarsgrunn] = sykmelding.values.annenFravarsgrunn?.name
                         it[valuesHoveddiagnose] = sykmelding.values.hoveddiagnose.toDiagnoseJsonb()
                         it[valuesBidiagnoser] =
                             sykmelding.values.bidiagnoser.mapNotNull { bi -> bi.toDiagnoseJsonb() }
                         it[valuesAktivitet] =
                             sykmelding.values.aktivitet.map { a -> a.toAktivitetJsonb() }
                         it[valuesMeldinger] = sykmelding.values.meldinger.toMeldingerJsonb()
-                        it[valuesYrkesskade] = null
-                        it[valuesArbeidsgiver] = null
-                        it[valuesTilbakedatering] = null
+                        it[valuesYrkesskade] = sykmelding.values.yrkesskade.toYrkesskadeJsonb()
+                        it[valuesArbeidsgiver] =
+                            sykmelding.values.arbeidsgiver.toArbeidsgiverJsonb()
+                        it[valuesTilbakedatering] =
+                            sykmelding.values.tilbakedatering.toTilbakedateringJsonb()
                         it[valuesUtdypendeSporsmal] = null
-                        it[valuesAnnenFravarsgrunn] = null
                     }
                     .single()
                     .sykmeldingRowToVerifiedSykInnSykmelding()
@@ -139,12 +143,16 @@ class SykmeldingRepo {
                     aktivitet =
                         this[SykmeldingTable.valuesAktivitet].map { it.toSykInnAktivitet() },
                     svangerskapsrelatert = this[SykmeldingTable.valuesSvangerskapsrelatert],
+                    annenFravarsgrunn =
+                        this[SykmeldingTable.valuesAnnenFravarsgrunn]?.let {
+                            AnnenFravarsgrunn.valueOf(it)
+                        },
                     meldinger = this[SykmeldingTable.valuesMeldinger]?.toSykInnMeldinger(),
-                    yrkesskade = null,
-                    arbeidsgiver = null,
-                    tilbakedatering = null,
+                    yrkesskade = this[SykmeldingTable.valuesYrkesskade]?.toSykInnYrkesskade(),
+                    arbeidsgiver = this[SykmeldingTable.valuesArbeidsgiver]?.toSykInnArbeidsgiver(),
+                    tilbakedatering =
+                        this[SykmeldingTable.valuesTilbakedatering]?.toSykInnTilbakedatering(),
                     utdypendeSporsmal = null,
-                    annenFravarsgrunn = null,
                 ),
             meta =
                 SykInnSykmeldingMeta(
@@ -160,22 +168,4 @@ class SykmeldingRepo {
             result = this[SykmeldingTable.rules].toSykInnResult(),
         )
     }
-
-    private fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
-        when (this.type) {
-            RuleType.OK -> SykInnSykmeldingRuleResult.OK()
-            RuleType.PENDING,
-            RuleType.INVALID ->
-                SykInnSykmeldingRuleResult.Outcome(
-                    this.type,
-                    requireNotNull(this.message) { "${this.type} should always have message" },
-                    requireNotNull(this.rule) { "${this.type} should have rule" },
-                )
-        }
-
-    private fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
-        SykInnDiagnoseInfo(system = SykInnDiagnoseSystem.valueOf(this.system), code = this.code)
-
-    private fun SykmeldingJsonbMeldinger.toSykInnMeldinger(): SykInnMeldinger =
-        SykInnMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver)
 }
