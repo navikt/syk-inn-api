@@ -108,5 +108,4 @@ object OpprettSykmelding {
     )
 
     data class DiagnoseInfo(val system: SykInnDiagnoseSystem, val code: String)
-    // Kvifor har vi egen diagnoseinfo når libben har ein ?
 }

@@ -16,6 +16,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmeldingMeta
+import no.nav.tsm.modules.sykmeldinger.domain.getDiagnoseText
 import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
@@ -51,13 +52,20 @@ fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
             SykInnSykmeldingValues(
                 pasientenSkalSkjermes = this.values.pasientenSkalSkjermes,
                 hoveddiagnose =
-                    SykInnDiagnoseInfo(
-                        system = this.values.hoveddiagnose.system,
-                        code = this.values.hoveddiagnose.code,
-                    ),
+                    this.values.hoveddiagnose.let {
+                        SykInnDiagnoseInfo(
+                            system = it.system,
+                            code = it.code,
+                            text = it.system.getDiagnoseText(it.code),
+                        )
+                    },
                 bidiagnoser =
                     this.values.bidiagnoser.map {
-                        SykInnDiagnoseInfo(system = it.system, code = it.code)
+                        SykInnDiagnoseInfo(
+                            system = it.system,
+                            code = it.code,
+                            text = it.system.getDiagnoseText(it.code),
+                        )
                     },
                 aktivitet = this.values.aktivitet.map { it.toSykInnApiAktivitet() },
                 svangerskapsrelatert = this.values.svangerskapsrelatert,

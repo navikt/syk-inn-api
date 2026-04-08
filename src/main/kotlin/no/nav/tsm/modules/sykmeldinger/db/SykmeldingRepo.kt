@@ -7,10 +7,14 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.collections.emptyList
 import no.nav.tsm.core.logger
+import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
-import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingColumnRuleResult
+import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbDiagnose
+import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbRuleResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toHoveddiagnoseColumn
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -58,7 +62,8 @@ class SykmeldingRepo {
                         it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
                         it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                         it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
-                        it[valuesHoveddiagnose] = null
+                        it[valuesHoveddiagnose] =
+                            sykmelding.values.hoveddiagnose.toHoveddiagnoseColumn()
                         it[valuesBidiagnoser] = "[]"
                         it[valuesAktivitet] = "[]"
                         it[valuesMeldinger] = null
@@ -122,7 +127,7 @@ class SykmeldingRepo {
             values =
                 SykInnSykmeldingValues(
                     pasientenSkalSkjermes = false,
-                    hoveddiagnose = null,
+                    hoveddiagnose = this[SykmeldingTable.valuesHoveddiagnose]?.toSykInnDiagnose(),
                     bidiagnoser = emptyList(),
                     aktivitet = emptyList(),
                     svangerskapsrelatert = false,
@@ -148,7 +153,7 @@ class SykmeldingRepo {
         )
     }
 
-    private fun SykmeldingColumnRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
+    private fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
         when (this.type) {
             RuleType.OK -> SykInnSykmeldingRuleResult.OK()
             RuleType.PENDING,
@@ -159,4 +164,11 @@ class SykmeldingRepo {
                     requireNotNull(this.rule) { "${this.type} should have rule" },
                 )
         }
+
+    private fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
+        SykInnDiagnoseInfo(
+            system = SykInnDiagnoseSystem.valueOf(this.system),
+            code = this.code,
+            text = this.text,
+        )
 }

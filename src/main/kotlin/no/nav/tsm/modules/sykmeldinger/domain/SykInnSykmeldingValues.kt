@@ -51,4 +51,4 @@ data class SykInnArbeidsrelatertArsak(
     val annenArbeidsrelatertArsak: String?,
 )
 
-data class SykInnDiagnoseInfo(val system: SykInnDiagnoseSystem, val code: String)
+data class SykInnDiagnoseInfo(val system: SykInnDiagnoseSystem, val code: String, val text: String)

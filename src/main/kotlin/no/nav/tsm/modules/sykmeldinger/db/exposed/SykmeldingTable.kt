@@ -7,17 +7,14 @@ import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.json.jsonb
 
-data class SykmeldingColumnRuleResult(val type: RuleType, val message: String?, val rule: String?)
+data class SykmeldingJsonbRuleResult(val type: RuleType, val message: String?, val rule: String?)
+
+data class SykmeldingJsonbDiagnose(val system: String, val text: String, val code: String)
 
 object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
     val idempotencyKey = javaUUID("idempotency_key")
-    val rules =
-        jsonb<SykmeldingColumnRuleResult>(
-            "rules",
-            { exposedJacksonObjectMapper.writeValueAsString(it) },
-            { exposedJacksonObjectMapper.readValue(it) },
-        )
+    val rules = jacksonJsonb<SykmeldingJsonbRuleResult>("rules")
     val metaSource = text("meta_source")
     val metaMottatt = timestampWithTimeZone("meta_mottatt")
     val metaPasientIdent = text("meta_pasient_ident")
@@ -27,7 +24,8 @@ object SykmeldingTable : Table("sykmelding") {
     val metaOrgnummer = text("meta_orgnummer")
     val metaTelefonnummer = text("meta_telefonnummer")
     val valuesPasientenSkalSkjermes = bool("values_pasienten_skal_skjermes")
-    val valuesHoveddiagnose = jsonb("values_hoveddiagnose", { it }, { it }).nullable()
+    val valuesHoveddiagnose =
+        jacksonJsonb<SykmeldingJsonbDiagnose>("values_hoveddiagnose").nullable()
     val valuesBidiagnoser = jsonb("values_bidiagnoser", { it }, { it })
     val valuesAktivitet = jsonb("values_aktivitet", { it }, { it })
     val valuesSvangerskapsrelatert = bool("values_svangerskapsrelatert")
@@ -40,3 +38,10 @@ object SykmeldingTable : Table("sykmelding") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+private inline fun <reified Type : Any> Table.jacksonJsonb(name: String) =
+    jsonb(
+        name,
+        { exposedJacksonObjectMapper.writeValueAsString(it) },
+        { exposedJacksonObjectMapper.readValue<Type>(it) },
+    )
