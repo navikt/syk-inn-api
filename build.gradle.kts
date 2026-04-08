@@ -77,6 +77,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.kafka)
+    testImplementation(libs.kotest.assertions)
 }
 
 tasks {

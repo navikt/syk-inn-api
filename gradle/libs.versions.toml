@@ -12,6 +12,7 @@ mockk = "1.14.9"
 testcontainers = "2.0.3"
 otel = "2.25.0"
 arrow = "2.2.1.1"
+kotest-assertions = "6.1.11"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -52,6 +53,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest-assertions" }
 
 # Database stuff
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
