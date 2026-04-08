@@ -19,6 +19,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.utils.WithAll
 import no.nav.tsm.utils.configureFullIntegrationTests
 import no.nav.tsm.utils.testClient
@@ -85,13 +86,22 @@ class EverythingTest : WithAll() {
             values.bidiagnoser?.first()?.system shouldBe SykInnDiagnoseSystem.ICPC2
 
             // aktivitet
-            val aktivitet = values.aktivitet.first().shouldBeInstanceOf<BehandlerSykmeldingAktivitet.IkkeMulig>()
+            val aktivitet =
+                values.aktivitet
+                    .first()
+                    .shouldBeInstanceOf<BehandlerSykmeldingAktivitet.IkkeMulig>()
             aktivitet.fom shouldBe LocalDate.now()
             aktivitet.tom shouldBe LocalDate.now()
             aktivitet.medisinskArsak.isMedisinskArsak shouldBe true
             aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak shouldBe true
-            aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker shouldBe listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)
-            aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak shouldBe "Begrunnelse for annen arbeidsrelatert årsak"
+            aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker shouldBe
+                listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)
+            aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak shouldBe
+                "Begrunnelse for annen arbeidsrelatert årsak"
+
+            // utfall
+            utfall.result shouldBe RuleType.OK
+            utfall.cause shouldBe null
 
             // meldinger
             values.meldinger?.tilNav shouldBe "Dette er en melding til Nav"
@@ -110,31 +120,50 @@ class EverythingTest : WithAll() {
             values.tilbakedatering?.begrunnelse shouldBe "Begrunnelse for tilbakedatering"
 
             // utdypendeSporsmal
-            values.utdypendeSporsmal?.utfordringerMedArbeid?.sporsmalstekst shouldBe "Beskriv utfordringer med arbeid"
-            values.utdypendeSporsmal?.utfordringerMedArbeid?.svar shouldBe "Pasienten har betydelige utfordringer med å utføre arbeidsoppgaver"
-            values.utdypendeSporsmal?.medisinskOppsummering?.sporsmalstekst shouldBe "Medisinsk oppsummering"
-            values.utdypendeSporsmal?.medisinskOppsummering?.svar shouldBe "Pasienten har en kronisk tilstand som krever behandling"
-            values.utdypendeSporsmal?.hensynPaArbeidsplassen?.sporsmalstekst shouldBe "Hensyn på arbeidsplassen"
-            values.utdypendeSporsmal?.hensynPaArbeidsplassen?.svar shouldBe "Behov for tilrettelagt arbeidsplass og redusert arbeidsbelastning"
-            values.utdypendeSporsmal?.sykdomsutvikling?.sporsmalstekst shouldBe "Beskriv sykdomsutviklingen"
-            values.utdypendeSporsmal?.sykdomsutvikling?.svar shouldBe "Tilstanden har gradvis forverret seg over de siste månedene"
-            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.sporsmalstekst shouldBe "Arbeidsrelaterte utfordringer"
-            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.svar shouldBe "Fysisk krevende arbeidsoppgaver forverrer tilstanden"
-            values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.sporsmalstekst shouldBe "Behandling og fremtidig arbeid"
-            values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.svar shouldBe "Pågående behandling forventes å bedre arbeidsevnen på sikt"
+            values.utdypendeSporsmal?.utfordringerMedArbeid?.sporsmalstekst shouldBe
+                "Beskriv utfordringer med arbeid"
+            values.utdypendeSporsmal?.utfordringerMedArbeid?.svar shouldBe
+                "Pasienten har betydelige utfordringer med å utføre arbeidsoppgaver"
+            values.utdypendeSporsmal?.medisinskOppsummering?.sporsmalstekst shouldBe
+                "Medisinsk oppsummering"
+            values.utdypendeSporsmal?.medisinskOppsummering?.svar shouldBe
+                "Pasienten har en kronisk tilstand som krever behandling"
+            values.utdypendeSporsmal?.hensynPaArbeidsplassen?.sporsmalstekst shouldBe
+                "Hensyn på arbeidsplassen"
+            values.utdypendeSporsmal?.hensynPaArbeidsplassen?.svar shouldBe
+                "Behov for tilrettelagt arbeidsplass og redusert arbeidsbelastning"
+            values.utdypendeSporsmal?.sykdomsutvikling?.sporsmalstekst shouldBe
+                "Beskriv sykdomsutviklingen"
+            values.utdypendeSporsmal?.sykdomsutvikling?.svar shouldBe
+                "Tilstanden har gradvis forverret seg over de siste månedene"
+            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.sporsmalstekst shouldBe
+                "Arbeidsrelaterte utfordringer"
+            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.svar shouldBe
+                "Fysisk krevende arbeidsoppgaver forverrer tilstanden"
+            values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.sporsmalstekst shouldBe
+                "Behandling og fremtidig arbeid"
+            values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.svar shouldBe
+                "Pågående behandling forventes å bedre arbeidsevnen på sikt"
             values.utdypendeSporsmal?.uavklarteForhold?.sporsmalstekst shouldBe "Uavklarte forhold"
-            values.utdypendeSporsmal?.uavklarteForhold?.svar shouldBe "Videre utredning pågår for å avklare diagnosen"
-            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.sporsmalstekst shouldBe "Oppdatert medisinsk status"
-            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.svar shouldBe "Pasienten responderer moderat på behandlingen"
-            values.utdypendeSporsmal?.realistiskMestringArbeid?.sporsmalstekst shouldBe "Realistisk mestring av arbeid"
-            values.utdypendeSporsmal?.realistiskMestringArbeid?.svar shouldBe "Delvis arbeidsevne forventes om 3-6 måneder"
-            values.utdypendeSporsmal?.forventetHelsetilstandUtvikling?.sporsmalstekst shouldBe "Forventet utvikling av helsetilstand"
-            values.utdypendeSporsmal?.forventetHelsetilstandUtvikling?.svar shouldBe "Gradvis bedring forventes med riktig behandling og tilrettelegging"
+            values.utdypendeSporsmal?.uavklarteForhold?.svar shouldBe
+                "Videre utredning pågår for å avklare diagnosen"
+            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.sporsmalstekst shouldBe
+                "Oppdatert medisinsk status"
+            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.svar shouldBe
+                "Pasienten responderer moderat på behandlingen"
+            values.utdypendeSporsmal?.realistiskMestringArbeid?.sporsmalstekst shouldBe
+                "Realistisk mestring av arbeid"
+            values.utdypendeSporsmal?.realistiskMestringArbeid?.svar shouldBe
+                "Delvis arbeidsevne forventes om 3-6 måneder"
+            values.utdypendeSporsmal?.forventetHelsetilstandUtvikling?.sporsmalstekst shouldBe
+                "Forventet utvikling av helsetilstand"
+            values.utdypendeSporsmal?.forventetHelsetilstandUtvikling?.svar shouldBe
+                "Gradvis bedring forventes med riktig behandling og tilrettelegging"
             values.utdypendeSporsmal?.medisinskeHensyn?.sporsmalstekst shouldBe "Medisinske hensyn"
-            values.utdypendeSporsmal?.medisinskeHensyn?.svar shouldBe "Unngå tung løfting og langvarig stående arbeid"
+            values.utdypendeSporsmal?.medisinskeHensyn?.svar shouldBe
+                "Unngå tung løfting og langvarig stående arbeid"
         }
     }
-
 
     @Test
     fun `simple API to Kafka test`() = testApplication {

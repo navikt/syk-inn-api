@@ -12,7 +12,7 @@ import no.nav.tsm.modules.sykmeldinger.db.exposed.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbDiagnose
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingJsonbRuleResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.SykmeldingTable
-import no.nav.tsm.modules.sykmeldinger.db.exposed.toHoveddiagnoseColumn
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toDiagnoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toRuleResultColumn
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
@@ -62,9 +62,9 @@ class SykmeldingRepo {
                         it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
                         it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                         it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
-                        it[valuesHoveddiagnose] =
-                            sykmelding.values.hoveddiagnose.toHoveddiagnoseColumn()
-                        it[valuesBidiagnoser] = "[]"
+                        it[valuesHoveddiagnose] = sykmelding.values.hoveddiagnose.toDiagnoseJsonb()
+                        it[valuesBidiagnoser] =
+                            sykmelding.values.bidiagnoser.mapNotNull { bi -> bi.toDiagnoseJsonb() }
                         it[valuesAktivitet] = "[]"
                         it[valuesMeldinger] = null
                         it[valuesYrkesskade] = null
@@ -126,11 +126,13 @@ class SykmeldingRepo {
             sykmeldingId = this[SykmeldingTable.id],
             values =
                 SykInnSykmeldingValues(
-                    pasientenSkalSkjermes = false,
+                    pasientenSkalSkjermes = this[SykmeldingTable.valuesPasientenSkalSkjermes],
                     hoveddiagnose = this[SykmeldingTable.valuesHoveddiagnose]?.toSykInnDiagnose(),
-                    bidiagnoser = emptyList(),
+                    bidiagnoser =
+                        this[SykmeldingTable.valuesBidiagnoser]?.map { it.toSykInnDiagnose() }
+                            ?: emptyList(),
                     aktivitet = emptyList(),
-                    svangerskapsrelatert = false,
+                    svangerskapsrelatert = this[SykmeldingTable.valuesSvangerskapsrelatert],
                     meldinger = null,
                     yrkesskade = null,
                     arbeidsgiver = null,

@@ -12,5 +12,5 @@ fun SykInnSykmeldingRuleResult.toRuleResultColumn(): SykmeldingJsonbRuleResult =
             SykmeldingJsonbRuleResult(type = this.type, message = this.message, rule = this.rule)
     }
 
-fun SykInnDiagnoseInfo?.toHoveddiagnoseColumn(): SykmeldingJsonbDiagnose? =
+fun SykInnDiagnoseInfo?.toDiagnoseJsonb(): SykmeldingJsonbDiagnose? =
     this?.let { SykmeldingJsonbDiagnose(system = it.system.name, text = it.text(), code = it.code) }
