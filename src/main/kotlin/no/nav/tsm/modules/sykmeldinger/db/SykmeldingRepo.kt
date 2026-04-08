@@ -166,9 +166,5 @@ class SykmeldingRepo {
         }
 
     private fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
-        SykInnDiagnoseInfo(
-            system = SykInnDiagnoseSystem.valueOf(this.system),
-            code = this.code,
-            text = this.text,
-        )
+        SykInnDiagnoseInfo(system = SykInnDiagnoseSystem.valueOf(this.system), code = this.code)
 }
