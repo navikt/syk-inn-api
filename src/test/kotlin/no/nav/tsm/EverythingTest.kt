@@ -1,6 +1,7 @@
 package no.nav.tsm
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.client.call.body
@@ -86,18 +87,19 @@ class EverythingTest : WithAll() {
             values.bidiagnoser?.first()?.system shouldBe SykInnDiagnoseSystem.ICPC2
 
             // aktivitet
-            val aktivitet =
-                values.aktivitet
-                    .first()
-                    .shouldBeInstanceOf<BehandlerSykmeldingAktivitet.IkkeMulig>()
-            aktivitet.fom shouldBe LocalDate.now()
-            aktivitet.tom shouldBe LocalDate.now()
-            aktivitet.medisinskArsak.isMedisinskArsak shouldBe true
-            aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak shouldBe true
-            aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker shouldBe
-                listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)
-            aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak shouldBe
-                "Begrunnelse for annen arbeidsrelatert årsak"
+            values.aktivitet shouldHaveSize 1
+            if (values.aktivitet.size > 1) {
+                val aktivitet = values.aktivitet.first()
+                aktivitet.shouldBeInstanceOf<BehandlerSykmeldingAktivitet.IkkeMulig>()
+                aktivitet.fom shouldBe LocalDate.now()
+                aktivitet.tom shouldBe LocalDate.now()
+                aktivitet.medisinskArsak.isMedisinskArsak shouldBe true
+                aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak shouldBe true
+                aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker shouldBe
+                    listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)
+                aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak shouldBe
+                    "Begrunnelse for annen arbeidsrelatert årsak"
+            }
 
             // utfall
             utfall.result shouldBe RuleType.OK

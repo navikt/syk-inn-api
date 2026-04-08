@@ -24,12 +24,12 @@ object SykmeldingTable : Table("sykmelding") {
     val metaOrgnummer = text("meta_orgnummer")
     val metaTelefonnummer = text("meta_telefonnummer")
     val valuesPasientenSkalSkjermes = bool("values_pasienten_skal_skjermes")
+    val valuesSvangerskapsrelatert = bool("values_svangerskapsrelatert")
     val valuesHoveddiagnose =
         jacksonJsonb<SykmeldingJsonbDiagnose>("values_hoveddiagnose").nullable()
     val valuesBidiagnoser =
         jacksonJsonb<List<SykmeldingJsonbDiagnose>>("values_bidiagnoser").nullable()
     val valuesAktivitet = jsonb("values_aktivitet", { it }, { it })
-    val valuesSvangerskapsrelatert = bool("values_svangerskapsrelatert")
     val valuesMeldinger = jsonb("values_meldinger", { it }, { it }).nullable()
     val valuesYrkesskade = jsonb("values_yrkesskade", { it }, { it }).nullable()
     val valuesArbeidsgiver = jsonb("values_arbeidsgiver", { it }, { it }).nullable()
