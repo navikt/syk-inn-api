@@ -26,6 +26,8 @@ data class SykmeldingJsonbArbeidsgiver(val harFlere: Boolean, val arbeidsgiverna
 
 data class SykmeldingJsonbTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
 
+data class SykmeldingJsonbUtdypendeSporsmal(val sporsmalstekst: String, val svar: String)
+
 @JsonSubTypes(
     JsonSubTypes.Type(SykmeldingJsonbAktivitet.IkkeMulig::class, name = "AKTIVITET_IKKE_MULIG"),
     JsonSubTypes.Type(SykmeldingJsonbAktivitet.Gradert::class, name = "GRADERT"),
@@ -107,7 +109,9 @@ object SykmeldingTable : Table("sykmelding") {
         jacksonJsonb<SykmeldingJsonbArbeidsgiver>("values_arbeidsgiver").nullable()
     val valuesTilbakedatering =
         jacksonJsonb<SykmeldingJsonbTilbakedatering>("values_tilbakedatering").nullable()
-    val valuesUtdypendeSporsmal = jsonb("values_utdypende_sporsmal", { it }, { it }).nullable()
+    val valuesUtdypendeSporsmal =
+        jacksonJsonb<Map<String, SykmeldingJsonbUtdypendeSporsmal>>("values_utdypende_sporsmal")
+            .nullable()
 
     override val primaryKey = PrimaryKey(id)
 }

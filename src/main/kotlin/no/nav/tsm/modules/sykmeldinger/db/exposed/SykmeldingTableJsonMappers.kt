@@ -9,6 +9,8 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnMedisinskArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.RuleType
@@ -50,6 +52,80 @@ object toJsonb {
         this?.let {
             SykmeldingJsonbTilbakedatering(startdato = it.startdato, begrunnelse = it.begrunnelse)
         }
+
+    fun SykInnUtdypendeSporsmal?.toUtdypendeSporsmalJsonb():
+        Map<String, SykmeldingJsonbUtdypendeSporsmal>? {
+        if (this == null) return null
+        return buildMap {
+                hensynPaArbeidsplassen?.let {
+                    put(
+                        "hensynPaArbeidsplassen",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                medisinskOppsummering?.let {
+                    put(
+                        "medisinskOppsummering",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                utfordringerMedArbeid?.let {
+                    put(
+                        "utfordringerMedArbeid",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                sykdomsutvikling?.let {
+                    put(
+                        "sykdomsutvikling",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                arbeidsrelaterteUtfordringer?.let {
+                    put(
+                        "arbeidsrelaterteUtfordringer",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                behandlingOgFremtidigArbeid?.let {
+                    put(
+                        "behandlingOgFremtidigArbeid",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                uavklarteForhold?.let {
+                    put(
+                        "uavklarteForhold",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                oppdatertMedisinskStatus?.let {
+                    put(
+                        "oppdatertMedisinskStatus",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                realistiskMestringArbeid?.let {
+                    put(
+                        "realistiskMestringArbeid",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                forventetHelsetilstandUtvikling?.let {
+                    put(
+                        "forventetHelsetilstandUtvikling",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+                medisinskeHensyn?.let {
+                    put(
+                        "medisinskeHensyn",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
+            }
+            .takeIf { it.isNotEmpty() }
+    }
 }
 
 object fromJsonb {
@@ -80,6 +156,25 @@ object fromJsonb {
 
     fun SykmeldingJsonbTilbakedatering.toSykInnTilbakedatering(): SykInnTilbakedatering =
         SykInnTilbakedatering(startdato = startdato, begrunnelse = begrunnelse)
+
+    fun Map<String, SykmeldingJsonbUtdypendeSporsmal>.toSykInnUtdypendeSporsmal():
+        SykInnUtdypendeSporsmal =
+        SykInnUtdypendeSporsmal(
+            hensynPaArbeidsplassen = this["hensynPaArbeidsplassen"]?.toSvar(),
+            medisinskOppsummering = this["medisinskOppsummering"]?.toSvar(),
+            utfordringerMedArbeid = this["utfordringerMedArbeid"]?.toSvar(),
+            sykdomsutvikling = this["sykdomsutvikling"]?.toSvar(),
+            arbeidsrelaterteUtfordringer = this["arbeidsrelaterteUtfordringer"]?.toSvar(),
+            behandlingOgFremtidigArbeid = this["behandlingOgFremtidigArbeid"]?.toSvar(),
+            uavklarteForhold = this["uavklarteForhold"]?.toSvar(),
+            oppdatertMedisinskStatus = this["oppdatertMedisinskStatus"]?.toSvar(),
+            realistiskMestringArbeid = this["realistiskMestringArbeid"]?.toSvar(),
+            forventetHelsetilstandUtvikling = this["forventetHelsetilstandUtvikling"]?.toSvar(),
+            medisinskeHensyn = this["medisinskeHensyn"]?.toSvar(),
+        )
+
+    private fun SykmeldingJsonbUtdypendeSporsmal.toSvar(): SykInnUtdypendeSporsmalSvar =
+        SykInnUtdypendeSporsmalSvar(sporsmalstekst = sporsmalstekst, svar = svar)
 
     fun SykInnAktivitet.toAktivitetJsonb(): SykmeldingJsonbAktivitet =
         when (this) {

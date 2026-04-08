@@ -15,12 +15,14 @@ import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnDiagnose
 import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnResult
 import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnTilbakedatering
+import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnUtdypendeSporsmal
 import no.nav.tsm.modules.sykmeldinger.db.exposed.fromJsonb.toSykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toArbeidsgiverJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toDiagnoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toMeldingerJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toRuleResultJson
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toTilbakedateringJsonb
+import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toUtdypendeSporsmalJsonb
 import no.nav.tsm.modules.sykmeldinger.db.exposed.toJsonb.toYrkesskadeJsonb
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -80,7 +82,8 @@ class SykmeldingRepo {
                             sykmelding.values.arbeidsgiver.toArbeidsgiverJsonb()
                         it[valuesTilbakedatering] =
                             sykmelding.values.tilbakedatering.toTilbakedateringJsonb()
-                        it[valuesUtdypendeSporsmal] = null
+                        it[valuesUtdypendeSporsmal] =
+                            sykmelding.values.utdypendeSporsmal.toUtdypendeSporsmalJsonb()
                     }
                     .single()
                     .sykmeldingRowToVerifiedSykInnSykmelding()
@@ -152,7 +155,8 @@ class SykmeldingRepo {
                     arbeidsgiver = this[SykmeldingTable.valuesArbeidsgiver]?.toSykInnArbeidsgiver(),
                     tilbakedatering =
                         this[SykmeldingTable.valuesTilbakedatering]?.toSykInnTilbakedatering(),
-                    utdypendeSporsmal = null,
+                    utdypendeSporsmal =
+                        this[SykmeldingTable.valuesUtdypendeSporsmal]?.toSykInnUtdypendeSporsmal(),
                 ),
             meta =
                 SykInnSykmeldingMeta(
