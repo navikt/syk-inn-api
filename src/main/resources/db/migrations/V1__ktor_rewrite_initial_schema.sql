@@ -19,7 +19,7 @@ insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_CONSUMER', 'STOPPED', now(), 'system');
 
 insert into job(name, desired_state, updated_at, updated_by)
-values ('SYKMELDING_PRODUCER', 'STOPPED', now(), 'system');
+values ('SYKMELDING_PRODUCER', 'RUNNING', now(), 'system');
 
 insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_DELETE', 'STOPPED', now(), 'system');

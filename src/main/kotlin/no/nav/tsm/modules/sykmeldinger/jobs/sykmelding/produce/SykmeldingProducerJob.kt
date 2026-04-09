@@ -44,9 +44,13 @@ class SykmeldingProducerJob(
                 }
             }
 
+        var count = 0
         do {
             val next = sendNextSykmelding()
+            if (next != null) count++
         } while (next != null)
+
+        if (count > 0) logger.info("Finished sykmeldinger producer batch, sent $count sykmeldinger")
     }
 
     private fun sendNextSykmelding(): SykmeldingStatusJob? {
