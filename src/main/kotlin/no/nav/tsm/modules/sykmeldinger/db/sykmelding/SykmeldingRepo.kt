@@ -7,6 +7,8 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toAktivitetJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnArbeidsgiver
@@ -53,6 +55,15 @@ class SykmeldingRepo {
                     it[status] = JuridiskVurderingStatus.PENDING.name
                     it[eventTimestamp] = OffsetDateTime.now()
                     it[juridiskVurdering] = juridisk
+                }
+
+                SykmeldingStatusTable.insert {
+                    it[sykmeldingId] = sykmelding.sykmeldingId
+                    it[status] = SykmeldingStatusStatus.PENDING.name
+                    it[mottattTimestamp] = sykmelding.meta.mottatt
+                    it[eventTimestamp] = OffsetDateTime.now()
+                    it[sendTimestamp] = OffsetDateTime.now()
+                    it[sourceSystem] = sykmelding.meta.source
                 }
 
                 SykmeldingTable.insertReturning {

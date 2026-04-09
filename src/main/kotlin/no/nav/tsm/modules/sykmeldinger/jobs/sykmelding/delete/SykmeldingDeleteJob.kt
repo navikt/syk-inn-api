@@ -4,9 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.modules.jobs.service.JobName
 
-class SykmeldingDeleteJob(applicationScope: CoroutineScope) : Job(applicationScope) {
-    override val jobName = JobName.SYKMELDING_DELETE
-
+class SykmeldingDeleteJob(applicationScope: CoroutineScope) :
+    Job(JobName.SYKMELDING_DELETE, applicationScope) {
     override suspend fun runJob() {
         TODO("Not yet implemented")
     }

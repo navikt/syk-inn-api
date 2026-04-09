@@ -7,9 +7,7 @@ import no.nav.tsm.modules.jobs.service.JobName
 class SykmeldingConsumerJob(
     applicationScope: CoroutineScope,
     private val sykmeldingConsumerService: SykmeldingConsumerService,
-) : Job(applicationScope) {
-    override val jobName: JobName = JobName.SYKMELDING_CONSUMER
-
+) : Job(JobName.SYKMELDING_CONSUMER, applicationScope) {
     override suspend fun runJob() {
         sykmeldingConsumerService.consume()
     }

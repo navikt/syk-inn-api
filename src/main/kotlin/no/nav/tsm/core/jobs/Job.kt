@@ -20,15 +20,13 @@ enum class JobStatus {
     FAILED,
 }
 
-abstract class Job(private val applicationScope: CoroutineScope) {
+abstract class Job(val jobName: JobName, private val applicationScope: CoroutineScope) {
     private val logger = logger()
 
     private var job: Job? = null
     private val _status = MutableStateFlow(JobStatus.NOT_STARTED)
     val status: StateFlow<JobStatus> = _status.asStateFlow()
     private val mutex: Mutex = Mutex()
-
-    abstract val jobName: no.nav.tsm.modules.jobs.service.JobName
 
     suspend fun start(): Boolean {
         logger.info("Starting $jobName")
@@ -58,7 +56,9 @@ abstract class Job(private val applicationScope: CoroutineScope) {
                     logger.error("KafkaConsumerJob crashed unexpectedly", cause)
                     _status.value = JobStatus.FAILED
                 } finally {
-                    logger.info("Job finished or failed, setting job reference to null")
+                    logger.info(
+                        "Job (${jobName}) finished or failed, setting job reference to null"
+                    )
                     job = null
                 }
             }

@@ -8,9 +8,8 @@ import kotlinx.coroutines.withContext
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.modules.jobs.service.JobName
 
-class JuridiskHenvisningProducerJob(applicationScope: CoroutineScope) : Job(applicationScope) {
-    override val jobName = JobName.JURIDISK_PRODUCER
-
+class JuridiskHenvisningProducerJob(applicationScope: CoroutineScope) :
+    Job(JobName.JURIDISK_PRODUCER, applicationScope) {
     override suspend fun runJob() =
         withContext(Dispatchers.Default) {
             while (isActive) {
