@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.common.name.SimpleNavn
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
@@ -29,7 +30,7 @@ class SykmelderServiceTest {
             SykmelderMedHpr(
                     hprNummer = hprNummer,
                     ident = ident,
-                    navn = "Test Testesen",
+                    navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
                 )
                 .right()
@@ -67,7 +68,7 @@ class SykmelderServiceTest {
             SykmelderMedHpr(
                     hprNummer = hprNummer,
                     ident = ident,
-                    navn = "Test Testesen",
+                    navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
                 )
                 .right()

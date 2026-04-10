@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
+import no.nav.tsm.core.common.name.Navn
 import no.nav.tsm.regulus.regula.payload.BehandlerGodkjenning
 import no.nav.tsm.regulus.regula.payload.BehandlerKode
 import no.nav.tsm.regulus.regula.payload.BehandlerPeriode
@@ -7,7 +8,7 @@ import no.nav.tsm.regulus.regula.payload.BehandlerTilleggskompetanse
 
 data class SykmelderMedHpr(
     val ident: String,
-    val navn: String,
+    val navn: Navn,
     val hprNummer: String,
     val godkjenninger: List<SykmelderGodkjenning>,
 )

@@ -77,8 +77,9 @@ private fun SykInnSykmeldingRuleResult.resultToUtfall() =
 private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
     BehandlerSykmeldingMeta(
         mottatt = mottatt,
-        pasient = BehandlerSykmeldingSykmeldt(ident = pasientIdent, navn = pasientNavn),
-        sykmelder = BehandlerSykmeldingSykmelder(hpr = behandlerHpr, navn = behandlerNavn),
+        pasient = BehandlerSykmeldingSykmeldt(ident = pasient.ident, navn = pasient.displayName()),
+        sykmelder =
+            BehandlerSykmeldingSykmelder(hpr = behandler.hpr, navn = behandler.displayName()),
         legekontorOrgnr = legekontorOrgnr,
         legekontorTlf = legekontorTlf,
     )

@@ -49,9 +49,13 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     ),
                 pasient =
                     Pasient(
-                        fnr = meta.pasientIdent,
-                        // TODO
-                        navn = null,
+                        fnr = meta.pasient.ident,
+                        navn =
+                            Navn(
+                                fornavn = meta.pasient.fornavn,
+                                mellomnavn = meta.pasient.mellomnavn,
+                                etternavn = meta.pasient.etternavn,
+                            ),
                         navKontor = null,
                         navnFastlege = null,
                         kontaktinfo = emptyList(),
@@ -70,7 +74,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     Behandler(
                         navn = Navn(fornavn = "TODO", mellomnavn = null, etternavn = "TODO"),
                         adresse = null,
-                        ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandlerHpr)),
+                        ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
                         // TODO: Telefonnummer
                         kontaktinfo = emptyList(),
                     ),
@@ -78,7 +82,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     Sykmelder(
                         // TODO dont hardcode
                         helsepersonellKategori = HelsepersonellKategori.LEGE,
-                        ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandlerHpr)),
+                        ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
                     ),
                 // TODO dont hardcode
                 arbeidsgiver = IngenArbeidsgiver(),

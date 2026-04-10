@@ -13,6 +13,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import no.nav.tsm.core.Environment
+import no.nav.tsm.core.common.name.Navn
+import no.nav.tsm.core.common.name.SimpleNavn
 import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
 
@@ -142,10 +144,10 @@ class HprCloudClient(
         return SykmelderKodeverk(aktiv = this.aktiv, oid = this.oid, verdi = this.verdi)
     }
 
-    private fun HprSykmelder.toNavn(): String {
+    private fun HprSykmelder.toNavn(): Navn {
         requireNotNull(fornavn) { "HprSykmelder må ha fornavn" }
         requireNotNull(etternavn) { "HprSykmelder må ha etternavn" }
 
-        return listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
+        return SimpleNavn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
     }
 }

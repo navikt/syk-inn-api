@@ -2,6 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
 import arrow.core.Either
 import arrow.core.right
+import no.nav.tsm.core.common.name.SimpleNavn
 import no.nav.tsm.core.logger
 
 class HprLocalClient : HprClient {
@@ -24,7 +25,7 @@ class HprLocalClient : HprClient {
             return SykmelderMedHpr(
                     ident = "brokenFnr",
                     hprNummer = "hprButHasBrokenFnrAndNoGodkjenninger",
-                    navn = "Test Testesen",
+                    navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
                 )
                 .right()
@@ -38,7 +39,7 @@ class HprLocalClient : HprClient {
             return SykmelderMedHpr(
                     ident = "suspendertFnr",
                     hprNummer = "hprButFnrIsSuspended",
-                    navn = "Test Testesen",
+                    navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = aktivLegeGodnkjenninger,
                 )
                 .right()
@@ -48,7 +49,7 @@ class HprLocalClient : HprClient {
         return SykmelderMedHpr(
                 ident = "09099012345",
                 hprNummer = behandlerHpr,
-                navn = "Test Testesen",
+                navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                 godkjenninger = aktivLegeGodnkjenninger,
             )
             .right()
@@ -66,7 +67,7 @@ class HprLocalClient : HprClient {
         return SykmelderMedHpr(
                 ident = behandlerIdent,
                 hprNummer = "123456789",
-                navn = "Test Testesen",
+                navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                 godkjenninger = emptyList(),
             )
             .right()

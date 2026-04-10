@@ -21,10 +21,13 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnYrkesskad
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toArbeidsgiverJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toDiagnoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toMeldingerJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toNavnJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toRuleResultJson
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toTilbakedateringJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toUtdypendeSporsmalJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toYrkesskadeJsonb
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
@@ -74,10 +77,10 @@ class SykmeldingRepo {
                         it[metaMottatt] = sykmelding.meta.mottatt
                         it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
                         it[metaTelefonnummer] = sykmelding.meta.legekontorTlf
-                        it[metaPasientIdent] = sykmelding.meta.pasientIdent
-                        it[metaPasientNavn] = sykmelding.meta.pasientNavn
-                        it[metaBehandlerNavn] = sykmelding.meta.behandlerNavn
-                        it[metaBehandlerHpr] = sykmelding.meta.behandlerHpr
+                        it[metaPasientIdent] = sykmelding.meta.pasient.ident
+                        it[metaPasientNavn] = sykmelding.meta.pasient.toNavnJsonb()
+                        it[metaBehandlerHpr] = sykmelding.meta.behandler.hpr
+                        it[metaBehandlerNavn] = sykmelding.meta.behandler.toNavnJsonb()
                         it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                         it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
                         it[valuesAnnenFravarsgrunn] = sykmelding.values.annenFravarsgrunn?.name
@@ -172,10 +175,24 @@ class SykmeldingRepo {
                 SykInnSykmeldingMeta(
                     mottatt = this[SykmeldingTable.metaMottatt],
                     source = this[SykmeldingTable.metaSource],
-                    pasientIdent = this[SykmeldingTable.metaPasientIdent],
-                    pasientNavn = this[SykmeldingTable.metaPasientNavn],
-                    behandlerNavn = this[SykmeldingTable.metaBehandlerNavn],
-                    behandlerHpr = this[SykmeldingTable.metaBehandlerHpr],
+                    pasient =
+                        this[SykmeldingTable.metaPasientNavn].let { navn ->
+                            SykInnPasient(
+                                fornavn = navn.fornavn,
+                                mellomnavn = navn.mellomnavn,
+                                etternavn = navn.etternavn,
+                                ident = this[SykmeldingTable.metaPasientIdent],
+                            )
+                        },
+                    behandler =
+                        this[SykmeldingTable.metaBehandlerNavn].let { navn ->
+                            SykInnBehandler(
+                                fornavn = navn.fornavn,
+                                mellomnavn = navn.mellomnavn,
+                                etternavn = navn.etternavn,
+                                hpr = this[SykmeldingTable.metaBehandlerHpr],
+                            )
+                        },
                     legekontorOrgnr = this[SykmeldingTable.metaOrgnummer],
                     legekontorTlf = this[SykmeldingTable.metaTelefonnummer],
                 ),

@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 
+import no.nav.tsm.core.common.name.Navn
 import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
@@ -36,6 +37,9 @@ object toJsonb {
         this?.let {
             SykmeldingJsonbDiagnose(system = it.system.name, text = it.text(), code = it.code)
         }
+
+    fun Navn.toNavnJsonb(): SykmeldingJsonbNavn =
+        SykmeldingJsonbNavn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
 
     fun SykInnMeldinger?.toMeldingerJsonb(): SykmeldingJsonbMeldinger? =
         this?.let { SykmeldingJsonbMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver) }

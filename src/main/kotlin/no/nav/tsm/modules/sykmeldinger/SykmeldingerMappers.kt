@@ -3,6 +3,8 @@ package no.nav.tsm.modules.sykmeldinger
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
@@ -24,10 +26,20 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                 source = "TODO",
                 // TODO: Ikke .now()?
                 mottatt = OffsetDateTime.now(ZoneOffset.UTC),
-                pasientIdent = meta.pasientIdent,
-                pasientNavn = pasient.toNavn(),
-                behandlerHpr = sykmelder.hpr,
-                behandlerNavn = sykmelder.navn,
+                pasient =
+                    SykInnPasient(
+                        ident = meta.pasientIdent,
+                        fornavn = pasient.navn.fornavn,
+                        mellomnavn = pasient.navn.mellomnavn,
+                        etternavn = pasient.navn.etternavn,
+                    ),
+                behandler =
+                    SykInnBehandler(
+                        fornavn = pasient.navn.fornavn,
+                        mellomnavn = pasient.navn.mellomnavn,
+                        etternavn = pasient.navn.etternavn,
+                        hpr = meta.behandlerHpr,
+                    ),
                 legekontorOrgnr = meta.legekontorOrgnr,
                 legekontorTlf = meta.legekontorTlf,
             ),

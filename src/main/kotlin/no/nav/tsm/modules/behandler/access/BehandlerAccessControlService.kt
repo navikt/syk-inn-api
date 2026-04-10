@@ -10,7 +10,7 @@ class BehandlerAccessControlService {
         currentBehandlerHpr: String,
     ): BehandlerSykmelding? {
         /** Behandlere are able to see the entire sykmelding if it's written by themselves. */
-        if (sykInnSykmelding.meta.behandlerHpr == currentBehandlerHpr) {
+        if (sykInnSykmelding.meta.behandler.hpr == currentBehandlerHpr) {
             return sykInnSykmelding.toSykmelding()
         }
 

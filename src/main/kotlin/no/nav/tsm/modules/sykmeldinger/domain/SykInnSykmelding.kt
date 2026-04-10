@@ -2,6 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.domain
 
 import java.time.OffsetDateTime
 import java.util.*
+import no.nav.tsm.core.common.name.Navn
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 sealed interface SykInnSykmelding {
@@ -24,13 +25,25 @@ data class UnverifiedSykInnSykmelding(
     val meta: UnverifiedSykInnSykmeldingMeta,
 ) : SykInnSykmelding
 
+data class SykInnPasient(
+    override val fornavn: String,
+    override val mellomnavn: String?,
+    override val etternavn: String,
+    val ident: String,
+) : Navn
+
+data class SykInnBehandler(
+    override val fornavn: String,
+    override val mellomnavn: String?,
+    override val etternavn: String,
+    val hpr: String,
+) : Navn
+
 data class SykInnSykmeldingMeta(
     val source: String,
     val mottatt: OffsetDateTime,
-    val pasientIdent: String,
-    val pasientNavn: String,
-    val behandlerHpr: String,
-    val behandlerNavn: String,
+    val pasient: SykInnPasient,
+    val behandler: SykInnBehandler,
     val legekontorOrgnr: String,
     val legekontorTlf: String,
 )
