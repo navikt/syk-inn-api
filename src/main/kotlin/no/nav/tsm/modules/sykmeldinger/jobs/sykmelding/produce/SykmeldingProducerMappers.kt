@@ -5,6 +5,8 @@ import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
@@ -23,8 +25,10 @@ import no.nav.tsm.sykmelding.input.core.model.Pasient
 import no.nav.tsm.sykmelding.input.core.model.PendingRule
 import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.Sykmelder
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
@@ -100,7 +104,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                 // TODO
                 bistandNav = null,
                 // TODO
-                utdypendeSporsmal = null,
+                utdypendeSporsmal = values.utdypendeSporsmal.toUtdypendeOpplysninger(),
             ),
     )
 }
@@ -154,3 +158,39 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
         is SykInnAktivitet.Behandlingsdager -> TODO()
         is SykInnAktivitet.Reisetilskudd -> TODO()
     }
+
+private fun SykInnUtdypendeSporsmal?.toUtdypendeOpplysninger(): List<UtdypendeSporsmal>? {
+    if (this == null) return null
+
+    // TODO: Sanity check mapping between these enums and distinct values
+    return listOfNotNull(
+            hensynPaArbeidsplassen?.toUtdypendeSporsmal(Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN),
+            medisinskOppsummering?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
+            utfordringerMedArbeid?.toUtdypendeSporsmal(Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID),
+            sykdomsutvikling?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
+            arbeidsrelaterteUtfordringer?.toUtdypendeSporsmal(
+                Sporsmalstype.UTFORDRINGER_MED_ARBEID
+            ),
+            behandlingOgFremtidigArbeid?.toUtdypendeSporsmal(
+                Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID
+            ),
+            uavklarteForhold?.toUtdypendeSporsmal(Sporsmalstype.UAVKLARTE_FORHOLD),
+            oppdatertMedisinskStatus?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
+            realistiskMestringArbeid?.toUtdypendeSporsmal(Sporsmalstype.UTFORDRINGER_MED_ARBEID),
+            forventetHelsetilstandUtvikling?.toUtdypendeSporsmal(
+                Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING
+            ),
+            medisinskeHensyn?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSKE_HENSYN),
+        )
+        .ifEmpty { null }
+}
+
+private fun SykInnUtdypendeSporsmalSvar.toUtdypendeSporsmal(
+    type: Sporsmalstype
+): UtdypendeSporsmal =
+    UtdypendeSporsmal(
+        type = type,
+        sporsmal = sporsmalstekst,
+        svar = svar,
+        skjermetForArbeidsgiver = true,
+    )
