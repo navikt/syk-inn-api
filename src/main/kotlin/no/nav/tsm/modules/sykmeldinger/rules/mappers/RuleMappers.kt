@@ -2,10 +2,10 @@ package no.nav.tsm.modules.sykmeldinger.rules.mappers
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
-import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
@@ -18,6 +18,7 @@ import no.nav.tsm.regulus.regula.RegulaMeta
 import no.nav.tsm.regulus.regula.RegulaPasient
 import no.nav.tsm.regulus.regula.RegulaPayload
 import no.nav.tsm.regulus.regula.payload.Aktivitet
+import no.nav.tsm.regulus.regula.payload.AnnenFravarsArsak
 import no.nav.tsm.regulus.regula.payload.Diagnose
 
 fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): RegulaBehandler =
@@ -78,8 +79,10 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
             },
         bidiagnoser = mapToRegulaBidiagnoser(sykmelding.values.bidiagnoser),
         aktivitet = mapToSykmeldingAktivitet(sykmelding.values.aktivitet.first()),
-        // TODO: Provide
-        annenFravarsArsak = null,
+        annenFravarsArsak =
+            sykmelding.values.annenFravarsgrunn?.let {
+                AnnenFravarsArsak(grunn = listOf(it.name), beskrivelse = null)
+            },
         // TODO: Provide
         utdypendeOpplysninger = emptyMap(),
         // TODO Provide

@@ -1,9 +1,9 @@
 package no.nav.tsm.modules.sykmeldinger.domain
 
+import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.diagnoser.ICD10
 import no.nav.tsm.diagnoser.ICPC2
 import no.nav.tsm.diagnoser.ICPC2B
-import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
 
 fun SykInnDiagnoseInfo.text(): String =
     when (system) {

@@ -3,6 +3,7 @@ package no.nav.tsm.modules.behandler.payloads
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
+import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType

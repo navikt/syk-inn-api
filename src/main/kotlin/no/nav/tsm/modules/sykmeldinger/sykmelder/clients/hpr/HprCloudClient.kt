@@ -13,8 +13,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import io.ktor.server.plugins.di.annotations.Named
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.common.name.Navn
-import no.nav.tsm.core.common.name.SimpleNavn
+import no.nav.tsm.core.common.Navn
+import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
 

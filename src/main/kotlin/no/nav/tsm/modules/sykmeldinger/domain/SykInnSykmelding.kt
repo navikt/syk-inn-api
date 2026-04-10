@@ -2,7 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.domain
 
 import java.time.OffsetDateTime
 import java.util.*
-import no.nav.tsm.core.common.name.Navn
+import no.nav.tsm.core.common.Navn
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 sealed interface SykInnSykmelding {

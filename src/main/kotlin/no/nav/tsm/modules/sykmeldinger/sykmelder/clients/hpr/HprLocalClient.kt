@@ -2,7 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
 import arrow.core.Either
 import arrow.core.right
-import no.nav.tsm.core.common.name.SimpleNavn
+import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.logger
 
 class HprLocalClient : HprClient {

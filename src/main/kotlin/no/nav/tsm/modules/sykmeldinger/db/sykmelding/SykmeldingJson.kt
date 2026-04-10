@@ -1,7 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 
-import no.nav.tsm.core.common.name.Navn
-import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
+import no.nav.tsm.core.common.Navn
+import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak

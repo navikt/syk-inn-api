@@ -1,7 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
 import java.time.OffsetDateTime
-import no.nav.tsm.modules.behandler.payloads.SykInnDiagnoseSystem
+import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
@@ -30,6 +30,8 @@ import no.nav.tsm.sykmelding.input.core.model.ValidationType
 import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
 import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
 import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
+import no.nav.tsm.sykmelding.input.core.model.metadata.Kontaktinfo
+import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
 import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
@@ -72,11 +74,18 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                 aktivitet = values.aktivitet.map { it.toAktivitet() },
                 behandler =
                     Behandler(
-                        navn = Navn(fornavn = "TODO", mellomnavn = null, etternavn = "TODO"),
+                        navn =
+                            Navn(
+                                fornavn = meta.behandler.fornavn,
+                                mellomnavn = meta.behandler.mellomnavn,
+                                etternavn = meta.behandler.etternavn,
+                            ),
                         adresse = null,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
-                        // TODO: Telefonnummer
-                        kontaktinfo = emptyList(),
+                        kontaktinfo =
+                            listOf(
+                                Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)
+                            ),
                     ),
                 sykmelder =
                     Sykmelder(

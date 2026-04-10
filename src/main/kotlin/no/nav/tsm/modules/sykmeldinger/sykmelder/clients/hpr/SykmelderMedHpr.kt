@@ -1,6 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
-import no.nav.tsm.core.common.name.Navn
+import no.nav.tsm.core.common.Navn
 import no.nav.tsm.regulus.regula.payload.BehandlerGodkjenning
 import no.nav.tsm.regulus.regula.payload.BehandlerKode
 import no.nav.tsm.regulus.regula.payload.BehandlerPeriode

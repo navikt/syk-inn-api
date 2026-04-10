@@ -1,4 +1,4 @@
-package no.nav.tsm.core.common.name
+package no.nav.tsm.core.common
 
 interface Navn {
     val fornavn: String
