@@ -42,6 +42,7 @@ fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
         submitId = this.submitId,
         meta =
             UnverifiedSykInnSykmeldingMeta(
+                source = this.meta.source,
                 behandlerHpr = this.meta.sykmelderHpr,
                 pasientIdent = this.meta.pasientIdent,
                 legekontorOrgnr = this.meta.legekontorOrgnr,

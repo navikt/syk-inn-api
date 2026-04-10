@@ -63,6 +63,7 @@ sealed interface SykInnSykmeldingRuleResult {
 }
 
 data class UnverifiedSykInnSykmeldingMeta(
+    val source: String,
     val behandlerHpr: String,
     val pasientIdent: String,
     val legekontorOrgnr: String,
