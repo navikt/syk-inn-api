@@ -99,16 +99,11 @@ jobs:
           repository: navikt/syk-inn
           fetch-depth: 1
           ref: ktor-tests
-      - run: corepack enable
-      - uses: actions/setup-node@v6
-        id: setup-node
+      - uses: navikt/tsm-workflows/actions/typst@main
+      - uses: navikt/tsm-workflows/actions/yarn@main
         with:
-          node-version: 24
-          cache: yarn
-      - name: Install yarn dependencies
-        run: yarn workspaces focus
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          READER_TOKEN: ${{ secrets.READER_TOKEN }}
+          workspace: ""
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
