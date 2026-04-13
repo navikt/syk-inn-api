@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.auth
+package no.nav.tsm.plugins.auth
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -21,7 +21,6 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.Texas
-import no.nav.tsm.plugins.auth.TexasClient
 
 class TexasClientTest {
 

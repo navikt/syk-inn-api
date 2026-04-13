@@ -17,14 +17,15 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
     sykmelder: Sykmelder.MedSuspensjon,
     pasient: PdlPerson,
 ): VerifiedSykInnSykmelding {
+    val verifiedAt = OffsetDateTime.now(ZoneOffset.UTC)
+
     return VerifiedSykInnSykmelding(
         sykmeldingId = UUID.randomUUID(),
         values = values,
         meta =
             SykInnSykmeldingMeta(
                 source = meta.source,
-                // TODO: Ikke .now()?
-                mottatt = OffsetDateTime.now(ZoneOffset.UTC),
+                mottatt = verifiedAt,
                 pasient =
                     SykInnPasient(
                         ident = meta.pasientIdent,
@@ -37,7 +38,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                         fornavn = pasient.navn.fornavn,
                         mellomnavn = pasient.navn.mellomnavn,
                         etternavn = pasient.navn.etternavn,
-                        hpr = meta.behandlerHpr,
+                        hpr = sykmelder.hpr,
                     ),
                 legekontorOrgnr = meta.legekontorOrgnr,
                 legekontorTlf = meta.legekontorTlf,

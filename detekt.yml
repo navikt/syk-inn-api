@@ -10,6 +10,12 @@ exceptions:
   TooGenericExceptionCaught:
     active: false
 
+complexity:
+  LongMethod:
+    active: false
+  TooManyFunctions:
+    active: false
+
 style:
   MaxLineLength:
     active: false
@@ -17,3 +23,4 @@ style:
     max: 5
   WildcardImport:
     active: false
+

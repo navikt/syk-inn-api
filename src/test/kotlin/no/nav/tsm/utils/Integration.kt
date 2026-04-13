@@ -1,11 +1,33 @@
 package no.nav.tsm.utils
 
+import no.nav.tsm.core.PostgresConfig
+import no.nav.tsm.core.db.runFlywayMigrations
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 
 abstract class WithPostgresql {
     companion object {
         val postgres = PostgreSQLContainer("postgres:17-alpine").apply { start() }
+
+        fun runMigrations(clean: Boolean = false) {
+            runFlywayMigrations(postgres.jdbcUrl, postgres.username, postgres.password)
+        }
+
+        fun connect() {
+            val postgresConfig =
+                PostgresConfig(
+                    url = postgres.jdbcUrl,
+                    username = postgres.username,
+                    password = postgres.password,
+                )
+
+            R2dbcDatabase.connect(
+                url = postgresConfig.r2dbUrl,
+                user = postgresConfig.username,
+                password = postgresConfig.password,
+            )
+        }
     }
 }
 

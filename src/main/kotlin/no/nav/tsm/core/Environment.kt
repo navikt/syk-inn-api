@@ -28,9 +28,15 @@ class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
 
 class Auth(val entra: EntraAuth)
 
-class KafkaInputProducer(val delay: Int)
+class KafkaInputProducer(val delay: Long)
 
-class KafkaConfig(val config: Properties, val inputProducer: KafkaInputProducer)
+class KafkaSykmeldingConsumer(val longPoll: Long)
+
+class KafkaConfig(
+    val config: Properties,
+    val inputProducer: KafkaInputProducer,
+    val sykmeldingConsumer: KafkaSykmeldingConsumer,
+)
 
 class Environment(
     val runtime: Runtime,
@@ -50,7 +56,12 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 },
             inputProducer =
                 KafkaInputProducer(
-                    delay = config.property("kafka.input-producer.delay").getString().toInt()
+                    delay = config.property("kafka.input-producer.delay").getString().toLong()
+                ),
+            sykmeldingConsumer =
+                KafkaSykmeldingConsumer(
+                    longPoll =
+                        config.property("kafka.sykmelding-consumer.long-poll").getString().toLong()
                 ),
         )
 

@@ -7,12 +7,9 @@ import kotlin.test.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.core.PostgresConfig
-import no.nav.tsm.core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.WithPostgresql
-import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -22,22 +19,8 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
     companion object {
         init {
-            val postgresConfig =
-                PostgresConfig(
-                    url = postgres.jdbcUrl,
-                    username = postgres.username,
-                    password = postgres.password,
-                )
-            runFlywayMigrations(
-                postgresConfig.url,
-                postgresConfig.username,
-                postgresConfig.password,
-            )
-            R2dbcDatabase.connect(
-                url = postgresConfig.r2dbUrl,
-                user = postgresConfig.username,
-                password = postgresConfig.password,
-            )
+            runMigrations()
+            connect()
         }
     }
 

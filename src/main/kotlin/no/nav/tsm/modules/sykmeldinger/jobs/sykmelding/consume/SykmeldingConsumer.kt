@@ -17,8 +17,8 @@ class SykmeldingConsumer(environment: Environment) {
     private val logger = logger()
     private val topicName = "tsm.sykmeldinger"
 
-    // TODO: Configureable?
-    private val duration: Duration = Duration.ofSeconds(10)
+    private val duration: Duration =
+        Duration.ofMillis(environment.kafka.sykmeldingConsumer.longPoll)
     private val consumer: KafkaConsumer<String, ByteArray?>
     private val kafkaObjectMapper = jacksonObjectMapper()
 
