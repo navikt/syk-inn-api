@@ -12,6 +12,7 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskHenvisning
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskUtfall
@@ -23,7 +24,6 @@ import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class JuridiskJobRepoTest : WithPostgresql() {
 
@@ -38,7 +38,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
 
     @BeforeTest
     fun cleanup() {
-        runBlocking { suspendTransaction { JuridiskVurderingTable.deleteAll() } }
+        runBlocking { dbQuery { JuridiskVurderingTable.deleteAll() } }
     }
 
     @Test
@@ -125,7 +125,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
         assertEquals(2, count)
-        suspendTransaction {
+        dbQuery {
             JuridiskVurderingTable.selectAll().toList().forEach { row ->
                 assertEquals(
                     JuridiskVurderingStatus.PENDING.name,
@@ -160,7 +160,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
         status: JuridiskVurderingStatus,
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
-        suspendTransaction {
+        dbQuery {
             JuridiskVurderingTable.insert {
                 it[JuridiskVurderingTable.sykmeldingId] = sykmeldingId
                 it[JuridiskVurderingTable.status] = status.name

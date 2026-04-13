@@ -7,13 +7,13 @@ import kotlin.test.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class SykmeldingProducerRepoTest : WithPostgresql() {
 
@@ -26,8 +26,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
     private val repo = SykmeldingProducerRepo()
 
-    @BeforeTest
-    fun cleanup(): Unit = runBlocking { suspendTransaction { SykmeldingStatusTable.deleteAll() } }
+    @BeforeTest fun cleanup(): Unit = runBlocking { dbQuery { SykmeldingStatusTable.deleteAll() } }
 
     @Test
     fun `getNext returns null when no pending items exist`() = runTest {
@@ -121,7 +120,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
         assertEquals(2, count)
-        suspendTransaction {
+        dbQuery {
             SykmeldingStatusTable.selectAll().toList().forEach { row ->
                 assertEquals(SykmeldingStatusStatus.PENDING.name, row[SykmeldingStatusTable.status])
             }
@@ -163,7 +162,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
         sendTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
-        suspendTransaction {
+        dbQuery {
             SykmeldingStatusTable.insert {
                 it[SykmeldingStatusTable.sykmeldingId] = sykmeldingId
                 it[SykmeldingStatusTable.status] = status.name

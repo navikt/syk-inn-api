@@ -4,11 +4,11 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
+import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.StatementType
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.r2dbc.update
 
 data class SykmeldingStatusJob(val sykmeldingId: UUID, val status: SykmeldingStatusStatus)
@@ -16,7 +16,7 @@ data class SykmeldingStatusJob(val sykmeldingId: UUID, val status: SykmeldingSta
 class SykmeldingProducerRepo {
 
     suspend fun getNext(): SykmeldingStatusJob? {
-        return suspendTransaction {
+        return dbQuery {
             exec(
                     """
                     UPDATE sykmelding_status rs
@@ -50,16 +50,15 @@ class SykmeldingProducerRepo {
         }
     }
 
-    suspend fun updateStatus(sykmeldingId: UUID, failed: SykmeldingStatusStatus) =
-        suspendTransaction {
-            SykmeldingStatusTable.update({ SykmeldingStatusTable.sykmeldingId eq sykmeldingId }) {
-                it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
-                it[status] = failed.name
-            }
+    suspend fun updateStatus(sykmeldingId: UUID, failed: SykmeldingStatusStatus) = dbQuery {
+        SykmeldingStatusTable.update({ SykmeldingStatusTable.sykmeldingId eq sykmeldingId }) {
+            it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
+            it[status] = failed.name
         }
+    }
 
     suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
-        return suspendTransaction {
+        return dbQuery {
             SykmeldingStatusTable.update({
                 (SykmeldingStatusTable.status inList
                     listOf(

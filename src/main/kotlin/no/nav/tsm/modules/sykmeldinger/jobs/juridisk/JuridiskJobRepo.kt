@@ -7,6 +7,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
+import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
@@ -15,7 +16,6 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.statements.StatementType
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.r2dbc.update
 
 private val objectMapper = jacksonObjectMapper().apply { registerModule(JavaTimeModule()) }
@@ -29,7 +29,7 @@ data class JuridiskJob(
 class JuridiskJobRepo {
 
     suspend fun getNext(): JuridiskJob? {
-        return suspendTransaction {
+        return dbQuery {
             exec(
                     """
                     UPDATE juridisk_status rs
@@ -66,7 +66,7 @@ class JuridiskJobRepo {
     }
 
     suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
-        return suspendTransaction {
+        return dbQuery {
             JuridiskVurderingTable.update({
                 (JuridiskVurderingTable.status inList
                     listOf(

@@ -5,11 +5,12 @@ import arrow.core.left
 import arrow.core.right
 import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toList
+import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
@@ -31,11 +32,7 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toRuleResultJson
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toTilbakedateringJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toUtdypendeSporsmalJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toYrkesskadeJsonb
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
-import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
@@ -45,7 +42,6 @@ import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.selectAll
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class SykmeldingRepo {
     private val logger = logger()
@@ -56,7 +52,7 @@ class SykmeldingRepo {
         juridisk: JuridiskVurderingResult,
     ): Either<String, VerifiedSykInnSykmelding> {
         try {
-            val inserted = suspendTransaction {
+            val inserted = dbQuery {
                 JuridiskVurderingTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
                     it[status] = JuridiskVurderingStatus.PENDING.name
@@ -130,27 +126,26 @@ class SykmeldingRepo {
         }
     }
 
-    suspend fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = suspendTransaction {
+    suspend fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.metaPasientIdent eq ident }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
             .toList()
     }
 
-    suspend fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = suspendTransaction {
+    suspend fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.id eq sykmeldingId }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
             .firstOrNull()
     }
 
-    suspend fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? =
-        suspendTransaction {
-            SykmeldingTable.selectAll()
-                .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
-                .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
-                .firstOrNull()
-        }
+    suspend fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? = dbQuery {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
+            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+            .firstOrNull()
+    }
 
     private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnSykmelding {
         return VerifiedSykInnSykmelding(
