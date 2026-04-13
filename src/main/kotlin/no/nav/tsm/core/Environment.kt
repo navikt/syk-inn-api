@@ -13,7 +13,12 @@ enum class RuntimeEnvironments(val nais: String) {
 
 class Runtime(val env: RuntimeEnvironments, val name: String)
 
-class PostgresConfig(val url: String, val username: String, val password: String)
+class PostgresConfig(
+    val url: String,
+    val username: String,
+    val password: String,
+    val r2dbUrl: String = url.replace("jdbc", "r2dbc"),
+)
 
 class Texas(val tokenEndpoint: String)
 

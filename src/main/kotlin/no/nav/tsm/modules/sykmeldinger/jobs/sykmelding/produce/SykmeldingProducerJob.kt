@@ -23,7 +23,7 @@ class SykmeldingProducerJob(
     private val hungSykmeldingTimeoutSeconds = 1800L
 
     override suspend fun runJob() =
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             while (isActive) {
                 delay(sykmeldingerProducerBatchDelaySeconds * 1000)
 
@@ -35,7 +35,7 @@ class SykmeldingProducerJob(
         }
 
     @WithSpan
-    private fun handleSykmeldingerBatch() {
+    private suspend fun handleSykmeldingerBatch() {
         sykmeldingProducerRepo
             .resetHangingJobs(OffsetDateTime.now(UTC).minusSeconds(hungSykmeldingTimeoutSeconds))
             .let {
@@ -53,7 +53,7 @@ class SykmeldingProducerJob(
         if (count > 0) logger.info("Finished sykmeldinger producer batch, sent $count sykmeldinger")
     }
 
-    private fun sendNextSykmelding(): SykmeldingStatusJob? {
+    private suspend fun sendNextSykmelding(): SykmeldingStatusJob? {
         val next = sykmeldingProducerRepo.getNext() ?: return null
 
         try {

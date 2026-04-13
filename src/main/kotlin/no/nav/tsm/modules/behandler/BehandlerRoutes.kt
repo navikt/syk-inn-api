@@ -33,7 +33,6 @@ import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
 private val logger = logger()
 
-@OptIn(ExperimentalKtorApi::class)
 fun Application.configureBehandlerRoutes() {
     val accessControlService: BehandlerAccessControlService by dependencies
     val sykmeldingerService: SykmeldingerService by dependencies

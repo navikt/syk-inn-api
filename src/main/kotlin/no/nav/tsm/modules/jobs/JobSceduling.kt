@@ -16,7 +16,7 @@ fun Application.configureJobSceduling() {
     val jobScheduler: JobSchedulerService by dependencies
 
     monitor.subscribe(ApplicationStarting) {
-        launch {
+        launch(Dispatchers.IO) {
             log.info("Job sceduling setup")
             jobScheduler.setup()
         }

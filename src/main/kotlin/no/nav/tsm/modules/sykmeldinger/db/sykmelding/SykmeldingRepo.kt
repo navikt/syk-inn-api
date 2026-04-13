@@ -3,8 +3,13 @@ package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
 import java.util.UUID
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
@@ -37,22 +42,21 @@ import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.insertReturning
-import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.postgresql.util.PSQLException
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.insertReturning
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class SykmeldingRepo {
     private val logger = logger()
 
-    fun insert(
+    suspend fun insert(
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
         juridisk: JuridiskVurderingResult,
     ): Either<String, VerifiedSykInnSykmelding> {
         try {
-            val inserted = transaction {
+            val inserted = suspendTransaction {
                 JuridiskVurderingTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
                     it[status] = JuridiskVurderingStatus.PENDING.name
@@ -113,7 +117,7 @@ class SykmeldingRepo {
                 return "Idempotency Key triggered".left()
             }
 
-            if (e.cause is PSQLException) {
+            if (e.cause is R2dbcException) {
                 /**
                  * Parts of the stack trace contains all values, these appear on the second line+
                  */
@@ -126,25 +130,27 @@ class SykmeldingRepo {
         }
     }
 
-    fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = transaction {
+    suspend fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = suspendTransaction {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.metaPasientIdent eq ident }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+            .toList()
     }
 
-    fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = transaction {
+    suspend fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = suspendTransaction {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.id eq sykmeldingId }
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
             .firstOrNull()
     }
 
-    fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? = transaction {
-        SykmeldingTable.selectAll()
-            .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
-            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
-            .firstOrNull()
-    }
+    suspend fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? =
+        suspendTransaction {
+            SykmeldingTable.selectAll()
+                .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
+                .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+                .firstOrNull()
+        }
 
     private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnSykmelding {
         return VerifiedSykInnSykmelding(

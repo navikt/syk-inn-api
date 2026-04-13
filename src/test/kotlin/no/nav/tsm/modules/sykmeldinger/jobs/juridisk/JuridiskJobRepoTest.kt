@@ -9,6 +9,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskHenvisning
@@ -18,21 +22,27 @@ import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.Lovverk
 import no.nav.tsm.utils.WithPostgresql
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.deleteAll
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.deleteAll
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class JuridiskJobRepoTest : WithPostgresql() {
 
     companion object {
         init {
+            val postgresConfig =
+                PostgresConfig(
+                    url = postgres.jdbcUrl,
+                    username = postgres.username,
+                    password = postgres.password,
+                )
             runFlywayMigrations(postgres.jdbcUrl, postgres.username, postgres.password)
-            Database.connect(
-                url = postgres.jdbcUrl,
-                user = postgres.username,
-                password = postgres.password,
+            R2dbcDatabase.connect(
+                url = postgresConfig.r2dbUrl,
+                user = postgresConfig.username,
+                password = postgresConfig.password,
             )
         }
     }
@@ -41,17 +51,17 @@ class JuridiskJobRepoTest : WithPostgresql() {
 
     @BeforeTest
     fun cleanup() {
-        transaction { JuridiskVurderingTable.deleteAll() }
+        runBlocking { suspendTransaction { JuridiskVurderingTable.deleteAll() } }
     }
 
     @Test
-    fun `getNext returns null when no pending items exist`() {
+    fun `getNext returns null when no pending items exist`() = runTest {
         val result = repo.getNext()
         assertNull(result)
     }
 
     @Test
-    fun `getNext returns pending item and updates status to SENDING`() {
+    fun `getNext returns pending item and updates status to SENDING`() = runTest {
         val sykmeldingId = UUID.randomUUID()
         insertRuleStatus(sykmeldingId, JuridiskVurderingStatus.PENDING)
 
@@ -63,7 +73,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext picks oldest pending item first`() {
+    fun `getNext picks oldest pending item first`() = runTest {
         val older = UUID.randomUUID()
         val newer = UUID.randomUUID()
         insertRuleStatus(
@@ -84,7 +94,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext ignores non-PENDING items`() {
+    fun `getNext ignores non-PENDING items`() = runTest {
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENDING)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENT)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.FAILED)
@@ -94,7 +104,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext called twice returns different items`() {
+    fun `getNext called twice returns different items`() = runTest {
         val first = UUID.randomUUID()
         val second = UUID.randomUUID()
         insertRuleStatus(
@@ -118,7 +128,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `resetHangingJobs resets SENDING and FAILED to PENDING`() {
+    fun `resetHangingJobs resets SENDING and FAILED to PENDING`() = runTest {
         val sending = UUID.randomUUID()
         val failed = UUID.randomUUID()
         val oldEventTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2)
@@ -128,8 +138,8 @@ class JuridiskJobRepoTest : WithPostgresql() {
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
         assertEquals(2, count)
-        transaction {
-            JuridiskVurderingTable.selectAll().forEach { row ->
+        suspendTransaction {
+            JuridiskVurderingTable.selectAll().toList().forEach { row ->
                 assertEquals(
                     JuridiskVurderingStatus.PENDING.name,
                     row[JuridiskVurderingTable.status],
@@ -139,7 +149,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `resetHangingJobs does not reset recent items`() {
+    fun `resetHangingJobs does not reset recent items`() = runTest {
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENDING)
 
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
@@ -148,7 +158,7 @@ class JuridiskJobRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `resetHangingJobs does not reset PENDING or SENT items`() {
+    fun `resetHangingJobs does not reset PENDING or SENT items`() = runTest {
         val oldEventTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.PENDING, oldEventTimestamp)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENT, oldEventTimestamp)
@@ -158,12 +168,12 @@ class JuridiskJobRepoTest : WithPostgresql() {
         assertEquals(0, count)
     }
 
-    private fun insertRuleStatus(
+    private suspend fun insertRuleStatus(
         sykmeldingId: UUID,
         status: JuridiskVurderingStatus,
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
-        transaction {
+        suspendTransaction {
             JuridiskVurderingTable.insert {
                 it[JuridiskVurderingTable.sykmeldingId] = sykmeldingId
                 it[JuridiskVurderingTable.status] = status.name

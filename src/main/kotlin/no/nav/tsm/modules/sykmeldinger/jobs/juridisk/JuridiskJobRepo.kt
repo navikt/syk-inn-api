@@ -5,7 +5,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
+import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
@@ -14,8 +15,8 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.statements.StatementType
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.update
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.r2dbc.update
 
 private val objectMapper = jacksonObjectMapper().apply { registerModule(JavaTimeModule()) }
 
@@ -27,47 +28,45 @@ data class JuridiskJob(
 
 class JuridiskJobRepo {
 
-    fun getNext(): JuridiskJob? {
-        return transaction {
+    suspend fun getNext(): JuridiskJob? {
+        return suspendTransaction {
             exec(
-                """
-                UPDATE juridisk_status rs
-                SET status = ?,
-                    event_timestamp = now()
-                FROM (
-                    SELECT sykmelding_id FROM juridisk_status
-                    WHERE status = ?
-                    ORDER BY event_timestamp
-                    FOR UPDATE SKIP LOCKED
-                    LIMIT 1
-                ) AS temp_status
-                WHERE rs.sykmelding_id = temp_status.sykmelding_id
-                RETURNING rs.sykmelding_id, rs.status, rs.juridisk_vurdering
-                """
-                    .trimIndent(),
-                args =
-                    listOf(
-                        TextColumnType() to JuridiskVurderingStatus.SENDING.name,
-                        TextColumnType() to JuridiskVurderingStatus.PENDING.name,
-                    ),
-                explicitStatementType = StatementType.EXEC,
-            ) { rs ->
-                if (rs.next()) {
+                    """
+                    UPDATE juridisk_status rs
+                    SET status = ?,
+                        event_timestamp = now()
+                    FROM (
+                        SELECT sykmelding_id FROM juridisk_status
+                        WHERE status = ?
+                        ORDER BY event_timestamp
+                        FOR UPDATE SKIP LOCKED
+                        LIMIT 1
+                    ) AS temp_status
+                    WHERE rs.sykmelding_id = temp_status.sykmelding_id
+                    RETURNING rs.sykmelding_id, rs.status, rs.juridisk_vurdering
+                    """
+                        .trimIndent(),
+                    args =
+                        listOf(
+                            TextColumnType() to JuridiskVurderingStatus.SENDING.name,
+                            TextColumnType() to JuridiskVurderingStatus.PENDING.name,
+                        ),
+                    explicitStatementType = StatementType.UPDATE,
+                ) {
                     JuridiskJob(
-                        sykmeldingId = UUID.fromString(rs.getString("sykmelding_id")),
-                        status = JuridiskVurderingStatus.valueOf(rs.getString("status")),
+                        sykmeldingId = UUID.fromString(it.get("sykmelding_id", String::class.java)),
+                        status =
+                            JuridiskVurderingStatus.valueOf(it.get("status", String::class.java)),
                         juridiskVurdering =
-                            objectMapper.readValue(rs.getString("juridisk_vurdering")),
+                            objectMapper.readValue(it.get("juridisk_vurdering", String::class.java)),
                     )
-                } else {
-                    null
                 }
-            }
+                ?.firstOrNull()
         }
     }
 
-    fun resetHangingJobs(timestamp: OffsetDateTime): Int {
-        return transaction {
+    suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
+        return suspendTransaction {
             JuridiskVurderingTable.update({
                 (JuridiskVurderingTable.status inList
                     listOf(

@@ -8,6 +8,7 @@ import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import arrow.fx.coroutines.parZip
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.core.logger
@@ -46,6 +47,7 @@ class SykmeldingerService(
                 .bind()
         }
 
+    @WithSpan
     suspend fun create(
         sykmelding: UnverifiedSykInnSykmelding
     ): Either<CreateErrors, VerifiedSykInnSykmelding> = either {
@@ -65,7 +67,6 @@ class SykmeldingerService(
 
                     CreateErrors.UnknownResourceError
                 }
-
                 val (rules, juridiskVurdering) =
                     ruleService
                         .verify(sykmelding, sykmelder, pasient)
@@ -113,21 +114,21 @@ class SykmeldingerService(
         UnknownError,
     }
 
-    fun byId(sykmeldingId: UUID): Either<GetErrors, VerifiedSykInnSykmelding> {
+    suspend fun byId(sykmeldingId: UUID): Either<GetErrors, VerifiedSykInnSykmelding> {
         val sykmelding = repo.byId(sykmeldingId) ?: return GetErrors.NotFound.left()
 
         return sykmelding.right()
     }
 
-    fun byIdent(ident: String): Either<GetErrors, List<VerifiedSykInnSykmelding>> {
-        // TODO: need to call PDL to get all idents for ident
+    @WithSpan
+    suspend fun byIdent(ident: String): Either<GetErrors, List<VerifiedSykInnSykmelding>> {
         return repo.allByIdent(ident).right()
     }
 
     /** Fetches behandler (hpr) and sykmeldt (pdl) in parallel. */
     private suspend fun <Result> getSykmeldingVerifyResources(
         sykmelding: UnverifiedSykInnSykmelding,
-        block: Raise<CreateErrors>.(sykmelder: Sykmelder, pasient: PdlPerson) -> Result,
+        block: suspend Raise<CreateErrors>.(sykmelder: Sykmelder, pasient: PdlPerson) -> Result,
     ): Either<CreateErrors, Result> = either {
         /**
          * parZip runs both these resource lookups in parallel, executes the rules and gives us our

@@ -1,8 +1,9 @@
 [versions]
 kotlin = "2.3.0"
-ktor = "3.4.0"
+ktor = "3.4.2"
 logback = "1.5.13"
 logbackEncoder = "8.1"
+postgresR2dbc = "1.1.1.RELEASE"
 postgres = "42.7.9"
 exposed = "1.1.1"
 prometheus = "1.6.13"
@@ -56,9 +57,10 @@ testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", ver
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest-assertions" }
 
 # Database stuff
+postgresql-r2dbc = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgresR2dbc" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-r2dbc", version.ref = "exposed" }
 exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed" }
 exposed-date = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }

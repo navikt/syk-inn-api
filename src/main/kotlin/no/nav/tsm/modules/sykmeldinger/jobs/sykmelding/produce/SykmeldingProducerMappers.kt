@@ -166,7 +166,9 @@ private fun SykInnUtdypendeSporsmal?.toUtdypendeOpplysninger(): List<UtdypendeSp
     return listOfNotNull(
             hensynPaArbeidsplassen?.toUtdypendeSporsmal(Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN),
             medisinskOppsummering?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
-            utfordringerMedArbeid?.toUtdypendeSporsmal(Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID),
+            utfordringerMedArbeid?.toUtdypendeSporsmal(
+                Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID
+            ),
             sykdomsutvikling?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
             arbeidsrelaterteUtfordringer?.toUtdypendeSporsmal(
                 Sporsmalstype.UTFORDRINGER_MED_ARBEID

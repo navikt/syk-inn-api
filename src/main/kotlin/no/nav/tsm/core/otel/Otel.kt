@@ -2,6 +2,9 @@ package no.nav.tsm.core.otel
 
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.StatusCode
+import no.nav.tsm.core.logger
+
+private val log = logger()
 
 fun failSpan(span: Span, exception: Throwable): Throwable {
     span.setStatus(StatusCode.ERROR)

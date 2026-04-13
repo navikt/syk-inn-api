@@ -2,31 +2,41 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import java.util.*
+import kotlin.test.*
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.db.runFlywayMigrations
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.WithPostgresql
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.deleteAll
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.deleteAll
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 class SykmeldingProducerRepoTest : WithPostgresql() {
 
     companion object {
         init {
-            runFlywayMigrations(postgres.jdbcUrl, postgres.username, postgres.password)
-            Database.connect(
-                url = postgres.jdbcUrl,
-                user = postgres.username,
-                password = postgres.password,
+            val postgresConfig =
+                PostgresConfig(
+                    url = postgres.jdbcUrl,
+                    username = postgres.username,
+                    password = postgres.password,
+                )
+            runFlywayMigrations(
+                postgresConfig.url,
+                postgresConfig.username,
+                postgresConfig.password,
+            )
+            R2dbcDatabase.connect(
+                url = postgresConfig.r2dbUrl,
+                user = postgresConfig.username,
+                password = postgresConfig.password,
             )
         }
     }
@@ -34,18 +44,16 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     private val repo = SykmeldingProducerRepo()
 
     @BeforeTest
-    fun cleanup() {
-        transaction { SykmeldingStatusTable.deleteAll() }
-    }
+    fun cleanup(): Unit = runBlocking { suspendTransaction { SykmeldingStatusTable.deleteAll() } }
 
     @Test
-    fun `getNext returns null when no pending items exist`() {
+    fun `getNext returns null when no pending items exist`() = runTest {
         val result = repo.getNext()
         assertNull(result)
     }
 
     @Test
-    fun `getNext returns pending item and updates status to SENDING`() {
+    fun `getNext returns pending item and updates status to SENDING`() = runTest {
         val sykmeldingId = UUID.randomUUID()
         insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.PENDING)
 
@@ -57,7 +65,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext picks oldest by send_timestamp first`() {
+    fun `getNext picks oldest by send_timestamp first`() = runTest {
         val older = UUID.randomUUID()
         val newer = UUID.randomUUID()
         insertSykmeldingStatus(
@@ -78,7 +86,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext ignores non-PENDING items`() {
+    fun `getNext ignores non-PENDING items`() = runTest {
         insertSykmeldingStatus(UUID.randomUUID(), SykmeldingStatusStatus.SENDING)
         insertSykmeldingStatus(UUID.randomUUID(), SykmeldingStatusStatus.SENT)
         insertSykmeldingStatus(UUID.randomUUID(), SykmeldingStatusStatus.FAILED)
@@ -88,7 +96,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `getNext called twice returns different items`() {
+    fun `getNext called twice returns different items`() = runTest {
         val first = UUID.randomUUID()
         val second = UUID.randomUUID()
         insertSykmeldingStatus(
@@ -112,7 +120,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `resetHangingJobs resets SENDING and FAILED to PENDING`() {
+    fun `resetHangingJobs resets SENDING and FAILED to PENDING`() = runTest {
         val sending = UUID.randomUUID()
         val failed = UUID.randomUUID()
         val oldEventTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2)
@@ -130,15 +138,15 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
         assertEquals(2, count)
-        transaction {
-            SykmeldingStatusTable.selectAll().forEach { row ->
+        suspendTransaction {
+            SykmeldingStatusTable.selectAll().toList().forEach { row ->
                 assertEquals(SykmeldingStatusStatus.PENDING.name, row[SykmeldingStatusTable.status])
             }
         }
     }
 
     @Test
-    fun `resetHangingJobs does not reset recent items`() {
+    fun `resetHangingJobs does not reset recent items`() = runTest {
         val recent = UUID.randomUUID()
         insertSykmeldingStatus(recent, SykmeldingStatusStatus.SENDING)
 
@@ -148,7 +156,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     }
 
     @Test
-    fun `resetHangingJobs does not reset PENDING or SENT items`() {
+    fun `resetHangingJobs does not reset PENDING or SENT items`() = runTest {
         val oldEventTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2)
         insertSykmeldingStatus(
             UUID.randomUUID(),
@@ -166,13 +174,13 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         assertEquals(0, count)
     }
 
-    private fun insertSykmeldingStatus(
+    private suspend fun insertSykmeldingStatus(
         sykmeldingId: UUID,
         status: SykmeldingStatusStatus,
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
         sendTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
-        transaction {
+        suspendTransaction {
             SykmeldingStatusTable.insert {
                 it[SykmeldingStatusTable.sykmeldingId] = sykmeldingId
                 it[SykmeldingStatusTable.status] = status.name

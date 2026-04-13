@@ -19,10 +19,10 @@ class JobSchedulerService(
     @Named("runner") private val runner: String,
 ) {
     private val updateInterval = 10.seconds
-    private val log = logger()
+    private val logger = logger()
 
     suspend fun setup() {
-        log.debug("Setting up JobScheduler")
+        logger.debug("Setting up JobScheduler")
         jobs.forEach {
             jobRepository.updateJobStatus(
                 runner = runner,
@@ -32,11 +32,12 @@ class JobSchedulerService(
         }
     }
 
+    @WithSpan
     suspend fun start() = coroutineScope {
         jobs.forEach { manager ->
             launch {
                 manager.status.collect { newStatus ->
-                    log.debug("Job ${manager.jobName} status changed to $newStatus")
+                    logger.debug("Job ${manager.jobName} status changed to $newStatus")
                     jobRepository.updateJobStatus(
                         runner = runner,
                         jobName = manager.jobName,
@@ -58,21 +59,21 @@ class JobSchedulerService(
 
     @WithSpan
     private suspend fun updateJobs() {
-        log.debug("Updating jobs statuses")
+        logger.debug("Updating jobs statuses")
         val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }
 
         val span = Span.current()
         span.setAttribute("job.count", jobStates.size.toLong())
-
         jobs.forEach { job ->
             val desiredState = jobStates[job.jobName]
             requireNotNull(desiredState) { "No desired state found for job ${job.jobName}" }
             if (desiredState != job.status.value) {
-                log.info("Updating job ${job.jobName} to desired state $desiredState")
+                logger.info("Updating job ${job.jobName} to desired state $desiredState")
                 when (desiredState) {
                     JobStatus.RUNNING -> job.start()
                     JobStatus.STOPPED -> job.stop()
-                    else -> log.warn("Unknown desired state $desiredState for job ${job.jobName}")
+                    else ->
+                        logger.warn("Unknown desired state $desiredState for job ${job.jobName}")
                 }
             }
         }
