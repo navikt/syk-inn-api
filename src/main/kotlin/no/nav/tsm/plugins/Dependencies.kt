@@ -14,7 +14,7 @@ fun Application.configureDependencies() {
 
     dependencies {
         provide<HttpClient> { configureBaseHttpClient() }
-        provide<Environment>() { initializeEnvironment(config) }
+        provide<Environment> { initializeEnvironment(config) }
     }
 }
 

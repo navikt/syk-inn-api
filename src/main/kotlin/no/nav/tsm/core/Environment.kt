@@ -95,9 +95,7 @@ fun Application.isLocal(): Boolean {
 }
 
 private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {
-    val configEnv = this.property("app.runtime").getString()
-
-    return when (configEnv) {
+    return when (val configEnv = this.property("app.runtime").getString()) {
         "local" -> RuntimeEnvironments.LOCAL
         "prod-gcp" -> RuntimeEnvironments.PROD
         "dev-gcp" -> RuntimeEnvironments.DEV

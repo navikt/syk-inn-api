@@ -6,7 +6,7 @@ interface Navn {
     val etternavn: String
 
     fun displayName(): String =
-        "${fornavn}${if (mellomnavn != null) " ${mellomnavn} " else " "}${etternavn}"
+        "${fornavn}${if (mellomnavn != null) " $mellomnavn " else " "}${etternavn}"
 }
 
 data class SimpleNavn(

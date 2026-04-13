@@ -50,7 +50,7 @@ data class SykInnSykmeldingMeta(
 
 sealed interface SykInnSykmeldingRuleResult {
 
-    class OK() : SykInnSykmeldingRuleResult
+    class OK : SykInnSykmeldingRuleResult
 
     data class Outcome(val type: RuleType, val message: String, val rule: String) :
         SykInnSykmeldingRuleResult {

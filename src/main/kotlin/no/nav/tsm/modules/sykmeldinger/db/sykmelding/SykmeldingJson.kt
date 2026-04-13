@@ -21,7 +21,7 @@ import no.nav.tsm.sykmelding.input.core.model.RuleType
  *
  * domain → jsonb
  */
-object toJsonb {
+object ToJsonb {
     fun SykInnSykmeldingRuleResult.toRuleResultJson(): SykmeldingJsonbRuleResult =
         when (this) {
             is SykInnSykmeldingRuleResult.OK -> SykmeldingJsonbRuleResult(RuleType.OK, null, null)
@@ -142,7 +142,7 @@ object toJsonb {
  *
  * jsonb → domain
  */
-object fromJsonb {
+object FromJsonb {
 
     fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
         when (this.type) {

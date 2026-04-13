@@ -14,23 +14,23 @@ import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toAktivitetJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnAktivitet
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnArbeidsgiver
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnDiagnose
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnMeldinger
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnResult
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnTilbakedatering
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnUtdypendeSporsmal
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.fromJsonb.toSykInnYrkesskade
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toArbeidsgiverJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toDiagnoseJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toMeldingerJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toNavnJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toRuleResultJson
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toTilbakedateringJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toUtdypendeSporsmalJsonb
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.toJsonb.toYrkesskadeJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toAktivitetJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnAktivitet
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnArbeidsgiver
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnDiagnose
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnResult
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnTilbakedatering
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnUtdypendeSporsmal
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnYrkesskade
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toArbeidsgiverJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toDiagnoseJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toMeldingerJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toNavnJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toRuleResultJson
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toTilbakedateringJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toUtdypendeSporsmalJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toYrkesskadeJsonb
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
@@ -123,7 +123,7 @@ class SykmeldingRepo {
                  */
                 val firstLine = e.message?.split("\n")?.firstOrNull() ?: "No message"
                 logger.error("Sykmelding insert failed: $firstLine")
-                throw IllegalStateException("Sykmelding insert failed: ${firstLine}")
+                throw IllegalStateException("Sykmelding insert failed: $firstLine")
             }
 
             throw e

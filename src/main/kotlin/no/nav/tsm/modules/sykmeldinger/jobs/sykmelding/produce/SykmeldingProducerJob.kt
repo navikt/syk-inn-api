@@ -16,7 +16,7 @@ class SykmeldingProducerJob(
     private val sykmeldingProducer: SykmeldingInputProducer,
     private val sykmeldingProducerRepo: SykmeldingProducerRepo,
     private val sykmeldingRepo: SykmeldingRepo,
-    private val environment: Environment,
+    environment: Environment,
     applicationScope: CoroutineScope,
 ) : Job(JobName.SYKMELDING_PRODUCER, applicationScope) {
     private val logger = logger()

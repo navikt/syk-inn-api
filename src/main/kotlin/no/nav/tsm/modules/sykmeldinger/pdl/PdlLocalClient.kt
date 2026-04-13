@@ -23,7 +23,7 @@ class PdlLocalClient : PdlClient {
                     listOf(
                         Ident(
                             ident = "120398120398",
-                            gruppe = IDENT_GRUPPE.FOLKEREGISTERIDENT,
+                            gruppe = Identgruppe.FOLKEREGISTERIDENT,
                             historisk = false,
                         )
                     ),

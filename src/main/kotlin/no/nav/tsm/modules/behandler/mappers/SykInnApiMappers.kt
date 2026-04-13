@@ -20,22 +20,19 @@ import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerSykmeldingVerify =
-    when (this) {
-        is SykInnSykmeldingRuleResult.Outcome ->
-            BehandlerSykmeldingVerify(
-                status =
-                    when (this.type) {
-                        RuleType.PENDING -> RegulaOutcomeStatus.MANUAL_PROCESSING
-                        RuleType.INVALID -> RegulaOutcomeStatus.INVALID
-                        RuleType.OK ->
-                            throw IllegalStateException(
-                                "Outcome cannot be OK, only PENDING and INVALID should have message"
-                            )
-                    },
-                message = this.message,
-                rule = this.rule,
-            )
-    }
+    BehandlerSykmeldingVerify(
+        status =
+            when (this.type) {
+                RuleType.PENDING -> RegulaOutcomeStatus.MANUAL_PROCESSING
+                RuleType.INVALID -> RegulaOutcomeStatus.INVALID
+                RuleType.OK ->
+                    throw IllegalStateException(
+                        "Outcome cannot be OK, only PENDING and INVALID should have message"
+                    )
+            },
+        message = this.message,
+        rule = this.rule,
+    )
 
 fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     return UnverifiedSykInnSykmelding(

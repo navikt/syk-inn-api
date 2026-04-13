@@ -6,9 +6,9 @@ data class PdlPerson(val navn: PdlNavn, val foedselsdato: LocalDate?, val idente
 
 data class PdlNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 
-data class Ident(val ident: String, val gruppe: IDENT_GRUPPE, val historisk: Boolean)
+data class Ident(val ident: String, val gruppe: Identgruppe, val historisk: Boolean)
 
-enum class IDENT_GRUPPE {
+enum class Identgruppe {
     AKTORID,
     FOLKEREGISTERIDENT,
     NPID,
