@@ -23,7 +23,7 @@ class SykmeldingConsumer(environment: Environment) {
     private val kafkaObjectMapper = jacksonObjectMapper()
 
     init {
-        val kafkaProperties = Properties(environment.kafka)
+        val kafkaProperties = Properties(environment.kafka.config)
 
         kafkaProperties.apply {
             this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-ktor"

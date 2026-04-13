@@ -28,9 +28,13 @@ class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
 
 class Auth(val entra: EntraAuth)
 
+class KafkaInputProducer(val delay: Int)
+
+class KafkaConfig(val config: Properties, val inputProducer: KafkaInputProducer)
+
 class Environment(
     val runtime: Runtime,
-    val kafka: Properties,
+    val kafka: KafkaConfig,
     val postgres: PostgresConfig,
     val texas: () -> Texas,
     val external: () -> ExternalApi,
@@ -39,9 +43,16 @@ class Environment(
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
     val kafkaProperties =
-        Properties().apply {
-            config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
-        }
+        KafkaConfig(
+            config =
+                Properties().apply {
+                    config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
+                },
+            inputProducer =
+                KafkaInputProducer(
+                    delay = config.property("kafka.input-producer.delay").getString().toInt()
+                ),
+        )
 
     return Environment(
         runtime =

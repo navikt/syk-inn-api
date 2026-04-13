@@ -4,6 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
 import kotlinx.coroutines.*
+import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.service.JobName
@@ -15,20 +16,21 @@ class SykmeldingProducerJob(
     private val sykmeldingProducer: SykmeldingInputProducer,
     private val sykmeldingProducerRepo: SykmeldingProducerRepo,
     private val sykmeldingRepo: SykmeldingRepo,
+    private val environment: Environment,
     applicationScope: CoroutineScope,
 ) : Job(JobName.SYKMELDING_PRODUCER, applicationScope) {
     private val logger = logger()
 
-    private val sykmeldingerProducerBatchDelaySeconds = 10L
+    private val sykmeldingerProducerBatchDelaySeconds = environment.kafka.inputProducer.delay
     private val hungSykmeldingTimeoutSeconds = 1800L
 
     override suspend fun runJob() =
         withContext(Dispatchers.IO) {
             while (isActive) {
-                delay(sykmeldingerProducerBatchDelaySeconds * 1000)
+                delay(sykmeldingerProducerBatchDelaySeconds.toLong())
 
                 logger.info(
-                    "Running sykmeldinger producer job (${sykmeldingerProducerBatchDelaySeconds}s)"
+                    "Running sykmeldinger producer job (${sykmeldingerProducerBatchDelaySeconds}ms)"
                 )
                 handleSykmeldingerBatch()
             }

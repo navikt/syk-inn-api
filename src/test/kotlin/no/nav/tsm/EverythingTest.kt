@@ -2,19 +2,21 @@ package no.nav.tsm
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
+import java.time.Duration
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
@@ -22,13 +24,23 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.utils.KafkaTestConsumer
+import no.nav.tsm.utils.KafkaTestConsumer.createTestConsumer
+import no.nav.tsm.utils.KafkaTestUtils
 import no.nav.tsm.utils.WithAll
 import no.nav.tsm.utils.configureFullIntegrationTests
 import no.nav.tsm.utils.testClient
 import org.intellij.lang.annotations.Language
 
 class EverythingTest : WithAll() {
-    private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
+    /** All tests use a single consumer to reduce setup and teardown time */
+    companion object {
+        private val allRecords: MutableMap<UUID, SykmeldingRecord?> = mutableMapOf()
+        private val consumer = createTestConsumer(kafka)
+    }
+
+    private fun ApplicationTestBuilder.configureEverythingTest() {
         client = testClient()
 
         application { configureFullIntegrationTests(postgres, kafka) }
@@ -36,7 +48,7 @@ class EverythingTest : WithAll() {
 
     @Test
     fun `API should accept and return all values through database`() = testApplication {
-        configureSykmeldingApiTest()
+        configureEverythingTest()
 
         val response =
             client.post("/api/sykmelding") {
@@ -167,11 +179,15 @@ class EverythingTest : WithAll() {
             values.utdypendeSporsmal?.medisinskeHensyn?.svar shouldBe
                 "Unngå tung løfting og langvarig stående arbeid"
         }
+
+        val record: SykmeldingRecord? = consumeUntil(sykmeldingFull.sykmeldingId)
+        record.shouldNotBeNull()
+        KafkaTestUtils.expectAllValues(sykmeldingFull, record)
     }
 
     @Test
     fun `simple API to Kafka test`() = testApplication {
-        configureSykmeldingApiTest()
+        configureEverythingTest()
 
         val response =
             client.post("/api/sykmelding") {
@@ -204,8 +220,41 @@ class EverythingTest : WithAll() {
         val allSykmeldinger = requireNotNull(allResponse.body<List<BehandlerSykmelding>>())
         assertEquals(1, allSykmeldinger.size)
 
-        // TODO: Somehow assert that the message is published to Kafka
+        val first = allSykmeldinger.first()
+        first.shouldBeInstanceOf<BehandlerSykmeldingFull>()
+
+        val record: SykmeldingRecord? = consumeUntil(first.sykmeldingId)
+        record.shouldNotBeNull()
+        KafkaTestUtils.expectAllValues(first, record)
     }
+
+    /**
+     * Consumes until the record has been produced on the Kafka topic, times out after 10 seconds.
+     */
+    private suspend fun consumeUntil(sykmeldingId: UUID) =
+        withContext(Dispatchers.IO) {
+            if (allRecords.containsKey(sykmeldingId)) return@withContext allRecords[sykmeldingId]
+
+            val stopAt = OffsetDateTime.now().plusSeconds(10)
+            while (OffsetDateTime.now().isBefore(stopAt)) {
+                val records = consumer.poll(Duration.ofMillis(500))
+                if (records.isEmpty) continue
+
+                records.forEach { record ->
+                    val keyUuid = UUID.fromString(record.key())
+                    val value = record.value()
+                    allRecords[keyUuid] = KafkaTestConsumer.parseIt(value)
+                }
+
+                if (allRecords.containsKey(sykmeldingId)) {
+                    return@withContext allRecords[sykmeldingId]
+                }
+            }
+
+            throw IllegalStateException(
+                "Did not receive expected message with id $sykmeldingId within 10 seconds, there were ${allRecords.size} records."
+            )
+        }
 }
 
 @Language("JSON")

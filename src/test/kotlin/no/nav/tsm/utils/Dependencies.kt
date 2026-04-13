@@ -5,6 +5,8 @@ import io.ktor.server.plugins.di.*
 import io.mockk.mockk
 import java.util.Properties
 import no.nav.tsm.core.Environment
+import no.nav.tsm.core.KafkaConfig
+import no.nav.tsm.core.KafkaInputProducer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
@@ -53,9 +55,13 @@ private fun createIntegrationEnvironment(
                 password = postgres.password,
             ),
         kafka =
-            if (kafka != null)
-                Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
-            else mockk(),
+            KafkaConfig(
+                config =
+                    if (kafka != null)
+                        Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
+                    else mockk(),
+                inputProducer = KafkaInputProducer(delay = 500),
+            ),
         texas = { mockk() },
         external = { mockk() },
         auth = { mockk() },

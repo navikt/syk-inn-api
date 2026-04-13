@@ -35,7 +35,7 @@ fun Application.configureJobsDependencies() {
                 SykmeldingInputKafkaInputFactory.localProducer(
                     appname = environment.runtime.name,
                     namespace = "tsm",
-                    properties = environment.kafka,
+                    properties = environment.kafka.config,
                 )
             }
         }
