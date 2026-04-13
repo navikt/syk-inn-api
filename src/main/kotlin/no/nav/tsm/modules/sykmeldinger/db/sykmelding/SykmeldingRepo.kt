@@ -38,7 +38,7 @@ import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
+import org.jetbrains.exposed.v1.r2dbc.ExposedR2dbcException
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -103,12 +103,12 @@ class SykmeldingRepo {
             }
 
             return inserted.right()
-        } catch (e: ExposedSQLException) {
+        } catch (e: ExposedR2dbcException) {
             /** TODO: This cannot possibly be the best way to handle idempotency contraint errors */
             if (
-                e.message?.contains(
+                e.message.contains(
                     """violates unique constraint "sykmelding_idempotency_key_key""""
-                ) == true
+                )
             ) {
                 return "Idempotency Key triggered".left()
             }
