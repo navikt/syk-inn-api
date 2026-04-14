@@ -161,7 +161,7 @@ private fun List<SykInnDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
 
 private fun SykInnTilbakedatering.toExistingSykmeldingTilbakedatering():
     BehandlerSykmeldingTilbakedatering =
-    BehandlerSykmeldingTilbakedatering(startdato = startdato, begrunnelse = begrunnelse)
+    BehandlerSykmeldingTilbakedatering(startdato = kontaktdato, begrunnelse = begrunnelse)
 
 private fun SykInnUtdypendeSporsmal.toExistingSykmeldingUtdypendeSporsmalSvar():
     BehandlerSykmeldingUtdypendeSporsmal =

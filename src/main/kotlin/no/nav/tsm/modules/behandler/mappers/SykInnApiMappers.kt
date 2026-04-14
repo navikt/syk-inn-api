@@ -76,7 +76,7 @@ fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
                 tilbakedatering =
                     this.values.tilbakedatering?.let {
                         SykInnTilbakedatering(
-                            startdato = it.startdato,
+                            kontaktdato = it.startdato,
                             begrunnelse = it.begrunnelse,
                         )
                     },

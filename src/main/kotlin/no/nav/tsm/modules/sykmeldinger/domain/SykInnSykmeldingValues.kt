@@ -25,7 +25,7 @@ data class SykInnYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)
 
 data class SykInnArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String)
 
-data class SykInnTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
+data class SykInnTilbakedatering(val kontaktdato: LocalDate, val begrunnelse: String)
 
 data class SykInnUtdypendeSporsmal(
     val hensynPaArbeidsplassen: SykInnUtdypendeSporsmalSvar?,

@@ -6,6 +6,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
@@ -33,6 +34,7 @@ import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
 import no.nav.tsm.sykmelding.input.core.model.Sykmelder
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
 import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
 import no.nav.tsm.sykmelding.input.core.model.ValidationResult
 import no.nav.tsm.sykmelding.input.core.model.ValidationType
@@ -102,10 +104,8 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                         helsepersonellKategori = HelsepersonellKategori.LEGE,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
                     ),
-                arbeidsgiver =
-                    values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
-                // TODO
-                tilbakedatering = null,
+                arbeidsgiver = values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
+                tilbakedatering = values.tilbakedatering?.toTilbakedatering(),
                 // TODO
                 bistandNav = null,
                 // TODO
@@ -144,6 +144,12 @@ private fun SykInnDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
             },
         kode = code,
         tekst = this.text(),
+    )
+
+private fun SykInnTilbakedatering.toTilbakedatering(): Tilbakedatering =
+    Tilbakedatering(
+        kontaktDato = kontaktdato,
+        begrunnelse = begrunnelse,
     )
 
 private fun SykInnAktivitet.toAktivitet(): Aktivitet =

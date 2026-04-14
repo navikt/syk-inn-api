@@ -58,7 +58,7 @@ object ToJsonb {
 
     fun SykInnTilbakedatering?.toTilbakedateringJsonb(): SykmeldingJsonbTilbakedatering? =
         this?.let {
-            SykmeldingJsonbTilbakedatering(startdato = it.startdato, begrunnelse = it.begrunnelse)
+            SykmeldingJsonbTilbakedatering(startdato = it.kontaktdato, begrunnelse = it.begrunnelse)
         }
 
     fun SykInnUtdypendeSporsmal?.toUtdypendeSporsmalJsonb():
@@ -168,7 +168,7 @@ object FromJsonb {
         SykInnArbeidsgiver(harFlere = harFlere, arbeidsgivernavn = arbeidsgivernavn)
 
     fun SykmeldingJsonbTilbakedatering.toSykInnTilbakedatering(): SykInnTilbakedatering =
-        SykInnTilbakedatering(startdato = startdato, begrunnelse = begrunnelse)
+        SykInnTilbakedatering(kontaktdato = startdato, begrunnelse = begrunnelse)
 
     fun Map<String, SykmeldingJsonbUtdypendeSporsmal>.toSykInnUtdypendeSporsmal():
         SykInnUtdypendeSporsmal =
