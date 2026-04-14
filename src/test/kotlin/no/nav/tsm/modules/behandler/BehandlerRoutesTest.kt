@@ -13,7 +13,6 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
-import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.utils.WithPostgresql
 import no.nav.tsm.utils.configurePostgresIntegrationTests
@@ -150,7 +149,7 @@ class BehandlerRoutesTest : WithPostgresql() {
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertIs<BehandlerSykmeldingVerify>(created)
-        assertEquals(RegulaOutcomeStatus.INVALID, created.status)
+        assertEquals(RuleType.INVALID, created.status)
         assertEquals("UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE", created.rule)
     }
 

@@ -100,16 +100,10 @@ fun Application.configureBehandlerRoutes() {
                                     call.respond(error.code, MessageBody(error.message))
                                 },
                                 { rule: SykInnSykmeldingRuleResult ->
-                                    when (rule) {
-                                        is SykInnSykmeldingRuleResult.OK ->
-                                            call.respond<Boolean>(HttpStatusCode.OK, true)
-
-                                        is SykInnSykmeldingRuleResult.Outcome ->
-                                            call.respond<BehandlerSykmeldingVerify>(
-                                                HttpStatusCode.OK,
-                                                rule.toBehandlerSykmeldingVerify(),
-                                            )
-                                    }
+                                    call.respond<BehandlerSykmeldingVerify>(
+                                        HttpStatusCode.OK,
+                                        rule.toBehandlerSykmeldingVerify(),
+                                    )
                                 },
                             )
                     }
@@ -122,8 +116,6 @@ fun Application.configureBehandlerRoutes() {
                             HttpStatusCode.OK {
                                 description =
                                     "The result of the rule execution, without creating the sykmelding"
-                                // TODO: How to represent union between boolean and
-                                // BehandlerSykmeldingVerify?
                                 schema = jsonSchema<BehandlerSykmeldingVerify>()
                             }
                             HttpStatusCode.UnprocessableEntity {

@@ -87,8 +87,6 @@ sealed class BehandlerSykmeldingAktivitet(
         BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.REISETILSKUDD, fom, tom)
 }
 
-data class BehandlerSykmeldingMedisinskArsak(val isMedisinskArsak: Boolean)
-
 data class BehandlerSykmeldingArbeidsrelatertArsak(
     val isArbeidsrelatertArsak: Boolean,
     val arbeidsrelaterteArsaker: List<ArbeidsrelatertArsakType>,

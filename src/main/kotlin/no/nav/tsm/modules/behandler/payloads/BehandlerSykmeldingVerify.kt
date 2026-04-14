@@ -1,9 +1,5 @@
 package no.nav.tsm.modules.behandler.payloads
 
-import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
+import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-data class BehandlerSykmeldingVerify(
-    val status: RegulaOutcomeStatus,
-    val message: String,
-    val rule: String,
-)
+data class BehandlerSykmeldingVerify(val status: RuleType, val message: String?, val rule: String?)

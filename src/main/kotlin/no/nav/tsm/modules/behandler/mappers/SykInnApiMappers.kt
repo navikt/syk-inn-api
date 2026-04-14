@@ -15,23 +15,16 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmeldingMeta
-import no.nav.tsm.regulus.regula.RegulaOutcomeStatus
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-fun SykInnSykmeldingRuleResult.Outcome.toBehandlerSykmeldingVerify(): BehandlerSykmeldingVerify =
-    BehandlerSykmeldingVerify(
-        status =
-            when (this.type) {
-                RuleType.PENDING -> RegulaOutcomeStatus.MANUAL_PROCESSING
-                RuleType.INVALID -> RegulaOutcomeStatus.INVALID
-                RuleType.OK ->
-                    throw IllegalStateException(
-                        "Outcome cannot be OK, only PENDING and INVALID should have message"
-                    )
-            },
-        message = this.message,
-        rule = this.rule,
-    )
+fun SykInnSykmeldingRuleResult.toBehandlerSykmeldingVerify(): BehandlerSykmeldingVerify =
+    when (this) {
+        is SykInnSykmeldingRuleResult.OK ->
+            BehandlerSykmeldingVerify(status = RuleType.OK, message = null, rule = null)
+
+        is SykInnSykmeldingRuleResult.Outcome ->
+            BehandlerSykmeldingVerify(status = this.type, message = this.message, rule = this.rule)
+    }
 
 fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     return UnverifiedSykInnSykmelding(
