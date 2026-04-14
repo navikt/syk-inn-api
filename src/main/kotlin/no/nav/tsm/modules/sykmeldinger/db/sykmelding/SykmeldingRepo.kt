@@ -117,7 +117,7 @@ class SykmeldingRepo {
                 /**
                  * Parts of the stack trace contains all values, these appear on the second line+
                  */
-                val firstLine = e.message?.split("\n")?.firstOrNull() ?: "No message"
+                val firstLine = e.message.split("\n").firstOrNull() ?: "No message"
                 logger.error("Sykmelding insert failed: $firstLine")
                 throw IllegalStateException("Sykmelding insert failed: $firstLine")
             }

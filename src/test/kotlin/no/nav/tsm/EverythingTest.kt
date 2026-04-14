@@ -107,7 +107,6 @@ class EverythingTest : WithAll() {
                 aktivitet.shouldBeInstanceOf<BehandlerSykmeldingAktivitet.IkkeMulig>()
                 aktivitet.fom shouldBe LocalDate.now()
                 aktivitet.tom shouldBe LocalDate.now()
-                aktivitet.medisinskArsak.isMedisinskArsak shouldBe true
                 aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak shouldBe true
                 aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker shouldBe
                     listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING)

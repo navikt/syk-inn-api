@@ -6,7 +6,6 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnMedisinskArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
@@ -196,7 +195,6 @@ object FromJsonb {
                 SykmeldingJsonbAktivitet.IkkeMulig(
                     fom = fom,
                     tom = tom,
-                    medisinskArsak = SykmeldingJsonbMedisinskArsak(medisinskArsak.isMedisinskArsak),
                     arbeidsrelatertArsak =
                         SykmeldingJsonbArbeidsrelatertArsak(
                             isArbeidsrelatertArsak = arbeidsrelatertArsak.isArbeidsrelatertArsak,
@@ -238,7 +236,6 @@ object FromJsonb {
                 SykInnAktivitet.IkkeMulig(
                     fom = fom,
                     tom = tom,
-                    medisinskArsak = SykInnMedisinskArsak(medisinskArsak.isMedisinskArsak),
                     arbeidsrelatertArsak =
                         SykInnArbeidsrelatertArsak(
                             isArbeidsrelatertArsak = arbeidsrelatertArsak.isArbeidsrelatertArsak,

@@ -61,7 +61,6 @@ sealed class BehandlerSykmeldingAktivitet(
     data class IkkeMulig(
         override val fom: LocalDate,
         override val tom: LocalDate,
-        val medisinskArsak: BehandlerSykmeldingMedisinskArsak,
         val arbeidsrelatertArsak: BehandlerSykmeldingArbeidsrelatertArsak,
     ) : BehandlerSykmeldingAktivitet(BehandlerSykmeldingType.AKTIVITET_IKKE_MULIG, fom, tom)
 

@@ -11,6 +11,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
 import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
 import no.nav.tsm.sykmelding.input.core.model.Behandler
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
@@ -147,9 +148,15 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
             AktivitetIkkeMulig(
                 fom = fom,
                 tom = tom,
-                // TODO
+                arbeidsrelatertArsak =
+                    if (arbeidsrelatertArsak.isArbeidsrelatertArsak == true)
+                        ArbeidsrelatertArsak(
+                            beskrivelse = arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+                            arsak = arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+                        )
+                    else null,
+                // medisinskArsak er soft deprekert, settes til null med vilje
                 medisinskArsak = null,
-                arbeidsrelatertArsak = null,
             )
 
         is SykInnAktivitet.Gradert ->

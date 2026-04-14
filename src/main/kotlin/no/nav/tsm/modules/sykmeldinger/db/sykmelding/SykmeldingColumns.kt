@@ -43,7 +43,6 @@ sealed interface SykmeldingJsonbAktivitet {
     data class IkkeMulig(
         override val fom: LocalDate,
         override val tom: LocalDate,
-        val medisinskArsak: SykmeldingJsonbMedisinskArsak,
         val arbeidsrelatertArsak: SykmeldingJsonbArbeidsrelatertArsak,
     ) : SykmeldingJsonbAktivitet
 

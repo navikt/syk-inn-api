@@ -5,7 +5,6 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsgiver
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsrelatertArsak
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingDiagnoseInfo
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
-import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingMedisinskArsak
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingMeldinger
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingMeta
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
@@ -109,10 +108,6 @@ private fun List<SykInnAktivitet>.toPersistedSykmeldingAktivitetToExistingSykmel
                 BehandlerSykmeldingAktivitet.IkkeMulig(
                     fom = aktivitet.fom,
                     tom = aktivitet.tom,
-                    medisinskArsak =
-                        BehandlerSykmeldingMedisinskArsak(
-                            isMedisinskArsak = aktivitet.medisinskArsak.isMedisinskArsak
-                        ),
                     arbeidsrelatertArsak =
                         BehandlerSykmeldingArbeidsrelatertArsak(
                             isArbeidsrelatertArsak =

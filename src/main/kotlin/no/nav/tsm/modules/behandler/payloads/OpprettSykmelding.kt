@@ -73,7 +73,6 @@ object OpprettSykmelding {
         data class IkkeMulig(
             override val fom: LocalDate,
             override val tom: LocalDate,
-            val medisinskArsak: MedisinskArsak,
             val arbeidsrelatertArsak: ArbeidsrelatertArsak,
         ) : Aktivitet
 

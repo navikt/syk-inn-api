@@ -6,7 +6,6 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnMedisinskArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -165,8 +164,6 @@ private fun OpprettSykmelding.Aktivitet.toSykInnApiAktivitet(): SykInnAktivitet 
             SykInnAktivitet.IkkeMulig(
                 fom = this.fom,
                 tom = this.tom,
-                medisinskArsak =
-                    SykInnMedisinskArsak(isMedisinskArsak = this.medisinskArsak.isMedisinskArsak),
                 arbeidsrelatertArsak =
                     SykInnArbeidsrelatertArsak(
                         isArbeidsrelatertArsak = this.arbeidsrelatertArsak.isArbeidsrelatertArsak,
