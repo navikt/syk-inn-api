@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 import java.time.OffsetDateTime
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
@@ -11,6 +12,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
 import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
 import no.nav.tsm.sykmelding.input.core.model.Behandler
@@ -19,6 +21,8 @@ import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmeldingMetadata
+import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
 import no.nav.tsm.sykmelding.input.core.model.Gradert
 import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.InvalidRule
@@ -98,8 +102,8 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                         helsepersonellKategori = HelsepersonellKategori.LEGE,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
                     ),
-                // TODO dont hardcode
-                arbeidsgiver = IngenArbeidsgiver(),
+                arbeidsgiver =
+                    values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
                 // TODO
                 tilbakedatering = null,
                 // TODO
@@ -161,9 +165,34 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
 
         is SykInnAktivitet.Gradert ->
             Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
+
         is SykInnAktivitet.Avventende -> TODO()
         is SykInnAktivitet.Behandlingsdager -> TODO()
         is SykInnAktivitet.Reisetilskudd -> TODO()
+    }
+
+private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?): ArbeidsgiverInfo =
+    when {
+        this == null -> IngenArbeidsgiver()
+        this.harFlere ->
+            FlereArbeidsgivere(
+                navn = this.arbeidsgivernavn,
+                meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+                // syk-inn-api har ikke noe med disse verdiene å gjøre
+                yrkesbetegnelse = null,
+                stillingsprosent = null,
+                tiltakArbeidsplassen = null,
+            )
+
+        else ->
+            EnArbeidsgiver(
+                meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+                // syk-inn-api har ikke noe med disse verdiene å gjøre
+                navn = null,
+                yrkesbetegnelse = null,
+                stillingsprosent = null,
+                tiltakArbeidsplassen = null,
+            )
     }
 
 private fun SykInnUtdypendeSporsmal?.toUtdypendeOpplysninger(): List<UtdypendeSporsmal>? {
