@@ -5,6 +5,7 @@ import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
@@ -17,6 +18,7 @@ import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
 import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
 import no.nav.tsm.sykmelding.input.core.model.Behandler
+import no.nav.tsm.sykmelding.input.core.model.BistandNav
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
 import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
@@ -106,9 +108,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     ),
                 arbeidsgiver = values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
                 tilbakedatering = values.tilbakedatering?.toTilbakedatering(),
-                // TODO
-                bistandNav = null,
-                // TODO
+                bistandNav = values.meldinger?.toBistandNav(),
                 utdypendeSporsmal = values.utdypendeSporsmal.toUtdypendeOpplysninger(),
             ),
     )
@@ -150,6 +150,13 @@ private fun SykInnTilbakedatering.toTilbakedatering(): Tilbakedatering =
     Tilbakedatering(
         kontaktDato = kontaktdato,
         begrunnelse = begrunnelse,
+    )
+
+private fun SykInnMeldinger.toBistandNav(): BistandNav =
+    BistandNav(
+        beskrivBistand = tilNav,
+        // TODO: Default false?
+        bistandUmiddelbart = false,
     )
 
 private fun SykInnAktivitet.toAktivitet(): Aktivitet =
