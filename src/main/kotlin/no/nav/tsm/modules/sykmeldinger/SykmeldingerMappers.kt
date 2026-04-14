@@ -39,6 +39,9 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                         mellomnavn = pasient.navn.mellomnavn,
                         etternavn = pasient.navn.etternavn,
                         hpr = sykmelder.hpr,
+                        helsepersonellkategori = sykmelder.godkjenninger
+                            .filter { it.helsepersonellkategori?.aktiv != true }
+                            .mapNotNull { it.helsepersonellkategori?.verdi }
                     ),
                 legekontorOrgnr = meta.legekontorOrgnr,
                 legekontorTlf = meta.legekontorTlf,

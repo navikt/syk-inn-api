@@ -81,6 +81,7 @@ class SykmeldingRepo {
                         it[metaPasientNavn] = sykmelding.meta.pasient.toNavnJsonb()
                         it[metaBehandlerHpr] = sykmelding.meta.behandler.hpr
                         it[metaBehandlerNavn] = sykmelding.meta.behandler.toNavnJsonb()
+                        it[metaBehandlerHelsepersonellkategori] = sykmelding.meta.behandler.helsepersonellkategori
                         it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                         it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
                         it[valuesAnnenFravarsgrunn] = sykmelding.values.annenFravarsgrunn?.name
@@ -192,6 +193,7 @@ class SykmeldingRepo {
                                 mellomnavn = navn.mellomnavn,
                                 etternavn = navn.etternavn,
                                 hpr = this[SykmeldingTable.metaBehandlerHpr],
+                                helsepersonellkategori = this[SykmeldingTable.metaBehandlerHelsepersonellkategori]
                             )
                         },
                     legekontorOrgnr = this[SykmeldingTable.metaOrgnummer],

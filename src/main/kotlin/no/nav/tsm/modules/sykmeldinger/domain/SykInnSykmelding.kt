@@ -37,6 +37,7 @@ data class SykInnBehandler(
     override val mellomnavn: String?,
     override val etternavn: String,
     val hpr: String,
+    val helsepersonellkategori: List<String>,
 ) : Navn
 
 data class SykInnSykmeldingMeta(

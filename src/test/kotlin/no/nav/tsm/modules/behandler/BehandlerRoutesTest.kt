@@ -303,7 +303,6 @@ private val fullExampleSykmeldingPayload =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
@@ -344,7 +343,6 @@ private val brokenExampleSykmeldingPayloadBadDiagnoseSystem =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
@@ -385,7 +383,6 @@ private val brokenExampleSykmeldingPayloadUnknownAktivitet =
     |        "type": "DENNE TYPEN AKTIVITET FINNES IKKE",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
@@ -426,7 +423,6 @@ private val brokenExampleSykmeldingPayloadInvalidSykmelderHpr =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
@@ -467,7 +463,6 @@ private val brokenExampleSykmeldingPayloadValidHprButBrokenFnr =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],
@@ -508,7 +503,6 @@ private val exampleSykmeldingPayloadValidHprButSuspendedIdent =
     |        "type": "AKTIVITET_IKKE_MULIG",
     |        "fom": "${LocalDate.now()}",
     |        "tom": "${LocalDate.now()}",
-    |        "medisinskArsak": {"isMedisinskArsak":  true},
     |        "arbeidsrelatertArsak": {"isArbeidsrelatertArsak":  false, "arbeidsrelaterteArsaker":  [], "annenArbeidsrelatertArsak":  null}
     |      }
     |    ],

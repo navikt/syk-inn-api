@@ -95,10 +95,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                             ),
                         adresse = null,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
-                        kontaktinfo =
-                            listOf(
-                                Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)
-                            ),
+                        kontaktinfo = listOf(Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)),
                     ),
                 sykmelder =
                     Sykmelder(
