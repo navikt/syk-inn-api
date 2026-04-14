@@ -38,7 +38,7 @@ CREATE TABLE sykmelding
     meta_pasient_navn                     JSONB       NOT NULL,
     meta_behandler_hpr                    TEXT        NOT NULL,
     meta_behandler_navn                   JSONB       NOT NULL,
-    meta_behandler_helsepersonellkategori TEXT        NOT NULL,
+    meta_behandler_helsepersonellkategori JSONB       NOT NULL,
     meta_orgnummer                        TEXT        NOT NULL,
     meta_telefonnummer                    TEXT        NOT NULL,
     values_pasienten_skal_skjermes        BOOLEAN     NOT NULL,

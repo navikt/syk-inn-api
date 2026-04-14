@@ -95,15 +95,19 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                             ),
                         adresse = null,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
-                        kontaktinfo = listOf(Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)),
+                        kontaktinfo =
+                            listOf(
+                                Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)
+                            ),
                     ),
                 sykmelder =
                     Sykmelder(
-                        // TODO dont hardcode
-                        helsepersonellKategori = HelsepersonellKategori.LEGE,
+                        helsepersonellKategori =
+                            meta.behandler.helsepersonellkategori.toHelsepersonellkategori(),
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
                     ),
-                arbeidsgiver = values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
+                arbeidsgiver =
+                    values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
                 tilbakedatering = values.tilbakedatering?.toTilbakedatering(),
                 bistandNav = values.meldinger?.toBistandNav(),
                 utdypendeSporsmal = values.utdypendeSporsmal.toUtdypendeOpplysninger(),
@@ -144,10 +148,7 @@ private fun SykInnDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
     )
 
 private fun SykInnTilbakedatering.toTilbakedatering(): Tilbakedatering =
-    Tilbakedatering(
-        kontaktDato = kontaktdato,
-        begrunnelse = begrunnelse,
-    )
+    Tilbakedatering(kontaktDato = kontaktdato, begrunnelse = begrunnelse)
 
 private fun SykInnMeldinger.toBistandNav(): BistandNav =
     BistandNav(
@@ -155,6 +156,9 @@ private fun SykInnMeldinger.toBistandNav(): BistandNav =
         // TODO: Default false?
         bistandUmiddelbart = false,
     )
+
+private fun List<String>.toHelsepersonellkategori(): HelsepersonellKategori =
+    map { parseHelsepersonellKategori(it) }.minBy { helsepersonellkategoriPresedence(it) }
 
 private fun SykInnAktivitet.toAktivitet(): Aktivitet =
     when (this) {
