@@ -68,9 +68,6 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
         else RegulaAvsender.IngenAvsender
 
     return RegulaPayload(
-        // TODO: Can be removed from regula, see:
-        // https://github.com/navikt/regulus-regula/pull/14/changes
-        sykmeldingId = UUID.randomUUID().toString(),
         meta = RegulaMeta.Meta(sendtTidspunkt = LocalDateTime.now()),
         pasient = pasient,
         behandler = behandler,
