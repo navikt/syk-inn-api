@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.raise.Raise
+import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
@@ -39,9 +40,9 @@ class SykmeldingerService(
     suspend fun verify(
         sykmelding: UnverifiedSykInnSykmelding
     ): Either<CreateErrors, SykInnSykmeldingRuleResult> =
-        getSykmeldingVerifyResources(sykmelding) { sykmelder, pasient ->
+        getSykmeldingVerifyResources(sykmelding) { sykmelder, previous, pasient ->
             ruleService
-                .verify(sykmelding, sykmelder, pasient)
+                .verify(sykmelding, previous, sykmelder, pasient)
                 .mapLeft { CreateErrors.RuleError }
                 .map { (result, _) -> result }
                 .bind()
@@ -59,7 +60,10 @@ class SykmeldingerService(
             return@either alreadyExists
         }
 
-        getSykmeldingVerifyResources<VerifiedSykInnSykmelding>(sykmelding) { sykmelder, pasient ->
+        getSykmeldingVerifyResources<VerifiedSykInnSykmelding>(sykmelding) {
+                sykmelder,
+                previous,
+                pasient ->
                 ensure(sykmelder is Sykmelder.MedSuspensjon) {
                     logger.error(
                         "Behandler that does not exist in HPR/Btsys tried to create a sykmelding! :O"
@@ -69,7 +73,7 @@ class SykmeldingerService(
                 }
                 val (rules, juridiskVurdering) =
                     ruleService
-                        .verify(sykmelding, sykmelder, pasient)
+                        .verify(sykmelding, previous, sykmelder, pasient)
                         .mapLeft { CreateErrors.RuleError }
                         .bind()
 
@@ -128,7 +132,10 @@ class SykmeldingerService(
     /** Fetches behandler (hpr) and sykmeldt (pdl) in parallel. */
     private suspend fun <Result> getSykmeldingVerifyResources(
         sykmelding: UnverifiedSykInnSykmelding,
-        block: suspend Raise<CreateErrors>.(sykmelder: Sykmelder, pasient: PdlPerson) -> Result,
+        block:
+            suspend Raise<CreateErrors>.(
+                sykmelder: Sykmelder, previous: List<VerifiedSykInnSykmelding>, pasient: PdlPerson,
+            ) -> Result,
     ): Either<CreateErrors, Result> = either {
         /**
          * parZip runs both these resource lookups in parallel, executes the rules and gives us our
@@ -152,8 +159,13 @@ class SykmeldingerService(
                     }
                     .bind()
             },
-        ) { a, b ->
-            block(a, b)
+            {
+                byIdent(sykmelding.meta.pasientIdent)
+                    .mapLeft { CreateErrors.UnknownResourceError }
+                    .bind()
+            },
+        ) { sykmelder, pasient, previous ->
+            block(sykmelder, previous, pasient)
         }
     }
 }

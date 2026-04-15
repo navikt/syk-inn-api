@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.toJuridiskVurdering
@@ -29,6 +30,7 @@ class RuleService {
     @WithSpan
     fun verify(
         sykmelding: UnverifiedSykInnSykmelding,
+        otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
     ): Either<RuleErrors, Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult>> {
@@ -49,6 +51,7 @@ class RuleService {
         return this.executeRegulaRules(
                 behandletTidspunkt = now,
                 sykmelding = sykmelding,
+                otherSykmeldinger = otherSykmeldinger,
                 behandler = regulaBehandler,
                 pasient = regulaPasient,
             )
@@ -59,6 +62,7 @@ class RuleService {
     private fun executeRegulaRules(
         behandletTidspunkt: LocalDateTime,
         sykmelding: UnverifiedSykInnSykmelding,
+        otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
     ): Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult> {
@@ -66,6 +70,7 @@ class RuleService {
             mapUnruledSykInnSykmeldingToRegulaPayload(
                 behandletTidspunkt = behandletTidspunkt,
                 sykmelding = sykmelding,
+                otherSykmeldinger = otherSykmeldinger,
                 behandler = behandler,
                 pasient = pasient,
             )
