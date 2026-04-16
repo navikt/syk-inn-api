@@ -41,7 +41,7 @@ class SykmeldingConsumer(environment: Environment) {
         if (records.isEmpty) return emptyList()
 
         logger.info("Got ${records.count()} records from kafka")
-        return records.map { tryParse(it) }
+        return records.map { tryParse(it) }.map { it.first to it.second?.toVerifiedSykmelding() }
     }
 
     fun subscribe() {
@@ -56,7 +56,7 @@ class SykmeldingConsumer(environment: Environment) {
 
     private fun tryParse(
         record: ConsumerRecord<String, ByteArray?>
-    ): Pair<String, VerifiedSykInnSykmelding?> =
+    ): Pair<String, SykmeldingRecord?> =
         try {
             return record.key() to record.value()?.let { parseAndMapSykmelding(it) }
         } catch (ex: Exception) {
@@ -66,7 +66,7 @@ class SykmeldingConsumer(environment: Environment) {
             )
         }
 
-    private fun parseAndMapSykmelding(bytes: ByteArray): VerifiedSykInnSykmelding {
-        return sykmeldingObjectMapper.readValue<SykmeldingRecord>(bytes).toVerifiedSykmelding()
+    private fun parseAndMapSykmelding(bytes: ByteArray): SykmeldingRecord {
+        return sykmeldingObjectMapper.readValue<SykmeldingRecord>(bytes)
     }
 }

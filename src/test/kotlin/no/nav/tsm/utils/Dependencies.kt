@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
 import java.util.Properties
+import kotlin.time.Duration.Companion.hours
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.KafkaConfig
 import no.nav.tsm.core.KafkaInputProducer
@@ -11,6 +12,7 @@ import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.module
 import no.nav.tsm.plugins.auth.configureAuthentication
 import no.nav.tsm.plugins.configureDatabase
@@ -56,6 +58,7 @@ private fun createIntegrationEnvironment(
                 password = postgres.password,
                 schema = "public"
             ),
+        sykmeldingConfig = SykmeldingConfig(retention = 1.hours),
         kafka =
             KafkaConfig(
                 config =

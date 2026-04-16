@@ -1,9 +1,10 @@
 package no.nav.tsm.core
 
-import io.ktor.server.application.Application
-import io.ktor.server.config.ApplicationConfig
-import io.ktor.server.plugins.di.dependencies
-import java.util.Properties
+import io.ktor.server.application.*
+import io.ktor.server.config.*
+import io.ktor.server.plugins.di.*
+import java.util.*
+import kotlin.time.Duration
 
 enum class RuntimeEnvironments(val nais: String) {
     LOCAL("local"),
@@ -12,6 +13,8 @@ enum class RuntimeEnvironments(val nais: String) {
 }
 
 class Runtime(val env: RuntimeEnvironments, val name: String)
+
+class SykmeldingConfig(val retention: Duration)
 
 class PostgresConfig(
     val url: String,
@@ -43,6 +46,7 @@ class Environment(
     val runtime: Runtime,
     val kafka: KafkaConfig,
     val postgres: PostgresConfig,
+    val sykmeldingConfig: SykmeldingConfig,
     val texas: () -> Texas,
     val external: () -> ExternalApi,
     val auth: () -> Auth,
@@ -80,6 +84,8 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 password = config.property("postgres.password").getString(),
                 schema = config.property("postgres.schema").getString(),
             ),
+        sykmeldingConfig =
+            SykmeldingConfig(retention = config.property("sykmelding.retention").getAs()),
         texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
         external = {
             ExternalApi(

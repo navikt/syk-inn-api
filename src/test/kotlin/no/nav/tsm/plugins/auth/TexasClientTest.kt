@@ -72,6 +72,7 @@ private val testEnv =
         texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
         kafka = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
+        sykmeldingConfig = mockk(relaxed = true),
         external = mockk(relaxed = true),
         auth = mockk(relaxed = true),
     )

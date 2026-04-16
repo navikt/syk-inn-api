@@ -76,6 +76,7 @@ private val testEnv =
         texas = mockk(relaxed = true),
         kafka = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
+        sykmeldingConfig = mockk(relaxed = true),
         external = {
             ExternalApi(
                 btsys = "https://test.btsys.endpoint",
