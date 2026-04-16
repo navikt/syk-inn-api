@@ -11,13 +11,32 @@ fun SykmeldingRecord.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
         sykmeldingId = UUID.fromString(sykmelding.id),
         values = toSykmeldingValues(),
         meta = toMetadata(),
-        result = toResult(),
+        result = validation.toResult(),
     )
 }
 
-private fun SykmeldingRecord.toResult(): SykInnSykmeldingRuleResult {
-    TODO("Not yet implemented")
-}
+private fun ValidationResult.toResult(): SykInnSykmeldingRuleResult =
+    when (this.status) {
+        RuleType.OK -> SykInnSykmeldingRuleResult.OK()
+        RuleType.PENDING,
+        RuleType.INVALID -> {
+            when (val rule: Rule = this.rules.first()) {
+                is OKRule -> SykInnSykmeldingRuleResult.OK()
+                is InvalidRule ->
+                    SykInnSykmeldingRuleResult.Outcome(
+                        type = status,
+                        rule = rule.name,
+                        message = rule.reason.sykmelder,
+                    )
+                is PendingRule ->
+                    SykInnSykmeldingRuleResult.Outcome(
+                        type = status,
+                        rule = rule.name,
+                        message = rule.reason.sykmelder,
+                    )
+            }
+        }
+    }
 
 private fun SykmeldingRecord.toMetadata(): SykInnSykmeldingMeta {
     TODO("Not yet implemented")
@@ -38,6 +57,7 @@ private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
                         )
                     },
             )
+
         is Avventende -> TODO()
         is Behandlingsdager -> TODO()
         is Gradert -> TODO()
@@ -105,16 +125,19 @@ private fun Sykmelding.toTilbakedatering(): SykInnTilbakedatering? {
                 this.tilbakedatering?.kontaktDato,
                 this.tilbakedatering?.begrunnelse,
             )
+
         is Papirsykmelding ->
             SykInnTilbakedatering(
                 this.tilbakedatering?.kontaktDato,
                 this.tilbakedatering?.begrunnelse,
             )
+
         is XmlSykmelding ->
             SykInnTilbakedatering(
                 this.tilbakedatering?.kontaktDato,
                 this.tilbakedatering?.begrunnelse,
             )
+
         is UtenlandskSykmelding -> null
     }
 }
