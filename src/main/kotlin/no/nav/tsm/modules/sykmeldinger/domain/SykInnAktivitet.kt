@@ -10,7 +10,7 @@ sealed interface SykInnAktivitet {
     data class IkkeMulig(
         override val fom: LocalDate,
         override val tom: LocalDate,
-        val arbeidsrelatertArsak: SykInnArbeidsrelatertArsak,
+        val arbeidsrelatertArsak: SykInnArbeidsrelatertArsak?,
     ) : SykInnAktivitet
 
     data class Gradert(

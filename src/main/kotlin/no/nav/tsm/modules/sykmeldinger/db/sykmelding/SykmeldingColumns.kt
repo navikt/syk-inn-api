@@ -43,7 +43,7 @@ sealed interface SykmeldingJsonbAktivitet {
     data class IkkeMulig(
         override val fom: LocalDate,
         override val tom: LocalDate,
-        val arbeidsrelatertArsak: SykmeldingJsonbArbeidsrelatertArsak,
+        val arbeidsrelatertArsak: SykmeldingJsonbArbeidsrelatertArsak?,
     ) : SykmeldingJsonbAktivitet
 
     data class Gradert(
@@ -72,7 +72,6 @@ sealed interface SykmeldingJsonbAktivitet {
 data class SykmeldingJsonbMedisinskArsak(val isMedisinskArsak: Boolean)
 
 data class SykmeldingJsonbArbeidsrelatertArsak(
-    val isArbeidsrelatertArsak: Boolean,
     val arbeidsrelaterteArsaker: List<ArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?,
 )

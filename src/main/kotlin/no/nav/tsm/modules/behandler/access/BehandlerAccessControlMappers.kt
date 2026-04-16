@@ -110,12 +110,12 @@ private fun List<SykInnAktivitet>.toPersistedSykmeldingAktivitetToExistingSykmel
                     tom = aktivitet.tom,
                     arbeidsrelatertArsak =
                         BehandlerSykmeldingArbeidsrelatertArsak(
-                            isArbeidsrelatertArsak =
-                                aktivitet.arbeidsrelatertArsak.isArbeidsrelatertArsak,
+                            isArbeidsrelatertArsak = aktivitet.arbeidsrelatertArsak != null,
                             arbeidsrelaterteArsaker =
-                                aktivitet.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+                                aktivitet.arbeidsrelatertArsak?.arbeidsrelaterteArsaker
+                                    ?: emptyList(),
                             annenArbeidsrelatertArsak =
-                                aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+                                aktivitet.arbeidsrelatertArsak?.annenArbeidsrelatertArsak,
                         ),
                 )
 

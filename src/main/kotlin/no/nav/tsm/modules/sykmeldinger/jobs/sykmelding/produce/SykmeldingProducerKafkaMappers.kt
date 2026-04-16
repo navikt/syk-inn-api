@@ -167,12 +167,12 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
                 fom = fom,
                 tom = tom,
                 arbeidsrelatertArsak =
-                    if (arbeidsrelatertArsak.isArbeidsrelatertArsak == true)
+                    arbeidsrelatertArsak?.let {
                         ArbeidsrelatertArsak(
                             beskrivelse = arbeidsrelatertArsak.annenArbeidsrelatertArsak,
                             arsak = arbeidsrelatertArsak.arbeidsrelaterteArsaker,
                         )
-                    else null,
+                    },
                 // medisinskArsak er soft deprekert, settes til null med vilje
                 medisinskArsak = null,
             )

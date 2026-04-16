@@ -46,7 +46,6 @@ data class SykInnUtdypendeSporsmalSvar(val sporsmalstekst: String, val svar: Str
 data class SykInnMedisinskArsak(val isMedisinskArsak: Boolean)
 
 data class SykInnArbeidsrelatertArsak(
-    val isArbeidsrelatertArsak: Boolean,
     val arbeidsrelaterteArsaker: List<ArbeidsrelatertArsakType>,
     val annenArbeidsrelatertArsak: String?,
 )

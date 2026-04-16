@@ -49,11 +49,10 @@ private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
                 fom = this.fom,
                 tom = this.tom,
                 arbeidsrelatertArsak =
-                    this.arbeidsrelatertArsak.let { arsak ->
+                    this.arbeidsrelatertArsak?.let { arsak ->
                         SykInnArbeidsrelatertArsak(
-                            isArbeidsrelatertArsak = arsak != null,
-                            arbeidsrelaterteArsaker = arsak?.arsak ?: emptyList(),
-                            annenArbeidsrelatertArsak = arsak?.beskrivelse,
+                            arbeidsrelaterteArsaker = arsak.arsak,
+                            annenArbeidsrelatertArsak = arsak.beskrivelse,
                         )
                     },
             )

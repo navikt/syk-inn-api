@@ -157,16 +157,21 @@ private fun OpprettSykmelding.Aktivitet.toSykInnApiAktivitet(): SykInnAktivitet 
             SykInnAktivitet.IkkeMulig(
                 fom = this.fom,
                 tom = this.tom,
-                arbeidsrelatertArsak =
-                    SykInnArbeidsrelatertArsak(
-                        isArbeidsrelatertArsak = this.arbeidsrelatertArsak.isArbeidsrelatertArsak,
-                        arbeidsrelaterteArsaker = this.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
-                        annenArbeidsrelatertArsak =
-                            this.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
-                    ),
+                arbeidsrelatertArsak = toSykInnArbeidsrelatertArsak(),
             )
 
         is OpprettSykmelding.Aktivitet.Reisetilskudd ->
             SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
     }
 }
+
+private fun OpprettSykmelding.Aktivitet.IkkeMulig.toSykInnArbeidsrelatertArsak():
+    SykInnArbeidsrelatertArsak? =
+    if (this.arbeidsrelatertArsak.isArbeidsrelatertArsak) {
+        SykInnArbeidsrelatertArsak(
+            arbeidsrelaterteArsaker = this.arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+            annenArbeidsrelatertArsak = this.arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+        )
+    } else {
+        null
+    }

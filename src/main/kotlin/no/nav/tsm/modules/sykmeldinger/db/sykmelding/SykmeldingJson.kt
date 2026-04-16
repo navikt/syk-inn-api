@@ -196,12 +196,12 @@ object FromJsonb {
                     fom = fom,
                     tom = tom,
                     arbeidsrelatertArsak =
-                        SykmeldingJsonbArbeidsrelatertArsak(
-                            isArbeidsrelatertArsak = arbeidsrelatertArsak.isArbeidsrelatertArsak,
-                            arbeidsrelaterteArsaker = arbeidsrelatertArsak.arbeidsrelaterteArsaker,
-                            annenArbeidsrelatertArsak =
-                                arbeidsrelatertArsak.annenArbeidsrelatertArsak,
-                        ),
+                        arbeidsrelatertArsak?.let {
+                            SykmeldingJsonbArbeidsrelatertArsak(
+                                it.arbeidsrelaterteArsaker,
+                                it.annenArbeidsrelatertArsak,
+                            )
+                        },
                 )
 
             is SykInnAktivitet.Gradert ->
@@ -237,12 +237,14 @@ object FromJsonb {
                     fom = fom,
                     tom = tom,
                     arbeidsrelatertArsak =
-                        SykInnArbeidsrelatertArsak(
-                            isArbeidsrelatertArsak = arbeidsrelatertArsak.isArbeidsrelatertArsak,
-                            arbeidsrelaterteArsaker = arbeidsrelatertArsak.arbeidsrelaterteArsaker,
-                            annenArbeidsrelatertArsak =
-                                arbeidsrelatertArsak.annenArbeidsrelatertArsak,
-                        ),
+                        arbeidsrelatertArsak?.let {
+                            SykInnArbeidsrelatertArsak(
+                                arbeidsrelaterteArsaker =
+                                    arbeidsrelatertArsak.arbeidsrelaterteArsaker,
+                                annenArbeidsrelatertArsak =
+                                    arbeidsrelatertArsak.annenArbeidsrelatertArsak,
+                            )
+                        },
                 )
 
             is SykmeldingJsonbAktivitet.Gradert ->
