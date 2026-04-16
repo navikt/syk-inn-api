@@ -3,10 +3,12 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.Duration
-import java.util.Properties
-import kotlin.to
+import java.util.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
+import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -34,12 +36,12 @@ class SykmeldingConsumer(environment: Environment) {
         consumer = KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
     }
 
-    fun poll(): List<Pair<String, Map<String, String>?>> {
+    fun poll(): List<Pair<String, VerifiedSykInnSykmelding?>> {
         val records = consumer.poll(duration)
         if (records.isEmpty) return emptyList()
 
         logger.info("Got ${records.count()} records from kafka")
-        return records.map { it.key() to tryParse(it) }
+        return records.map { tryParse(it) }
     }
 
     fun subscribe() {
@@ -52,13 +54,19 @@ class SykmeldingConsumer(environment: Environment) {
         consumer.unsubscribe()
     }
 
-    private fun tryParse(record: ConsumerRecord<String, ByteArray?>): Map<String, String>? =
+    private fun tryParse(
+        record: ConsumerRecord<String, ByteArray?>
+    ): Pair<String, VerifiedSykInnSykmelding?> =
         try {
-            record.value()?.let { kafkaObjectMapper.readValue(it) }
+            return record.key() to record.value()?.let { parseAndMapSykmelding(it) }
         } catch (ex: Exception) {
             throw IllegalStateException(
                 "Got exception during record deserialization for record with key ${record.key()} and offset ${record.offset()}",
                 ex,
             )
         }
+
+    private fun parseAndMapSykmelding(bytes: ByteArray): VerifiedSykInnSykmelding {
+        return sykmeldingObjectMapper.readValue<SykmeldingRecord>(bytes).toVerifiedSykmelding()
+    }
 }

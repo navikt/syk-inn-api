@@ -17,9 +17,9 @@ data class SykmeldingJsonbMeldinger(val tilNav: String?, val tilArbeidsgiver: St
 
 data class SykmeldingJsonbYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)
 
-data class SykmeldingJsonbArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String)
+data class SykmeldingJsonbArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String?)
 
-data class SykmeldingJsonbTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
+data class SykmeldingJsonbTilbakedatering(val startdato: LocalDate?, val begrunnelse: String?)
 
 data class SykmeldingJsonbUtdypendeSporsmal(val sporsmalstekst: String, val svar: String)
 

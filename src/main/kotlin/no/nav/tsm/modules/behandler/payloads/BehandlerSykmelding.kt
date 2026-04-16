@@ -101,9 +101,9 @@ data class BehandlerSykmeldingDiagnoseInfo(
 
 data class BehandlerSykmeldingRuleResult(val result: RuleType, val cause: String?)
 
-data class BehandlerSykmeldingTilbakedatering(val startdato: LocalDate, val begrunnelse: String)
+data class BehandlerSykmeldingTilbakedatering(val startdato: LocalDate?, val begrunnelse: String?)
 
-data class BehandlerSykmeldingArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String)
+data class BehandlerSykmeldingArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String?)
 
 data class BehandlerSykmeldingYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)
 

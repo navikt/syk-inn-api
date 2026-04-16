@@ -1,7 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.rules.mappers
 
 import java.time.LocalDateTime
-import java.util.UUID
 import kotlin.collections.listOf
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.diagnoser.ICD10

@@ -7,6 +7,7 @@ import no.nav.tsm.core.dynamicDependencies
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningProducerJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumer
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerJob
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerService
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.SykmeldingProducerJob
@@ -18,6 +19,7 @@ fun Application.configureJobsDependencies() {
     val environment: Environment by dependencies
 
     dependencies {
+        provide<SykmeldingConsumerRepo>(SykmeldingConsumerRepo::class)
         provide<SykmeldingConsumer>(SykmeldingConsumer::class)
         provide<SykmeldingConsumerService>(SykmeldingConsumerService::class)
         provide<SykmeldingConsumerJob>(SykmeldingConsumerJob::class)

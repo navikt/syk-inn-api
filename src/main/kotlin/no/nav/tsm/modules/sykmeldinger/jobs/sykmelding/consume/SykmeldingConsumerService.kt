@@ -1,14 +1,17 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 
-class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
+class SykmeldingConsumerService(
+    private val sykmeldingConsumerRepo: SykmeldingConsumerRepo,
+    private val consumer: SykmeldingConsumer,
+) {
     private val logger = logger()
 
     suspend fun consume() =
@@ -31,24 +34,24 @@ class SykmeldingConsumerService(private val consumer: SykmeldingConsumer) {
         }
 
     @WithSpan
-    private suspend fun handleSykmelding(key: String, value: Map<String, String>?) {
-        logger.info(
-            "Handling record with key $key and value of size ${value?.size ?: "null"}, values: ${
-                // TODO: Debug only
-                jacksonObjectMapper().writeValueAsString(
-                    value
-                )
-            }"
-        )
-
-        /**
-         * TODO: The rules are already executed here, should we handle this is service or should
-         *   Kafka rawdog Repo directly?
-         */
+    private suspend fun handleSykmelding(key: String, sykmelding: VerifiedSykInnSykmelding?) {
+        when (sykmelding) {
+            null -> {
+                logger.debug("Tombstone for sykmelding $key, deleting")
+                try {
+                    val sykmeldingId = UUID.fromString(key)
+                    val deleted = sykmeldingConsumerRepo.delete(sykmeldingId)
+                    logger.debug(
+                        "${if (deleted >= 1) "Deleted" else "Sykmelding did not exist" } sykmeldingId: $sykmeldingId"
+                    )
+                } catch (ex: Exception) {
+                    logger.error("Could not delete sykmelding", ex)
+                }
+            }
+            else -> {
+                sykmeldingConsumerRepo.insert(sykmelding)
+                logger.debug("Sykmelding inserted ${sykmelding.sykmeldingId}")
+            }
+        }
     }
-}
-
-/** Just a stub, should map from SykmledingKafkaRecord → SykInnSykmelding */
-private fun Map<String, String>?.toSykInnSykmelding(): VerifiedSykInnSykmelding {
-    TODO("Not yet implemented")
 }
