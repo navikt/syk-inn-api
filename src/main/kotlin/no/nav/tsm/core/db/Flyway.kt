@@ -1,12 +1,15 @@
 package no.nav.tsm.core.db
 
+import no.nav.tsm.core.PostgresConfig
 import org.flywaydb.core.Flyway
 
-fun runFlywayMigrations(url: String, user: String, password: String) {
+fun runFlywayMigrations(postgresConfig: PostgresConfig) {
     val flyway =
         Flyway.configure()
             .cleanDisabled(false)
-            .dataSource(url, user, password)
+            .dataSource(postgresConfig.url, postgresConfig.username, postgresConfig.password)
+            .defaultSchema(postgresConfig.schema)
+            .createSchemas(true)
             .locations("db/migrations")
             .load()
 

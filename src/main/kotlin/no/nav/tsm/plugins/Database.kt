@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 fun Application.configureDatabase() {
     val env: Environment by dependencies
 
-    runFlywayMigrations(env.postgres.url, env.postgres.username, env.postgres.password)
+    runFlywayMigrations(env.postgres)
 
     R2dbcDatabase.connect(
         url = env.postgres.r2dbUrl,

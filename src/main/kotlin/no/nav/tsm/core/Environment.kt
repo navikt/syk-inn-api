@@ -17,7 +17,8 @@ class PostgresConfig(
     val url: String,
     val username: String,
     val password: String,
-    val r2dbUrl: String = url.replace("jdbc", "r2dbc"),
+    val schema: String,
+    val r2dbUrl: String = "${url.replace("jdbc", "r2dbc")}?schema=$schema",
 )
 
 class Texas(val tokenEndpoint: String)
@@ -77,6 +78,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 url = config.property("postgres.url").getString(),
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
+                schema = config.property("postgres.schema").getString(),
             ),
         texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
         external = {
