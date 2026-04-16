@@ -3,12 +3,24 @@ package no.nav.tsm.utils
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.kotest.matchers.equals.shouldEqual
+import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import java.util.Properties
 import kotlin.collections.set
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
+import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
+import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
+import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
+import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
+import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
+import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -47,7 +59,88 @@ object KafkaTestConsumer {
 
 object KafkaTestUtils {
     fun expectAllValues(sykmelding: BehandlerSykmeldingFull, record: SykmeldingRecord) {
-        sykmelding.sykmeldingId.toString() shouldEqual record.sykmelding.id
-        // TODO: Assert all the values
+        val digitalSykmelding = record.sykmelding.shouldBeInstanceOf<DigitalSykmelding>()
+        val digitalMetadata = record.metadata.shouldBeInstanceOf<Digital>()
+        val medisinskVurdering =
+            digitalSykmelding.medisinskVurdering.shouldBeInstanceOf<DigitalMedisinskVurdering>()
+
+        assertSoftly {
+            // id
+            sykmelding.sykmeldingId.toString() shouldBe digitalSykmelding.id
+
+            // meta
+            sykmelding.meta.pasient.ident shouldBe digitalSykmelding.pasient.fnr
+            sykmelding.meta.sykmelder.hpr shouldBe
+                digitalSykmelding.behandler.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
+            sykmelding.meta.legekontorOrgnr shouldBe digitalMetadata.orgnummer
+            sykmelding.meta.legekontorTlf shouldBe
+                digitalSykmelding.behandler.kontaktinfo
+                    .firstOrNull { it.type == KontaktinfoType.TLF }
+                    ?.value
+
+            // medisinsk vurdering
+            sykmelding.values.pasientenSkalSkjermes shouldBe medisinskVurdering.skjermetForPasient
+            sykmelding.values.svangerskapsrelatert shouldBe medisinskVurdering.svangerskap
+            sykmelding.values.annenFravarsgrunn shouldBe medisinskVurdering.annenFravarsgrunn
+            sykmelding.values.hoveddiagnose?.code shouldBe medisinskVurdering.hovedDiagnose?.kode
+            sykmelding.values.bidiagnoser?.map { it.code } shouldBe
+                medisinskVurdering.biDiagnoser?.map { it.kode }
+            sykmelding.values.yrkesskade?.skadedato shouldBe
+                medisinskVurdering.yrkesskade?.yrkesskadeDato
+
+            // aktivitet
+            sykmelding.values.aktivitet shouldHaveSize digitalSykmelding.aktivitet.size
+            sykmelding.values.aktivitet.zip(digitalSykmelding.aktivitet).forEach {
+                (expected, actual) ->
+                expected.fom shouldBe actual.fom
+                expected.tom shouldBe actual.tom
+            }
+
+            // arbeidsgiver
+            when {
+                sykmelding.values.arbeidsgiver?.harFlere == true -> {
+                    val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<FlereArbeidsgivere>()
+                    sykmelding.values.arbeidsgiver!!.arbeidsgivernavn shouldBe ag.navn
+                    sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
+                }
+                sykmelding.values.arbeidsgiver?.harFlere == false -> {
+                    val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<EnArbeidsgiver>()
+                    sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
+                }
+                else -> digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<IngenArbeidsgiver>()
+            }
+
+            // tilbakedatering
+            sykmelding.values.tilbakedatering?.startdato shouldBe
+                digitalSykmelding.tilbakedatering?.kontaktDato
+            sykmelding.values.tilbakedatering?.begrunnelse shouldBe
+                digitalSykmelding.tilbakedatering?.begrunnelse
+
+            // meldinger
+            sykmelding.values.meldinger?.tilNav shouldBe
+                digitalSykmelding.bistandNav?.beskrivBistand
+
+            // utfall
+            sykmelding.utfall.result shouldBe record.validation.status
+
+            // utdypendeSporsmal - check all svar values are present in record
+            val recordSvar = digitalSykmelding.utdypendeSporsmal?.map { it.svar }.orEmpty()
+            sykmelding.values.utdypendeSporsmal?.run {
+                listOfNotNull(
+                        utfordringerMedArbeid?.svar,
+                        medisinskOppsummering?.svar,
+                        hensynPaArbeidsplassen?.svar,
+                        sykdomsutvikling?.svar,
+                        arbeidsrelaterteUtfordringer?.svar,
+                        behandlingOgFremtidigArbeid?.svar,
+                        uavklarteForhold?.svar,
+                        oppdatertMedisinskStatus?.svar,
+                        realistiskMestringArbeid?.svar,
+                        forventetHelsetilstandUtvikling?.svar,
+                        medisinskeHensyn?.svar,
+                    )
+                    .forEach { svar -> recordSvar shouldContain svar }
+            }
+        }
     }
 }
