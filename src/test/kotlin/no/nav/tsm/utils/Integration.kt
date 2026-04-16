@@ -10,18 +10,20 @@ abstract class WithPostgresql {
     companion object {
         val postgres = PostgreSQLContainer("postgres:17-alpine").apply { start() }
 
+        val postgresConfig =
+            PostgresConfig(
+                url = postgres.jdbcUrl,
+                username = postgres.username,
+                password = postgres.password,
+                schema = "public"
+            )
+
+
         fun runMigrations(clean: Boolean = false) {
-            runFlywayMigrations(postgres.jdbcUrl, postgres.username, postgres.password)
+            runFlywayMigrations(postgresConfig)
         }
 
         fun connect() {
-            val postgresConfig =
-                PostgresConfig(
-                    url = postgres.jdbcUrl,
-                    username = postgres.username,
-                    password = postgres.password,
-                )
-
             R2dbcDatabase.connect(
                 url = postgresConfig.r2dbUrl,
                 user = postgresConfig.username,

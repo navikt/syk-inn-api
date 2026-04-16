@@ -54,6 +54,7 @@ private fun createIntegrationEnvironment(
                 url = postgres.jdbcUrl,
                 username = postgres.username,
                 password = postgres.password,
+                schema = "public"
             ),
         kafka =
             KafkaConfig(
