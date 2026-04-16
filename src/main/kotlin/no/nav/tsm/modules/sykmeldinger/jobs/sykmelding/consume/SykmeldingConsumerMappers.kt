@@ -57,10 +57,26 @@ private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
                     },
             )
 
-        is Avventende -> TODO()
-        is Behandlingsdager -> TODO()
-        is Gradert -> TODO()
-        is Reisetilskudd -> TODO()
+        is Gradert ->
+            SykInnAktivitet.Gradert(
+                fom = this.fom,
+                tom = this.tom,
+                grad = this.grad,
+                reisetilskudd = this.reisetilskudd,
+            )
+        is Avventende ->
+            SykInnAktivitet.Avventende(
+                fom = this.fom,
+                tom = this.tom,
+                innspillTilArbeidsgiver = this.innspillTilArbeidsgiver,
+            )
+        is Behandlingsdager ->
+            SykInnAktivitet.Behandlingsdager(
+                fom = this.fom,
+                tom = this.tom,
+                antallBehandlingsdager = this.antallBehandlingsdager,
+            )
+        is Reisetilskudd -> SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
     }
 }
 
