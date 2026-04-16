@@ -56,7 +56,7 @@ private fun createIntegrationEnvironment(
                 url = postgres.jdbcUrl,
                 username = postgres.username,
                 password = postgres.password,
-                schema = "public"
+                schema = "public",
             ),
         sykmeldingConfig = SykmeldingConfig(retention = 1.hours),
         kafka =

@@ -3,7 +3,6 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.time.toJavaDuration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -26,7 +25,6 @@ class SykmeldingConsumerService(
             try {
                 while (isActive) {
                     val records = consumer.poll()
-
                     for ((key, sykmelding) in records) {
                         handleSykmelding(key, sykmelding)
                     }
@@ -67,6 +65,6 @@ class SykmeldingConsumerService(
     }
 
     private fun isOverRetentionPeriod(sykmelding: VerifiedSykInnSykmelding): Boolean =
-        sykmelding.values.aktivitet.maxOf { it.tom } >
-            (LocalDate.now() - sykmeldingConfig.retention.toJavaDuration())
+        sykmelding.values.aktivitet.maxOf { it.tom } <
+            (LocalDate.now().minusDays(sykmeldingConfig.retention.inWholeDays))
 }

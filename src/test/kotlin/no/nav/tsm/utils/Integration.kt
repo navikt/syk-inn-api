@@ -15,9 +15,8 @@ abstract class WithPostgresql {
                 url = postgres.jdbcUrl,
                 username = postgres.username,
                 password = postgres.password,
-                schema = "public"
+                schema = "public",
             )
-
 
         fun runMigrations(clean: Boolean = false) {
             runFlywayMigrations(postgresConfig)
