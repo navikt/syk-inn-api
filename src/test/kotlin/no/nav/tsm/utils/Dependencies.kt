@@ -54,9 +54,12 @@ private fun createIntegrationEnvironment(
         postgres =
             PostgresConfig(
                 url = postgres.jdbcUrl.removePrefix("jdbc:"),
+                r2 = postgres.jdbcUrl.removePrefix("jdbc:"),
                 username = postgres.username,
                 password = postgres.password,
                 schema = "public",
+                sslCert = "",
+                sslKeyPk8 = "",
             ),
         sykmeldingConfig = SykmeldingConfig(retention = 1.hours),
         kafka =

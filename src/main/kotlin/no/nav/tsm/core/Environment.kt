@@ -17,7 +17,10 @@ class Runtime(val env: RuntimeEnvironments, val name: String)
 class SykmeldingConfig(val retention: Duration)
 
 class PostgresConfig(
+    val sslCert: String,
+    val sslKeyPk8: String,
     val url: String,
+    val r2: String,
     val username: String,
     val password: String,
     val schema: String,
@@ -78,7 +81,10 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         kafka = kafkaProperties,
         postgres =
             PostgresConfig(
+                sslCert = config.property("postgres.sslCert").getString(),
+                sslKeyPk8 = config.property("postgres.sslKeyPk8").getString(),
                 url = config.property("postgres.url").getString(),
+                r2 = config.property("postgres.r2").getString(),
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
                 schema = config.property("postgres.schema").getString(),
