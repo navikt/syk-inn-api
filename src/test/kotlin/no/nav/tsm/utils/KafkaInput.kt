@@ -44,7 +44,7 @@ object KafkaTestConsumer {
         println(container.bootstrapServers)
 
         kafkaProperties.apply {
-            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-ktor"
+            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-tests"
             this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
             this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "true"
         }
@@ -100,7 +100,7 @@ object KafkaTestUtils {
             when {
                 sykmelding.values.arbeidsgiver?.harFlere == true -> {
                     val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<FlereArbeidsgivere>()
-                    sykmelding.values.arbeidsgiver!!.arbeidsgivernavn shouldBe ag.navn
+                    sykmelding.values.arbeidsgiver.arbeidsgivernavn shouldBe ag.navn
                     sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
                 }
                 sykmelding.values.arbeidsgiver?.harFlere == false -> {

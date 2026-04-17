@@ -21,7 +21,6 @@ class PostgresConfig(
     val username: String,
     val password: String,
     val schema: String,
-    val r2dbUrl: String = "${url.replace("jdbc", "r2dbc")}?schema=$schema",
 )
 
 class Texas(val tokenEndpoint: String)

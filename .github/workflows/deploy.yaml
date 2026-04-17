@@ -23,7 +23,7 @@ jobs:
       - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
         with:
-          app: "syk-inn-api-ktor"
+          app: "syk-inn-api"
           team: "tsm"
           salsa: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,7 +58,7 @@ jobs:
   #   NOPE! - Don't even think about it yet
 
   build-for-gpr:
-    name: Publish a version of syk-inn-api-ktor to GPR for use in testing
+    name: Publish a version of syk-inn-api to GPR for use in testing
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -70,7 +70,7 @@ jobs:
         run: |
           IMAGE="ghcr.io/${{ github.repository }}-ktor-test"
           TAGS="${IMAGE}:${{ github.sha }}"
-          if [[ "${{ github.ref_name }}" == "main" || "${{ github.ref_name }}" == dev* ]]; then
+          if [[ "${{ github.ref_name }}" == "main" || "${{ github.ref_name }}" == dev*  || "${{ github.ref_name }}" == feat/ktor ]]; then
             TAGS="${TAGS}\n${IMAGE}:latest"
           fi
           echo -e "tags<<EOF\n${TAGS}\nEOF" >> "$GITHUB_OUTPUT"
@@ -91,8 +91,6 @@ jobs:
     name: Runs syk-inn integration tests with the newest syk-inn-api from GPR
     needs: build-for-gpr
     runs-on: ubuntu-latest
-    # Because we expect it to fail for a while
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
         with:

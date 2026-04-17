@@ -53,7 +53,7 @@ private fun createIntegrationEnvironment(
         runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
         postgres =
             PostgresConfig(
-                url = postgres.jdbcUrl,
+                url = postgres.jdbcUrl.removePrefix("jdbc:"),
                 username = postgres.username,
                 password = postgres.password,
                 schema = "public",

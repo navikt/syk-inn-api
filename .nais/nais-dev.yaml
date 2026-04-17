@@ -1,8 +1,7 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  # TODO: Temporary deploy this as its own app
-  name: syk-inn-api-ktor
+  name: syk-inn-api
   namespace: tsm
   labels:
     team: tsm
@@ -11,12 +10,10 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_17
-        # TODO: Temporary deploy this as its own app
-        name: syk-inn-api-ktor-instance
+        name: syk-inn-api-instance
         cascadingDelete: false
         databases:
-          # TODO: Temporary deploy this as its own app
-          - name: syk-inn-api-ktor
+          - name: syk-inn-api
             envVarPrefix: DB
         diskAutoresize: true
         highAvailability: false

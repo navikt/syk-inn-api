@@ -12,7 +12,7 @@ abstract class WithPostgresql {
 
         val postgresConfig =
             PostgresConfig(
-                url = postgres.jdbcUrl,
+                url = postgres.jdbcUrl.removePrefix("jdbc:"),
                 username = postgres.username,
                 password = postgres.password,
                 schema = "public",
@@ -24,7 +24,7 @@ abstract class WithPostgresql {
 
         fun connect() {
             R2dbcDatabase.connect(
-                url = postgresConfig.r2dbUrl,
+                url = "r2dbc:${postgresConfig.url}",
                 user = postgresConfig.username,
                 password = postgresConfig.password,
             )

@@ -7,7 +7,7 @@ fun runFlywayMigrations(postgresConfig: PostgresConfig) {
     val flyway =
         Flyway.configure()
             .cleanDisabled(false)
-            .dataSource(postgresConfig.url, postgresConfig.username, postgresConfig.password)
+            .dataSource("jdbc:${postgresConfig.url}", postgresConfig.username, postgresConfig.password)
             .defaultSchema(postgresConfig.schema)
             .createSchemas(true)
             .locations("db/migrations")

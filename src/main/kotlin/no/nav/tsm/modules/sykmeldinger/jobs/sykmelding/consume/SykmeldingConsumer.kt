@@ -28,7 +28,8 @@ class SykmeldingConsumer(environment: Environment) {
         val kafkaProperties = Properties(environment.kafka.config)
 
         kafkaProperties.apply {
-            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-ktor"
+            // Unique group id while we test, when we go live this will be a more distinct name
+            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-new-temp-1"
             this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
             this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "true"
         }

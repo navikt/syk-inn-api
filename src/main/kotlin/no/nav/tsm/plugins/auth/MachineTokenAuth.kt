@@ -3,6 +3,7 @@ package no.nav.tsm.plugins.auth
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.di.dependencies
 import java.net.URI
@@ -25,6 +26,7 @@ fun Application.configureMachineTokenAuth() {
     authentication {
         jwt(MACHINE_TOKEN_AUTH) {
             verifier(jwkProvider, entra.issuer) { withAudience(entra.audience) }
+            validate { credentials -> JWTPrincipal(credentials.payload) }
         }
     }
 }
