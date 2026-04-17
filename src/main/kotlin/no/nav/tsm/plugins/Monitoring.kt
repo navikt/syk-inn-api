@@ -13,6 +13,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.tsm.core.db.dbQuery
 import org.slf4j.event.Level
 
 fun Application.configureMonitoring() {
@@ -20,7 +21,19 @@ fun Application.configureMonitoring() {
 
     install(KHealth) {
         healthCheckPath = "/internal/health/alive"
-        readyCheckPath = "/internal/health/ready"
+
+        readyChecks {
+            readyCheckPath = "/internal/health/ready"
+
+            check("database ready") {
+                try {
+                    dbQuery { exec("SELECT 1") }
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+        }
     }
     install(ShutDownUrl.ApplicationCallPlugin) {
         shutDownUrl = "/internal/shutdown"

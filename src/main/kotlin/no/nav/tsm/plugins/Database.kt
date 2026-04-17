@@ -17,10 +17,12 @@ fun Application.configureDatabase() {
     runFlywayMigrations(env.postgres)
 
     R2dbcDatabase.connect(
-        url = "r2dbc:${env.postgres.url}".let { url ->
-            val separator = if ('?' in url) "&" else "?"
-            "$url${separator}schema=${env.postgres.schema}"
-        },
+        url =
+            "r2dbc:${env.postgres.url}"
+                .let { url ->
+                    val separator = if ('?' in url) "&" else "?"
+                    "$url${separator}schema=${env.postgres.schema}"
+                },
         user = env.postgres.username,
         password = env.postgres.password,
     )
