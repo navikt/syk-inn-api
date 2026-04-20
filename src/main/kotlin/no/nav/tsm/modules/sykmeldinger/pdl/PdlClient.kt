@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.pdl
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -36,7 +37,14 @@ class PdlCloudClient(
     private val logger = logger()
 
     private val pdlHttpClient = httpClient.config {
-        install(ContentNegotiation) { jackson { registerModule(JavaTimeModule()) } }
+        install(ContentNegotiation) {
+            jackson {
+                registerModule(JavaTimeModule())
+
+                // tsm-pdl-cache responds with some values we don't care about
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
     }
 
     @WithSpan
