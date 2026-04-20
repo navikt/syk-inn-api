@@ -6,29 +6,19 @@ import arrow.core.right
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.callid.CallId
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.Named
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.common.Navn
 import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
-
-sealed interface HprClient {
-
-    enum class HprErrors {
-        NotFound,
-        UnknownError,
-    }
-
-    suspend fun getSykmelderByHpr(behandlerHpr: String): Either<HprErrors, SykmelderMedHpr>
-
-    suspend fun getSykmelderByIdent(behandlerIdent: String): Either<HprErrors, SykmelderMedHpr>
-}
 
 class HprCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
@@ -39,6 +29,7 @@ class HprCloudClient(
 
     private val httpClient: HttpClient = httpClient.config {
         install(CallId) { intercept { request, callId -> request.header("Nav-CallId", callId) } }
+        install(ContentNegotiation) { jackson {} }
     }
 
     override suspend fun getSykmelderByHpr(

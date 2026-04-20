@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.clients
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
@@ -15,12 +15,9 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprSykmelder
 import no.nav.tsm.utils.testJsonObjectMapper
 
-class HprClientTest {
+class HprCloudClientTest {
 
     @Test
     fun `should return sykmelder based on hpr number`() = runTest {

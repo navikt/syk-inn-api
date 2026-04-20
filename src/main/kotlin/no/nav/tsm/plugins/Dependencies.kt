@@ -2,8 +2,6 @@ package no.nav.tsm.plugins
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache5.*
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import no.nav.tsm.core.Environment
@@ -18,5 +16,4 @@ fun Application.configureDependencies() {
     }
 }
 
-private fun configureBaseHttpClient(): HttpClient =
-    HttpClient(Apache5) { install(ContentNegotiation) { jackson() } }
+private fun configureBaseHttpClient(): HttpClient = HttpClient(Apache5) {}
