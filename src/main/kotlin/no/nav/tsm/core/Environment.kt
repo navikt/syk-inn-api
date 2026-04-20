@@ -16,11 +16,11 @@ class Runtime(val env: RuntimeEnvironments, val name: String)
 
 class SykmeldingConfig(val retention: Duration)
 
+class PostgresR2DBCConfig(val url: String, val sslCert: String?, val sslKeyPk8: String?)
+
 class PostgresConfig(
-    val sslCert: String,
-    val sslKeyPk8: String,
-    val url: String,
-    val r2: String,
+    val jdbc: String,
+    val r2: PostgresR2DBCConfig,
     val username: String,
     val password: String,
     val schema: String,
@@ -81,10 +81,13 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         kafka = kafkaProperties,
         postgres =
             PostgresConfig(
-                sslCert = config.property("postgres.sslCert").getString(),
-                sslKeyPk8 = config.property("postgres.sslKeyPk8").getString(),
-                url = config.property("postgres.url").getString(),
-                r2 = config.property("postgres.r2").getString(),
+                jdbc = config.property("postgres.jdbc").getString(),
+                r2 =
+                    PostgresR2DBCConfig(
+                        url = config.property("postgres.r2dbc.url").getString(),
+                        sslCert = config.propertyOrNull("postgres.r2dbc.sslCert")?.getString(),
+                        sslKeyPk8 = config.propertyOrNull("postgres.r2dbc.sslKeyPk8")?.getString(),
+                    ),
                 username = config.property("postgres.username").getString(),
                 password = config.property("postgres.password").getString(),
                 schema = config.property("postgres.schema").getString(),

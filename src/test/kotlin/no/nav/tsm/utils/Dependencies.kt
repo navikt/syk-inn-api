@@ -10,6 +10,7 @@ import no.nav.tsm.core.KafkaConfig
 import no.nav.tsm.core.KafkaInputProducer
 import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
+import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.SykmeldingConfig
@@ -45,21 +46,21 @@ fun Application.configureFullIntegrationTests(
     module()
 }
 
-private fun createIntegrationEnvironment(
-    postgres: PostgreSQLContainer,
-    kafka: ConfluentKafkaContainer?,
-) =
+fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
     Environment(
         runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
         postgres =
             PostgresConfig(
-                url = postgres.jdbcUrl.removePrefix("jdbc:"),
-                r2 = postgres.jdbcUrl.removePrefix("jdbc:"),
+                jdbc = postgres.jdbcUrl,
+                r2 =
+                    PostgresR2DBCConfig(
+                        url = "r2dbc:${postgres.jdbcUrl.removePrefix("jdbc:")}",
+                        sslCert = null,
+                        sslKeyPk8 = null,
+                    ),
                 username = postgres.username,
                 password = postgres.password,
                 schema = "public",
-                sslCert = "",
-                sslKeyPk8 = "",
             ),
         sykmeldingConfig = SykmeldingConfig(retention = 1.hours),
         kafka =

@@ -1,38 +1,13 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17-alpine
+    container_name: syk-inn-api-dev-postgres
     environment:
-      POSTGRES_DB: syk-inn-api
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: syk-inn-api
     ports:
-      - "7969:5432"
-    volumes:
-      - ./scripts/certs/server.crt:/tmp/pg-ssl/server.crt:ro
-      - ./scripts/certs/server.key:/tmp/pg-ssl/server.key:ro
-      - ./scripts/certs/root-cert.pem:/tmp/pg-ssl/root-cert.pem:ro
-      - ./scripts/certs/pg_hba.conf:/tmp/pg-ssl/pg_hba.conf:ro
-    command:
-      - bash
-      - -c
-      - |
-        set -e
-        install -d -o postgres -g postgres -m 0755 /etc/pg-ssl
-        install -o postgres -g postgres -m 0600 /tmp/pg-ssl/server.key    /etc/pg-ssl/server.key
-        install -o postgres -g postgres -m 0644 /tmp/pg-ssl/server.crt    /etc/pg-ssl/server.crt
-        install -o postgres -g postgres -m 0644 /tmp/pg-ssl/root-cert.pem /etc/pg-ssl/root-cert.pem
-        install -o postgres -g postgres -m 0644 /tmp/pg-ssl/pg_hba.conf   /etc/pg-ssl/pg_hba.conf
-        exec docker-entrypoint.sh postgres \
-          -c ssl=on \
-          -c ssl_cert_file=/etc/pg-ssl/server.crt \
-          -c ssl_key_file=/etc/pg-ssl/server.key \
-          -c ssl_ca_file=/etc/pg-ssl/root-cert.pem \
-          -c hba_file=/etc/pg-ssl/pg_hba.conf
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d syk-inn-api" ]
-      interval: 2s
-      timeout: 3s
-      retries: 20
+      - '7969:5432'
   kafka:
     image: confluentinc/confluent-local:8.1.0
     container_name: syk-inn-api-dev-kafka

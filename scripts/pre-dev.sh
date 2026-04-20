@@ -7,25 +7,6 @@ BOLD="\033[1m"
 RED="\033[1;31m"
 RESET="\033[0m"
 
-here="$(cd "$(dirname "$0")" && pwd)"
-certs_dir="$here/certs"
-required_certs=(root-cert.pem server.crt server.key cert.pem key.pem key.pk8 pg_hba.conf)
-
-missing=0
-for f in "${required_certs[@]}"; do
-  if [ ! -f "$certs_dir/$f" ]; then
-    missing=1
-    break
-  fi
-done
-
-if [ "$missing" -eq 1 ]; then
-  echo -e "${CYAN}Certs missing — generating…${RESET}"
-  "$here/generate-certs.sh"
-else
-  echo -e "${GREEN}✔ Certs already present${RESET}"
-fi
-
 running_services="$(
   docker compose ps --format json 2>/dev/null \
   | jq -r 'select(.State=="running") | .Service' \

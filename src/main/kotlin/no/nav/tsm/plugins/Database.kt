@@ -15,11 +15,8 @@ import java.util.function.Function
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.db.runFlywayMigrations
-import no.nav.tsm.core.logger
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
-
-private val logger = logger()
 
 fun Application.configureDatabase() {
     val env: Environment by dependencies
@@ -27,22 +24,29 @@ fun Application.configureDatabase() {
     runFlywayMigrations(env.postgres)
 
     R2dbcDatabase.connect(
-        url = "r2dbc:${env.postgres.r2}",
+        url = env.postgres.r2.url,
         user = env.postgres.username,
         password = env.postgres.password,
-        databaseConfig = createDbConfig(env.postgres),
+        databaseConfig = createR2DbcConfig(env.postgres),
     )
 }
 
-private fun createDbConfig(postgresConfig: PostgresConfig) = R2dbcDatabaseConfig {
+private fun createR2DbcConfig(postgresConfig: PostgresConfig) = R2dbcDatabaseConfig {
     connectionFactoryOptions {
         option(SCHEMA, postgresConfig.schema)
-        if (postgresConfig.sslKeyPk8.isNotEmpty()) {
+        if (postgresConfig.r2.sslKeyPk8 != null || postgresConfig.r2.sslCert != null) {
+            requireNotNull(postgresConfig.r2.sslCert) {
+                "SSL cert must be provided if SSL key is provided"
+            }
+            requireNotNull(postgresConfig.r2.sslKeyPk8) {
+                "SSL key must be provided if SSL cert is provided"
+            }
+
             option(SSL_MODE, SSLMode.VERIFY_CA)
             val customizer =
                 pkcs8KeyManagerCustomizer(
-                    cert = Path.of(postgresConfig.sslCert),
-                    pkcs8DerKey = Path.of(postgresConfig.sslKeyPk8),
+                    cert = Path.of(postgresConfig.r2.sslCert),
+                    pkcs8DerKey = Path.of(postgresConfig.r2.sslKeyPk8),
                 )
             option(SSL_CONTEXT_BUILDER_CUSTOMIZER, customizer)
         }
