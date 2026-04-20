@@ -97,9 +97,9 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
         external = {
             ExternalApi(
-                tsmPdlCache = config.property("tsm-pdl-cache").getString(),
-                helsenettproxy = config.property("syfohelsenettproxy").getString(),
-                btsys = config.property("btsys").getString(),
+                tsmPdlCache = config.property("external.tsm-pdl-cache").getString(),
+                helsenettproxy = config.property("external.syfohelsenettproxy").getString(),
+                btsys = config.property("external.btsys").getString(),
             )
         },
         auth = {
