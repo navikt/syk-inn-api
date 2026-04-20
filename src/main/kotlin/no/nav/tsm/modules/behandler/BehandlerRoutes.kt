@@ -147,8 +147,6 @@ fun Application.configureBehandlerRoutes() {
                                     SykmeldingNotFound
                                 }
 
-                                println(accessControlledSykmelding)
-
                                 accessControlledSykmelding
                             }
                             .fold(

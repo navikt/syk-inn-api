@@ -1,6 +1,14 @@
-# syk-inn-api v2
+# syk-inn-api
 
-TODO
+Backend service for [syk-inn](https://github.com/navikt/syk-inn) responsible for receiving and processing sykmeldinger,
+and publishing them for downstream applications on kafka.
+
+Primary responsibilities:
+
+* Validate payloads from syk-inn
+* Execute the [sykmeldinger rule tree](https://github.com/navikt/regulus-regula) with required metadata
+* Persist the sykmeldinger and their processing status in the database
+* Publish the sykmeldinger on kafka for downstream applications to consume
 
 ## Development
 
@@ -35,9 +43,8 @@ graph TD
     end
 
     DB[("Database")]
-
     behandler --> sykmeldinger
-    kafka -- "JobManager" --> jobs
+    kafka -- " JobManager " --> jobs
     sykmeldinger --> DB
     jobs --> DB
 ```
@@ -110,7 +117,7 @@ With gradle :
 In IntelliJ:
 
 There is a run configuration checked into the repository using modern IntelliJ `.run` folder. You should already
-have a runnable run-configuration in IntelliJ. 
+have a runnable run-configuration in IntelliJ.
 
 If not you can refer to the manually configure it:
 
