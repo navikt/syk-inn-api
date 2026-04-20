@@ -145,7 +145,7 @@ object FromJsonb {
 
     fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
         when (this.type) {
-            RuleType.OK -> SykInnSykmeldingRuleResult.OK()
+            RuleType.OK -> SykInnSykmeldingRuleResult.OK
             RuleType.PENDING,
             RuleType.INVALID ->
                 SykInnSykmeldingRuleResult.Outcome(

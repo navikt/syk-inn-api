@@ -86,7 +86,7 @@ class RuleService {
 
     private fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =
         when (this) {
-            is RegulaResult.Ok -> SykInnSykmeldingRuleResult.OK()
+            is RegulaResult.Ok -> SykInnSykmeldingRuleResult.OK
             is RegulaResult.NotOk ->
                 SykInnSykmeldingRuleResult.Outcome(
                     message = this.outcome.reason.sykmelder,

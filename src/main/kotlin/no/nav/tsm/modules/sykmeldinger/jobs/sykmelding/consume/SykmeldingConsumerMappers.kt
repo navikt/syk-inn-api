@@ -17,11 +17,11 @@ fun SykmeldingRecord.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
 
 private fun ValidationResult.toResult(): SykInnSykmeldingRuleResult =
     when (this.status) {
-        RuleType.OK -> SykInnSykmeldingRuleResult.OK()
+        RuleType.OK -> SykInnSykmeldingRuleResult.OK
         RuleType.PENDING,
         RuleType.INVALID -> {
             when (val rule: Rule = this.rules.first()) {
-                is OKRule -> SykInnSykmeldingRuleResult.OK()
+                is OKRule -> SykInnSykmeldingRuleResult.OK
                 is InvalidRule ->
                     SykInnSykmeldingRuleResult.Outcome(
                         type = status,

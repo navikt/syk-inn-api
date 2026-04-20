@@ -164,6 +164,6 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                     legekontorOrgnr = "123456789",
                     legekontorTlf = "12345678",
                 ),
-            result = SykInnSykmeldingRuleResult.OK(),
+            result = SykInnSykmeldingRuleResult.OK,
         )
 }
