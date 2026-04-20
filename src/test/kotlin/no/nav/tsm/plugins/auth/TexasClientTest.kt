@@ -7,11 +7,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.toByteArray
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.ktor.utils.io.ByteReadChannel
 import io.mockk.mockk
@@ -24,7 +22,7 @@ import no.nav.tsm.core.Texas
 
 class TexasClientTest {
 
-    val texasObjectMapper =
+    val texasResponseMapper =
         jacksonObjectMapper().apply {
             setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         }
@@ -35,7 +33,7 @@ class TexasClientTest {
             assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
 
             val payload =
-                texasObjectMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
+                texasResponseMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
             assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
 
             respond(
@@ -48,18 +46,7 @@ class TexasClientTest {
             )
         }
 
-        val texas =
-            TexasClient(
-                env = testEnv,
-                httpClient =
-                    HttpClient(mockEngine) {
-                        install(ContentNegotiation) {
-                            jackson {
-                                setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-                            }
-                        }
-                    },
-            )
+        val texas = TexasClient(env = testEnv, httpClient = HttpClient(mockEngine) {})
 
         val response = texas.requestToken("tsm", "tsm-pdl-cache")
         assertEquals("ay.aeuheu", response.token)

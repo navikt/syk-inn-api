@@ -1,6 +1,6 @@
 package no.nav.tsm.plugins.auth
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -23,11 +23,7 @@ data class TexasToken(val token: String)
 class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val env: Environment) {
     private val logger = logger()
 
-    private val texasHttpClient = httpClient.config {
-        install(ContentNegotiation) {
-            jackson { setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) }
-        }
-    }
+    private val texasHttpClient = httpClient.config { install(ContentNegotiation) { jackson {} } }
 
     @WithSpan("Texas.requestToken")
     suspend fun requestToken(
@@ -65,11 +61,14 @@ class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val 
         }
     }
 
-    internal data class TokenRequest(val identityProvider: String, val target: String)
+    internal data class TokenRequest(
+        @param:JsonProperty("identity_provider") val identityProvider: String,
+        val target: String,
+    )
 
     internal data class TokenResponse(
-        val accessToken: String,
-        val expiresIn: Int,
-        val tokenType: String,
+        @param:JsonProperty("access_token") val accessToken: String,
+        @param:JsonProperty("expires_in") val expiresIn: Int,
+        @param:JsonProperty("token_type") val tokenType: String,
     )
 }
