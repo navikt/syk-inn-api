@@ -1,6 +1,5 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -19,9 +18,9 @@ import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprSykmelder
+import no.nav.tsm.utils.testJsonObjectMapper
 
 class HprClientTest {
-    private val objectMapper = jacksonObjectMapper()
 
     @Test
     fun `should return sykmelder based on hpr number`() = runTest {
@@ -41,7 +40,7 @@ class HprClientTest {
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
                 content =
-                    objectMapper.writeValueAsString(
+                    testJsonObjectMapper.writeValueAsString(
                         HprSykmelder(
                             fnr = "12345678901",
                             hprNummer = hprNummer,

@@ -3,11 +3,14 @@ package no.nav.tsm.modules.sykmeldinger.pdl
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.*
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
@@ -23,17 +26,21 @@ sealed interface PdlClient {
 }
 
 class PdlCloudClient(
-    @Named("RetryHttpClient") private val httpClient: HttpClient,
+    @Named("RetryHttpClient") httpClient: HttpClient,
     private val texasClient: TexasClient,
     private val environment: Environment,
 ) : PdlClient {
     private val logger = logger()
 
+    private val pdlHttpClient = httpClient.config {
+        install(ContentNegotiation) { jackson { registerModule(JavaTimeModule()) } }
+    }
+
     override suspend fun getPerson(ident: String): Either<PdlClient.PdlErrors, PdlPerson> {
         val (token) = getToken()
 
         val response =
-            httpClient.get("${environment.external().tsmPdlCache}/api/person") {
+            pdlHttpClient.get("${environment.external().tsmPdlCache}/api/person") {
                 headers {
                     append("Nav-Consumer-Id", "syk-inn-api")
                     append("Authorization", "Bearer $token")
