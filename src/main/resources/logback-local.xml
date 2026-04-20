@@ -15,6 +15,9 @@
     <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
     <logger name="org.apache.kafka.clients.consumer" level="WARN"/>
 
+    <!-- When running local, lets log debug for our own stuff -->
+    <logger name="no.nav.tsm" level="DEBUG"/>
+
     <!-- Local development, redirect secure logs to console with nice colors -->
     <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

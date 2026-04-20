@@ -29,7 +29,7 @@ class SykmeldingProducerJob(
         withContext(Dispatchers.IO) {
             while (isActive) {
                 delay(batchDelayMillis.milliseconds)
-                logger.info("Running sykmeldinger producer job (${batchDelayMillis}ms)")
+                logger.debug("Running sykmeldinger producer job (${batchDelayMillis}ms)")
                 handleSykmeldingerBatch()
             }
         }

@@ -66,6 +66,7 @@ class PdlCloudClientTest {
 
         val response =
             pdlClient.getPerson("hello").getOrElse { fail("Failed to get person from PDL") }
+
         response.foedselsdato shouldBe LocalDate.now().minusYears(35)
     }
 }
