@@ -31,7 +31,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
 
     companion object {
         init {
-            runMigrations()
+            runMigrations(true)
             connect()
         }
     }

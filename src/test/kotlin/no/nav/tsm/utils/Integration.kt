@@ -1,6 +1,6 @@
 package no.nav.tsm.utils
 
-import no.nav.tsm.core.db.runFlywayMigrations
+import no.nav.tsm.core.db.getFlyway
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
@@ -12,7 +12,11 @@ abstract class WithPostgresql {
         val config = createIntegrationEnvironment(postgres, null)
 
         fun runMigrations(clean: Boolean = false) {
-            runFlywayMigrations(config.postgres)
+            val flyway = getFlyway(config.postgres)
+            if (clean) {
+                flyway.clean()
+            }
+            flyway.migrate()
         }
 
         fun connect() {

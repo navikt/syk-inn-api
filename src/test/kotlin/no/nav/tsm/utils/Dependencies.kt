@@ -17,7 +17,6 @@ import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.module
 import no.nav.tsm.plugins.auth.configureAuthentication
-import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureSerialization
 import org.testcontainers.kafka.ConfluentKafkaContainer
@@ -30,7 +29,6 @@ fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer)
     // Global
     configureAuthentication()
     configureDependencies()
-    configureDatabase()
     configureSerialization()
 
     // #1: Postgres specific tests will have to provide their own "in test" set of modules

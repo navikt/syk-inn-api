@@ -30,6 +30,9 @@ class BehandlerRoutesTest : WithPostgresql() {
             configureSykmeldingerModule()
             configureBehandlerModule()
         }
+
+        runMigrations(true)
+        connect()
     }
 
     @Test

@@ -14,14 +14,15 @@ import java.util.Base64
 import java.util.function.Function
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.PostgresConfig
-import no.nav.tsm.core.db.runFlywayMigrations
+import no.nav.tsm.core.db.getFlyway
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
 
 fun Application.configureDatabase() {
     val env: Environment by dependencies
 
-    runFlywayMigrations(env.postgres)
+    // Always migrate flyway on application startup
+    getFlyway(env.postgres).migrate()
 
     R2dbcDatabase.connect(
         url = env.postgres.r2.url,

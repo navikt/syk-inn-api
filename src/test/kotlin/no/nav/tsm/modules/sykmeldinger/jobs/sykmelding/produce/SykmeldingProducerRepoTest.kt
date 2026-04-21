@@ -19,7 +19,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
     companion object {
         init {
-            runMigrations()
+            runMigrations(true)
             connect()
         }
     }
