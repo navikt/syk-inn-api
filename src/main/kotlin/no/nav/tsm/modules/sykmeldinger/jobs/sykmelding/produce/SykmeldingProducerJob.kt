@@ -3,7 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.toJavaDuration
 import kotlinx.coroutines.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
@@ -22,14 +22,14 @@ class SykmeldingProducerJob(
 ) : Job(JobName.SYKMELDING_PRODUCER, applicationScope) {
     private val logger = logger()
 
-    private val batchDelayMillis = environment.kafka.inputProducer.delay
-    private val hungSykmeldingTimeoutSeconds = 1800L
+    private val batchDelay = environment.kafka.inputProducer.delay
+    private val hungSykmelding = environment.kafka.inputProducer.hungTimeout
 
     override suspend fun runJob() =
         withContext(Dispatchers.IO) {
             while (isActive) {
-                delay(batchDelayMillis.milliseconds)
-                logger.debug("Running sykmeldinger producer job (${batchDelayMillis}ms)")
+                delay(batchDelay)
+                logger.debug("Running sykmeldinger producer job (${batchDelay}ms)")
                 handleSykmeldingerBatch()
             }
         }
@@ -37,7 +37,7 @@ class SykmeldingProducerJob(
     @WithSpan
     private suspend fun handleSykmeldingerBatch() {
         sykmeldingProducerRepo
-            .resetHangingJobs(OffsetDateTime.now(UTC).minusSeconds(hungSykmeldingTimeoutSeconds))
+            .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungSykmelding.toJavaDuration()))
             .let {
                 if (it > 0) {
                     logger.info("Reset $it sykmeldinger for sending")

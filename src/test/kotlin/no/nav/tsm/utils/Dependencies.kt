@@ -5,6 +5,7 @@ import io.ktor.server.plugins.di.*
 import io.mockk.mockk
 import java.util.Properties
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.KafkaConfig
 import no.nav.tsm.core.KafkaInputProducer
@@ -69,8 +70,8 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                     if (kafka != null)
                         Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
                     else mockk(),
-                inputProducer = KafkaInputProducer(delay = 500),
-                sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000L),
+                inputProducer = KafkaInputProducer(delay = 500.milliseconds, hungTimeout = 1.hours),
+                sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
             ),
         texas = { mockk() },
         external = { mockk() },

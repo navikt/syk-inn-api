@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.*
+import kotlin.time.toJavaDuration
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
@@ -19,8 +20,7 @@ class SykmeldingConsumer(environment: Environment) {
     private val logger = logger()
     private val topicName = "tsm.sykmeldinger"
 
-    private val duration: Duration =
-        Duration.ofMillis(environment.kafka.sykmeldingConsumer.longPoll)
+    private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>
     private val kafkaObjectMapper = jacksonObjectMapper()
 

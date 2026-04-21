@@ -1,3 +1,5 @@
+@file:Suppress("detekt.MagicNumber")
+
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
 import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
