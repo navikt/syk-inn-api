@@ -93,7 +93,9 @@ class SykmeldingerService(
                          */
                         val existing = repo.byIdempotencyKey(sykmelding.submitId)
 
-                        logger.info("Idempotency Key ${sykmelding.submitId} hit constraint")
+                        logger.info(
+                            "Idempotency Key ${sykmelding.submitId} hit constraint (cause: ${it})"
+                        )
                         ensureNotNull(existing) {
                             logger.error(
                                 "Idempotency Key ${sykmelding.submitId} hit constraint but doesn't exist, seems sus"

@@ -41,8 +41,6 @@ object KafkaTestConsumer {
         val kafkaProperties =
             Properties().apply { this["bootstrap.servers"] = container.bootstrapServers }
 
-        println(container.bootstrapServers)
-
         kafkaProperties.apply {
             this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-tests"
             this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"

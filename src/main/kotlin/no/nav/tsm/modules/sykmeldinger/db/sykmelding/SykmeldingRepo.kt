@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException
 import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
 import java.util.*
@@ -84,13 +85,17 @@ abstract class SykmeldingInsert {
 }
 
 class SykmeldingRepo : SykmeldingInsert() {
+    enum class InsertErrors {
+        IDEMPOTENCY_HIT
+    }
+
     private val logger = logger()
 
     suspend fun insert(
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
         juridisk: JuridiskVurderingResult,
-    ): Either<String, VerifiedSykInnSykmelding> {
+    ): Either<InsertErrors, VerifiedSykInnSykmelding> {
         try {
             val inserted = dbQuery {
                 JuridiskVurderingTable.insert {
@@ -114,13 +119,8 @@ class SykmeldingRepo : SykmeldingInsert() {
 
             return inserted.right()
         } catch (e: ExposedR2dbcException) {
-            /** TODO: This cannot possibly be the best way to handle idempotency contraint errors */
-            if (
-                e.message.contains(
-                    """violates unique constraint "sykmelding_idempotency_key_key""""
-                )
-            ) {
-                return "Idempotency Key triggered".left()
+            if (e.cause is R2dbcDataIntegrityViolationException) {
+                return InsertErrors.IDEMPOTENCY_HIT.left()
             }
 
             if (e.cause is R2dbcException) {
