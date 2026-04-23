@@ -21,8 +21,10 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
 fun Application.configureDatabase() {
     val env: Environment by dependencies
 
+    val flyway = getFlyway(env.postgres)
+    flyway.clean()
     // Always migrate flyway on application startup
-    getFlyway(env.postgres).migrate()
+    flyway.migrate()
 
     R2dbcDatabase.connect(
         url = env.postgres.r2.url,
