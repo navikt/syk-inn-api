@@ -66,6 +66,10 @@ fun pkcs8KeyManagerCustomizer(
             .encodeToString(Files.readAllBytes(pkcs8DerKey))
     val pkcs8Pem = "-----BEGIN PRIVATE KEY-----\n$b64\n-----END PRIVATE KEY-----\n".toByteArray()
     return Function {
+        /**
+         * Using R2DBC in nice requires us to disable endpoint identification/hostname verification
+         * for the TLS connection
+         */
         it.endpointIdentificationAlgorithm("")
             .keyManager(ByteArrayInputStream(certBytes), ByteArrayInputStream(pkcs8Pem))
     }

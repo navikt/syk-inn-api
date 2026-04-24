@@ -19,6 +19,8 @@ import org.apache.kafka.common.serialization.StringDeserializer
 class SykmeldingConsumer(environment: Environment) {
     private val logger = logger()
     private val topicName = "tsm.sykmeldinger"
+    // Unique group id while we test, when we go live this will be a more distinct name
+    private val groupId = "syk-inn-api-new-temp-1"
 
     private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>
@@ -28,8 +30,7 @@ class SykmeldingConsumer(environment: Environment) {
         val kafkaProperties = Properties(environment.kafka.config)
 
         kafkaProperties.apply {
-            // Unique group id while we test, when we go live this will be a more distinct name
-            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-new-temp-1"
+            this[ConsumerConfig.GROUP_ID_CONFIG] = groupId
             this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
             this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "true"
         }

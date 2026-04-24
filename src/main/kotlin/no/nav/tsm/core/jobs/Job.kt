@@ -50,10 +50,10 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
                     runJob()
                     _status.value = JobStatus.STOPPED
                 } catch (ex: CancellationException) {
-                    logger.info("KafkaConsumerJob was cancelled gracefully", ex)
+                    logger.info("${jobName.name} was cancelled gracefully", ex)
                     _status.value = JobStatus.STOPPED
                 } catch (cause: Exception) {
-                    logger.error("KafkaConsumerJob crashed unexpectedly", cause)
+                    logger.error("${jobName.name} crashed unexpectedly", cause)
                     _status.value = JobStatus.FAILED
                 } finally {
                     logger.info(

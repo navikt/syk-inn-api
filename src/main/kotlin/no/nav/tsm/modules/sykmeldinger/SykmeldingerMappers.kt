@@ -35,9 +35,9 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                     ),
                 behandler =
                     SykInnBehandler(
-                        fornavn = pasient.navn.fornavn,
-                        mellomnavn = pasient.navn.mellomnavn,
-                        etternavn = pasient.navn.etternavn,
+                        fornavn = sykmelder.navn.fornavn,
+                        mellomnavn = sykmelder.navn.mellomnavn,
+                        etternavn = sykmelder.navn.etternavn,
                         hpr = sykmelder.hpr,
                         helsepersonellkategori =
                             sykmelder.godkjenninger

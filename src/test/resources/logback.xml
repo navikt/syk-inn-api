@@ -24,7 +24,7 @@
         </encoder>
     </appender>
 
-    <!-- Pretty console appender for local development -->1
+    <!-- Pretty console appender for local development -->
     <appender name="PRETTY-CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
