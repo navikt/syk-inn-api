@@ -227,11 +227,11 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
         hpr == null ->
             SykInnSykmeldingMeta.Utenlandsk(source = source, mottatt = mottatt, pasient = pasient)
 
-        source.contains("fhir", ignoreCase = true)
-                && helsepersonellkategori != null
-                && legekontorOrgnr != null
-                && legekontorTlf != null
-                && navn != null ->
+        source.contains("fhir", ignoreCase = true) &&
+            helsepersonellkategori != null &&
+            legekontorOrgnr != null &&
+            legekontorTlf != null &&
+            navn != null ->
             SykInnSykmeldingMeta.Digital(
                 source = source,
                 mottatt = mottatt,

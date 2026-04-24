@@ -201,8 +201,7 @@ private fun SykInnUtdypendeSporsmal.toExistingSykmeldingUtdypendeSporsmalSvar():
         forventetHelsetilstandUtvikling =
             if (week39) forventetHelsetilstandUtvikling?.toExistingSykmeldingSporsmalSvar()
             else null,
-        medisinskeHensyn =
-            if (week39) medisinskeHensyn.toExistingSykmeldingSporsmalSvar() else null,
+        medisinskeHensyn = if (week39) medisinskeHensyn.toExistingSykmeldingSporsmalSvar() else null,
     )
 }
 

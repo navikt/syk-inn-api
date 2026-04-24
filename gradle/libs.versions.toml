@@ -1,18 +1,18 @@
 [versions]
-kotlin = "2.3.0"
-ktor = "3.4.2"
-logback = "1.5.13"
-logbackEncoder = "8.1"
+kotlin = "2.3.21"
+ktor = "3.4.3"
+logback = "1.5.32"
+logbackEncoder = "9.0"
 postgresR2dbc = "1.1.1.RELEASE"
-postgres = "42.7.9"
-exposed = "1.1.1"
-prometheus = "1.6.13"
-flyway = "12.0.2"
+postgres = "42.7.10"
+exposed = "1.2.0"
+prometheus = "1.16.5"
+flyway = "12.4.0"
 kafka = "4.2.0"
 mockk = "1.14.9"
-testcontainers = "2.0.3"
-otel = "2.25.0"
-arrow = "2.2.1.1"
+testcontainers = "2.0.5"
+otel = "2.27.0"
+arrow = "2.2.2.1"
 kotest-assertions = "6.1.11"
 
 [libraries]
@@ -44,7 +44,7 @@ otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-in
 
 # TSM Dependencies
 tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version = "24" }
-tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version = "2026.1.10" }
+tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version = "2026.1.13" }
 tsm-regula = { module = "no.nav.tsm.regulus:regula", version = "48" }
 
 # Testing
@@ -72,5 +72,6 @@ ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
-spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.4.0" }
 detekt = { id = "dev.detekt", version = "2.0.0-alpha.2" }
+gradle-versions = { id = "com.github.ben-manes.versions", version = "0.54.0" }
