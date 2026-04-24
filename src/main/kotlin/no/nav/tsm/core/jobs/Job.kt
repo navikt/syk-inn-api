@@ -29,17 +29,17 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
     private val mutex: Mutex = Mutex()
 
     suspend fun start(): Boolean {
-        logger.info("Starting $jobName")
+        logger.info("Starting Job($jobName)")
 
         if (job?.isActive == true) {
-            logger.info("$jobName is already running, not starting a new one")
+            logger.info("Job($jobName) is already running, not starting a new one")
             return false
         }
 
         mutex.withLock {
             if (job?.isActive == true) {
                 logger.info(
-                    "$jobName was started by another request while waiting for lock, not starting a new one"
+                    "Job($jobName) was started by another request while waiting for lock, not starting a new one"
                 )
                 return false
             }
@@ -50,15 +50,13 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
                     runJob()
                     _status.value = JobStatus.STOPPED
                 } catch (ex: CancellationException) {
-                    logger.info("${jobName.name} was cancelled gracefully", ex)
+                    logger.info("Job(${jobName.name}) was cancelled gracefully", ex)
                     _status.value = JobStatus.STOPPED
                 } catch (cause: Exception) {
-                    logger.error("${jobName.name} crashed unexpectedly", cause)
+                    logger.error("Job(${jobName.name}) crashed unexpectedly", cause)
                     _status.value = JobStatus.FAILED
                 } finally {
-                    logger.info(
-                        "Job (${jobName}) finished or failed, setting job reference to null"
-                    )
+                    logger.info("Job(${jobName}) finished or failed, setting job reference ønull")
                     job = null
                 }
             }
@@ -68,16 +66,18 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
 
     suspend fun stop(): Boolean {
         if (job == null || job?.isCancelled == true) {
-            logger.info("No job was running, nothing to stop")
+            logger.info("Job(${jobName.name}) was not running, no need to stop")
 
             _status.value = JobStatus.STOPPED
             return false
         }
 
-        logger.info("Job is running, stopping it ...")
+        logger.info("Job(${jobName.name}) is running, stopping it ...")
         mutex.withLock {
             if (job == null || job?.isCancelled == true) {
-                logger.info("Job was already stopped by another request, nothing to stop")
+                logger.info(
+                    "Job(${jobName.name}) was already stopped by another request, no need to stop"
+                )
                 return false
             }
 
@@ -85,7 +85,7 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
             job = null
             _status.value = JobStatus.STOPPED
 
-            logger.info("Job stopped successfully")
+            logger.info("Job(${jobName.name}) stopped successfully")
             return true
         }
     }

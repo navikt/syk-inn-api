@@ -20,7 +20,9 @@ fun Application.configureMonitoring() {
     configureMicrometer()
 
     install(KHealth) {
-        healthCheckPath = "/internal/health/alive"
+        healthChecks {
+            healthCheckPath = "/internal/health/alive"
+        }
 
         readyChecks {
             readyCheckPath = "/internal/health/ready"

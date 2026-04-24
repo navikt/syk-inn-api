@@ -37,7 +37,7 @@ class JobSchedulerService(
         jobs.forEach { manager ->
             launch {
                 manager.status.collect { newStatus ->
-                    logger.debug("Job ${manager.jobName} status changed to $newStatus")
+                    logger.debug("Job(${manager.jobName}) status changed to $newStatus")
                     jobRepository.updateJobStatus(
                         runner = runner,
                         jobName = manager.jobName,
