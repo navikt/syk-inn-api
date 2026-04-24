@@ -87,35 +87,32 @@ private fun OpprettSykmelding.UtdypendeSporsmal.mapToSykInnUtdypendeSporsmal():
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
             },
         medisinskOppsummering =
-            this.medisinskOppsummering?.let {
+            this.oppdatertMedisinskStatus?.let {
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
-            },
-        utfordringerMedArbeid =
+            }
+                ?: this.sykdomsutvikling?.let {
+                    SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
+                }
+                ?: this.medisinskOppsummering?.let {
+                    SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
+                },
+        utfordringerMedGradertArbeid =
             this.utfordringerMedArbeid?.let {
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
             },
-        sykdomsutvikling =
-            this.sykdomsutvikling?.let {
+        utfordringerMedArbeid =
+            this.realistiskMestringArbeid?.let {
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
-            },
-        arbeidsrelaterteUtfordringer =
-            this.arbeidsrelaterteUtfordringer?.let {
-                SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
-            },
+            }
+                ?: this.arbeidsrelaterteUtfordringer?.let {
+                    SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
+                },
         behandlingOgFremtidigArbeid =
             this.behandlingOgFremtidigArbeid?.let {
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
             },
         uavklarteForhold =
             this.uavklarteForhold?.let {
-                SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
-            },
-        oppdatertMedisinskStatus =
-            this.oppdatertMedisinskStatus?.let {
-                SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
-            },
-        realistiskMestringArbeid =
-            this.realistiskMestringArbeid?.let {
                 SykInnUtdypendeSporsmalSvar(sporsmalstekst = it.sporsmalstekst, svar = it.svar)
             },
         forventetHelsetilstandUtvikling =

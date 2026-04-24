@@ -7,9 +7,17 @@ import java.time.LocalDate
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
-data class SykmeldingJsonbNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
+data class SykmeldingJsonbNavn(
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
+)
 
-data class SykmeldingJsonbRuleResult(val type: RuleType, val message: String?, val rule: String?)
+data class SykmeldingJsonbValidationResult(
+    val type: RuleType,
+    val message: String?,
+    val rule: String?,
+)
 
 data class SykmeldingJsonbDiagnose(val system: String, val text: String, val code: String)
 

@@ -143,7 +143,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                     annenFravarsgrunn = null,
                 ),
             meta =
-                SykInnSykmeldingMeta(
+                SykInnSykmeldingMeta.Digital(
                     source = "test",
                     mottatt = OffsetDateTime.now(),
                     pasient =

@@ -46,6 +46,7 @@ fun Application.configureBehandlerRoutes() {
                         either<GenericHttpError, BehandlerSykmeldingFull> {
                                 val payload = call.receiveOpprettPayload().bind()
                                 val sykmelding = payload.toSykInnSykmelding()
+                                val hpr = sykmelding.meta.behandlerHpr
                                 val created: VerifiedSykInnSykmelding =
                                     sykmeldingerService
                                         .create(sykmelding)
@@ -55,7 +56,7 @@ fun Application.configureBehandlerRoutes() {
                                 val result =
                                     accessControlService.toRedactedIfNeeded(
                                         sykInnSykmelding = created,
-                                        currentBehandlerHpr = created.meta.behandler.hpr,
+                                        currentBehandlerHpr = hpr,
                                     )
 
                                 ensureNotNull(result) { InternalServerError }

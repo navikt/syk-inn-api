@@ -21,11 +21,12 @@ import no.nav.tsm.sykmelding.input.core.model.RuleType
  * domain → jsonb
  */
 object ToJsonb {
-    fun SykInnSykmeldingRuleResult.toRuleResultJson(): SykmeldingJsonbRuleResult =
+    fun SykInnSykmeldingRuleResult.toRuleResultJson(): SykmeldingJsonbValidationResult =
         when (this) {
-            is SykInnSykmeldingRuleResult.OK -> SykmeldingJsonbRuleResult(RuleType.OK, null, null)
+            is SykInnSykmeldingRuleResult.OK ->
+                SykmeldingJsonbValidationResult(RuleType.OK, null, null)
             is SykInnSykmeldingRuleResult.Outcome ->
-                SykmeldingJsonbRuleResult(
+                SykmeldingJsonbValidationResult(
                     type = this.type,
                     message = this.message,
                     rule = this.rule,
@@ -77,21 +78,15 @@ object ToJsonb {
                         SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
                     )
                 }
+                utfordringerMedGradertArbeid?.let {
+                    put(
+                        "utfordringerMedGradertArbeid",
+                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
+                    )
+                }
                 utfordringerMedArbeid?.let {
                     put(
                         "utfordringerMedArbeid",
-                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
-                    )
-                }
-                sykdomsutvikling?.let {
-                    put(
-                        "sykdomsutvikling",
-                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
-                    )
-                }
-                arbeidsrelaterteUtfordringer?.let {
-                    put(
-                        "arbeidsrelaterteUtfordringer",
                         SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
                     )
                 }
@@ -104,18 +99,6 @@ object ToJsonb {
                 uavklarteForhold?.let {
                     put(
                         "uavklarteForhold",
-                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
-                    )
-                }
-                oppdatertMedisinskStatus?.let {
-                    put(
-                        "oppdatertMedisinskStatus",
-                        SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
-                    )
-                }
-                realistiskMestringArbeid?.let {
-                    put(
-                        "realistiskMestringArbeid",
                         SykmeldingJsonbUtdypendeSporsmal(it.sporsmalstekst, it.svar),
                     )
                 }
@@ -143,7 +126,7 @@ object ToJsonb {
  */
 object FromJsonb {
 
-    fun SykmeldingJsonbRuleResult.toSykInnResult(): SykInnSykmeldingRuleResult =
+    fun SykmeldingJsonbValidationResult.toSykInnResult(): SykInnSykmeldingRuleResult =
         when (this.type) {
             RuleType.OK -> SykInnSykmeldingRuleResult.OK
             RuleType.PENDING,
@@ -176,12 +159,9 @@ object FromJsonb {
             hensynPaArbeidsplassen = this["hensynPaArbeidsplassen"]?.toSvar(),
             medisinskOppsummering = this["medisinskOppsummering"]?.toSvar(),
             utfordringerMedArbeid = this["utfordringerMedArbeid"]?.toSvar(),
-            sykdomsutvikling = this["sykdomsutvikling"]?.toSvar(),
-            arbeidsrelaterteUtfordringer = this["arbeidsrelaterteUtfordringer"]?.toSvar(),
+            utfordringerMedGradertArbeid = this["utfordringerMedGradertArbeid"]?.toSvar(),
             behandlingOgFremtidigArbeid = this["behandlingOgFremtidigArbeid"]?.toSvar(),
             uavklarteForhold = this["uavklarteForhold"]?.toSvar(),
-            oppdatertMedisinskStatus = this["oppdatertMedisinskStatus"]?.toSvar(),
-            realistiskMestringArbeid = this["realistiskMestringArbeid"]?.toSvar(),
             forventetHelsetilstandUtvikling = this["forventetHelsetilstandUtvikling"]?.toSvar(),
             medisinskeHensyn = this["medisinskeHensyn"]?.toSvar(),
         )

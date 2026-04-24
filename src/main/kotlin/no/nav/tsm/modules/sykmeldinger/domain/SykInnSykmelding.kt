@@ -26,28 +26,50 @@ data class UnverifiedSykInnSykmelding(
 ) : SykInnSykmelding
 
 data class SykInnPasient(
-    override val fornavn: String,
+    override val fornavn: String?,
     override val mellomnavn: String?,
-    override val etternavn: String,
+    override val etternavn: String?,
     val ident: String,
 ) : Navn
 
 data class SykInnBehandler(
-    override val fornavn: String,
+    override val fornavn: String?,
     override val mellomnavn: String?,
-    override val etternavn: String,
+    override val etternavn: String?,
     val hpr: String,
     val helsepersonellkategori: List<String>,
 ) : Navn
 
-data class SykInnSykmeldingMeta(
-    val source: String,
-    val mottatt: OffsetDateTime,
-    val pasient: SykInnPasient,
-    val behandler: SykInnBehandler,
-    val legekontorOrgnr: String,
-    val legekontorTlf: String,
-)
+sealed interface SykInnSykmeldingMeta {
+
+    val source: String
+    val mottatt: OffsetDateTime
+    val pasient: SykInnPasient
+
+    data class Legacy(
+        override val source: String,
+        override val mottatt: OffsetDateTime,
+        override val pasient: SykInnPasient,
+        val behandler: SykInnBehandler,
+        val legekontorOrgnr: String?,
+        val legekontorTlf: String?,
+    ) : SykInnSykmeldingMeta
+
+    data class Digital(
+        override val source: String,
+        override val mottatt: OffsetDateTime,
+        override val pasient: SykInnPasient,
+        val behandler: SykInnBehandler,
+        val legekontorOrgnr: String,
+        val legekontorTlf: String,
+    ) : SykInnSykmeldingMeta
+
+    data class Utenlandsk(
+        override val source: String,
+        override val mottatt: OffsetDateTime,
+        override val pasient: SykInnPasient,
+    ) : SykInnSykmeldingMeta
+}
 
 sealed interface SykInnSykmeldingRuleResult {
 

@@ -74,8 +74,20 @@ private fun SykInnSykmeldingRuleResult.resultToUtfall() =
             BehandlerSykmeldingRuleResult(result = this.type, cause = this.message)
     }
 
-private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
-    BehandlerSykmeldingMeta(
+private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta(): BehandlerSykmeldingMeta {
+    val (behandler, legekontorOrgnr, legekontorTlf) =
+        when (this) {
+            is SykInnSykmeldingMeta.Digital ->
+                Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
+            is SykInnSykmeldingMeta.Legacy ->
+                Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
+            is SykInnSykmeldingMeta.Utenlandsk ->
+                throw IllegalStateException(
+                    "Utenlandsk sykmelding will be supported in future verions"
+                ) // TODO implement
+        }
+
+    return BehandlerSykmeldingMeta(
         mottatt = mottatt,
         pasient = BehandlerSykmeldingSykmeldt(ident = pasient.ident, navn = pasient.displayName()),
         sykmelder =
@@ -83,6 +95,7 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta() =
         legekontorOrgnr = legekontorOrgnr,
         legekontorTlf = legekontorTlf,
     )
+}
 
 fun SykInnSykmeldingValues.toSykmeldingDocumentValues(): BehandlerSykmeldingValues {
     return BehandlerSykmeldingValues(
@@ -164,23 +177,34 @@ private fun SykInnTilbakedatering.toExistingSykmeldingTilbakedatering():
     BehandlerSykmeldingTilbakedatering(startdato = kontaktdato, begrunnelse = begrunnelse)
 
 private fun SykInnUtdypendeSporsmal.toExistingSykmeldingUtdypendeSporsmalSvar():
-    BehandlerSykmeldingUtdypendeSporsmal =
-    BehandlerSykmeldingUtdypendeSporsmal(
+    BehandlerSykmeldingUtdypendeSporsmal {
+    val week39 = (this.medisinskeHensyn != null)
+    val week17 = (!week39 && this.behandlingOgFremtidigArbeid != null)
+    val week7 = (!week39 && !week17)
+
+    return BehandlerSykmeldingUtdypendeSporsmal(
+        medisinskOppsummering =
+            if (week7) medisinskOppsummering?.toExistingSykmeldingSporsmalSvar() else null,
         hensynPaArbeidsplassen = hensynPaArbeidsplassen?.toExistingSykmeldingSporsmalSvar(),
-        medisinskOppsummering = medisinskOppsummering?.toExistingSykmeldingSporsmalSvar(),
-        utfordringerMedArbeid = utfordringerMedArbeid?.toExistingSykmeldingSporsmalSvar(),
-        sykdomsutvikling = sykdomsutvikling?.toExistingSykmeldingSporsmalSvar(),
+        utfordringerMedArbeid = utfordringerMedGradertArbeid?.toExistingSykmeldingSporsmalSvar(),
+        sykdomsutvikling =
+            if (week17) medisinskOppsummering?.toExistingSykmeldingSporsmalSvar() else null,
         arbeidsrelaterteUtfordringer =
-            arbeidsrelaterteUtfordringer?.toExistingSykmeldingSporsmalSvar(),
+            if (week17) utfordringerMedArbeid?.toExistingSykmeldingSporsmalSvar() else null,
         behandlingOgFremtidigArbeid =
             behandlingOgFremtidigArbeid?.toExistingSykmeldingSporsmalSvar(),
         uavklarteForhold = uavklarteForhold?.toExistingSykmeldingSporsmalSvar(),
-        oppdatertMedisinskStatus = oppdatertMedisinskStatus?.toExistingSykmeldingSporsmalSvar(),
-        realistiskMestringArbeid = realistiskMestringArbeid?.toExistingSykmeldingSporsmalSvar(),
+        oppdatertMedisinskStatus =
+            if (week17) medisinskOppsummering?.toExistingSykmeldingSporsmalSvar() else null,
+        realistiskMestringArbeid =
+            if (week39) utfordringerMedArbeid?.toExistingSykmeldingSporsmalSvar() else null,
         forventetHelsetilstandUtvikling =
-            forventetHelsetilstandUtvikling?.toExistingSykmeldingSporsmalSvar(),
-        medisinskeHensyn = medisinskeHensyn?.toExistingSykmeldingSporsmalSvar(),
+            if (week39) forventetHelsetilstandUtvikling?.toExistingSykmeldingSporsmalSvar()
+            else null,
+        medisinskeHensyn =
+            if (week39) medisinskeHensyn.toExistingSykmeldingSporsmalSvar() else null,
     )
+}
 
 private fun SykInnUtdypendeSporsmalSvar.toExistingSykmeldingSporsmalSvar():
     BehandlerSykmeldingSporsmalSvar =

@@ -139,22 +139,16 @@ class EverythingTest : WithAll() {
                 "Beskriv utfordringer med arbeid"
             values.utdypendeSporsmal?.utfordringerMedArbeid?.svar shouldBe
                 "Pasienten har betydelige utfordringer med å utføre arbeidsoppgaver"
-            values.utdypendeSporsmal?.medisinskOppsummering?.sporsmalstekst shouldBe
-                "Medisinsk oppsummering"
-            values.utdypendeSporsmal?.medisinskOppsummering?.svar shouldBe
-                "Pasienten har en kronisk tilstand som krever behandling"
+            values.utdypendeSporsmal?.medisinskOppsummering?.sporsmalstekst shouldBe null
+            values.utdypendeSporsmal?.medisinskOppsummering?.svar shouldBe null
             values.utdypendeSporsmal?.hensynPaArbeidsplassen?.sporsmalstekst shouldBe
                 "Hensyn på arbeidsplassen"
             values.utdypendeSporsmal?.hensynPaArbeidsplassen?.svar shouldBe
                 "Behov for tilrettelagt arbeidsplass og redusert arbeidsbelastning"
-            values.utdypendeSporsmal?.sykdomsutvikling?.sporsmalstekst shouldBe
-                "Beskriv sykdomsutviklingen"
-            values.utdypendeSporsmal?.sykdomsutvikling?.svar shouldBe
-                "Tilstanden har gradvis forverret seg over de siste månedene"
-            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.sporsmalstekst shouldBe
-                "Arbeidsrelaterte utfordringer"
-            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.svar shouldBe
-                "Fysisk krevende arbeidsoppgaver forverrer tilstanden"
+            values.utdypendeSporsmal?.sykdomsutvikling?.sporsmalstekst shouldBe null
+            values.utdypendeSporsmal?.sykdomsutvikling?.svar shouldBe null
+            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.sporsmalstekst shouldBe null
+            values.utdypendeSporsmal?.arbeidsrelaterteUtfordringer?.svar shouldBe null
             values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.sporsmalstekst shouldBe
                 "Behandling og fremtidig arbeid"
             values.utdypendeSporsmal?.behandlingOgFremtidigArbeid?.svar shouldBe
@@ -162,10 +156,8 @@ class EverythingTest : WithAll() {
             values.utdypendeSporsmal?.uavklarteForhold?.sporsmalstekst shouldBe "Uavklarte forhold"
             values.utdypendeSporsmal?.uavklarteForhold?.svar shouldBe
                 "Videre utredning pågår for å avklare diagnosen"
-            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.sporsmalstekst shouldBe
-                "Oppdatert medisinsk status"
-            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.svar shouldBe
-                "Pasienten responderer moderat på behandlingen"
+            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.sporsmalstekst shouldBe null
+            values.utdypendeSporsmal?.oppdatertMedisinskStatus?.svar shouldBe null
             values.utdypendeSporsmal?.realistiskMestringArbeid?.sporsmalstekst shouldBe
                 "Realistisk mestring av arbeid"
             values.utdypendeSporsmal?.realistiskMestringArbeid?.svar shouldBe

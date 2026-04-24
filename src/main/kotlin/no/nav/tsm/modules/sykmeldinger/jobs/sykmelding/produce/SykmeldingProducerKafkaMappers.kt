@@ -6,6 +6,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
@@ -50,6 +51,15 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 
 fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
+    val meta =
+        when (this.meta) {
+            is SykInnSykmeldingMeta.Digital -> this.meta
+            else ->
+                throw IllegalStateException(
+                    "Should never map not digital sykmelding to SykmeldingRecord"
+                )
+        }
+    // TODO() how to handle nullable names?
     return SykmeldingRecord(
         metadata = Digital(orgnummer = meta.legekontorOrgnr),
         validation = result.toValidationResult(meta.mottatt),
@@ -67,9 +77,17 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                         fnr = meta.pasient.ident,
                         navn =
                             Navn(
-                                fornavn = meta.pasient.fornavn,
+                                fornavn =
+                                    meta.pasient.fornavn
+                                        ?: throw IllegalStateException(
+                                            "Fornavn should not be null"
+                                        ),
                                 mellomnavn = meta.pasient.mellomnavn,
-                                etternavn = meta.pasient.etternavn,
+                                etternavn =
+                                    meta.pasient.etternavn
+                                        ?: throw IllegalStateException(
+                                            "Etternavn should not be null"
+                                        ),
                             ),
                         navKontor = null,
                         navnFastlege = null,
@@ -89,9 +107,17 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     Behandler(
                         navn =
                             Navn(
-                                fornavn = meta.behandler.fornavn,
+                                fornavn =
+                                    meta.behandler.fornavn
+                                        ?: throw IllegalStateException(
+                                            "Fornavn should not be null"
+                                        ),
                                 mellomnavn = meta.behandler.mellomnavn,
-                                etternavn = meta.behandler.etternavn,
+                                etternavn =
+                                    meta.behandler.etternavn
+                                        ?: throw IllegalStateException(
+                                            "Etternavn should not be null"
+                                        ),
                             ),
                         adresse = null,
                         ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
@@ -110,7 +136,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     values.arbeidsgiver.toArbeidsgiver(values.meldinger?.tilArbeidsgiver),
                 tilbakedatering = values.tilbakedatering?.toTilbakedatering(),
                 bistandNav = values.meldinger?.toBistandNav(),
-                utdypendeSporsmal = values.utdypendeSporsmal.toUtdypendeOpplysninger(),
+                utdypendeSporsmal = values.utdypendeSporsmal?.toUtdypendeOpplysninger(),
             ),
     )
 }
@@ -209,26 +235,19 @@ private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?):
             )
     }
 
-private fun SykInnUtdypendeSporsmal?.toUtdypendeOpplysninger(): List<UtdypendeSporsmal>? {
-    if (this == null) return null
-
+private fun SykInnUtdypendeSporsmal.toUtdypendeOpplysninger(): List<UtdypendeSporsmal>? {
     // TODO: Sanity check mapping between these enums and distinct values
     return listOfNotNull(
             hensynPaArbeidsplassen?.toUtdypendeSporsmal(Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN),
             medisinskOppsummering?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
-            utfordringerMedArbeid?.toUtdypendeSporsmal(
+            utfordringerMedGradertArbeid?.toUtdypendeSporsmal(
                 Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID
             ),
-            sykdomsutvikling?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
-            arbeidsrelaterteUtfordringer?.toUtdypendeSporsmal(
-                Sporsmalstype.UTFORDRINGER_MED_ARBEID
-            ),
+            utfordringerMedArbeid?.toUtdypendeSporsmal(Sporsmalstype.UTFORDRINGER_MED_ARBEID),
             behandlingOgFremtidigArbeid?.toUtdypendeSporsmal(
                 Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID
             ),
             uavklarteForhold?.toUtdypendeSporsmal(Sporsmalstype.UAVKLARTE_FORHOLD),
-            oppdatertMedisinskStatus?.toUtdypendeSporsmal(Sporsmalstype.MEDISINSK_OPPSUMMERING),
-            realistiskMestringArbeid?.toUtdypendeSporsmal(Sporsmalstype.UTFORDRINGER_MED_ARBEID),
             forventetHelsetilstandUtvikling?.toUtdypendeSporsmal(
                 Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING
             ),

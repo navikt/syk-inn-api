@@ -30,13 +30,10 @@ data class SykInnTilbakedatering(val kontaktdato: LocalDate?, val begrunnelse: S
 data class SykInnUtdypendeSporsmal(
     val hensynPaArbeidsplassen: SykInnUtdypendeSporsmalSvar?,
     val medisinskOppsummering: SykInnUtdypendeSporsmalSvar?,
+    val utfordringerMedGradertArbeid: SykInnUtdypendeSporsmalSvar?,
     val utfordringerMedArbeid: SykInnUtdypendeSporsmalSvar?,
-    val sykdomsutvikling: SykInnUtdypendeSporsmalSvar?,
-    val arbeidsrelaterteUtfordringer: SykInnUtdypendeSporsmalSvar?,
     val behandlingOgFremtidigArbeid: SykInnUtdypendeSporsmalSvar?,
     val uavklarteForhold: SykInnUtdypendeSporsmalSvar?,
-    val oppdatertMedisinskStatus: SykInnUtdypendeSporsmalSvar?,
-    val realistiskMestringArbeid: SykInnUtdypendeSporsmalSvar?,
     val forventetHelsetilstandUtvikling: SykInnUtdypendeSporsmalSvar?,
     val medisinskeHensyn: SykInnUtdypendeSporsmalSvar?,
 )

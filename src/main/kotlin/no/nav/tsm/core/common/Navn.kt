@@ -1,9 +1,9 @@
 package no.nav.tsm.core.common
 
 interface Navn {
-    val fornavn: String
+    val fornavn: String?
     val mellomnavn: String?
-    val etternavn: String
+    val etternavn: String?
 
     fun displayName(): String =
         "${fornavn}${if (mellomnavn != null) " $mellomnavn " else " "}${etternavn}"

@@ -37,6 +37,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
+import org.apache.kafka.shaded.com.google.protobuf.LazyStringArrayList.emptyList
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.ExposedR2dbcException
@@ -50,20 +51,37 @@ abstract class SykmeldingInsert {
         idempotencyKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
     ): VerifiedSykInnSykmelding {
+
+        val (behandler, legekontorOrgnr, legekontorTlf) =
+            when (sykmelding.meta) {
+                is SykInnSykmeldingMeta.Digital ->
+                    Triple(
+                        sykmelding.meta.behandler,
+                        sykmelding.meta.legekontorOrgnr,
+                        sykmelding.meta.legekontorTlf,
+                    )
+                is SykInnSykmeldingMeta.Legacy ->
+                    Triple(
+                        sykmelding.meta.behandler,
+                        sykmelding.meta.legekontorOrgnr,
+                        sykmelding.meta.legekontorTlf,
+                    )
+                is SykInnSykmeldingMeta.Utenlandsk -> Triple(null, null, null)
+            }
+
         return SykmeldingTable.insertReturning {
                 it[SykmeldingTable.idempotencyKey] = idempotencyKey
                 it[id] = sykmelding.sykmeldingId
                 it[rules] = sykmelding.result.toRuleResultJson()
                 it[metaSource] = sykmelding.meta.source
                 it[metaMottatt] = sykmelding.meta.mottatt
-                it[metaOrgnummer] = sykmelding.meta.legekontorOrgnr
-                it[metaTelefonnummer] = sykmelding.meta.legekontorTlf
+                it[metaOrgnummer] = legekontorOrgnr
+                it[metaTelefonnummer] = legekontorTlf
                 it[metaPasientIdent] = sykmelding.meta.pasient.ident
                 it[metaPasientNavn] = sykmelding.meta.pasient.toNavnJsonb()
-                it[metaBehandlerHpr] = sykmelding.meta.behandler.hpr
-                it[metaBehandlerNavn] = sykmelding.meta.behandler.toNavnJsonb()
-                it[metaBehandlerHelsepersonellkategori] =
-                    sykmelding.meta.behandler.helsepersonellkategori
+                it[metaBehandlerHpr] = behandler?.hpr
+                it[metaBehandlerNavn] = behandler?.toNavnJsonb()
+                it[metaBehandlerHelsepersonellkategori] = behandler?.helsepersonellkategori
                 it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
                 it[valuesSvangerskapsrelatert] = sykmelding.values.svangerskapsrelatert
                 it[valuesAnnenFravarsgrunn] = sykmelding.values.annenFravarsgrunn?.name
@@ -167,7 +185,7 @@ private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnS
                 hoveddiagnose = this[SykmeldingTable.valuesHoveddiagnose]?.toSykInnDiagnose(),
                 bidiagnoser =
                     this[SykmeldingTable.valuesBidiagnoser]?.map { it.toSykInnDiagnose() }
-                        ?: emptyList(),
+                        ?: emptyList<SykInnDiagnoseInfo>(),
                 aktivitet = this[SykmeldingTable.valuesAktivitet].map { it.toSykInnAktivitet() },
                 svangerskapsrelatert = this[SykmeldingTable.valuesSvangerskapsrelatert],
                 annenFravarsgrunn =
@@ -182,33 +200,69 @@ private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnS
                 utdypendeSporsmal =
                     this[SykmeldingTable.valuesUtdypendeSporsmal]?.toSykInnUtdypendeSporsmal(),
             ),
-        meta =
-            SykInnSykmeldingMeta(
-                mottatt = this[SykmeldingTable.metaMottatt],
-                source = this[SykmeldingTable.metaSource],
-                pasient =
-                    this[SykmeldingTable.metaPasientNavn].let { navn ->
-                        SykInnPasient(
-                            fornavn = navn.fornavn,
-                            mellomnavn = navn.mellomnavn,
-                            etternavn = navn.etternavn,
-                            ident = this[SykmeldingTable.metaPasientIdent],
-                        )
-                    },
-                behandler =
-                    this[SykmeldingTable.metaBehandlerNavn].let { navn ->
-                        SykInnBehandler(
-                            fornavn = navn.fornavn,
-                            mellomnavn = navn.mellomnavn,
-                            etternavn = navn.etternavn,
-                            hpr = this[SykmeldingTable.metaBehandlerHpr],
-                            helsepersonellkategori =
-                                this[SykmeldingTable.metaBehandlerHelsepersonellkategori],
-                        )
-                    },
-                legekontorOrgnr = this[SykmeldingTable.metaOrgnummer],
-                legekontorTlf = this[SykmeldingTable.metaTelefonnummer],
-            ),
+        meta = sykmeldingRowToSykInnSykmeldingMeta(),
         result = this[SykmeldingTable.rules].toSykInnResult(),
     )
+}
+
+private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMeta {
+    val navn = this[SykmeldingTable.metaBehandlerNavn]
+    val mottatt = this[SykmeldingTable.metaMottatt]
+    val source = this[SykmeldingTable.metaSource]
+    val hpr = this[SykmeldingTable.metaBehandlerHpr]
+    val helsepersonellkategori = this[SykmeldingTable.metaBehandlerHelsepersonellkategori]
+    val legekontorOrgnr = this[SykmeldingTable.metaOrgnummer]
+    val legekontorTlf = this[SykmeldingTable.metaTelefonnummer]
+    val pasient =
+        this[SykmeldingTable.metaPasientNavn].let { navn ->
+            SykInnPasient(
+                fornavn = navn.fornavn,
+                mellomnavn = navn.mellomnavn,
+                etternavn = navn.etternavn,
+                ident = this[SykmeldingTable.metaPasientIdent],
+            )
+        }
+
+    return when {
+        hpr == null ->
+            SykInnSykmeldingMeta.Utenlandsk(source = source, mottatt = mottatt, pasient = pasient)
+
+        source.contains("fhir", ignoreCase = true)
+                && helsepersonellkategori != null
+                && legekontorOrgnr != null
+                && legekontorTlf != null
+                && navn != null ->
+            SykInnSykmeldingMeta.Digital(
+                source = source,
+                mottatt = mottatt,
+                pasient = pasient,
+                behandler =
+                    SykInnBehandler(
+                        fornavn = navn.fornavn,
+                        mellomnavn = navn.mellomnavn,
+                        etternavn = navn.etternavn,
+                        hpr = hpr,
+                        helsepersonellkategori = helsepersonellkategori,
+                    ),
+                legekontorOrgnr = legekontorOrgnr,
+                legekontorTlf = legekontorTlf,
+            )
+
+        else -> {
+            SykInnSykmeldingMeta.Legacy(
+                source = source,
+                mottatt = mottatt,
+                pasient = pasient,
+                SykInnBehandler(
+                    fornavn = navn?.fornavn,
+                    mellomnavn = navn?.mellomnavn,
+                    etternavn = navn?.etternavn,
+                    hpr = hpr,
+                    helsepersonellkategori = helsepersonellkategori ?: emptyList(),
+                ),
+                legekontorOrgnr = legekontorOrgnr,
+                legekontorTlf = legekontorTlf,
+            )
+        }
+    }
 }

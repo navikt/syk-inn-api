@@ -23,7 +23,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
         sykmeldingId = UUID.randomUUID(),
         values = values,
         meta =
-            SykInnSykmeldingMeta(
+            SykInnSykmeldingMeta.Digital(
                 source = meta.source,
                 mottatt = verifiedAt,
                 pasient =
