@@ -31,11 +31,7 @@ import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): RegulaBehandler =
     when (this) {
-        is Sykmelder.FinnesIkke ->
-            RegulaBehandler.FinnesIkke(
-                // TODO: Fix this quirk in regulus-regula
-                fnr = ""
-            )
+        is Sykmelder.FinnesIkke -> RegulaBehandler.FinnesIkke
 
         is Sykmelder.MedSuspensjon ->
             RegulaBehandler.Finnes(

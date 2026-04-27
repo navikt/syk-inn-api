@@ -22,10 +22,22 @@ kotlin {
     jvmToolchain(21)
 }
 
+val githubUsername = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR") ?: System.getenv("USERNAME")
+val githubPassword = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN") ?: System.getenv("NPM_AUTH_TOKEN")
+
 repositories {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/navikt/maven-release")
+            credentials {
+                username = githubUsername
+                password = githubPassword
+            }
+        }
+    }
 }
 
 dependencies {
