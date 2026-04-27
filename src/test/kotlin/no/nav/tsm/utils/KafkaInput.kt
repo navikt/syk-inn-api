@@ -57,15 +57,12 @@ object KafkaTestConsumer {
 
 object KafkaTestUtils {
     fun expectAllValues(sykmelding: BehandlerSykmeldingFull, record: SykmeldingRecord) {
+        sykmelding.sykmeldingId.toString() shouldBe record.sykmelding.id
+
         val digitalSykmelding = record.sykmelding.shouldBeInstanceOf<DigitalSykmelding>()
         val digitalMetadata = record.metadata.shouldBeInstanceOf<Digital>()
-        val medisinskVurdering =
-            digitalSykmelding.medisinskVurdering.shouldBeInstanceOf<DigitalMedisinskVurdering>()
 
         assertSoftly {
-            // id
-            sykmelding.sykmeldingId.toString() shouldBe digitalSykmelding.id
-
             // meta
             sykmelding.meta.pasient.ident shouldBe digitalSykmelding.pasient.fnr
             sykmelding.meta.sykmelder.hpr shouldBe
@@ -76,7 +73,8 @@ object KafkaTestUtils {
                     .firstOrNull { it.type == KontaktinfoType.TLF }
                     ?.value
 
-            // medisinsk vurdering
+            val medisinskVurdering =
+                digitalSykmelding.medisinskVurdering.shouldBeInstanceOf<DigitalMedisinskVurdering>()
             sykmelding.values.pasientenSkalSkjermes shouldBe medisinskVurdering.skjermetForPasient
             sykmelding.values.svangerskapsrelatert shouldBe medisinskVurdering.svangerskap
             sykmelding.values.annenFravarsgrunn shouldBe medisinskVurdering.annenFravarsgrunn
@@ -94,18 +92,18 @@ object KafkaTestUtils {
                 expected.tom shouldBe actual.tom
             }
 
-            // arbeidsgiver
-            when {
-                sykmelding.values.arbeidsgiver?.harFlere == true -> {
-                    val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<FlereArbeidsgivere>()
-                    sykmelding.values.arbeidsgiver.arbeidsgivernavn shouldBe ag.navn
-                    sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
-                }
-                sykmelding.values.arbeidsgiver?.harFlere == false -> {
-                    val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<EnArbeidsgiver>()
-                    sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
-                }
-                else -> digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<IngenArbeidsgiver>()
+            if (sykmelding.values.arbeidsgiver?.harFlere == true) {
+                // Har flere: We expect name and possibly meldingTilArbeidsgiver
+                val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<FlereArbeidsgivere>()
+                sykmelding.values.arbeidsgiver.arbeidsgivernavn shouldBe ag.navn
+                sykmelding.values.meldinger?.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
+            } else if (sykmelding.values.meldinger?.tilArbeidsgiver != null) {
+                // Har arbeidsgiver, men ikke flere: We expect meldingTilArbeidsgiver, but not name
+                val ag = digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<EnArbeidsgiver>()
+                sykmelding.values.meldinger.tilArbeidsgiver shouldBe ag.meldingTilArbeidsgiver
+            } else {
+                // No message, no arbeidsgiver - IngenArbeidsgiver
+                digitalSykmelding.arbeidsgiver.shouldBeInstanceOf<IngenArbeidsgiver>()
             }
 
             // tilbakedatering

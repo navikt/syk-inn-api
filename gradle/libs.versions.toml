@@ -73,5 +73,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 spotless = { id = "com.diffplug.spotless", version = "8.4.0" }
-detekt = { id = "dev.detekt", version = "2.0.0-alpha.2" }
+detekt = { id = "dev.detekt", version = "2.0.0-alpha.3" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.54.0" }
