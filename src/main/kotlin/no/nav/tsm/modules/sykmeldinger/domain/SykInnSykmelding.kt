@@ -5,8 +5,16 @@ import java.util.*
 import no.nav.tsm.core.common.Navn
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
+enum class SykInnSykmeldingType {
+    DIGITAL,
+    XML,
+    PAPIR,
+    UTENLANDSK,
+}
+
 sealed interface SykInnSykmelding {
     val values: SykInnSykmeldingValues
+    val type: SykInnSykmeldingType
 }
 
 /**
@@ -17,12 +25,14 @@ class VerifiedSykInnSykmelding(
     override val values: SykInnSykmeldingValues,
     val meta: SykInnSykmeldingMeta,
     val result: SykInnSykmeldingRuleResult,
+    override val type: SykInnSykmeldingType,
 ) : SykInnSykmelding
 
 data class UnverifiedSykInnSykmelding(
     val submitId: UUID,
     override val values: SykInnSykmeldingValues,
     val meta: UnverifiedSykInnSykmeldingMeta,
+    override val type: SykInnSykmeldingType = SykInnSykmeldingType.DIGITAL,
 ) : SykInnSykmelding
 
 data class SykInnPasient(
@@ -37,6 +47,7 @@ data class SykInnBehandler(
     override val mellomnavn: String?,
     override val etternavn: String?,
     val hpr: String,
+    val fnr: String,
     val helsepersonellkategori: List<String>,
 ) : Navn
 

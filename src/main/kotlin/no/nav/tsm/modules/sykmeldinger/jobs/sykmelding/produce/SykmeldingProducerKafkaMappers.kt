@@ -120,7 +120,11 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                                         ),
                             ),
                         adresse = null,
-                        ids = listOf(PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr)),
+                        ids =
+                            listOf(
+                                PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr),
+                                PersonId(type = PersonIdType.FNR, id = meta.behandler.fnr),
+                            ),
                         kontaktinfo =
                             listOf(
                                 Kontaktinfo(type = KontaktinfoType.TLF, value = meta.legekontorTlf)

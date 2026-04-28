@@ -72,6 +72,7 @@ abstract class SykmeldingInsert {
         return SykmeldingTable.insertReturning {
                 it[SykmeldingTable.idempotencyKey] = idempotencyKey
                 it[id] = sykmelding.sykmeldingId
+                it[type] = sykmelding.type.name
                 it[rules] = sykmelding.result.toRuleResultJson()
                 it[metaSource] = sykmelding.meta.source
                 it[metaMottatt] = sykmelding.meta.mottatt
@@ -80,6 +81,7 @@ abstract class SykmeldingInsert {
                 it[metaPasientIdent] = sykmelding.meta.pasient.ident
                 it[metaPasientNavn] = sykmelding.meta.pasient.toNavnJsonb()
                 it[metaBehandlerHpr] = behandler?.hpr
+                it[metaBehandlerFnr] = behandler?.fnr
                 it[metaBehandlerNavn] = behandler?.toNavnJsonb()
                 it[metaBehandlerHelsepersonellkategori] = behandler?.helsepersonellkategori
                 it[valuesPasientenSkalSkjermes] = sykmelding.values.pasientenSkalSkjermes
@@ -202,6 +204,7 @@ private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnS
             ),
         meta = sykmeldingRowToSykInnSykmeldingMeta(),
         result = this[SykmeldingTable.rules].toSykInnResult(),
+        type = SykInnSykmeldingType.valueOf(this[SykmeldingTable.type]),
     )
 }
 
@@ -210,6 +213,7 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
     val mottatt = this[SykmeldingTable.metaMottatt]
     val source = this[SykmeldingTable.metaSource]
     val hpr = this[SykmeldingTable.metaBehandlerHpr]
+    val fnr = this[SykmeldingTable.metaBehandlerFnr]
     val helsepersonellkategori = this[SykmeldingTable.metaBehandlerHelsepersonellkategori]
     val legekontorOrgnr = this[SykmeldingTable.metaOrgnummer]
     val legekontorTlf = this[SykmeldingTable.metaTelefonnummer]
@@ -231,6 +235,7 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
             helsepersonellkategori != null &&
             legekontorOrgnr != null &&
             legekontorTlf != null &&
+            fnr != null &&
             navn != null ->
             SykInnSykmeldingMeta.Digital(
                 source = source,
@@ -242,6 +247,7 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
                         mellomnavn = navn.mellomnavn,
                         etternavn = navn.etternavn,
                         hpr = hpr,
+                        fnr = fnr,
                         helsepersonellkategori = helsepersonellkategori,
                     ),
                 legekontorOrgnr = legekontorOrgnr,
@@ -258,6 +264,7 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
                     mellomnavn = navn?.mellomnavn,
                     etternavn = navn?.etternavn,
                     hpr = hpr,
+                    fnr = fnr ?: throw IllegalStateException("Fant ikke fnr"),
                     helsepersonellkategori = helsepersonellkategori ?: emptyList(),
                 ),
                 legekontorOrgnr = legekontorOrgnr,

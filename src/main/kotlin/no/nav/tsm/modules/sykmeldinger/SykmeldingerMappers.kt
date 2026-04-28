@@ -7,6 +7,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingType
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
@@ -39,6 +40,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                         mellomnavn = sykmelder.navn.mellomnavn,
                         etternavn = sykmelder.navn.etternavn,
                         hpr = sykmelder.hpr,
+                        fnr = sykmelder.ident,
                         helsepersonellkategori =
                             sykmelder.godkjenninger
                                 .filter { it.helsepersonellkategori?.aktiv == true }
@@ -52,6 +54,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                 legekontorOrgnr = meta.legekontorOrgnr,
                 legekontorTlf = meta.legekontorTlf,
             ),
+        type = SykInnSykmeldingType.DIGITAL,
         result = rules,
     )
 }

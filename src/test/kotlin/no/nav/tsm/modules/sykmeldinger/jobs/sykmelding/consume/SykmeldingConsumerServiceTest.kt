@@ -160,10 +160,12 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                             etternavn = "Legesen",
                             hpr = "9144889",
                             helsepersonellkategori = listOf("LE"),
+                            fnr = "12345678901",
                         ),
                     legekontorOrgnr = "123456789",
                     legekontorTlf = "12345678",
                 ),
             result = SykInnSykmeldingRuleResult.OK,
+            type = SykInnSykmeldingType.DIGITAL,
         )
 }

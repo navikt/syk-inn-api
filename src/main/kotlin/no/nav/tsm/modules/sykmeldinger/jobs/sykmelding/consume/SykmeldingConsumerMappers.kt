@@ -5,35 +5,29 @@ import java.util.*
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.*
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.BEHANDLING_OG_FREMTIDIG_ARBEID
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.FORVENTET_HELSETILSTAND_UTVIKLING
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.HENSYN_PA_ARBEIDSPLASSEN
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.MEDISINSKE_HENSYN
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.MEDISINSK_OPPSUMMERING
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.UAVKLARTE_FORHOLD
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.UTFORDRINGER_MED_ARBEID
-import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.UTFORDRINGER_MED_GRADERT_ARBEID
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.*
 import no.nav.tsm.sykmelding.input.core.model.*
-import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
-import no.nav.tsm.sykmelding.input.core.model.metadata.EDIEmottak
-import no.nav.tsm.sykmelding.input.core.model.metadata.Egenmeldt
-import no.nav.tsm.sykmelding.input.core.model.metadata.EmottakEnkel
-import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
-import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
-import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
-import no.nav.tsm.sykmelding.input.core.model.metadata.Organisasjon
-import no.nav.tsm.sykmelding.input.core.model.metadata.Papir
-import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
-import no.nav.tsm.sykmelding.input.core.model.metadata.Utenlandsk
+import no.nav.tsm.sykmelding.input.core.model.Pasient
+import no.nav.tsm.sykmelding.input.core.model.metadata.*
 
 private val log = logger()
 
 fun SykmeldingRecord.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
+
+    val type =
+        when (this.sykmelding.type) {
+            SykmeldingType.DIGITAL -> SykInnSykmeldingType.DIGITAL
+            SykmeldingType.XML -> SykInnSykmeldingType.XML
+            SykmeldingType.PAPIR -> SykInnSykmeldingType.PAPIR
+            SykmeldingType.UTENLANDSK -> SykInnSykmeldingType.UTENLANDSK
+        }
+
     return VerifiedSykInnSykmelding(
         sykmeldingId = UUID.fromString(sykmelding.id),
         values = toSykmeldingValues(),
         meta = toMetadata(),
         result = validation.toResult(),
+        type = type,
     )
 }
 
@@ -64,48 +58,92 @@ private fun ValidationResult.toResult(): SykInnSykmeldingRuleResult =
         }
     }
 
+private fun Sykmelder.toSykInnBehandler(behandler: Behandler): SykInnBehandler {
+    val behandlerHpr = behandler.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
+    val behandlerFnr = behandler.ids.firstOrNull { it.type == PersonIdType.FNR }?.id
+    val sykmelderHpr = ids.firstOrNull { it.type == PersonIdType.HPR }?.id
+    val sykmelderFnr = ids.firstOrNull { it.type == PersonIdType.FNR }?.id
+
+    val isSame =
+        (sykmelderHpr != null && sykmelderHpr == behandlerHpr) ||
+            (sykmelderFnr != null && sykmelderFnr == behandlerFnr)
+    val name = if (isSame) behandler.navn else null
+    val hpr: String =
+        (if (isSame) sykmelderHpr ?: behandlerHpr else sykmelderHpr)
+            ?: throw IllegalArgumentException("sykmelder hpr can't be null")
+    val fnr: String =
+        (if (isSame) sykmelderFnr ?: behandlerFnr else sykmelderFnr)
+            ?: throw IllegalArgumentException("sykmelder fnr can't be null")
+    return SykInnBehandler(
+        fornavn = name?.fornavn,
+        mellomnavn = name?.mellomnavn,
+        etternavn = name?.etternavn,
+        hpr = hpr,
+        fnr = fnr,
+        helsepersonellkategori = listOf(this.helsepersonellKategori.toShortCode()),
+    )
+}
+
 private fun SykmeldingRecord.toMetadata(): SykInnSykmeldingMeta {
 
-    return when (val meta = this.metadata) {
-        is Digital ->
+    val source = sykmelding.metadata.avsenderSystem.navn
+    val mottattDato = sykmelding.metadata.mottattDato
+    val pasient = sykmelding.pasient.toSykInnPasient()
+    val legekontorTlf = sykmelding.toLegekontorTlf()
+
+    val (meta: MessageMetadata, sykmelding: Sykmelding) = this.metadata to this.sykmelding
+
+    return when {
+        meta is Digital && sykmelding is DigitalSykmelding -> {
             SykInnSykmeldingMeta.Digital(
-                source = sykmelding.metadata.avsenderSystem.navn,
-                mottatt = sykmelding.metadata.mottattDato,
-                pasient = sykmelding.pasient.toSykInnPasient(),
-                behandler = sykmelding.toSykInnBehandler(),
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
+                behandler =
+                    sykmelding.behandler.toSykInnBehandler(
+                        sykmelding.sykmelder.helsepersonellKategori.toShortCode()
+                    ),
                 legekontorOrgnr = meta.orgnummer,
                 legekontorTlf =
                     sykmelding.toLegekontorTlf()
                         ?: throw IllegalStateException(
-                            "legekontorOrgnr is null"
-                        ), // TODO() ok to throw here
+                            "legekontorTlf must be set in DigitalSykmelding"
+                        ),
             )
-        is EDIEmottak ->
-            SykInnSykmeldingMeta.Legacy(
-                source = sykmelding.metadata.avsenderSystem.navn,
-                mottatt = sykmelding.metadata.mottattDato,
-                pasient = sykmelding.pasient.toSykInnPasient(),
-                behandler = sykmelding.toSykInnBehandler(),
-                legekontorOrgnr = getOrgNr(meta.sender),
-                legekontorTlf = sykmelding.toLegekontorTlf(),
-            )
-        is Papir ->
-            SykInnSykmeldingMeta.Legacy(
-                source = sykmelding.metadata.avsenderSystem.navn,
-                mottatt = sykmelding.metadata.mottattDato,
-                pasient = sykmelding.pasient.toSykInnPasient(),
-                behandler = sykmelding.toSykInnBehandler(),
-                legekontorOrgnr = getOrgNr(meta.sender),
-                legekontorTlf = sykmelding.toLegekontorTlf(),
-            )
-        is Utenlandsk ->
+        }
+        meta is Utenlandsk && sykmelding is UtenlandskSykmelding -> {
             SykInnSykmeldingMeta.Utenlandsk(
-                source = sykmelding.metadata.avsenderSystem.navn,
-                mottatt = sykmelding.metadata.mottattDato,
-                pasient = sykmelding.pasient.toSykInnPasient(),
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
             )
-        is Egenmeldt,
-        is EmottakEnkel -> throw IllegalStateException("these are not supported")
+        }
+        meta is Papir && sykmelding is Papirsykmelding -> {
+            SykInnSykmeldingMeta.Legacy(
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
+                behandler = sykmelding.sykmelder.toSykInnBehandler(sykmelding.behandler),
+                legekontorTlf = sykmelding.toLegekontorTlf(),
+                legekontorOrgnr = getOrgNr(meta.sender),
+            )
+        }
+
+        meta is EDIEmottak && sykmelding is XmlSykmelding -> {
+            SykInnSykmeldingMeta.Legacy(
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
+                behandler = sykmelding.sykmelder.toSykInnBehandler(sykmelding.behandler),
+                legekontorTlf = sykmelding.toLegekontorTlf(),
+                legekontorOrgnr = getOrgNr(meta.sender),
+            )
+        }
+        else -> {
+            throw IllegalStateException(
+                "Sykmelding: ${sykmelding.id} of type ${sykmelding.type} with metadata ${metadata.type} is not supported"
+            )
+        }
     }
 }
 
@@ -125,14 +163,7 @@ private fun Sykmelding.toSykInnBehandler(): SykInnBehandler =
             behandler.toSykInnBehandler(sykmelder.helsepersonellKategori.toShortCode())
         is Papirsykmelding ->
             behandler.toSykInnBehandler(sykmelder.helsepersonellKategori.toShortCode())
-        is UtenlandskSykmelding ->
-            SykInnBehandler(
-                fornavn = "",
-                mellomnavn = null,
-                etternavn = "",
-                hpr = "",
-                helsepersonellkategori = emptyList(),
-            )
+        is UtenlandskSykmelding -> throw IllegalStateException("these are not supported")
     }
 
 private fun Behandler.toSykInnBehandler(helsepersonellShortCode: String): SykInnBehandler =
@@ -140,7 +171,8 @@ private fun Behandler.toSykInnBehandler(helsepersonellShortCode: String): SykInn
         fornavn = navn.fornavn,
         mellomnavn = navn.mellomnavn,
         etternavn = navn.etternavn,
-        hpr = ids.firstOrNull { it.type == PersonIdType.HPR }?.id.orEmpty(),
+        hpr = ids.single { it.type == PersonIdType.HPR }.id,
+        fnr = ids.single { it.type == PersonIdType.FNR }.id,
         helsepersonellkategori = listOf(helsepersonellShortCode),
     )
 
@@ -152,8 +184,8 @@ private fun Sykmelding.toLegekontorTlf(): String? =
         is UtenlandskSykmelding -> null
     }
 
-private fun Behandler.firstTlf(): String =
-    kontaktinfo.firstOrNull { it.type == KontaktinfoType.TLF }?.value.orEmpty()
+private fun Behandler.firstTlf(): String? =
+    kontaktinfo.firstOrNull { it.type == KontaktinfoType.TLF }?.value
 
 private fun getOrgNr(sender: Organisasjon): String? {
     return sender.underOrganisasjon?.ids?.firstOrNull { it.type == OrgIdType.ENH }?.id
