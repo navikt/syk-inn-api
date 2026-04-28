@@ -14,12 +14,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskHenvisning
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskUtfall
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurdering
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.Lovverk
+import no.nav.tsm.regulus.regula.JuridiskHenvisning
+import no.nav.tsm.regulus.regula.JuridiskHenvisningLovverk
+import no.nav.tsm.regulus.regula.JuridiskUtfall
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
@@ -172,21 +170,19 @@ class JuridiskJobRepoTest : WithPostgresql() {
 }
 
 private fun testJuridiskVurdering() =
-    JuridiskVurderingResult(
-        juridiskeVurderinger =
-            listOf(
-                JuridiskVurdering(
-                    juridiskHenvisning =
-                        JuridiskHenvisning(
-                            lovverk = Lovverk.FOLKETRYGDLOVEN,
-                            paragraf = "8-4",
-                            ledd = 1,
-                            punktum = null,
-                            bokstav = null,
-                        ),
-                    input = mapOf("key" to "value"),
-                    tidsstempel = ZonedDateTime.now(ZoneOffset.UTC),
-                    utfall = JuridiskUtfall.VILKAR_OPPFYLT,
-                )
-            )
+    listOf(
+        RegulaJuridiskVurdering(
+            henvisning =
+                JuridiskHenvisning(
+                    lovverk = JuridiskHenvisningLovverk.FOLKETRYGDLOVEN,
+                    paragraf = "8-4",
+                    ledd = 1,
+                    punktum = null,
+                    bokstav = null,
+                ),
+            input = mapOf("key" to "value"),
+            tidsstempel = ZonedDateTime.now(ZoneOffset.UTC),
+            fodselsnummer = "12345678901",
+            utfall = JuridiskUtfall.VILKAR_OPPFYLT,
+        )
     )

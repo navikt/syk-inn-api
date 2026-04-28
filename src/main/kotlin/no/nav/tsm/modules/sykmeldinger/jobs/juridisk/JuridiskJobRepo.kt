@@ -9,8 +9,7 @@ import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.inList
@@ -23,7 +22,7 @@ private val objectMapper = jacksonObjectMapper().apply { registerModule(JavaTime
 data class JuridiskJob(
     val sykmeldingId: UUID,
     val status: JuridiskVurderingStatus,
-    val juridiskVurdering: JuridiskVurderingResult,
+    val juridiskVurdering: List<RegulaJuridiskVurdering>,
 )
 
 class JuridiskJobRepo {

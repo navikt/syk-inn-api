@@ -45,7 +45,7 @@ otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-in
 # TSM Dependencies
 tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version = "24" }
 tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version = "2026.1.13" }
-tsm-regula = { module = "no.nav.tsm.regulus:regula", version = "49" }
+tsm-regula = { module = "no.nav.tsm.regulus:regula", version = "50" }
 
 # Testing
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }

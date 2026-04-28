@@ -3,7 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.db.status
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
@@ -17,7 +17,7 @@ object JuridiskVurderingTable : Table("juridisk_status") {
     val status = text("status")
     val eventTimestamp = timestampWithTimeZone("event_timestamp")
     val juridiskVurdering =
-        jsonb<JuridiskVurderingResult>(
+        jsonb<List<RegulaJuridiskVurdering>>(
             "juridisk_vurdering",
             serialize = { juridiskVurderingObjectMapper.writeValueAsString(it) },
             deserialize = { juridiskVurderingObjectMapper.readValue(it) },

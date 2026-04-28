@@ -10,8 +10,6 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.toJuridiskVurdering
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
@@ -33,7 +31,7 @@ class RuleService {
         otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
-    ): Either<RuleErrors, Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult>> {
+    ): Either<RuleErrors, Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>>> {
         val now = LocalDateTime.now()
 
         val regulaPasient = sykmeldt.mapPdlPersonToRegulaPasient()
@@ -65,7 +63,7 @@ class RuleService {
         otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
-    ): Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult> {
+    ): Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>> {
         val regulaExecutionPayload =
             mapUnruledSykInnSykmeldingToRegulaPayload(
                 behandletTidspunkt = behandletTidspunkt,
@@ -81,7 +79,7 @@ class RuleService {
                 mode = ExecutionMode.NORMAL,
             )
 
-        return result.toSykInnRuleResult() to result.toJuridiskVurdering()
+        return result.toSykInnRuleResult() to result.juridisk
     }
 
     private fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =

@@ -34,8 +34,8 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toTilbakedateringJs
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toUtdypendeSporsmalJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toYrkesskadeJsonb
 import no.nav.tsm.modules.sykmeldinger.domain.*
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingStatus
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.apache.kafka.shaded.com.google.protobuf.LazyStringArrayList.emptyList
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -114,7 +114,7 @@ class SykmeldingRepo : SykmeldingInsert() {
     suspend fun insert(
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
-        juridisk: JuridiskVurderingResult,
+        juridisk: List<RegulaJuridiskVurdering>,
     ): Either<InsertErrors, VerifiedSykInnSykmelding> {
         try {
             val inserted = dbQuery {

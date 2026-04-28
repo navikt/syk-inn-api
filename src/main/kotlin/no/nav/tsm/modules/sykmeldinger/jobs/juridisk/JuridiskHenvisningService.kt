@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.rules.juridisk
+package no.nav.tsm.modules.sykmeldinger.jobs.juridisk
 
 class JuridiskHenvisningService(private val versjonsKode: String) {
     companion object {

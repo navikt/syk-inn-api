@@ -18,9 +18,9 @@ import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlNavn
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
-import no.nav.tsm.modules.sykmeldinger.rules.juridisk.JuridiskVurderingResult
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.junit.Test
 
 class SykmeldingerServiceTest {
@@ -131,5 +131,5 @@ class SykmeldingerServiceTest {
     }
 }
 
-val okRuleResultPair: Pair<SykInnSykmeldingRuleResult, JuridiskVurderingResult> =
-    SykInnSykmeldingRuleResult.OK to JuridiskVurderingResult(juridiskeVurderinger = emptyList())
+val okRuleResultPair: Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>> =
+    SykInnSykmeldingRuleResult.OK to emptyList()
