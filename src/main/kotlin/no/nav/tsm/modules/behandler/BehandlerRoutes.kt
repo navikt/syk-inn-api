@@ -24,10 +24,10 @@ import no.nav.tsm.core.otel.failSpan
 import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
 import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
 import no.nav.tsm.modules.behandler.mappers.toSykInnSykmelding
+import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
-import no.nav.tsm.modules.behandler.payloads.OpprettSykmelding
 import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
@@ -73,7 +73,7 @@ fun Application.configureBehandlerRoutes() {
                         summary = "Create a new sykmelding"
                         description =
                             "Will execute rules based on logged in users HPR authorizations and other metadata."
-                        requestBody { schema = jsonSchema<OpprettSykmelding.Payload>() }
+                        requestBody { schema = jsonSchema<BehandlerOpprettSykmelding.Payload>() }
                         responses {
                             HttpStatusCode.Created {
                                 description = "The newly created sykmelding"
@@ -112,7 +112,7 @@ fun Application.configureBehandlerRoutes() {
                         summary = "Verifying the contents of a sykmelding"
                         description =
                             "Verify what the rule execution will return, without actually creating the sykmelding"
-                        requestBody { schema = jsonSchema<OpprettSykmelding.Payload>() }
+                        requestBody { schema = jsonSchema<BehandlerOpprettSykmelding.Payload>() }
                         responses {
                             HttpStatusCode.OK {
                                 description =
@@ -240,9 +240,9 @@ private fun SykmeldingerService.GetErrors.getToHttpError(): GenericHttpError =
     }
 
 private suspend fun RoutingCall.receiveOpprettPayload():
-    Either<GenericHttpError, OpprettSykmelding.Payload> = either {
+    Either<GenericHttpError, BehandlerOpprettSykmelding.Payload> = either {
     catch(
-        { receive<OpprettSykmelding.Payload>() },
+        { receive<BehandlerOpprettSykmelding.Payload>() },
         { e: BadRequestException ->
             logger.error("OpprettSykmelding.Payload body parsing failed", e.failSpan())
 

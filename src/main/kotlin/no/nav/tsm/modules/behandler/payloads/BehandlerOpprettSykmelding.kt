@@ -8,7 +8,7 @@ import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 
-object OpprettSykmelding {
+object BehandlerOpprettSykmelding {
     data class Payload(val submitId: UUID, val meta: BehandlerMeta, val values: Values)
 
     data class BehandlerMeta(

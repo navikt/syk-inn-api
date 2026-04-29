@@ -1,7 +1,7 @@
 package no.nav.tsm.modules.behandler.mappers
 
+import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
-import no.nav.tsm.modules.behandler.payloads.OpprettSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
@@ -26,7 +26,7 @@ fun SykInnSykmeldingRuleResult.toBehandlerSykmeldingVerify(): BehandlerSykmeldin
             BehandlerSykmeldingVerify(status = this.type, message = this.message, rule = this.rule)
     }
 
-fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
+fun BehandlerOpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     return UnverifiedSykInnSykmelding(
         submitId = this.submitId,
         meta =
@@ -79,7 +79,7 @@ fun OpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSykmelding {
     )
 }
 
-private fun OpprettSykmelding.UtdypendeSporsmal.mapToSykInnUtdypendeSporsmal():
+private fun BehandlerOpprettSykmelding.UtdypendeSporsmal.mapToSykInnUtdypendeSporsmal():
     SykInnUtdypendeSporsmal {
     return SykInnUtdypendeSporsmal(
         hensynPaArbeidsplassen =
@@ -126,23 +126,23 @@ private fun OpprettSykmelding.UtdypendeSporsmal.mapToSykInnUtdypendeSporsmal():
     )
 }
 
-private fun OpprettSykmelding.Aktivitet.toSykInnApiAktivitet(): SykInnAktivitet {
+private fun BehandlerOpprettSykmelding.Aktivitet.toSykInnApiAktivitet(): SykInnAktivitet {
     return when (this) {
-        is OpprettSykmelding.Aktivitet.Avventende ->
+        is BehandlerOpprettSykmelding.Aktivitet.Avventende ->
             SykInnAktivitet.Avventende(
                 fom = this.fom,
                 tom = this.tom,
                 innspillTilArbeidsgiver = this.innspillTilArbeidsgiver,
             )
 
-        is OpprettSykmelding.Aktivitet.Behandlingsdager ->
+        is BehandlerOpprettSykmelding.Aktivitet.Behandlingsdager ->
             SykInnAktivitet.Behandlingsdager(
                 fom = this.fom,
                 tom = this.tom,
                 antallBehandlingsdager = this.antallBehandlingsdager,
             )
 
-        is OpprettSykmelding.Aktivitet.Gradert ->
+        is BehandlerOpprettSykmelding.Aktivitet.Gradert ->
             SykInnAktivitet.Gradert(
                 fom = this.fom,
                 tom = this.tom,
@@ -150,19 +150,19 @@ private fun OpprettSykmelding.Aktivitet.toSykInnApiAktivitet(): SykInnAktivitet 
                 reisetilskudd = this.reisetilskudd,
             )
 
-        is OpprettSykmelding.Aktivitet.IkkeMulig ->
+        is BehandlerOpprettSykmelding.Aktivitet.IkkeMulig ->
             SykInnAktivitet.IkkeMulig(
                 fom = this.fom,
                 tom = this.tom,
                 arbeidsrelatertArsak = toSykInnArbeidsrelatertArsak(),
             )
 
-        is OpprettSykmelding.Aktivitet.Reisetilskudd ->
+        is BehandlerOpprettSykmelding.Aktivitet.Reisetilskudd ->
             SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
     }
 }
 
-private fun OpprettSykmelding.Aktivitet.IkkeMulig.toSykInnArbeidsrelatertArsak():
+private fun BehandlerOpprettSykmelding.Aktivitet.IkkeMulig.toSykInnArbeidsrelatertArsak():
     SykInnArbeidsrelatertArsak? =
     if (this.arbeidsrelatertArsak.isArbeidsrelatertArsak) {
         SykInnArbeidsrelatertArsak(
