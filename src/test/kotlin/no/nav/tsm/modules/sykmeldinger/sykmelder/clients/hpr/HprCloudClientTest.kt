@@ -11,10 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.ExternalApi
-import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
 
 class HprCloudClientTest {
@@ -24,7 +21,8 @@ class HprCloudClientTest {
         val hprNummer = "12345"
         val mockEngine = MockEngine { request ->
             assertEquals(
-                testEnv.external().helsenettproxy + "/api/v2/behandlerMedHprNummer",
+                simpleUnitTestEnvironment.external().helsenettproxy +
+                    "/api/v2/behandlerMedHprNummer",
                 request.url.toString(),
             )
             assertEquals(
@@ -54,7 +52,7 @@ class HprCloudClientTest {
             HprCloudClient(
                 httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
                 texasClient = mockk(relaxed = true),
-                environment = testEnv,
+                environment = simpleUnitTestEnvironment,
             )
 
         val response = hprClient.getSykmelderByHpr(hprNummer).getOrNull()
@@ -68,7 +66,8 @@ class HprCloudClientTest {
         val hprNummer = "13378010"
         val mockEngine = MockEngine { request ->
             assertEquals(
-                testEnv.external().helsenettproxy + "/api/v2/behandlerMedHprNummer",
+                simpleUnitTestEnvironment.external().helsenettproxy +
+                    "/api/v2/behandlerMedHprNummer",
                 request.url.toString(),
             )
             assertEquals(
@@ -84,7 +83,7 @@ class HprCloudClientTest {
             HprCloudClient(
                 httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
                 texasClient = mockk(relaxed = true),
-                environment = testEnv,
+                environment = simpleUnitTestEnvironment,
             )
 
         val response = hprClient.getSykmelderByHpr(hprNummer)
@@ -94,20 +93,3 @@ class HprCloudClientTest {
         }
     }
 }
-
-private val testEnv =
-    Environment(
-        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app"),
-        texas = mockk(relaxed = true),
-        kafka = mockk(relaxed = true),
-        postgres = mockk(relaxed = true),
-        sykmeldingConfig = mockk(relaxed = true),
-        external = {
-            ExternalApi(
-                btsys = "https://test.btsys.endpoint",
-                tsmPdlCache = "https://test.pdlcache.endpoint",
-                helsenettproxy = "https://test.helsenettproxy.endpoint",
-            )
-        },
-        auth = mockk(relaxed = true),
-    )

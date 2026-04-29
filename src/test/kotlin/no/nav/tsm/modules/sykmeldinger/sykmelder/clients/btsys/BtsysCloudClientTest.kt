@@ -8,11 +8,8 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.ExternalApi
-import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.utils.client
+import no.nav.tsm.utils.simpleUnitTestEnvironment
 
 class BtsysCloudClientTest {
 
@@ -20,7 +17,7 @@ class BtsysCloudClientTest {
     fun `should return true when sykmelder is suspendert`() = runTest {
         val mockEngine = MockEngine { request ->
             assertEquals(
-                testEnv.external().btsys + "/api/v1/suspensjon/status",
+                simpleUnitTestEnvironment.external().btsys + "/api/v1/suspensjon/status",
                 request.url.toString(),
             )
 
@@ -35,7 +32,7 @@ class BtsysCloudClientTest {
             BtsysCloudClient(
                 httpClient = mockEngine.client(),
                 texasClient = mockk(relaxed = true),
-                environment = testEnv,
+                environment = simpleUnitTestEnvironment,
             )
 
         val response = btsys.isSuspendert("12345678910", LocalDate.now()).getOrNull()
@@ -46,7 +43,7 @@ class BtsysCloudClientTest {
     fun `should return false when sykmelder is not suspendert`() = runTest {
         val mockEngine = MockEngine { request ->
             assertEquals(
-                testEnv.external().btsys + "/api/v1/suspensjon/status",
+                simpleUnitTestEnvironment.external().btsys + "/api/v1/suspensjon/status",
                 request.url.toString(),
             )
 
@@ -61,27 +58,10 @@ class BtsysCloudClientTest {
             BtsysCloudClient(
                 httpClient = mockEngine.client(),
                 texasClient = mockk(relaxed = true),
-                environment = testEnv,
+                environment = simpleUnitTestEnvironment,
             )
 
         val response = btsys.isSuspendert("12345678910", LocalDate.now()).getOrNull()
         assertEquals(false, response)
     }
 }
-
-private val testEnv =
-    Environment(
-        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app"),
-        texas = mockk(relaxed = true),
-        kafka = mockk(relaxed = true),
-        postgres = mockk(relaxed = true),
-        sykmeldingConfig = mockk(relaxed = true),
-        external = {
-            ExternalApi(
-                btsys = "https://test.btsys.endpoint",
-                tsmPdlCache = "https://test.pdlcache.endpoint",
-                helsenettproxy = "https://test.helsenettproxy.endpoint",
-            )
-        },
-        auth = mockk(relaxed = true),
-    )

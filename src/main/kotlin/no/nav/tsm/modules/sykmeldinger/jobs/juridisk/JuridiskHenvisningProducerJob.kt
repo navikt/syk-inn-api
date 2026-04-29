@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.service.JobName
@@ -14,6 +15,7 @@ import no.nav.tsm.regulus.regula.juridisk.toJuridiskVurdering
 
 class JuridiskHenvisningProducerJob(
     private val juridiskJobRepo: JuridiskJobRepo,
+    private val environment: Environment,
     applicationScope: CoroutineScope,
 ) : Job(JobName.JURIDISK_PRODUCER, applicationScope) {
     private val logger = logger()
@@ -32,9 +34,8 @@ class JuridiskHenvisningProducerJob(
 
     @WithSpan
     private suspend fun handleJuridiskHenvisningBatch() {
-        val next = juridiskJobRepo.getNext()
-
-        if (next == null) return
+        // TODO: While
+        val next = juridiskJobRepo.getNext() ?: return
 
         val sykmeldingId = next.sykmeldingId.toString()
         val juridiskVurderinger =
@@ -44,7 +45,7 @@ class JuridiskHenvisningProducerJob(
                     eventName = JuridiskHenvisningService.EVENT_NAME,
                     version = JuridiskHenvisningService.VERSION,
                     kilde = JuridiskHenvisningService.KILDE,
-                    versjonAvKode = "TODO",
+                    versjonAvKode = environment.runtime.version,
                     sporing = mapOf("sykmeldingId" to sykmeldingId),
                 )
             }

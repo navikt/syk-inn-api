@@ -47,7 +47,7 @@ fun Application.configureFullIntegrationTests(
 
 fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
     Environment(
-        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app"),
+        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app", version = "testy-v0"),
         postgres =
             PostgresConfig(
                 jdbc = postgres.jdbcUrl,

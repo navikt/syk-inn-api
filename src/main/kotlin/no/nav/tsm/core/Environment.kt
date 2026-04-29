@@ -12,7 +12,7 @@ enum class RuntimeEnvironments(val nais: String) {
     PROD("prod-gcp"),
 }
 
-class Runtime(val env: RuntimeEnvironments, val name: String)
+class Runtime(val env: RuntimeEnvironments, val name: String, val version: String)
 
 class SykmeldingConfig(val retention: Duration)
 
@@ -77,6 +77,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             Runtime(
                 env = config.inferRuntimeEnvironment(),
                 name = config.property("app.name").getString(),
+                version = config.property("app.version").getString(),
             ),
         kafka = kafkaProperties,
         postgres =

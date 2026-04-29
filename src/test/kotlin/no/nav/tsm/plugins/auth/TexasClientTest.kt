@@ -12,13 +12,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.server.testing.testApplication
 import io.ktor.utils.io.ByteReadChannel
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.core.Texas
+import no.nav.tsm.utils.simpleUnitTestEnvironment
 
 class TexasClientTest {
 
@@ -30,7 +26,7 @@ class TexasClientTest {
     @Test
     fun `should exchange token for correct target`() = testApplication {
         val mockEngine = MockEngine { request ->
-            assertEquals(request.url.toString(), testEnv.texas().tokenEndpoint)
+            assertEquals(request.url.toString(), simpleUnitTestEnvironment.texas().tokenEndpoint)
 
             val payload =
                 texasResponseMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
@@ -46,20 +42,10 @@ class TexasClientTest {
             )
         }
 
-        val texas = TexasClient(env = testEnv, httpClient = HttpClient(mockEngine) {})
+        val texas =
+            TexasClient(env = simpleUnitTestEnvironment, httpClient = HttpClient(mockEngine) {})
 
         val response = texas.requestToken("tsm", "tsm-pdl-cache")
         assertEquals("ay.aeuheu", response.token)
     }
 }
-
-private val testEnv =
-    Environment(
-        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app"),
-        texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
-        kafka = mockk(relaxed = true),
-        postgres = mockk(relaxed = true),
-        sykmeldingConfig = mockk(relaxed = true),
-        external = mockk(relaxed = true),
-        auth = mockk(relaxed = true),
-    )

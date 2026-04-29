@@ -16,10 +16,7 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import no.nav.tsm.core.Environment
-import no.nav.tsm.core.ExternalApi
-import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
+import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
 
 class PdlCloudClientTest {
@@ -61,7 +58,7 @@ class PdlCloudClientTest {
             PdlCloudClient(
                 httpClient = HttpClient(mockEngine) {},
                 texasClient = mockk(relaxed = true),
-                environment = testEnv,
+                environment = simpleUnitTestEnvironment,
             )
 
         val response =
@@ -70,20 +67,3 @@ class PdlCloudClientTest {
         response.foedselsdato shouldBe LocalDate.now().minusYears(35)
     }
 }
-
-private val testEnv =
-    Environment(
-        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app"),
-        texas = mockk(relaxed = true),
-        kafka = mockk(relaxed = true),
-        postgres = mockk(relaxed = true),
-        sykmeldingConfig = mockk(relaxed = true),
-        external = {
-            ExternalApi(
-                btsys = "https://test.btsys.endpoint",
-                tsmPdlCache = "https://test.pdlcache.endpoint",
-                helsenettproxy = "https://test.helsenettproxy.endpoint",
-            )
-        },
-        auth = mockk(relaxed = true),
-    )
