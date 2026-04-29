@@ -81,7 +81,7 @@ class JuridiskHenvisningJobRepoTest : WithPostgresql() {
     @Test
     fun `getNext ignores non-PENDING items`() = runTest {
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENDING)
-        insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENT)
+        insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.DONE)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.FAILED)
 
         val result = repo.getNext()
@@ -146,7 +146,7 @@ class JuridiskHenvisningJobRepoTest : WithPostgresql() {
     fun `resetHangingJobs does not reset PENDING or SENT items`() = runTest {
         val oldEventTimestamp = OffsetDateTime.now(ZoneOffset.UTC).minusHours(2)
         insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.PENDING, oldEventTimestamp)
-        insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.SENT, oldEventTimestamp)
+        insertRuleStatus(UUID.randomUUID(), JuridiskVurderingStatus.DONE, oldEventTimestamp)
 
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 

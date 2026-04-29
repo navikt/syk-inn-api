@@ -64,6 +64,11 @@ class JuridiskHenvisningProducerJob(
         val next = juridiskHenvisningJobRepo.getNext() ?: return null
         val sykmeldingId = next.sykmeldingId
 
+        if (next.juridiskVurdering.isEmpty()) {
+            juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+            return next
+        }
+
         try {
             val juridiskVurderinger =
                 next.juridiskVurdering.map {
@@ -78,7 +83,7 @@ class JuridiskHenvisningProducerJob(
                 }
 
             juridiskHenvisningProducer.sendJuridiskVurderinger(sykmeldingId, juridiskVurderinger)
-            juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.SENT)
+            juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
         } catch (e: Exception) {
             logger.error("Failed to produce juridisk henvisning for ID $sykmeldingId", e)
             juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.FAILED)

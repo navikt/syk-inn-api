@@ -16,7 +16,6 @@ import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
 class SykmeldingProducerRepoTest : WithPostgresql() {
-
     companion object {
         init {
             runMigrations(true)

@@ -240,11 +240,9 @@ class EverythingTest : WithAll() {
         created.meta.sykmelder.hpr shouldEqual "hprButFnrIsSuspended"
         created.utfall.result shouldEqual RuleType.INVALID
 
-        val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId, waitForJuridisk = true)
+        val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId)
         record.shouldNotBeNull()
         KafkaTestUtils.expectAllValues(created, record)
-
-        println(allPIKs)
     }
 
     /**
