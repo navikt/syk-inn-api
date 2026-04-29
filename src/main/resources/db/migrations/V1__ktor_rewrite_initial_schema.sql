@@ -25,7 +25,7 @@ insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_DELETE', 'STOPPED', now(), 'system');
 
 insert into job(name, desired_state, updated_at, updated_by)
-values ('JURIDISK_PRODUCER', 'STOPPED', now(), 'system');
+values ('JURIDISK_PRODUCER', 'RUNNING', now(), 'system');
 
 CREATE TABLE sykmelding
 (

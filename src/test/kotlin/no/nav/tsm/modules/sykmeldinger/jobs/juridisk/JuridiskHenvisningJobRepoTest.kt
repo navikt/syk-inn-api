@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.db.dbQuery
-import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.regulus.regula.JuridiskHenvisning
 import no.nav.tsm.regulus.regula.JuridiskHenvisningLovverk
 import no.nav.tsm.regulus.regula.JuridiskUtfall
@@ -23,7 +23,7 @@ import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
-class JuridiskJobRepoTest : WithPostgresql() {
+class JuridiskHenvisningJobRepoTest : WithPostgresql() {
 
     companion object {
         init {
@@ -32,11 +32,11 @@ class JuridiskJobRepoTest : WithPostgresql() {
         }
     }
 
-    private val repo = JuridiskJobRepo()
+    private val repo = JuridiskHenvisningJobRepo()
 
     @BeforeTest
     fun cleanup() {
-        runBlocking { dbQuery { JuridiskVurderingTable.deleteAll() } }
+        runBlocking { dbQuery { JuridiskVurderingStatusTable.deleteAll() } }
     }
 
     @Test
@@ -124,10 +124,10 @@ class JuridiskJobRepoTest : WithPostgresql() {
 
         assertEquals(2, count)
         dbQuery {
-            JuridiskVurderingTable.selectAll().toList().forEach { row ->
+            JuridiskVurderingStatusTable.selectAll().toList().forEach { row ->
                 assertEquals(
                     JuridiskVurderingStatus.PENDING.name,
-                    row[JuridiskVurderingTable.status],
+                    row[JuridiskVurderingStatusTable.status],
                 )
             }
         }
@@ -159,11 +159,11 @@ class JuridiskJobRepoTest : WithPostgresql() {
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
         dbQuery {
-            JuridiskVurderingTable.insert {
-                it[JuridiskVurderingTable.sykmeldingId] = sykmeldingId
-                it[JuridiskVurderingTable.status] = status.name
-                it[JuridiskVurderingTable.eventTimestamp] = eventTimestamp
-                it[JuridiskVurderingTable.juridiskVurdering] = testJuridiskVurdering()
+            JuridiskVurderingStatusTable.insert {
+                it[JuridiskVurderingStatusTable.sykmeldingId] = sykmeldingId
+                it[JuridiskVurderingStatusTable.status] = status.name
+                it[JuridiskVurderingStatusTable.eventTimestamp] = eventTimestamp
+                it[JuridiskVurderingStatusTable.juridiskVurdering] = testJuridiskVurdering()
             }
         }
     }

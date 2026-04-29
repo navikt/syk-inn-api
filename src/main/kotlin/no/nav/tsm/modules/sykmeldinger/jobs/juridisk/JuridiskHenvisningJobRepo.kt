@@ -8,10 +8,11 @@ import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
-import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.statements.StatementType
@@ -19,15 +20,15 @@ import org.jetbrains.exposed.v1.r2dbc.update
 
 private val objectMapper = jacksonObjectMapper().apply { registerModule(JavaTimeModule()) }
 
-data class JuridiskJob(
+data class JuridiskHenvisningJob(
     val sykmeldingId: UUID,
     val status: JuridiskVurderingStatus,
     val juridiskVurdering: List<RegulaJuridiskVurdering>,
 )
 
-class JuridiskJobRepo {
+class JuridiskHenvisningJobRepo {
 
-    suspend fun getNext(): JuridiskJob? {
+    suspend fun getNext(): JuridiskHenvisningJob? {
         return dbQuery {
             exec(
                     """
@@ -52,7 +53,7 @@ class JuridiskJobRepo {
                         ),
                     explicitStatementType = StatementType.UPDATE,
                 ) {
-                    JuridiskJob(
+                    JuridiskHenvisningJob(
                         sykmeldingId = UUID.fromString(it.get("sykmelding_id", String::class.java)),
                         status =
                             JuridiskVurderingStatus.valueOf(it.get("status", String::class.java)),
@@ -64,14 +65,23 @@ class JuridiskJobRepo {
         }
     }
 
+    suspend fun updateStatus(sykmeldingId: UUID, newStatus: JuridiskVurderingStatus) = dbQuery {
+        JuridiskVurderingStatusTable.update({
+            JuridiskVurderingStatusTable.sykmeldingId eq sykmeldingId
+        }) {
+            it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
+            it[status] = newStatus.name
+        }
+    }
+
     suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
         return dbQuery {
-            JuridiskVurderingTable.update({
-                (JuridiskVurderingTable.status inList
+            JuridiskVurderingStatusTable.update({
+                (JuridiskVurderingStatusTable.status inList
                     listOf(
                         JuridiskVurderingStatus.SENDING.name,
                         JuridiskVurderingStatus.FAILED.name,
-                    )) and (JuridiskVurderingTable.eventTimestamp less timestamp)
+                    )) and (JuridiskVurderingStatusTable.eventTimestamp less timestamp)
             }) {
                 it[status] = JuridiskVurderingStatus.PENDING.name
                 it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toAktivitetJsonb
@@ -118,7 +118,7 @@ class SykmeldingRepo : SykmeldingInsert() {
     ): Either<InsertErrors, VerifiedSykInnSykmelding> {
         try {
             val inserted = dbQuery {
-                JuridiskVurderingTable.insert {
+                JuridiskVurderingStatusTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
                     it[status] = JuridiskVurderingStatus.PENDING.name
                     it[eventTimestamp] = OffsetDateTime.now()

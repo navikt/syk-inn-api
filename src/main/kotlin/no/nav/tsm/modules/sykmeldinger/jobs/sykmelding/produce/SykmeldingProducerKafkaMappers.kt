@@ -155,9 +155,11 @@ private fun SykInnSykmeldingRuleResult.toValidationResult(
                 when (type) {
                     RuleType.OK -> throw IllegalStateException("Rule with outcome can't be OK")
                     RuleType.PENDING ->
+                        // TODO
                         PendingRule(rule, mottatt, ValidationType.AUTOMATIC, Reason("TODO", "TODO"))
 
                     RuleType.INVALID ->
+                        // TODO
                         InvalidRule(rule, ValidationType.AUTOMATIC, mottatt, Reason("TODO", "TODO"))
                 }
 
@@ -210,8 +212,11 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
         is SykInnAktivitet.Gradert ->
             Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
 
+        // TODO
         is SykInnAktivitet.Avventende -> TODO()
+        // TODO
         is SykInnAktivitet.Behandlingsdager -> TODO()
+        // TODO
         is SykInnAktivitet.Reisetilskudd -> TODO()
     }
 

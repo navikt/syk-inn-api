@@ -7,6 +7,7 @@ import no.nav.tsm.modules.jobs.service.JobName
 class SykmeldingDeleteJob(applicationScope: CoroutineScope) :
     Job(JobName.SYKMELDING_DELETE, applicationScope) {
     override suspend fun runJob() {
+        // TODO
         TODO("Not yet implemented")
     }
 }

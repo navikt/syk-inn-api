@@ -34,13 +34,14 @@ class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
 
 class Auth(val entra: EntraAuth)
 
-class KafkaInputProducer(val delay: Duration, val hungTimeout: Duration)
+class KafkaProducerJob(val delay: Duration, val hungTimeout: Duration)
 
 class KafkaSykmeldingConsumer(val longPoll: Duration)
 
 class KafkaConfig(
     val config: Properties,
-    val inputProducer: KafkaInputProducer,
+    val inputProducer: KafkaProducerJob,
+    val juridiskProducer: KafkaProducerJob,
     val sykmeldingConsumer: KafkaSykmeldingConsumer,
 )
 
@@ -62,9 +63,14 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                     config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
                 },
             inputProducer =
-                KafkaInputProducer(
+                KafkaProducerJob(
                     delay = config.property("kafka.input-producer.delay").getAs(),
                     hungTimeout = config.property("kafka.input-producer.delay").getAs(),
+                ),
+            juridiskProducer =
+                KafkaProducerJob(
+                    delay = config.property("kafka.juridisk-producer.delay").getAs(),
+                    hungTimeout = config.property("kafka.juridisk-producer.delay").getAs(),
                 ),
             sykmeldingConsumer =
                 KafkaSykmeldingConsumer(

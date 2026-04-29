@@ -11,6 +11,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import java.util.Properties
 import kotlin.collections.set
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
 import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
 import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
@@ -28,13 +29,19 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.testcontainers.kafka.ConfluentKafkaContainer
 
 object KafkaTestConsumer {
+    const val INPUT_TOPIC = "tsm.sykmeldinger-input"
+    const val PIK_TOPIC = "teamsykmelding.paragraf-i-kode"
+
     private val mapper =
         jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
             registerModule(SykmeldingModule())
         }
 
-    fun parseIt(record: ByteArray?): SykmeldingRecord? =
+    fun parseSykmeldingRecord(record: ByteArray?): SykmeldingRecord? =
+        if (record != null) mapper.readValue(record) else null
+
+    fun parsePIKRecord(record: ByteArray?): JuridiskHenvisningRecord? =
         if (record != null) mapper.readValue(record) else null
 
     fun createTestConsumer(container: ConfluentKafkaContainer): KafkaConsumer<String, ByteArray?> {
@@ -49,7 +56,7 @@ object KafkaTestConsumer {
 
         val kafkaConsumer =
             KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
-        kafkaConsumer.subscribe(listOf("tsm.sykmeldinger-input"))
+        kafkaConsumer.subscribe(listOf(INPUT_TOPIC, PIK_TOPIC))
 
         return kafkaConsumer
     }

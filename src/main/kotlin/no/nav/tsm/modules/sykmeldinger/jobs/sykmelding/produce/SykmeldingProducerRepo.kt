@@ -50,10 +50,10 @@ class SykmeldingProducerRepo {
         }
     }
 
-    suspend fun updateStatus(sykmeldingId: UUID, failed: SykmeldingStatusStatus) = dbQuery {
+    suspend fun updateStatus(sykmeldingId: UUID, newStatus: SykmeldingStatusStatus) = dbQuery {
         SykmeldingStatusTable.update({ SykmeldingStatusTable.sykmeldingId eq sykmeldingId }) {
             it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
-            it[status] = failed.name
+            it[status] = newStatus.name
         }
     }
 

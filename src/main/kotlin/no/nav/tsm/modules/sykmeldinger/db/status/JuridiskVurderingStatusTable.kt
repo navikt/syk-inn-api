@@ -9,17 +9,17 @@ import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.json.jsonb
 
-private val juridiskVurderingObjectMapper =
+private val juridiskVurderingExposedObjectMapper =
     jacksonObjectMapper().apply { registerModule(JavaTimeModule()) }
 
-object JuridiskVurderingTable : Table("juridisk_status") {
+object JuridiskVurderingStatusTable : Table("juridisk_status") {
     val sykmeldingId = javaUUID("sykmelding_id")
     val status = text("status")
     val eventTimestamp = timestampWithTimeZone("event_timestamp")
     val juridiskVurdering =
         jsonb<List<RegulaJuridiskVurdering>>(
             "juridisk_vurdering",
-            serialize = { juridiskVurderingObjectMapper.writeValueAsString(it) },
-            deserialize = { juridiskVurderingObjectMapper.readValue(it) },
+            serialize = { juridiskVurderingExposedObjectMapper.writeValueAsString(it) },
+            deserialize = { juridiskVurderingExposedObjectMapper.readValue(it) },
         )
 }

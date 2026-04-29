@@ -8,7 +8,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.KafkaConfig
-import no.nav.tsm.core.KafkaInputProducer
+import no.nav.tsm.core.KafkaProducerJob
 import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
@@ -68,7 +68,9 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                     if (kafka != null)
                         Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
                     else mockk(),
-                inputProducer = KafkaInputProducer(delay = 500.milliseconds, hungTimeout = 1.hours),
+                inputProducer = KafkaProducerJob(delay = 500.milliseconds, hungTimeout = 1.hours),
+                juridiskProducer =
+                    KafkaProducerJob(delay = 500.milliseconds, hungTimeout = 1.hours),
                 sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
             ),
         texas = { mockk() },

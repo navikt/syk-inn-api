@@ -2,6 +2,7 @@ package no.nav.tsm
 
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -21,6 +22,7 @@ import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
 import no.nav.tsm.sykmelding.input.core.model.RuleType
@@ -37,6 +39,7 @@ class EverythingTest : WithAll() {
     /** All tests use a single consumer to reduce setup and teardown time */
     companion object {
         private val allRecords: MutableMap<UUID, SykmeldingRecord?> = mutableMapOf()
+        private val allPIKs: MutableMap<UUID, JuridiskHenvisningRecord?> = mutableMapOf()
         private val consumer = createTestConsumer(kafka)
     }
 
@@ -214,15 +217,18 @@ class EverythingTest : WithAll() {
         val first = allSykmeldinger.first()
         first.shouldBeInstanceOf<BehandlerSykmeldingFull>()
 
-        val record: SykmeldingRecord? = consumeUntil(first.sykmeldingId)
+        val record: SykmeldingRecord? = consumeUntil(first.sykmeldingId, waitForJuridisk = true)
         record.shouldNotBeNull()
         KafkaTestUtils.expectAllValues(first, record)
+
+        // Full happy path hits all 4 trees with juridisk henvisninger
+        allPIKs[first.sykmeldingId]?.juridiskeVurderinger?.size shouldEqual 4
     }
 
     /**
      * Consumes until the record has been produced on the Kafka topic, times out after 10 seconds.
      */
-    private suspend fun consumeUntil(sykmeldingId: UUID) =
+    private suspend fun consumeUntil(sykmeldingId: UUID, waitForJuridisk: Boolean = false) =
         withContext(Dispatchers.IO) {
             if (allRecords.containsKey(sykmeldingId)) return@withContext allRecords[sykmeldingId]
 
@@ -234,10 +240,19 @@ class EverythingTest : WithAll() {
                 records.forEach { record ->
                     val keyUuid = UUID.fromString(record.key())
                     val value = record.value()
-                    allRecords[keyUuid] = KafkaTestConsumer.parseIt(value)
+
+                    when (record.topic()) {
+                        KafkaTestConsumer.PIK_TOPIC -> handlePIKRecord(keyUuid, value)
+                        KafkaTestConsumer.INPUT_TOPIC -> handleSykmeldingRecord(keyUuid, value)
+                        else -> throw IllegalStateException("Unknown topic: ${record.topic()}")
+                    }
                 }
 
-                if (allRecords.containsKey(sykmeldingId)) {
+                if (waitForJuridisk) {
+                    if (allRecords.containsKey(sykmeldingId) && allPIKs.containsKey(sykmeldingId)) {
+                        return@withContext allRecords[sykmeldingId]
+                    }
+                } else if (allRecords.containsKey(sykmeldingId)) {
                     return@withContext allRecords[sykmeldingId]
                 }
             }
@@ -246,6 +261,14 @@ class EverythingTest : WithAll() {
                 "Did not receive expected message with id $sykmeldingId within 10 seconds, there were ${allRecords.size} records."
             )
         }
+
+    private fun handleSykmeldingRecord(keyUuid: UUID, value: ByteArray?) {
+        allRecords[keyUuid] = KafkaTestConsumer.parseSykmeldingRecord(value)
+    }
+
+    private fun handlePIKRecord(keyUuid: UUID, value: ByteArray?) {
+        allPIKs[keyUuid] = KafkaTestConsumer.parsePIKRecord(value)
+    }
 }
 
 @Language("JSON")
