@@ -14,6 +14,8 @@
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="io.swagger.codegen.v3.generators" level="WARN"/>
     <logger name="org.apache.kafka.clients.consumer" level="WARN"/>
+    <logger name="org.testcontainers" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
 
     <!-- Local development, redirect secure logs to console with nice colors -->
     <appender name="TEAM_LOG" class="ch.qos.logback.core.ConsoleAppender">

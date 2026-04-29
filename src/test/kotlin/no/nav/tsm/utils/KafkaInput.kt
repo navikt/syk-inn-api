@@ -63,7 +63,8 @@ object KafkaTestConsumer {
 }
 
 object KafkaTestUtils {
-    fun expectAllValues(sykmelding: BehandlerSykmeldingFull, record: SykmeldingRecord) {
+    fun expectAllValues(sykmelding: BehandlerSykmeldingFull, record: SykmeldingRecord?) {
+        requireNotNull(record) { "Record can't be null here lol" }
         sykmelding.sykmeldingId.toString() shouldBe record.sykmelding.id
 
         val digitalSykmelding = record.sykmelding.shouldBeInstanceOf<DigitalSykmelding>()
@@ -86,7 +87,7 @@ object KafkaTestUtils {
             sykmelding.values.svangerskapsrelatert shouldBe medisinskVurdering.svangerskap
             sykmelding.values.annenFravarsgrunn shouldBe medisinskVurdering.annenFravarsgrunn
             sykmelding.values.hoveddiagnose?.code shouldBe medisinskVurdering.hovedDiagnose?.kode
-            sykmelding.values.bidiagnoser?.map { it.code } shouldBe
+            (sykmelding.values.bidiagnoser ?: emptyList()).map { it.code } shouldBe
                 medisinskVurdering.biDiagnoser?.map { it.kode }
             sykmelding.values.yrkesskade?.skadedato shouldBe
                 medisinskVurdering.yrkesskade?.yrkesskadeDato

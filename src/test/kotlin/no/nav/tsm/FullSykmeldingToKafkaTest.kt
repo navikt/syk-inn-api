@@ -223,26 +223,82 @@ class EverythingTest : WithAll() {
         }
 
     @Test
-    fun `suspendert behandler`() = testApplication {
+    fun `suspendert behandler should work and be submitted, even though its INVALID`() =
+        testApplication {
+            configureEverythingTest()
+
+            val response =
+                client.postSykmelding(
+                    createCreatePayload(
+                        meta = Testdata.suspendertBehandlerMeta,
+                        values = Testdata.everyValueAnswered,
+                    )
+                )
+            response.status shouldEqual HttpStatusCode.OK
+
+            val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+            created.meta.pasient.ident shouldEqual "21037712323"
+            created.meta.sykmelder.hpr shouldEqual "hprButFnrIsSuspended"
+            created.utfall.result shouldEqual RuleType.INVALID
+
+            val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId)
+            record.shouldNotBeNull()
+            KafkaTestUtils.expectAllValues(created, record)
+        }
+
+    @Test
+    fun `super minimal sykmelding`() = testApplication {
         configureEverythingTest()
 
         val response =
             client.postSykmelding(
                 createCreatePayload(
-                    meta = Testdata.suspendertBehandlerMeta,
-                    values = Testdata.everyValueAnswered,
+                    meta = Testdata.simpleBehandlerMeta,
+                    values =
+                        Values(
+                            pasientenSkalSkjermes = false,
+                            svangerskapsrelatert = false,
+                            hoveddiagnose =
+                                BehandlerOpprettSykmelding.DiagnoseInfo(
+                                    system = SykInnDiagnoseSystem.ICPC2,
+                                    code = "L73",
+                                ),
+                            bidiagnoser = emptyList(),
+                            aktivitet =
+                                listOf(
+                                    BehandlerOpprettSykmelding.Aktivitet.Gradert(
+                                        fom = LocalDate.now(),
+                                        tom = LocalDate.now().plusDays(7),
+                                        grad = 70,
+                                        reisetilskudd = false,
+                                    )
+                                ),
+                            meldinger =
+                                BehandlerOpprettSykmelding.Meldinger(
+                                    tilNav = null,
+                                    tilArbeidsgiver = null,
+                                ),
+                            utdypendeSporsmal = null,
+                            yrkesskade = null,
+                            arbeidsgiver = null,
+                            tilbakedatering = null,
+                            annenFravarsgrunn = null,
+                        ),
                 )
             )
         response.status shouldEqual HttpStatusCode.OK
 
         val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
-        created.meta.pasient.ident shouldEqual "21037712323"
-        created.meta.sykmelder.hpr shouldEqual "hprButFnrIsSuspended"
-        created.utfall.result shouldEqual RuleType.INVALID
+        created.utfall.result shouldEqual RuleType.OK
 
-        val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId)
-        record.shouldNotBeNull()
+        val record = consumeUntil(created.sykmeldingId, waitForJuridisk = true)
         KafkaTestUtils.expectAllValues(created, record)
+
+        val juridisk = requireNotNull(allPIKs[created.sykmeldingId]?.juridiskeVurderinger)
+        juridisk.shouldHaveSize(4)
+        juridisk.first().kilde shouldBe "syk-inn-api"
+        juridisk.first().version shouldBe "1.0.0"
+        juridisk.first().versjonAvKode shouldBe "testy-v0"
     }
 
     /**
