@@ -12,6 +12,7 @@ import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsume
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerService
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteJob
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.SykmeldingProducerJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.SykmeldingProducerRepo
 import no.nav.tsm.sykmelding.input.producer.SykmeldingInputKafkaInputFactory
@@ -29,6 +30,7 @@ fun Application.configureJobsDependencies() {
         provide<SykmeldingProducerRepo>(SykmeldingProducerRepo::class)
         provide<SykmeldingProducerJob>(SykmeldingProducerJob::class)
 
+        provide<SykmeldingDeleteRepo>(SykmeldingDeleteRepo::class)
         provide<SykmeldingDeleteJob>(SykmeldingDeleteJob::class)
 
         provide<JuridiskHenvisningJobRepo>(JuridiskHenvisningJobRepo::class)

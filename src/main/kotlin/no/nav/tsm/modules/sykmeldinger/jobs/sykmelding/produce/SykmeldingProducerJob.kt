@@ -22,8 +22,8 @@ class SykmeldingProducerJob(
 ) : Job(JobName.SYKMELDING_PRODUCER, applicationScope) {
     private val logger = logger()
 
-    private val batchDelay = environment.kafka.inputProducer.delay
-    private val hungSykmelding = environment.kafka.inputProducer.hungTimeout
+    private val batchDelay = environment.jobs.inputProducer.delay
+    private val hungSykmelding = environment.jobs.inputProducer.hungTimeout
 
     override suspend fun runJob() =
         withContext(Dispatchers.IO) {

@@ -27,8 +27,8 @@ class JuridiskHenvisningProducerJob(
 ) : Job(JobName.JURIDISK_PRODUCER, applicationScope) {
     private val logger = logger()
 
-    private val batchDelay = environment.kafka.juridiskProducer.delay
-    private val hungJuridisk = environment.kafka.juridiskProducer.hungTimeout
+    private val batchDelay = environment.jobs.juridiskProducer.delay
+    private val hungJuridisk = environment.jobs.juridiskProducer.hungTimeout
 
     override suspend fun runJob() =
         withContext(Dispatchers.IO) {

@@ -2,7 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.db.status
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
-import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
+import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 
 enum class SykmeldingStatusStatus {
     PENDING,

@@ -2,8 +2,6 @@ package no.nav.tsm.modules.jobs.db
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import kotlin.time.toJavaInstant
-import kotlin.time.toKotlinInstant
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
@@ -28,11 +26,7 @@ class JobRepository {
                 Job(
                     jobName = JobName.valueOf(it[JobTable.name]),
                     desiredState = JobStatus.valueOf(it[JobTable.desiredState]),
-                    updatedAt =
-                        OffsetDateTime.ofInstant(
-                            it[JobTable.updatedAt].toJavaInstant(),
-                            ZoneOffset.UTC,
-                        ),
+                    updatedAt = OffsetDateTime.ofInstant(it[JobTable.updatedAt], ZoneOffset.UTC),
                     updatedBy = it[JobTable.updatedBy],
                 )
             }
@@ -47,8 +41,7 @@ class JobRepository {
                 it[JobStatusTable.runner] = runner
                 it[JobStatusTable.job] = jobName.name
                 it[JobStatusTable.state] = jobStatus.name
-                it[JobStatusTable.updatedAt] =
-                    OffsetDateTime.now(ZoneOffset.UTC).toInstant().toKotlinInstant()
+                it[JobStatusTable.updatedAt] = OffsetDateTime.now(ZoneOffset.UTC).toInstant()
             }
         }
     }
@@ -61,8 +54,7 @@ class JobRepository {
         dbQuery {
             JobTable.update({ JobTable.name eq jobName.name }) {
                 it[JobTable.desiredState] = desiredState.name
-                it[JobTable.updatedAt] =
-                    OffsetDateTime.now(ZoneOffset.UTC).toInstant().toKotlinInstant()
+                it[JobTable.updatedAt] = OffsetDateTime.now(ZoneOffset.UTC).toInstant()
                 it[JobTable.updatedBy] = updatedBy
             }
         }
@@ -77,10 +69,7 @@ class JobRepository {
                         job = JobName.valueOf(it[JobStatusTable.job]),
                         state = JobStatus.valueOf(it[JobStatusTable.state]),
                         updatedAt =
-                            OffsetDateTime.ofInstant(
-                                it[JobStatusTable.updatedAt].toJavaInstant(),
-                                ZoneOffset.UTC,
-                            ),
+                            OffsetDateTime.ofInstant(it[JobStatusTable.updatedAt], ZoneOffset.UTC),
                     )
                 }
                 .toList()

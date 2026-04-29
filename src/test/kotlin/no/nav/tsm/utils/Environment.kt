@@ -12,6 +12,7 @@ val simpleUnitTestEnvironment =
         runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app", version = "testy-v0"),
         texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
         kafka = mockk(relaxed = true),
+        jobs = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
         sykmeldingConfig = mockk(relaxed = true),
         external = {

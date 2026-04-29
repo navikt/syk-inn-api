@@ -6,14 +6,20 @@ import no.nav.tsm.core.db.exposedJacksonObjectMapper
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
-import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
+import org.jetbrains.exposed.v1.javatime.date
+import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.json.jsonb
 
 object SykmeldingTable : Table("sykmelding") {
-
     val id = javaUUID("id")
+
+    /** Technical columns, used for deserialization, idempotency or filtering/sorting */
     val type = text("type")
     val idempotencyKey = javaUUID("idempotency_key")
+    val earliestFom = date("earliest_fom")
+    val latestTom = date("latest_tom")
+
+    /** Actual value columns */
     val rules = jacksonJsonb<SykmeldingJsonbValidationResult>("validation_result")
     val metaSource = text("meta_source")
     val metaMottatt = timestampWithTimeZone("meta_mottatt")

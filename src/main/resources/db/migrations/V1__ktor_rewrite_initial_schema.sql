@@ -22,7 +22,7 @@ insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_PRODUCER', 'RUNNING', now(), 'system');
 
 insert into job(name, desired_state, updated_at, updated_by)
-values ('SYKMELDING_DELETE', 'STOPPED', now(), 'system');
+values ('SYKMELDING_DELETE', 'RUNNING', now(), 'system');
 
 insert into job(name, desired_state, updated_at, updated_by)
 values ('JURIDISK_PRODUCER', 'RUNNING', now(), 'system');
@@ -30,9 +30,11 @@ values ('JURIDISK_PRODUCER', 'RUNNING', now(), 'system');
 CREATE TABLE sykmelding
 (
     id                                    UUID PRIMARY KEY,
-    idempotency_key                       UUID UNIQUE NOT NULL,
-    validation_result                     JSONB       NOT NULL,
     type                                  TEXT        NOT NULL,
+    idempotency_key                       UUID UNIQUE NOT NULL,
+    earliest_fom                          DATE        NOT NULL,
+    latest_tom                            DATE        NOT NULL,
+    validation_result                     JSONB       NOT NULL,
     meta_source                           TEXT        NOT NULL,
     meta_mottatt                          TIMESTAMPTZ NOT NULL,
     meta_pasient_ident                    TEXT        NOT NULL,
@@ -56,6 +58,7 @@ CREATE TABLE sykmelding
     values_annen_fravarsgrunn             TEXT        NULL
 );
 
+create index idx_sykmelding_latest_tom_date on sykmelding (latest_tom);
 
 create table sykmelding_status
 (

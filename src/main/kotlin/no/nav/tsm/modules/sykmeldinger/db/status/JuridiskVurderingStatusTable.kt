@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
-import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
+import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.json.jsonb
 
 private val juridiskVurderingExposedObjectMapper =

@@ -73,6 +73,8 @@ abstract class SykmeldingInsert {
                 it[SykmeldingTable.idempotencyKey] = idempotencyKey
                 it[id] = sykmelding.sykmeldingId
                 it[type] = sykmelding.type.name
+                it[earliestFom] = sykmelding.values.aktivitet.minOf { aktivitet -> aktivitet.fom }
+                it[latestTom] = sykmelding.values.aktivitet.maxOf { aktivitet -> aktivitet.tom }
                 it[rules] = sykmelding.result.toRuleResultJson()
                 it[metaSource] = sykmelding.meta.source
                 it[metaMottatt] = sykmelding.meta.mottatt
@@ -139,6 +141,7 @@ class SykmeldingRepo : SykmeldingInsert() {
 
             return inserted.right()
         } catch (e: ExposedR2dbcException) {
+            // TODO: This also catched other violations, for example not-null constraints :/
             if (e.cause is R2dbcDataIntegrityViolationException) {
                 return InsertErrors.IDEMPOTENCY_HIT.left()
             }

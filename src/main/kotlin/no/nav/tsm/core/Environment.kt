@@ -34,19 +34,23 @@ class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
 
 class Auth(val entra: EntraAuth)
 
-class KafkaProducerJob(val delay: Duration, val hungTimeout: Duration)
+class ProducerJob(val delay: Duration, val hungTimeout: Duration)
+
+class DeleterJob(val interval: Duration)
 
 class KafkaSykmeldingConsumer(val longPoll: Duration)
 
-class KafkaConfig(
-    val config: Properties,
-    val inputProducer: KafkaProducerJob,
-    val juridiskProducer: KafkaProducerJob,
-    val sykmeldingConsumer: KafkaSykmeldingConsumer,
+class KafkaConfig(val config: Properties, val sykmeldingConsumer: KafkaSykmeldingConsumer)
+
+class JobsConfig(
+    val inputProducer: ProducerJob,
+    val juridiskProducer: ProducerJob,
+    val sykmeldingDeleter: DeleterJob,
 )
 
 class Environment(
     val runtime: Runtime,
+    val jobs: JobsConfig,
     val kafka: KafkaConfig,
     val postgres: PostgresConfig,
     val sykmeldingConfig: SykmeldingConfig,
@@ -62,20 +66,26 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 Properties().apply {
                     config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
                 },
-            inputProducer =
-                KafkaProducerJob(
-                    delay = config.property("kafka.input-producer.delay").getAs(),
-                    hungTimeout = config.property("kafka.input-producer.delay").getAs(),
-                ),
-            juridiskProducer =
-                KafkaProducerJob(
-                    delay = config.property("kafka.juridisk-producer.delay").getAs(),
-                    hungTimeout = config.property("kafka.juridisk-producer.delay").getAs(),
-                ),
             sykmeldingConsumer =
                 KafkaSykmeldingConsumer(
                     longPoll = config.property("kafka.sykmelding-consumer.long-poll").getAs()
                 ),
+        )
+
+    val jobsConfig =
+        JobsConfig(
+            inputProducer =
+                ProducerJob(
+                    delay = config.property("jobs.input-producer.delay").getAs(),
+                    hungTimeout = config.property("jobs.input-producer.delay").getAs(),
+                ),
+            juridiskProducer =
+                ProducerJob(
+                    delay = config.property("jobs.juridisk-producer.delay").getAs(),
+                    hungTimeout = config.property("jobs.juridisk-producer.delay").getAs(),
+                ),
+            sykmeldingDeleter =
+                DeleterJob(interval = config.property("jobs.sykmelding-deleter.interval").getAs()),
         )
 
     return Environment(
@@ -86,6 +96,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 version = config.property("app.version").getString(),
             ),
         kafka = kafkaProperties,
+        jobs = jobsConfig,
         postgres =
             PostgresConfig(
                 jdbc = config.property("postgres.jdbc").getString(),
