@@ -11,7 +11,11 @@ import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.service.JobName
 
-class SykmeldingDeleteJob(environment: Environment, applicationScope: CoroutineScope) :
+class SykmeldingDeleteJob(
+    private val sykmeldingDeleteRepo: SykmeldingDeleteRepo,
+    environment: Environment,
+    applicationScope: CoroutineScope
+) :
     Job(JobName.SYKMELDING_DELETE, applicationScope) {
     private val logger = logger()
 
@@ -29,7 +33,11 @@ class SykmeldingDeleteJob(environment: Environment, applicationScope: CoroutineS
     }
 
     @WithSpan
-    private fun executeSykmeldingDeleteJob() {
-        println("tihi")
+    private suspend fun executeSykmeldingDeleteJob() {
+        val deletedCount = sykmeldingDeleteRepo.deleteStaleSykmeldinger()
+
+        if (deletedCount > 0) {
+            logger.info("Deleted old sykmeldinger $deletedCount")
+        }
     }
 }
