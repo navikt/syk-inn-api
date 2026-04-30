@@ -4,8 +4,10 @@ import java.time.LocalDate
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable.sykmeldingId
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
+import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable.status
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import org.jetbrains.exposed.v1.core.*
@@ -22,28 +24,27 @@ class SykmeldingDeleteRepo(val environment: Environment) {
     suspend fun deleteStaleSykmeldinger(): Int = dbQuery {
         // qqaddLogger(StdOutSqlLogger)
 
-        val sykmeldingJoinedWithStatus =
-            SykmeldingTable.leftJoin(
-                    otherTable = SykmeldingStatusTable,
-                    onColumn = { id },
-                    otherColumn = { sykmeldingId },
+        SykmeldingTable.deleteWhere {
+            listOf(
+                    SykmeldingTable.latestTom lessEq cutoff(),
+                    notExists(
+                        SykmeldingStatusTable.select(SykmeldingStatusTable.sykmeldingId).where {
+                            SykmeldingTable.id eq
+                                SykmeldingStatusTable.sykmeldingId and
+                                (status neq SykmeldingStatusStatus.SENT.name)
+                        }
+                    ),
+                    notExists(
+                        JuridiskVurderingStatusTable.select(sykmeldingId).where {
+                            SykmeldingTable.id eq
+                                sykmeldingId and
+                                (JuridiskVurderingStatusTable.status neq
+                                    JuridiskVurderingStatus.DONE.name)
+                        }
+                    ),
                 )
-                .leftJoin(
-                    otherTable = JuridiskVurderingStatusTable,
-                    onColumn = { SykmeldingTable.id },
-                    otherColumn = { JuridiskVurderingStatusTable.sykmeldingId },
-                )
-
-        val sykmeldingerToBeDeleted =
-            sykmeldingJoinedWithStatus.select(SykmeldingTable.id).where {
-                (SykmeldingTable.latestTom lessEq cutoff()) and
-                    ((JuridiskVurderingStatusTable.status eq JuridiskVurderingStatus.DONE.name) or
-                        JuridiskVurderingStatusTable.sykmeldingId.isNull()) and
-                    ((SykmeldingStatusTable.status eq SykmeldingStatusStatus.SENT.name) or
-                        SykmeldingStatusTable.sykmeldingId.isNull())
-            }
-
-        SykmeldingTable.deleteWhere { SykmeldingTable.id inSubQuery sykmeldingerToBeDeleted }
+                .compoundAnd()
+        }
     }
 
     private fun cutoff() =
