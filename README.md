@@ -9,6 +9,7 @@ Primary responsibilities:
 * Execute the [sykmeldinger rule tree](https://github.com/navikt/regulus-regula) with required metadata
 * Persist the sykmeldinger and their processing status in the database
 * Publish the sykmeldinger on kafka for downstream applications to consume
+* Publish the "juridisk henvisninger" (from rule execution) on kafka for teamsykmelding-pik to process
 
 ## Development
 

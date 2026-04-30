@@ -22,8 +22,6 @@ class SykmeldingDeleteRepo(val environment: Environment) {
     }
 
     suspend fun deleteStaleSykmeldinger(): Int = dbQuery {
-        // qqaddLogger(StdOutSqlLogger)
-
         SykmeldingTable.deleteWhere {
             listOf(
                     SykmeldingTable.latestTom lessEq cutoff(),

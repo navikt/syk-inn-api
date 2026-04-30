@@ -1,3 +1,4 @@
+-- Jobs and related state
 CREATE TABLE job
 (
     name          TEXT PRIMARY KEY,
@@ -15,6 +16,7 @@ CREATE TABLE job_status
     PRIMARY KEY (runner, job)
 );
 
+-- Initial state for jobs
 insert into job(name, desired_state, updated_at, updated_by)
 values ('SYKMELDING_CONSUMER', 'STOPPED', now(), 'system');
 
@@ -27,6 +29,7 @@ values ('SYKMELDING_DELETE', 'RUNNING', now(), 'system');
 insert into job(name, desired_state, updated_at, updated_by)
 values ('JURIDISK_PRODUCER', 'RUNNING', now(), 'system');
 
+-- Actual sykmelding table, flattened out for easier maintenance when working with changes to the schema in the future
 CREATE TABLE sykmelding
 (
     id                                    UUID PRIMARY KEY,
@@ -60,6 +63,7 @@ CREATE TABLE sykmelding
 
 create index idx_sykmelding_latest_tom_date on sykmelding (latest_tom);
 
+-- Sykmelding status are sykmeldinger that are to be published to kafka
 create table sykmelding_status
 (
     sykmelding_id     UUID primary key references sykmelding (id) on delete cascade,
@@ -74,6 +78,7 @@ create table sykmelding_status
 create index idx_sykmelding_status_event_timestamp on sykmelding_status (status, event_timestamp);
 create index idx_sykmelding_status_sendt_timestamp on sykmelding_status (status, send_timestamp);
 
+-- Juridisk status are "juridisk henvisninger" during rule execution that are to be published to the paragraf-i-kode topic
 create table juridisk_status
 (
     sykmelding_id      UUID primary key references sykmelding (id) on delete cascade,

@@ -83,8 +83,15 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta(): BehandlerSykmeldin
                 Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
             is SykInnSykmeldingMeta.Utenlandsk ->
                 throw IllegalStateException(
-                    "Utenlandsk sykmelding will be supported in future verions"
-                ) // TODO implement
+                    /**
+                     * Currently, no behandler will be able to see sykmeldinger from utenlandsk-source because
+                     * every sykmelding is filteder on the behandler's own HPR number.
+                     *
+                     * Once we add support for Redacted or full sykmeldinger for other behandlers, we will also
+                     * need to support Meta for these types of sykmeldinger.
+                     */
+                    "Utenlandsk sykmelding will be supported in future versions"
+                )
         }
 
     return BehandlerSykmeldingMeta(
