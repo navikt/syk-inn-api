@@ -1,21 +1,24 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.juridisk
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
-import no.nav.tsm.core.db.exposedJacksonObjectMapper
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus.PENDING
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus.SENDING
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
-import org.jetbrains.exposed.v1.core.TextColumnType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.inSubQuery
 import org.jetbrains.exposed.v1.core.less
-import org.jetbrains.exposed.v1.core.statements.StatementType
+import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption.PostgreSQL.ForUpdate
+import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption.PostgreSQL.MODE.SKIP_LOCKED
+import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.update
+import org.jetbrains.exposed.v1.r2dbc.updateReturning
 
 data class JuridiskHenvisningJob(
     val sykmeldingId: UUID,
@@ -25,42 +28,30 @@ data class JuridiskHenvisningJob(
 
 class JuridiskHenvisningJobRepo {
 
-    suspend fun getNext(): JuridiskHenvisningJob? {
-        return dbQuery {
-            exec(
-                    """
-                    UPDATE juridisk_status rs
-                    SET status = ?,
-                        event_timestamp = now()
-                    FROM (
-                        SELECT sykmelding_id FROM juridisk_status
-                        WHERE status = ?
-                        ORDER BY event_timestamp
-                        FOR UPDATE SKIP LOCKED
-                        LIMIT 1
-                    ) AS temp_status
-                    WHERE rs.sykmelding_id = temp_status.sykmelding_id
-                    RETURNING rs.sykmelding_id, rs.status, rs.juridisk_vurdering
-                    """
-                        .trimIndent(),
-                    args =
-                        listOf(
-                            TextColumnType() to JuridiskVurderingStatus.SENDING.name,
-                            TextColumnType() to JuridiskVurderingStatus.PENDING.name,
-                        ),
-                    explicitStatementType = StatementType.UPDATE,
+    suspend fun getNext(): JuridiskHenvisningJob? = dbQuery {
+        with(JuridiskVurderingStatusTable) {
+            updateReturning(
+                    listOf(sykmeldingId, status, juridiskVurdering),
+                    {
+                        sykmeldingId inSubQuery
+                            select(sykmeldingId)
+                                .where { status eq PENDING.name }
+                                .orderBy(eventTimestamp)
+                                .limit(1)
+                                .forUpdate(ForUpdate(SKIP_LOCKED))
+                    },
                 ) {
+                    it[status] = SENDING.name
+                    it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
+                }
+                .firstOrNull()
+                ?.let { row ->
                     JuridiskHenvisningJob(
-                        sykmeldingId = UUID.fromString(it.get("sykmelding_id", String::class.java)),
-                        status =
-                            JuridiskVurderingStatus.valueOf(it.get("status", String::class.java)),
-                        juridiskVurdering =
-                            exposedJacksonObjectMapper.readValue(
-                                it.get("juridisk_vurdering", String::class.java)
-                            ),
+                        sykmeldingId = row[sykmeldingId],
+                        status = JuridiskVurderingStatus.valueOf(row[status]),
+                        juridiskVurdering = row[juridiskVurdering],
                     )
                 }
-                ?.firstOrNull()
         }
     }
 
@@ -77,12 +68,10 @@ class JuridiskHenvisningJobRepo {
         return dbQuery {
             JuridiskVurderingStatusTable.update({
                 (JuridiskVurderingStatusTable.status inList
-                    listOf(
-                        JuridiskVurderingStatus.SENDING.name,
-                        JuridiskVurderingStatus.FAILED.name,
-                    )) and (JuridiskVurderingStatusTable.eventTimestamp less timestamp)
+                    listOf(SENDING.name, JuridiskVurderingStatus.FAILED.name)) and
+                    (JuridiskVurderingStatusTable.eventTimestamp less timestamp)
             }) {
-                it[status] = JuridiskVurderingStatus.PENDING.name
+                it[status] = PENDING.name
                 it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
             }
         }
