@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
+import no.nav.tsm.modules.sykmeldinger.db.status.ReasonJsonb
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toAktivitetJsonb
@@ -36,6 +37,7 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toYrkesskadeJsonb
 import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
+import no.nav.tsm.regulus.regula.RegulaResult
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.apache.kafka.shaded.com.google.protobuf.LazyStringArrayList.emptyList
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -119,6 +121,7 @@ class SykmeldingRepo : SykmeldingInsert() {
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
         juridisk: List<RegulaJuridiskVurdering>,
+        ruleResult: RegulaResult,
     ): Either<InsertErrors, VerifiedSykInnSykmelding> {
         try {
             val inserted = dbQuery {
@@ -131,6 +134,17 @@ class SykmeldingRepo : SykmeldingInsert() {
                 SykmeldingStatusTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
                     it[status] = SykmeldingStatusStatus.PENDING.name
+                    it[reason] =
+                        when (ruleResult) {
+                            is RegulaResult.Ok -> null
+                            is RegulaResult.NotOk ->
+                                ruleResult.outcome.reason.let { reason ->
+                                    ReasonJsonb(
+                                        sykmeldt = reason.sykmeldt,
+                                        sykmelder = reason.sykmelder,
+                                    )
+                                }
+                        }
                     it[mottattTimestamp] = sykmelding.meta.mottatt
                     it[eventTimestamp] = OffsetDateTime.now()
                     it[sendTimestamp] = OffsetDateTime.now()

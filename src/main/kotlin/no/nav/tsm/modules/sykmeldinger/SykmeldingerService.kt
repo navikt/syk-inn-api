@@ -14,14 +14,15 @@ import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
+import no.nav.tsm.modules.sykmeldinger.rules.toSykInnRuleResult
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.regulus.regula.RegulaResult
 
 class SykmeldingerService(
     private val pdlClient: PdlClient,
@@ -37,9 +38,7 @@ class SykmeldingerService(
         UnknownResourceError,
     }
 
-    suspend fun verify(
-        sykmelding: UnverifiedSykInnSykmelding
-    ): Either<CreateErrors, SykInnSykmeldingRuleResult> =
+    suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): Either<CreateErrors, RegulaResult> =
         getSykmeldingVerifyResources(sykmelding) { sykmelder, previous, pasient ->
             ruleService
                 .verify(sykmelding, previous, sykmelder, pasient)
@@ -77,12 +76,14 @@ class SykmeldingerService(
                         .mapLeft { CreateErrors.RuleError }
                         .bind()
 
-                val verifiedSykmelding = sykmelding.toVerifiedSykmelding(rules, sykmelder, pasient)
+                val verifiedSykmelding =
+                    sykmelding.toVerifiedSykmelding(rules.toSykInnRuleResult(), sykmelder, pasient)
                 val inserted =
                     repo.insert(
                         submitKey = sykmelding.submitId,
                         sykmelding = verifiedSykmelding,
                         juridisk = juridiskVurdering,
+                        ruleResult = rules,
                     )
 
                 inserted.fold(

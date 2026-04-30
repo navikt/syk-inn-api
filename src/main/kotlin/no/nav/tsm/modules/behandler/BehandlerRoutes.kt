@@ -31,6 +31,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.rules.toSykInnRuleResult
 import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
 private val logger = logger()
@@ -93,6 +94,7 @@ fun Application.configureBehandlerRoutes() {
 
                                 sykmeldingerService
                                     .verify(sykmelding)
+                                    .map { it.toSykInnRuleResult() }
                                     .mapLeft { it.createdToHttpError() }
                                     .bind()
                             }

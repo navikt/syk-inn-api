@@ -11,6 +11,7 @@ import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.service.JobName
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
+import no.nav.tsm.sykmelding.input.core.model.Reason
 import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 
 class SykmeldingProducerJob(
@@ -62,7 +63,14 @@ class SykmeldingProducerJob(
                     "Sykmelding with id ${next.sykmeldingId} not found."
                 }
 
-            sykmeldingProducer.sendSykmelding(sykmelding.toInputRecord())
+            sykmeldingProducer.sendSykmelding(
+                sykmelding.toInputRecord(
+                    reason =
+                        next.reason?.let {
+                            Reason(sykmelder = it.sykmelder, sykmeldt = it.sykmeldt)
+                        }
+                )
+            )
 
             sykmeldingProducerRepo.updateStatus(next.sykmeldingId, SykmeldingStatusStatus.SENT)
         } catch (ex: Exception) {

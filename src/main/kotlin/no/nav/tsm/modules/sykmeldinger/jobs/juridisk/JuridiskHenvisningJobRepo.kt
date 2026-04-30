@@ -1,13 +1,12 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.juridisk
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.core.db.exposedJacksonObjectMapper
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import org.jetbrains.exposed.v1.core.TextColumnType
@@ -17,8 +16,6 @@ import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.statements.StatementType
 import org.jetbrains.exposed.v1.r2dbc.update
-
-private val objectMapper = jacksonObjectMapper().apply { registerModule(JavaTimeModule()) }
 
 data class JuridiskHenvisningJob(
     val sykmeldingId: UUID,
@@ -58,7 +55,9 @@ class JuridiskHenvisningJobRepo {
                         status =
                             JuridiskVurderingStatus.valueOf(it.get("status", String::class.java)),
                         juridiskVurdering =
-                            objectMapper.readValue(it.get("juridisk_vurdering", String::class.java)),
+                            exposedJacksonObjectMapper.readValue(
+                                it.get("juridisk_vurdering", String::class.java)
+                            ),
                     )
                 }
                 ?.firstOrNull()

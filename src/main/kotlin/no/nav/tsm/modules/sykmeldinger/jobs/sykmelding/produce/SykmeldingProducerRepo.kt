@@ -1,20 +1,26 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
 import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.core.db.exposedJacksonObjectMapper
+import no.nav.tsm.modules.sykmeldinger.db.status.ReasonJsonb
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.StatementType
 import org.jetbrains.exposed.v1.r2dbc.update
 
-data class SykmeldingStatusJob(val sykmeldingId: UUID, val status: SykmeldingStatusStatus)
+data class SykmeldingStatusJob(
+    val sykmeldingId: UUID,
+    val status: SykmeldingStatusStatus,
+    val reason: ReasonJsonb?,
+)
 
 class SykmeldingProducerRepo {
-
     suspend fun getNext(): SykmeldingStatusJob? {
         return dbQuery {
             exec(
@@ -30,7 +36,7 @@ class SykmeldingProducerRepo {
                         LIMIT 1
                     ) AS temp_status
                     WHERE rs.sykmelding_id = temp_status.sykmelding_id
-                    RETURNING rs.sykmelding_id, rs.status
+                    RETURNING rs.sykmelding_id, rs.status, rs.rule_reason
                     """
                         .trimIndent(),
                     args =
@@ -44,6 +50,10 @@ class SykmeldingProducerRepo {
                         sykmeldingId = UUID.fromString(it.get("sykmelding_id", String::class.java)),
                         status =
                             SykmeldingStatusStatus.valueOf(it.get("status", String::class.java)),
+                        reason =
+                            it.get("rule_reason", String::class.java)?.let {
+                                exposedJacksonObjectMapper.readValue<ReasonJsonb>(it)
+                            },
                     )
                 }
                 ?.firstOrNull()

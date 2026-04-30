@@ -64,6 +64,7 @@ create table sykmelding_status
 (
     sykmelding_id     UUID primary key references sykmelding (id) on delete cascade,
     status            text        not null,
+    rule_reason       jsonb       null,
     mottatt_timestamp timestamptz not null,
     event_timestamp   timestamptz not null,
     send_timestamp    timestamptz not null,

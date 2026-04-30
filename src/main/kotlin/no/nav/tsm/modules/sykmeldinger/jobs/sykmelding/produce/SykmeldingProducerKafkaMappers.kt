@@ -50,7 +50,14 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
 
-fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
+fun VerifiedSykInnSykmelding.toInputRecord(
+    /**
+     * Because the kafka record requires the "old" regulus reason texts, they are in between user
+     * saving and being published to kafka stored in the sykmelding_status table, as no other part
+     * of the data flow actually needs these texts.
+     */
+    reason: Reason?
+): SykmeldingRecord {
     val meta =
         when (this.meta) {
             is SykInnSykmeldingMeta.Digital -> this.meta
@@ -59,10 +66,9 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                     "Should never map not digital sykmelding to SykmeldingRecord"
                 )
         }
-    // TODO() how to handle nullable names?
     return SykmeldingRecord(
         metadata = Digital(orgnummer = meta.legekontorOrgnr),
-        validation = result.toValidationResult(meta.mottatt),
+        validation = result.toValidationResult(meta.mottatt, reason),
         sykmelding =
             DigitalSykmelding(
                 id = sykmeldingId.toString(),
@@ -77,6 +83,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
                         fnr = meta.pasient.ident,
                         navn =
                             Navn(
+                                // TODO() how to handle nullable names?
                                 fornavn =
                                     meta.pasient.fornavn
                                         ?: throw IllegalStateException(
@@ -146,7 +153,8 @@ fun VerifiedSykInnSykmelding.toInputRecord(): SykmeldingRecord {
 }
 
 private fun SykInnSykmeldingRuleResult.toValidationResult(
-    mottatt: OffsetDateTime
+    mottatt: OffsetDateTime,
+    reason: Reason?,
 ): ValidationResult =
     when (this) {
         is SykInnSykmeldingRuleResult.OK -> ValidationResult(RuleType.OK, mottatt, emptyList())
@@ -155,12 +163,26 @@ private fun SykInnSykmeldingRuleResult.toValidationResult(
                 when (type) {
                     RuleType.OK -> throw IllegalStateException("Rule with outcome can't be OK")
                     RuleType.PENDING ->
-                        // TODO
-                        PendingRule(rule, mottatt, ValidationType.AUTOMATIC, Reason("TODO", "TODO"))
+                        PendingRule(
+                            rule,
+                            mottatt,
+                            ValidationType.AUTOMATIC,
+                            reason
+                                ?: throw IllegalStateException(
+                                    "Rule with outcome 'PENDING' can't be without reason"
+                                ),
+                        )
 
                     RuleType.INVALID ->
-                        // TODO
-                        InvalidRule(rule, ValidationType.AUTOMATIC, mottatt, Reason("TODO", "TODO"))
+                        InvalidRule(
+                            rule,
+                            ValidationType.AUTOMATIC,
+                            mottatt,
+                            reason
+                                ?: throw IllegalStateException(
+                                    "Rule with outcome 'INVALID' can't be without reason"
+                                ),
+                        )
                 }
 
             ValidationResult(type, mottatt, listOf(rule))

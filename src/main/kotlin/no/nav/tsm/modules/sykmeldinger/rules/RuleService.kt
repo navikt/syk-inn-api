@@ -31,7 +31,7 @@ class RuleService {
         otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         sykmelder: Sykmelder,
         sykmeldt: PdlPerson,
-    ): Either<RuleErrors, Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>>> {
+    ): Either<RuleErrors, Pair<RegulaResult, List<RegulaJuridiskVurdering>>> {
         val now = LocalDateTime.now()
 
         val regulaPasient = sykmeldt.mapPdlPersonToRegulaPasient()
@@ -63,7 +63,7 @@ class RuleService {
         otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         behandler: RegulaBehandler,
         pasient: RegulaPasient,
-    ): Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>> {
+    ): Pair<RegulaResult, List<RegulaJuridiskVurdering>> {
         val regulaExecutionPayload =
             mapUnruledSykInnSykmeldingToRegulaPayload(
                 behandletTidspunkt = behandletTidspunkt,
@@ -79,25 +79,23 @@ class RuleService {
                 mode = ExecutionMode.NORMAL,
             )
 
-        return result.toSykInnRuleResult() to result.juridisk
+        return result to result.juridisk
     }
-
-    private fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =
-        when (this) {
-            is RegulaResult.Ok -> SykInnSykmeldingRuleResult.OK
-            is RegulaResult.NotOk ->
-                SykInnSykmeldingRuleResult.Outcome(
-                    message = this.outcome.reason.sykmelder,
-                    rule = this.outcome.rule,
-                    type =
-                        when (this.status) {
-                            RegulaStatus.MANUAL_PROCESSING -> RuleType.PENDING
-                            RegulaStatus.INVALID -> RuleType.INVALID
-                            RegulaStatus.OK ->
-                                throw IllegalStateException(
-                                    "RegulaResult.NotOk cannot have status OK"
-                                )
-                        },
-                )
-        }
 }
+
+fun RegulaResult.toSykInnRuleResult(): SykInnSykmeldingRuleResult =
+    when (this) {
+        is RegulaResult.Ok -> SykInnSykmeldingRuleResult.OK
+        is RegulaResult.NotOk ->
+            SykInnSykmeldingRuleResult.Outcome(
+                message = this.outcome.reason.sykmelder,
+                rule = this.outcome.rule,
+                type =
+                    when (this.status) {
+                        RegulaStatus.MANUAL_PROCESSING -> RuleType.PENDING
+                        RegulaStatus.INVALID -> RuleType.INVALID
+                        RegulaStatus.OK ->
+                            throw IllegalStateException("RegulaResult.NotOk cannot have status OK")
+                    },
+            )
+    }

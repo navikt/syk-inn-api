@@ -1,14 +1,10 @@
 package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.tsm.core.db.exposedJacksonObjectMapper
-import org.jetbrains.exposed.v1.core.Column
+import no.nav.tsm.core.db.jacksonJsonb
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.javatime.date
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
-import org.jetbrains.exposed.v1.json.jsonb
 
 object SykmeldingTable : Table("sykmelding") {
     val id = javaUUID("id")
@@ -51,14 +47,4 @@ object SykmeldingTable : Table("sykmelding") {
             .nullable()
 
     override val primaryKey = PrimaryKey(id)
-}
-
-private inline fun <reified Type : Any> Table.jacksonJsonb(name: String): Column<Type> {
-    val writer = exposedJacksonObjectMapper.writerFor(object : TypeReference<Type>() {})
-
-    return jsonb(
-        name,
-        { writer.writeValueAsString(it) },
-        { exposedJacksonObjectMapper.readValue<Type>(it) },
-    )
 }

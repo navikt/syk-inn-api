@@ -6,6 +6,7 @@ import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldBeTypeOf
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -33,6 +34,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.InvalidRule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.KafkaTestConsumer
@@ -260,6 +262,17 @@ class EverythingTest : WithAll() {
             val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId)
             record.shouldNotBeNull()
             KafkaTestUtils.expectAllValues(created, record)
+
+            assertSoftly {
+                record.validation.status shouldBe RuleType.INVALID
+
+                val rule = record.validation.rules.first()
+                rule.shouldBeTypeOf<InvalidRule>()
+                rule.reason.sykmelder shouldBe
+                    "Behandler er suspendert av NAV på konsultasjonstidspunkt. Pasienten har fått beskjed."
+                rule.reason.sykmeldt shouldBe
+                    "Den som sykmeldte deg har mistet retten til å skrive sykmeldinger."
+            }
         }
 
     @Test

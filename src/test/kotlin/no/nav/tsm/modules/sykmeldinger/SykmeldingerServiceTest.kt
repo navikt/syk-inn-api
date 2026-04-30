@@ -4,7 +4,7 @@ import arrow.core.left
 import arrow.core.right
 import io.kotest.assertions.throwables.shouldThrowMessage
 import io.kotest.matchers.comparables.shouldBeLessThan
-import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.types.shouldBeTypeOf
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -13,7 +13,6 @@ import kotlin.time.measureTimedValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlNavn
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
@@ -21,6 +20,7 @@ import no.nav.tsm.modules.sykmeldinger.rules.RuleService
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
+import no.nav.tsm.regulus.regula.RegulaResult
 import org.junit.Test
 
 class SykmeldingerServiceTest {
@@ -127,9 +127,9 @@ class SykmeldingerServiceTest {
         val timedValue = measureTimedValue { sykmeldingService.verify(mockk(relaxed = true)) }
 
         timedValue.duration shouldBeLessThan 4000.milliseconds
-        timedValue.value.getOrNull() shouldEqual SykInnSykmeldingRuleResult.OK
+        timedValue.value.getOrNull().shouldBeTypeOf<RegulaResult.Ok>()
     }
 }
 
-val okRuleResultPair: Pair<SykInnSykmeldingRuleResult, List<RegulaJuridiskVurdering>> =
-    SykInnSykmeldingRuleResult.OK to emptyList()
+val okRuleResultPair: Pair<RegulaResult, List<RegulaJuridiskVurdering>> =
+    RegulaResult.Ok(emptyList()) to emptyList()
