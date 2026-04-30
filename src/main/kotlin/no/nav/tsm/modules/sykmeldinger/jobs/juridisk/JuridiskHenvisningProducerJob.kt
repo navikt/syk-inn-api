@@ -13,7 +13,7 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.jobs.service.JobName
-import no.nav.tsm.regulus.regula.juridisk.toJuridiskVurdering
+import no.nav.tsm.regulus.regula.toJuridiskVurdering
 
 const val JURIDISK_HENVISNING_EVENT_NAME = "subsumsjon"
 const val JURIDISK_HENVISNING_VERSION = "1.0.0"

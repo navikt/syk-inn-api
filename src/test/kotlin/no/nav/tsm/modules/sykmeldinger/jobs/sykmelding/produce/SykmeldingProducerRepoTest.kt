@@ -11,6 +11,7 @@ import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.insertDummySykmelding
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -162,6 +163,8 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         sendTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
         dbQuery {
+            insertDummySykmelding(sykmeldingId)
+
             SykmeldingStatusTable.insert {
                 it[SykmeldingStatusTable.sykmeldingId] = sykmeldingId
                 it[SykmeldingStatusTable.status] = status.name

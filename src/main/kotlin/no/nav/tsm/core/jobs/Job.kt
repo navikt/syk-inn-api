@@ -49,8 +49,8 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
                     _status.value = JobStatus.RUNNING
                     runJob()
                     _status.value = JobStatus.STOPPED
-                } catch (ex: CancellationException) {
-                    logger.info("Job(${jobName.name}) was cancelled gracefully", ex)
+                } catch (_: CancellationException) {
+                    logger.debug("Job(${jobName.name}) was cancelled gracefully")
                     _status.value = JobStatus.STOPPED
                 } catch (cause: Exception) {
                     logger.error("Job(${jobName.name}) crashed unexpectedly", cause)

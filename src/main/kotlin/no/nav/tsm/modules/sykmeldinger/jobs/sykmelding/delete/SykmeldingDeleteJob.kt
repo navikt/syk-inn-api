@@ -14,14 +14,13 @@ import no.nav.tsm.modules.jobs.service.JobName
 class SykmeldingDeleteJob(
     private val sykmeldingDeleteRepo: SykmeldingDeleteRepo,
     environment: Environment,
-    applicationScope: CoroutineScope
-) :
-    Job(JobName.SYKMELDING_DELETE, applicationScope) {
+    applicationScope: CoroutineScope,
+) : Job(JobName.SYKMELDING_DELETE, applicationScope) {
     private val logger = logger()
 
     private val jobInterval = environment.jobs.sykmeldingDeleter.interval
 
-    override suspend fun runJob() {
+    override suspend fun runJob() =
         withContext(Dispatchers.IO) {
             while (isActive) {
                 delay(jobInterval)
@@ -30,7 +29,6 @@ class SykmeldingDeleteJob(
                 executeSykmeldingDeleteJob()
             }
         }
-    }
 
     @WithSpan
     private suspend fun executeSykmeldingDeleteJob() {

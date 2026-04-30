@@ -60,12 +60,14 @@ abstract class SykmeldingInsert {
                         sykmelding.meta.legekontorOrgnr,
                         sykmelding.meta.legekontorTlf,
                     )
+
                 is SykInnSykmeldingMeta.Legacy ->
                     Triple(
                         sykmelding.meta.behandler,
                         sykmelding.meta.legekontorOrgnr,
                         sykmelding.meta.legekontorTlf,
                     )
+
                 is SykInnSykmeldingMeta.Utenlandsk -> Triple(null, null, null)
             }
 
@@ -120,13 +122,12 @@ class SykmeldingRepo : SykmeldingInsert() {
     ): Either<InsertErrors, VerifiedSykInnSykmelding> {
         try {
             val inserted = dbQuery {
-                JuridiskVurderingStatusTable.insert {
-                    it[sykmeldingId] = sykmelding.sykmeldingId
-                    it[status] = JuridiskVurderingStatus.PENDING.name
-                    it[eventTimestamp] = OffsetDateTime.now()
-                    it[juridiskVurdering] = juridisk
-                }
+                val insertedSykmelding = insertSykmelding(submitKey, sykmelding)
 
+                /**
+                 * Status and juridisk has a foreign key constraint to sykmelding, and must be
+                 * inserted after.
+                 */
                 SykmeldingStatusTable.insert {
                     it[sykmeldingId] = sykmelding.sykmeldingId
                     it[status] = SykmeldingStatusStatus.PENDING.name
@@ -136,7 +137,14 @@ class SykmeldingRepo : SykmeldingInsert() {
                     it[sourceSystem] = sykmelding.meta.source
                 }
 
-                insertSykmelding(submitKey, sykmelding)
+                JuridiskVurderingStatusTable.insert {
+                    it[sykmeldingId] = sykmelding.sykmeldingId
+                    it[status] = JuridiskVurderingStatus.PENDING.name
+                    it[eventTimestamp] = OffsetDateTime.now()
+                    it[juridiskVurdering] = juridisk
+                }
+
+                insertedSykmelding
             }
 
             return inserted.right()

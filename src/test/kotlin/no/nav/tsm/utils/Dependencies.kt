@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import io.mockk.mockk
 import java.util.Properties
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import no.nav.tsm.core.DeleterJob
@@ -63,7 +64,6 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                 password = postgres.password,
                 schema = "public",
             ),
-        sykmeldingConfig = SykmeldingConfig(retention = 1.hours),
         kafka =
             KafkaConfig(
                 config =
@@ -72,11 +72,12 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                     else mockk(),
                 sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
             ),
+        sykmeldingConfig = SykmeldingConfig(retention = 14.days),
         jobs =
             JobsConfig(
                 inputProducer = ProducerJob(delay = 500.milliseconds, hungTimeout = 1.hours),
                 juridiskProducer = ProducerJob(delay = 500.milliseconds, hungTimeout = 1.hours),
-                sykmeldingDeleter = DeleterJob(interval = 500.milliseconds),
+                sykmeldingDeleter = DeleterJob(interval = 250.milliseconds),
             ),
         texas = { mockk() },
         external = { mockk() },

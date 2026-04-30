@@ -17,8 +17,12 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding.BehandlerMeta
@@ -74,6 +78,21 @@ class EverythingTest : WithAll() {
                 requireNotNull(it.body<List<BehandlerSykmelding>>())
             }
 
+    private suspend fun HttpClient.getById(id: UUID, hpr: String) =
+        this.get("/api/sykmelding/$id") {
+                headers {
+                    append("Content-Type", "application/json")
+                    append("HPR", hpr)
+                }
+            }
+            .let {
+                when (it.status) {
+                    HttpStatusCode.OK -> requireNotNull(it.body<BehandlerSykmelding>())
+                    HttpStatusCode.NotFound -> null
+                    else -> throw IllegalStateException("Didn't expect ${it.status} in tests!")
+                }
+            }
+
     @Test
     fun `API should accept a full payload, and properly map and store all values in the database`() =
         testApplication {
@@ -87,14 +106,11 @@ class EverythingTest : WithAll() {
             created.meta.sykmelder.hpr shouldBe "9144889"
             created.meta.legekontorOrgnr shouldBe "123456789"
 
-            val allSykmeldinger =
-                client.getAllSykmeldingerFor(ident = "21037712323", hpr = "9144889")
-            allSykmeldinger.shouldHaveSize(1)
+            val sykmelding =
+                requireNotNull(client.getById(id = created.sykmeldingId, hpr = "9144889"))
+            sykmelding.shouldBeInstanceOf<BehandlerSykmeldingFull>()
 
-            val sykmelding = requireNotNull(allSykmeldinger.first())
-            val sykmeldingFull = sykmelding.shouldBeInstanceOf<BehandlerSykmeldingFull>()
-
-            assertSoftly(sykmeldingFull) {
+            assertSoftly(sykmelding) {
                 // meta
                 meta.pasient.ident shouldBe "21037712323"
                 meta.sykmelder.hpr shouldBe "9144889"
@@ -187,9 +203,9 @@ class EverythingTest : WithAll() {
                     "Unngå tung løfting og langvarig stående arbeid"
             }
 
-            val record: SykmeldingRecord? = consumeUntil(sykmeldingFull.sykmeldingId)
+            val record: SykmeldingRecord? = consumeUntil(sykmelding.sykmeldingId)
             record.shouldNotBeNull()
-            KafkaTestUtils.expectAllValues(sykmeldingFull, record)
+            KafkaTestUtils.expectAllValues(sykmelding, record)
         }
 
     @Test
@@ -301,10 +317,87 @@ class EverythingTest : WithAll() {
         juridisk.first().versjonAvKode shouldBe "testy-v0"
     }
 
+    @Test
+    fun `should publish sykmelding before it tries to delete`() = testApplication {
+        configureEverythingTest()
+
+        val response =
+            client.postSykmelding(
+                createCreatePayload(
+                    meta = Testdata.simpleBehandlerMeta,
+                    values =
+                        Values(
+                            pasientenSkalSkjermes = false,
+                            svangerskapsrelatert = false,
+                            hoveddiagnose =
+                                BehandlerOpprettSykmelding.DiagnoseInfo(
+                                    system = SykInnDiagnoseSystem.ICPC2,
+                                    code = "L73",
+                                ),
+                            bidiagnoser = emptyList(),
+                            aktivitet =
+                                listOf(
+                                    BehandlerOpprettSykmelding.Aktivitet.Gradert(
+                                        fom = LocalDate.now().minusDays(29),
+                                        tom = LocalDate.now().minusDays(29 - 7),
+                                        grad = 69,
+                                        reisetilskudd = false,
+                                    )
+                                ),
+                            tilbakedatering =
+                                BehandlerOpprettSykmelding.Tilbakedatering(
+                                    startdato = LocalDate.now().minusDays(27),
+                                    begrunnelse = "Dette er minst 3 ord ass!",
+                                ),
+                            meldinger =
+                                BehandlerOpprettSykmelding.Meldinger(
+                                    tilNav = null,
+                                    tilArbeidsgiver = null,
+                                ),
+                            utdypendeSporsmal = null,
+                            yrkesskade = null,
+                            arbeidsgiver = null,
+                            annenFravarsgrunn = null,
+                        ),
+                )
+            )
+        response.status shouldEqual HttpStatusCode.OK
+
+        val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+        created.utfall.result shouldEqual RuleType.OK
+
+        val record = consumeUntil(created.sykmeldingId, waitForJuridisk = true)
+        KafkaTestUtils.expectAllValues(created, record)
+
+        val juridisk = requireNotNull(allPIKs[created.sykmeldingId]?.juridiskeVurderinger)
+        juridisk.shouldHaveSize(4)
+        juridisk.first().kilde shouldBe "syk-inn-api"
+        juridisk.first().version shouldBe "1.0.0"
+        juridisk.first().versjonAvKode shouldBe "testy-v0"
+
+        requireNotNull(
+            withTimeoutOrNull(10.seconds) {
+                do {
+                    val byId =
+                        client.getById(
+                            created.sykmeldingId,
+                            Testdata.simpleBehandlerMeta.sykmelderHpr,
+                        )
+                    delay(50.milliseconds)
+                } while (byId != null)
+            }
+        ) {
+            "Sykmelding still exists after 10 seconds, meaning it wasn't deleted by the job!"
+        }
+    }
+
     /**
      * Consumes until the record has been produced on the Kafka topic, times out after 10 seconds.
      */
-    private suspend fun consumeUntil(sykmeldingId: UUID, waitForJuridisk: Boolean = false) =
+    private suspend fun consumeUntil(
+        sykmeldingId: UUID,
+        waitForJuridisk: Boolean = false,
+    ): SykmeldingRecord? =
         withContext(Dispatchers.IO) {
             if (allRecords.containsKey(sykmeldingId)) return@withContext allRecords[sykmeldingId]
 

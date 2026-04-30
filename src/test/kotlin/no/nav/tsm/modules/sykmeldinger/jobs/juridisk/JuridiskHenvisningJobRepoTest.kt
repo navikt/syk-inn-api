@@ -14,11 +14,12 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
-import no.nav.tsm.regulus.regula.JuridiskHenvisning
-import no.nav.tsm.regulus.regula.JuridiskHenvisningLovverk
-import no.nav.tsm.regulus.regula.JuridiskUtfall
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
+import no.nav.tsm.regulus.regula.juridisk.JuridiskHenvisning
+import no.nav.tsm.regulus.regula.juridisk.JuridiskHenvisningLovverk
+import no.nav.tsm.regulus.regula.juridisk.JuridiskUtfall
 import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.insertDummySykmelding
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -159,11 +160,13 @@ class JuridiskHenvisningJobRepoTest : WithPostgresql() {
         eventTimestamp: OffsetDateTime = OffsetDateTime.now(ZoneOffset.UTC),
     ) {
         dbQuery {
+            insertDummySykmelding(sykmeldingId)
+
             JuridiskVurderingStatusTable.insert {
                 it[JuridiskVurderingStatusTable.sykmeldingId] = sykmeldingId
                 it[JuridiskVurderingStatusTable.status] = status.name
                 it[JuridiskVurderingStatusTable.eventTimestamp] = eventTimestamp
-                it[JuridiskVurderingStatusTable.juridiskVurdering] = testJuridiskVurdering()
+                it[juridiskVurdering] = testJuridiskVurdering()
             }
         }
     }

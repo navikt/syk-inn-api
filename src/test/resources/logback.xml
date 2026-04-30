@@ -10,6 +10,8 @@
         <appender-ref ref="TEAM_LOG"/>
     </logger>
 
+    <logger name="no.nav.tsm" level="DEBUG"/>
+
     <!-- Stuff we wanna squelch, use sparingly -->
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="io.swagger.codegen.v3.generators" level="WARN"/>

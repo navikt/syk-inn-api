@@ -48,7 +48,7 @@ CREATE TABLE sykmelding
     values_pasienten_skal_skjermes        BOOLEAN     NOT NULL,
     values_svangerskapsrelatert           BOOLEAN     NOT NULL,
     values_hoveddiagnose                  JSONB       NULL,
-    values_bidiagnoser                    JSONB       NOT NULL,
+    values_bidiagnoser                    JSONB       NULL,
     values_aktivitet                      JSONB       NOT NULL,
     values_meldinger                      JSONB       NULL,
     values_yrkesskade                     JSONB       NULL,
@@ -62,7 +62,7 @@ create index idx_sykmelding_latest_tom_date on sykmelding (latest_tom);
 
 create table sykmelding_status
 (
-    sykmelding_id     UUID primary key,
+    sykmelding_id     UUID primary key references sykmelding (id) on delete cascade,
     status            text        not null,
     mottatt_timestamp timestamptz not null,
     event_timestamp   timestamptz not null,
@@ -75,7 +75,7 @@ create index idx_sykmelding_status_sendt_timestamp on sykmelding_status (status,
 
 create table juridisk_status
 (
-    sykmelding_id      UUID primary key,
+    sykmelding_id      UUID primary key references sykmelding (id) on delete cascade,
     status             text        not null,
     event_timestamp    timestamptz not null,
     juridisk_vurdering jsonb       not null
