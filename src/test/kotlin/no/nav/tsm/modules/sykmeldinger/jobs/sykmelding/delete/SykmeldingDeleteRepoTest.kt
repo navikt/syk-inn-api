@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
@@ -26,7 +27,9 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingType
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
+import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
@@ -41,45 +44,128 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
         }
     }
 
-    private val repo = SykmeldingDeleteRepo(WithPostgresql.config)
+    private val repo = SykmeldingDeleteRepo(config)
     private val consumerRepo = SykmeldingConsumerRepo()
 
     @BeforeTest
     fun cleanup(): Unit = runBlocking {
         dbQuery {
+            JuridiskVurderingStatusTable.deleteAll()
             SykmeldingStatusTable.deleteAll()
             SykmeldingTable.deleteAll()
         }
     }
 
     @Test
-    fun `deleteStaleSykmeldinger deletes stale sykmeldinger with SENT status or no status`() =
-        runTest {
-            val staleSent = UUID.randomUUID()
-            val staleWithoutStatus = UUID.randomUUID()
-            val stalePending = UUID.randomUUID()
-            val freshSent = UUID.randomUUID()
+    fun `null+null = delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
 
-            insertSykmelding(staleSent, LocalDate.now().minusDays(15))
-            insertSykmelding(staleWithoutStatus, LocalDate.now().minusDays(15))
-            insertSykmelding(stalePending, LocalDate.now().minusDays(15))
-            insertSykmelding(freshSent, LocalDate.now())
+        insertStaleSykmelding(sykmeldingId)
 
-            insertSykmeldingStatus(staleSent, SykmeldingStatusStatus.SENT)
-            insertSykmeldingStatus(stalePending, SykmeldingStatusStatus.PENDING)
-            insertSykmeldingStatus(freshSent, SykmeldingStatusStatus.SENT)
+        val deletedCount = repo.deleteStaleSykmeldinger()
 
-            val deletedCount = repo.deleteStaleSykmeldinger()
+        assertEquals(1, deletedCount)
+        assertFalse(existsInDb(sykmeldingId))
+    }
 
-            assertEquals(2, deletedCount)
-            assertFalse(existsInDb(staleSent))
-            assertFalse(existsInDb(staleWithoutStatus))
-            assertTrue(existsInDb(stalePending))
-            assertTrue(existsInDb(freshSent))
-        }
+    @Test
+    fun `SENT+null = delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
 
-    private suspend fun insertSykmelding(id: UUID, tom: LocalDate) {
-        consumerRepo.insert(testSykmelding(id = id, tom = tom))
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.SENT)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(1, deletedCount)
+        assertFalse(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `SENT+DONE = delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.SENT)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(1, deletedCount)
+        assertFalse(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `null+DONE = delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(1, deletedCount)
+        assertFalse(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `FAILED+DONE = NOT delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.FAILED)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(0, deletedCount)
+        assertTrue(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `PENDING+DONE = NOT delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.PENDING)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(0, deletedCount)
+        assertTrue(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `SENT+PENDING = NOT delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.SENT)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.PENDING)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(0, deletedCount)
+        assertTrue(existsInDb(sykmeldingId))
+    }
+
+    @Test
+    fun `SENT+FAILED = NOT delete`() = runTest {
+        val sykmeldingId = UUID.randomUUID()
+
+        insertStaleSykmelding(sykmeldingId)
+        insertSykmeldingStatus(sykmeldingId, SykmeldingStatusStatus.SENT)
+        insertJuridiskStatus(sykmeldingId, JuridiskVurderingStatus.FAILED)
+
+        val deletedCount = repo.deleteStaleSykmeldinger()
+
+        assertEquals(0, deletedCount)
+        assertTrue(existsInDb(sykmeldingId))
+    }
+
+    private suspend fun insertStaleSykmelding(id: UUID) {
+        consumerRepo.insert(testSykmelding(id = id, tom = LocalDate.now().minusDays(15)))
     }
 
     private suspend fun insertSykmeldingStatus(sykmeldingId: UUID, status: SykmeldingStatusStatus) {
@@ -95,6 +181,18 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
         }
     }
 
+    private suspend fun insertJuridiskStatus(sykmeldingId: UUID, status: JuridiskVurderingStatus) {
+        dbQuery {
+            JuridiskVurderingStatusTable.insert {
+                it[JuridiskVurderingStatusTable.sykmeldingId] = sykmeldingId
+                it[JuridiskVurderingStatusTable.status] = status.name
+                it[JuridiskVurderingStatusTable.eventTimestamp] = OffsetDateTime.now()
+                it[JuridiskVurderingStatusTable.juridiskVurdering] =
+                    emptyList<RegulaJuridiskVurdering>()
+            }
+        }
+    }
+
     private suspend fun existsInDb(id: UUID): Boolean = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.id eq id }
@@ -105,10 +203,12 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
     private fun testSykmelding(
         id: UUID = UUID.randomUUID(),
-        tom: LocalDate = LocalDate.now(),
+        tom: LocalDate,
     ): VerifiedSykInnSykmelding =
         VerifiedSykInnSykmelding(
             sykmeldingId = id,
+            result = SykInnSykmeldingRuleResult.OK,
+            type = SykInnSykmeldingType.DIGITAL,
             values =
                 SykInnSykmeldingValues(
                     pasientenSkalSkjermes = false,
@@ -153,7 +253,5 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
                     legekontorOrgnr = "123456789",
                     legekontorTlf = "12345678",
                 ),
-            result = SykInnSykmeldingRuleResult.OK,
-            type = SykInnSykmeldingType.DIGITAL,
         )
 }
