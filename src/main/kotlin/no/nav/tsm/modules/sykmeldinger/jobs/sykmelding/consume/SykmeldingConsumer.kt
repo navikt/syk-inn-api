@@ -1,6 +1,5 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.util.*
@@ -24,7 +23,6 @@ class SykmeldingConsumer(environment: Environment) {
 
     private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>
-    private val kafkaObjectMapper = jacksonObjectMapper()
 
     init {
         val kafkaProperties = Properties(environment.kafka.config)

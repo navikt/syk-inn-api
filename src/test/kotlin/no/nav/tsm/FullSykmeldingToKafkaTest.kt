@@ -34,7 +34,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
 import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
-import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.sykmelding.input.core.model.Rule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.KafkaTestConsumer
@@ -267,7 +267,7 @@ class EverythingTest : WithAll() {
                 record.validation.status shouldBe RuleType.INVALID
 
                 val rule = record.validation.rules.first()
-                rule.shouldBeTypeOf<InvalidRule>()
+                rule.shouldBeTypeOf<Rule.Invalid>()
                 rule.reason.sykmelder shouldBe
                     "Behandler er suspendert av NAV på konsultasjonstidspunkt. Pasienten har fått beskjed."
                 rule.reason.sykmeldt shouldBe

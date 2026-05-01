@@ -1,6 +1,5 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
-import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.logger
@@ -14,20 +13,18 @@ private val log = logger()
 
 fun SykmeldingRecord.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
 
-    val type =
-        when (this.sykmelding.type) {
-            SykmeldingType.DIGITAL -> SykInnSykmeldingType.DIGITAL
-            SykmeldingType.XML -> SykInnSykmeldingType.XML
-            SykmeldingType.PAPIR -> SykInnSykmeldingType.PAPIR
-            SykmeldingType.UTENLANDSK -> SykInnSykmeldingType.UTENLANDSK
-        }
-
     return VerifiedSykInnSykmelding(
         sykmeldingId = UUID.fromString(sykmelding.id),
         values = toSykmeldingValues(),
         meta = toMetadata(),
         result = validation.toResult(),
-        type = type,
+        type =
+            when (this.sykmelding.type) {
+                SykmeldingType.DIGITAL -> SykInnSykmeldingType.DIGITAL
+                SykmeldingType.XML -> SykInnSykmeldingType.XML
+                SykmeldingType.PAPIR -> SykInnSykmeldingType.PAPIR
+                SykmeldingType.UTENLANDSK -> SykInnSykmeldingType.UTENLANDSK
+            },
     )
 }
 
@@ -36,114 +33,106 @@ private fun ValidationResult.toResult(): SykInnSykmeldingRuleResult =
         RuleType.OK -> SykInnSykmeldingRuleResult.OK
         RuleType.PENDING,
         RuleType.INVALID -> {
-            when (val rule = this.rules.firstOrNull { it !is OKRule }) {
+            when (
+                val rule =
+                    this.rules.sortedByDescending { it.timestamp }.firstOrNull { it !is Rule.OK }
+            ) {
                 null ->
                     throw IllegalStateException(
                         "ValidationResult status=$status but no non-OK rule present"
                     )
-                is InvalidRule ->
+                is Rule.Invalid ->
                     SykInnSykmeldingRuleResult.Outcome(
                         type = status,
                         rule = rule.name,
                         message = rule.reason.sykmelder,
                     )
-                is PendingRule ->
+                is Rule.Pending ->
                     SykInnSykmeldingRuleResult.Outcome(
                         type = status,
                         rule = rule.name,
                         message = rule.reason.sykmelder,
                     )
-                is OKRule -> error("unreachable: filtered above")
+                is Rule.OK -> error("unreachable: filtered above")
             }
         }
     }
 
-private fun Sykmelder.toSykInnBehandler(behandler: Behandler): SykInnBehandler {
-    val behandlerHpr = behandler.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
-    val behandlerFnr = behandler.ids.firstOrNull { it.type == PersonIdType.FNR }?.id
-    val sykmelderHpr = ids.firstOrNull { it.type == PersonIdType.HPR }?.id
-    val sykmelderFnr = ids.firstOrNull { it.type == PersonIdType.FNR }?.id
+private fun Sykmelding.Nasjonal.toSykInnBehandler(): SykInnBehandler {
+    val sykmelderIsSameAsBehandler =
+        sykmelder.ids.any { sykmelderId -> behandler.ids.any { it.id == sykmelderId.id } }
+    val ids =
+        if (sykmelderIsSameAsBehandler) {
+            sykmelder.ids union behandler.ids
+        } else {
+            sykmelder.ids
+        }
+    val navn =
+        if (sykmelderIsSameAsBehandler) {
+            behandler.navn
+        } else {
+            null
+        }
 
-    val isSame =
-        (sykmelderHpr != null && sykmelderHpr == behandlerHpr) ||
-            (sykmelderFnr != null && sykmelderFnr == behandlerFnr)
-    val name = if (isSame) behandler.navn else null
-    val hpr: String =
-        (if (isSame) sykmelderHpr ?: behandlerHpr else sykmelderHpr)
-            ?: throw IllegalArgumentException("sykmelder hpr can't be null")
-    val fnr: String =
-        (if (isSame) sykmelderFnr ?: behandlerFnr else sykmelderFnr)
-            ?: throw IllegalArgumentException("sykmelder fnr can't be null")
     return SykInnBehandler(
-        fornavn = name?.fornavn,
-        mellomnavn = name?.mellomnavn,
-        etternavn = name?.etternavn,
-        hpr = hpr,
-        fnr = fnr,
-        helsepersonellkategori = listOf(this.helsepersonellKategori.toShortCode()),
+        fornavn = navn?.fornavn,
+        mellomnavn = navn?.mellomnavn,
+        etternavn = navn?.etternavn,
+        hpr =
+            ids.firstOrNull { it.type == PersonIdType.HPR }?.id
+                ?: throw IllegalStateException("Could not find HPR for behandler for $id"),
+        fnr =
+            ids.firstOrNull { it.type in listOf(PersonIdType.FNR, PersonIdType.DNR) }?.id
+                ?: throw IllegalStateException("Could not find FNR/DNR for behandler for $id"),
+        helsepersonellkategori = listOf(sykmelder.helsepersonellKategori.toShortCode()),
     )
 }
 
 private fun SykmeldingRecord.toMetadata(): SykInnSykmeldingMeta {
-
     val source = sykmelding.metadata.avsenderSystem.navn
     val mottattDato = sykmelding.metadata.mottattDato
     val pasient = sykmelding.pasient.toSykInnPasient()
-    val legekontorTlf = sykmelding.toLegekontorTlf()
 
-    val (meta: MessageMetadata, sykmelding: Sykmelding) = this.metadata to this.sykmelding
-
-    return when {
-        meta is Digital && sykmelding is DigitalSykmelding -> {
+    return when (this) {
+        is SykmeldingRecord.Digital ->
             SykInnSykmeldingMeta.Digital(
                 source = source,
                 mottatt = mottattDato,
                 pasient = pasient,
-                behandler =
-                    sykmelding.behandler.toSykInnBehandler(
-                        sykmelding.sykmelder.helsepersonellKategori.toShortCode()
-                    ),
-                legekontorOrgnr = meta.orgnummer,
+                behandler = sykmelding.toSykInnBehandler(),
+                legekontorOrgnr = metadata.orgnummer,
                 legekontorTlf =
-                    sykmelding.toLegekontorTlf()
-                        ?: throw IllegalStateException(
-                            "legekontorTlf must be set in DigitalSykmelding"
-                        ),
+                    sykmelding.behandler.firstTlf()
+                        ?: throw IllegalStateException("legekontorTlf is null"),
             )
-        }
-        meta is Utenlandsk && sykmelding is UtenlandskSykmelding -> {
+        is SykmeldingRecord.Xml ->
+            SykInnSykmeldingMeta.Legacy(
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
+                behandler = sykmelding.toSykInnBehandler(),
+                legekontorOrgnr =
+                    when (val meta = metadata) {
+                        is MessageMetadata.Xml.Emottak -> getOrgNr(meta.sender)
+                        else -> null
+                    },
+                legekontorTlf = sykmelding.behandler.firstTlf(),
+            )
+        is SykmeldingRecord.Papir ->
+            SykInnSykmeldingMeta.Legacy(
+                source = source,
+                mottatt = mottattDato,
+                pasient = pasient,
+                behandler = sykmelding.toSykInnBehandler(),
+                legekontorOrgnr = getOrgNr(this.metadata.sender),
+                legekontorTlf = null,
+            )
+        is SykmeldingRecord.Utenlandsk ->
             SykInnSykmeldingMeta.Utenlandsk(
                 source = source,
                 mottatt = mottattDato,
                 pasient = pasient,
             )
-        }
-        meta is Papir && sykmelding is Papirsykmelding -> {
-            SykInnSykmeldingMeta.Legacy(
-                source = source,
-                mottatt = mottattDato,
-                pasient = pasient,
-                behandler = sykmelding.sykmelder.toSykInnBehandler(sykmelding.behandler),
-                legekontorTlf = sykmelding.toLegekontorTlf(),
-                legekontorOrgnr = getOrgNr(meta.sender),
-            )
-        }
-
-        meta is EDIEmottak && sykmelding is XmlSykmelding -> {
-            SykInnSykmeldingMeta.Legacy(
-                source = source,
-                mottatt = mottattDato,
-                pasient = pasient,
-                behandler = sykmelding.sykmelder.toSykInnBehandler(sykmelding.behandler),
-                legekontorTlf = sykmelding.toLegekontorTlf(),
-                legekontorOrgnr = getOrgNr(meta.sender),
-            )
-        }
-        else -> {
-            throw IllegalStateException(
-                "Sykmelding: ${sykmelding.id} of type ${sykmelding.type} with metadata ${metadata.type} is not supported"
-            )
-        }
     }
 }
 
@@ -154,35 +143,6 @@ private fun Pasient.toSykInnPasient(): SykInnPasient =
         etternavn = navn?.etternavn.orEmpty(),
         ident = fnr,
     )
-
-private fun Sykmelding.toSykInnBehandler(): SykInnBehandler =
-    when (this) {
-        is DigitalSykmelding ->
-            behandler.toSykInnBehandler(sykmelder.helsepersonellKategori.toShortCode())
-        is XmlSykmelding ->
-            behandler.toSykInnBehandler(sykmelder.helsepersonellKategori.toShortCode())
-        is Papirsykmelding ->
-            behandler.toSykInnBehandler(sykmelder.helsepersonellKategori.toShortCode())
-        is UtenlandskSykmelding -> throw IllegalStateException("these are not supported")
-    }
-
-private fun Behandler.toSykInnBehandler(helsepersonellShortCode: String): SykInnBehandler =
-    SykInnBehandler(
-        fornavn = navn.fornavn,
-        mellomnavn = navn.mellomnavn,
-        etternavn = navn.etternavn,
-        hpr = ids.single { it.type == PersonIdType.HPR }.id,
-        fnr = ids.single { it.type == PersonIdType.FNR }.id,
-        helsepersonellkategori = listOf(helsepersonellShortCode),
-    )
-
-private fun Sykmelding.toLegekontorTlf(): String? =
-    when (this) {
-        is DigitalSykmelding -> behandler.firstTlf()
-        is XmlSykmelding -> behandler.firstTlf()
-        is Papirsykmelding -> behandler.firstTlf()
-        is UtenlandskSykmelding -> null
-    }
 
 private fun Behandler.firstTlf(): String? =
     kontaktinfo.firstOrNull { it.type == KontaktinfoType.TLF }?.value
@@ -217,7 +177,7 @@ private fun HelsepersonellKategori.toShortCode(): String =
 
 private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
     return when (this) {
-        is AktivitetIkkeMulig ->
+        is Aktivitet.IkkeMulig ->
             SykInnAktivitet.IkkeMulig(
                 fom = this.fom,
                 tom = this.tom,
@@ -230,26 +190,26 @@ private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
                     },
             )
 
-        is Gradert ->
+        is Aktivitet.Gradert ->
             SykInnAktivitet.Gradert(
                 fom = this.fom,
                 tom = this.tom,
                 grad = this.grad,
                 reisetilskudd = this.reisetilskudd,
             )
-        is Avventende ->
+        is Aktivitet.Avventende ->
             SykInnAktivitet.Avventende(
                 fom = this.fom,
                 tom = this.tom,
                 innspillTilArbeidsgiver = this.innspillTilArbeidsgiver,
             )
-        is Behandlingsdager ->
+        is Aktivitet.Behandlingsdager ->
             SykInnAktivitet.Behandlingsdager(
                 fom = this.fom,
                 tom = this.tom,
                 antallBehandlingsdager = this.antallBehandlingsdager,
             )
-        is Reisetilskudd -> SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
+        is Aktivitet.Reisetilskudd -> SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
     }
 }
 
@@ -263,21 +223,56 @@ private fun SykmeldingRecord.toSykmeldingValues(): SykInnSykmeldingValues {
             },
         aktivitet = sykmelding.aktivitet.map { it.toSykInnAktivitet() },
         svangerskapsrelatert = sykmelding.medisinskVurdering.svangerskap,
-        meldinger = toMeldinger(meldingTilArbeidsgiver(), meldingTilNav()),
+        meldinger = sykmelding.toMeldinger(),
         yrkesskade = sykmelding.medisinskVurdering.yrkesskade?.toSykInnYrkesskade(),
         arbeidsgiver = sykmelding.toArbeidsgiver(),
-        tilbakedatering = toTilbakedatering(kontaktDato(), tilbakedatertBegrunnelse()),
+        tilbakedatering = sykmelding.toTilbakedatering(),
         utdypendeSporsmal = sykmelding.toUtdypendeSpm(),
-        annenFravarsgrunn = sykmelding.toSykInnFravarsGrunn(),
+        annenFravarsgrunn = sykmelding.medisinskVurdering.toSykInnFravarsGrunn(),
     )
+}
+
+private fun Sykmelding.toTilbakedatering(): SykInnTilbakedatering? {
+    when (this) {
+        is Sykmelding.Nasjonal -> {
+            val kontaktDato = this.tilbakedatering?.kontaktDato
+            val begrunnelse = this.tilbakedatering?.begrunnelse
+            if (kontaktDato == null && begrunnelse == null) {
+                return null
+            }
+            return SykInnTilbakedatering(kontaktdato = kontaktDato, begrunnelse = begrunnelse)
+        }
+        else -> return null
+    }
+}
+
+private fun Sykmelding.toMeldinger(): SykInnMeldinger? {
+    when (this) {
+        is Sykmelding.Nasjonal -> {
+            val meldingTilArbeidsgiver =
+                when (val arbeidsgiver = this.arbeidsgiver) {
+                    is ArbeidsgiverInfo.En -> arbeidsgiver.meldingTilArbeidsgiver
+                    is ArbeidsgiverInfo.Flere -> arbeidsgiver.meldingTilArbeidsgiver
+                    is ArbeidsgiverInfo.Ingen -> null
+                }
+
+            val meldingTilNav = this.bistandNav?.beskrivBistand
+
+            if (meldingTilNav == null && meldingTilArbeidsgiver == null) {
+                return null
+            }
+
+            return SykInnMeldinger(tilNav = meldingTilNav, tilArbeidsgiver = meldingTilArbeidsgiver)
+        }
+        else -> return null
+    }
 }
 
 private fun Sykmelding.toUtdypendeSpm(): SykInnUtdypendeSporsmal? {
     return when (this) {
-        is UtenlandskSykmelding -> null
-        is DigitalSykmelding -> this.utdypendeSporsmal?.toSykInnUtdypendeSpm()
-        is Papirsykmelding -> this.utdypendeOpplysninger?.toSykInnUtdypendeSpm()
-        is XmlSykmelding -> this.utdypendeOpplysninger?.toSykInnUtdypendeSpm()
+        is Sykmelding.Utenlandsk -> null
+        is Sykmelding.Digital -> this.utdypendeSporsmal?.toSykInnUtdypendeSpm()
+        is Sykmelding.Nasjonal.Legacy -> this.utdypendeOpplysninger?.toSykInnUtdypendeSpm()
     }
 }
 
@@ -302,7 +297,7 @@ private fun List<UtdypendeSporsmal>.tryGetSpm(
 
 private fun UtdypendeSporsmal.toSpm(): SykInnUtdypendeSporsmalSvar {
     return SykInnUtdypendeSporsmalSvar(
-        sporsmalstekst = sporsmal ?: SupportedSpmType.valueOf(type.name).defaultSpm,
+        sporsmalstekst = sporsmal ?: valueOf(type.name).defaultSpm,
         svar = svar,
     )
 }
@@ -408,93 +403,29 @@ private fun isSupported(spmKey: String): Boolean {
     }
 }
 
-private fun Sykmelding.toSykInnFravarsGrunn(): AnnenFravarsgrunn? {
-    return when (val vurdering = this.medisinskVurdering) {
-        is DigitalMedisinskVurdering -> vurdering.annenFravarsgrunn
-        is LegacyMedisinskVurdering -> vurdering.annenFraversArsak?.arsak?.firstOrNull()
+private fun MedisinskVurdering.toSykInnFravarsGrunn(): AnnenFravarsgrunn? =
+    when (this) {
+        is MedisinskVurdering.Digital -> this.annenFravarsgrunn
+        is MedisinskVurdering.Legacy -> this.annenFraversArsak?.arsak?.firstOrNull()
     }
-}
-
-private fun SykmeldingRecord.toTilbakedatering(
-    kontaktDato: LocalDate?,
-    tilbakedatertBegrunnelse: String?,
-): SykInnTilbakedatering? {
-    if (kontaktDato == null && tilbakedatertBegrunnelse == null) return null
-
-    return SykInnTilbakedatering(kontaktDato, tilbakedatertBegrunnelse)
-}
-
-private fun SykmeldingRecord.kontaktDato(): LocalDate? {
-    return when (val sykmelding = sykmelding) {
-        is DigitalSykmelding -> sykmelding.tilbakedatering?.kontaktDato
-        is Papirsykmelding -> sykmelding.tilbakedatering?.kontaktDato
-        is XmlSykmelding -> sykmelding.tilbakedatering?.kontaktDato
-        is UtenlandskSykmelding -> null
-    }
-}
-
-private fun SykmeldingRecord.tilbakedatertBegrunnelse(): String? {
-    return when (val sykmelding = sykmelding) {
-        is DigitalSykmelding -> sykmelding.tilbakedatering?.begrunnelse
-        is Papirsykmelding -> sykmelding.tilbakedatering?.begrunnelse
-        is XmlSykmelding -> sykmelding.tilbakedatering?.begrunnelse
-        is UtenlandskSykmelding -> null
-    }
-}
 
 private fun Sykmelding.toArbeidsgiver(): SykInnArbeidsgiver? {
     return when (this) {
-        is Papirsykmelding -> this.arbeidsgiver.toSykInnArbeidsgiver()
-        is DigitalSykmelding -> this.arbeidsgiver.toSykInnArbeidsgiver()
-        is XmlSykmelding -> this.arbeidsgiver.toSykInnArbeidsgiver()
-        is UtenlandskSykmelding -> null
+        is Sykmelding.Nasjonal -> this.arbeidsgiver.toSykInnArbeidsgiver()
+        is Sykmelding.Utenlandsk -> null
     }
 }
 
 private fun ArbeidsgiverInfo.toSykInnArbeidsgiver(): SykInnArbeidsgiver? {
     return when (this) {
-        is EnArbeidsgiver -> SykInnArbeidsgiver(false, this.navn)
-        is FlereArbeidsgivere -> SykInnArbeidsgiver(true, this.navn)
-        is IngenArbeidsgiver -> null
+        is ArbeidsgiverInfo.En -> SykInnArbeidsgiver(false, this.navn)
+        is ArbeidsgiverInfo.Flere -> SykInnArbeidsgiver(true, this.navn)
+        is ArbeidsgiverInfo.Ingen -> null
     }
 }
 
 private fun Yrkesskade.toSykInnYrkesskade(): SykInnYrkesskade {
     return SykInnYrkesskade(true, this.yrkesskadeDato)
-}
-
-private fun SykmeldingRecord.meldingTilNav(): String? {
-    return when (val sykmelding = sykmelding) {
-        is UtenlandskSykmelding -> null
-        is DigitalSykmelding -> sykmelding.bistandNav?.beskrivBistand
-        is Papirsykmelding -> sykmelding.bistandNav?.beskrivBistand
-        is XmlSykmelding -> sykmelding.bistandNav?.beskrivBistand
-    }
-}
-
-private fun SykmeldingRecord.meldingTilArbeidsgiver(): String? {
-    return when (val sykmelding = sykmelding) {
-        is UtenlandskSykmelding -> null
-        is DigitalSykmelding -> getMeldingTilArbeidsgiver(sykmelding.arbeidsgiver)
-        is Papirsykmelding -> getMeldingTilArbeidsgiver(sykmelding.arbeidsgiver)
-        is XmlSykmelding -> getMeldingTilArbeidsgiver(sykmelding.arbeidsgiver)
-    }
-}
-
-private fun getMeldingTilArbeidsgiver(arbeidsgiver: ArbeidsgiverInfo): String? =
-    when (arbeidsgiver) {
-        is EnArbeidsgiver -> arbeidsgiver.meldingTilArbeidsgiver
-        is FlereArbeidsgivere -> arbeidsgiver.meldingTilArbeidsgiver
-        is IngenArbeidsgiver -> null
-    }
-
-private fun SykmeldingRecord.toMeldinger(
-    meldingTilArbeidsgiver: String?,
-    meldingTilNav: String?,
-): SykInnMeldinger? {
-    if (meldingTilArbeidsgiver == null && meldingTilNav == null) return null
-
-    return SykInnMeldinger(tilNav = meldingTilNav, tilArbeidsgiver = meldingTilArbeidsgiver)
 }
 
 private fun DiagnoseInfo.toSykInnDiagnoseInfo(): SykInnDiagnoseInfo =

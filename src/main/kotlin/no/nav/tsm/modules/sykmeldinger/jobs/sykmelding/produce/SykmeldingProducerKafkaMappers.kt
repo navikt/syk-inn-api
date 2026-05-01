@@ -2,53 +2,10 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
 import java.time.OffsetDateTime
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
-import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.domain.text
-import no.nav.tsm.sykmelding.input.core.model.Aktivitet
-import no.nav.tsm.sykmelding.input.core.model.AktivitetIkkeMulig
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
-import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
-import no.nav.tsm.sykmelding.input.core.model.Behandler
-import no.nav.tsm.sykmelding.input.core.model.BistandNav
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
-import no.nav.tsm.sykmelding.input.core.model.DigitalMedisinskVurdering
-import no.nav.tsm.sykmelding.input.core.model.DigitalSykmelding
-import no.nav.tsm.sykmelding.input.core.model.DigitalSykmeldingMetadata
-import no.nav.tsm.sykmelding.input.core.model.EnArbeidsgiver
-import no.nav.tsm.sykmelding.input.core.model.FlereArbeidsgivere
-import no.nav.tsm.sykmelding.input.core.model.Gradert
-import no.nav.tsm.sykmelding.input.core.model.IngenArbeidsgiver
-import no.nav.tsm.sykmelding.input.core.model.InvalidRule
+import no.nav.tsm.modules.sykmeldinger.domain.*
+import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
-import no.nav.tsm.sykmelding.input.core.model.PendingRule
-import no.nav.tsm.sykmelding.input.core.model.Reason
-import no.nav.tsm.sykmelding.input.core.model.RuleType
-import no.nav.tsm.sykmelding.input.core.model.Sporsmalstype
-import no.nav.tsm.sykmelding.input.core.model.Sykmelder
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.Tilbakedatering
-import no.nav.tsm.sykmelding.input.core.model.UtdypendeSporsmal
-import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import no.nav.tsm.sykmelding.input.core.model.ValidationType
-import no.nav.tsm.sykmelding.input.core.model.Yrkesskade
-import no.nav.tsm.sykmelding.input.core.model.metadata.Digital
-import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
-import no.nav.tsm.sykmelding.input.core.model.metadata.Kontaktinfo
-import no.nav.tsm.sykmelding.input.core.model.metadata.KontaktinfoType
-import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
-import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
-import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
+import no.nav.tsm.sykmelding.input.core.model.metadata.*
 
 fun VerifiedSykInnSykmelding.toInputRecord(
     /**
@@ -66,14 +23,14 @@ fun VerifiedSykInnSykmelding.toInputRecord(
                     "Should never map not digital sykmelding to SykmeldingRecord"
                 )
         }
-    return SykmeldingRecord(
-        metadata = Digital(orgnummer = meta.legekontorOrgnr),
+    return SykmeldingRecord.Digital(
+        metadata = MessageMetadata.Digital(orgnummer = meta.legekontorOrgnr),
         validation = result.toValidationResult(meta.mottatt, reason),
         sykmelding =
-            DigitalSykmelding(
+            Sykmelding.Digital(
                 id = sykmeldingId.toString(),
                 metadata =
-                    DigitalSykmeldingMetadata(
+                    SykmeldingMeta.Digital(
                         mottattDato = meta.mottatt,
                         genDate = meta.mottatt,
                         avsenderSystem = AvsenderSystem(meta.source, "1"),
@@ -101,7 +58,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(
                         kontaktinfo = emptyList(),
                     ),
                 medisinskVurdering =
-                    DigitalMedisinskVurdering(
+                    MedisinskVurdering.Digital(
                         hovedDiagnose = values.hoveddiagnose?.toDiagnoseInfo(),
                         biDiagnoser = values.bidiagnoser.map { it.toDiagnoseInfo() },
                         svangerskap = values.svangerskapsrelatert,
@@ -163,7 +120,7 @@ private fun SykInnSykmeldingRuleResult.toValidationResult(
                 when (type) {
                     RuleType.OK -> throw IllegalStateException("Rule with outcome can't be OK")
                     RuleType.PENDING ->
-                        PendingRule(
+                        Rule.Pending(
                             rule,
                             mottatt,
                             ValidationType.AUTOMATIC,
@@ -174,7 +131,7 @@ private fun SykInnSykmeldingRuleResult.toValidationResult(
                         )
 
                     RuleType.INVALID ->
-                        InvalidRule(
+                        Rule.Invalid(
                             rule,
                             ValidationType.AUTOMATIC,
                             mottatt,
@@ -217,7 +174,7 @@ private fun List<String>.toHelsepersonellkategori(): HelsepersonellKategori =
 private fun SykInnAktivitet.toAktivitet(): Aktivitet =
     when (this) {
         is SykInnAktivitet.IkkeMulig ->
-            AktivitetIkkeMulig(
+            Aktivitet.IkkeMulig(
                 fom = fom,
                 tom = tom,
                 arbeidsrelatertArsak =
@@ -232,7 +189,7 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
             )
 
         is SykInnAktivitet.Gradert ->
-            Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
+            Aktivitet.Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
 
         // TODO
         is SykInnAktivitet.Avventende -> TODO()
@@ -244,9 +201,9 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
 
 private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?): ArbeidsgiverInfo =
     when {
-        this == null -> IngenArbeidsgiver()
+        this == null -> ArbeidsgiverInfo.Ingen()
         this.harFlere ->
-            FlereArbeidsgivere(
+            ArbeidsgiverInfo.Flere(
                 navn = this.arbeidsgivernavn,
                 meldingTilArbeidsgiver = meldingTilArbeidsgiver,
                 // syk-inn-api har ikke noe med disse verdiene å gjøre
@@ -256,7 +213,7 @@ private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?):
             )
 
         else ->
-            EnArbeidsgiver(
+            ArbeidsgiverInfo.En(
                 meldingTilArbeidsgiver = meldingTilArbeidsgiver,
                 // syk-inn-api har ikke noe med disse verdiene å gjøre
                 navn = null,

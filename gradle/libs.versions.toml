@@ -1,6 +1,7 @@
 [versions]
 kotlin = "2.3.21"
 ktor = "3.4.2"
+khealth = "3.0.2"
 logback = "1.5.32"
 logbackEncoder = "9.0"
 postgresR2dbc = "1.1.1.RELEASE"
@@ -14,6 +15,9 @@ testcontainers = "2.0.5"
 otel = "2.27.0"
 arrow = "2.2.2.1"
 kotest-assertions = "6.1.11"
+tsm-sykmeldinger-input = "26"
+tsm-regula = "51"
+tsm-diagnoser = "2026.1.13"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -32,7 +36,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-apache = { module = "io.ktor:ktor-client-apache5", version.ref = "ktor" }
 ktor-client-call-id = { module = "io.ktor:ktor-client-call-id", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
-khealth = { module = "dev.hayden:khealth", version = "3.0.2" }
+khealth = { module = "dev.hayden:khealth", version.ref = "khealth" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
 
@@ -43,9 +47,9 @@ micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-p
 otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version.ref = "otel" }
 
 # TSM Dependencies
-tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version = "24" }
-tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version = "2026.1.13" }
-tsm-regula = { module = "no.nav.tsm.regulus:regula", version = "51" }
+tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version.ref = "tsm-sykmeldinger-input" }
+tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser" }
+tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
 
 # Testing
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
