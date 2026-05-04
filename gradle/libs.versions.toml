@@ -16,7 +16,7 @@ otel = "2.27.0"
 arrow = "2.2.2.1"
 kotest-assertions = "6.1.11"
 tsm-sykmeldinger-input = "26"
-tsm-regula = "51"
+tsm-regula = "52"
 tsm-diagnoser = "2026.1.13"
 
 [libraries]

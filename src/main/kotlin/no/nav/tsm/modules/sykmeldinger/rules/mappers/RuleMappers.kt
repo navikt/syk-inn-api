@@ -75,8 +75,7 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
                 AnnenFravarsArsak(grunn = listOf(it.name), beskrivelse = null)
             },
         tidligereSykmeldinger = otherSykmeldinger.map { it.toTidligereSykmelding() },
-        // TODO: Provide
-        utdypendeOpplysninger = emptyMap(),
+        besvarteUtdypendeOpplysninger = sykmelding.values.utdypendeSporsmal?.toRegulaBesvartUtdypende(),
         kontaktPasientBegrunnelseIkkeKontakt = sykmelding.values.tilbakedatering?.begrunnelse,
         behandletTidspunkt = behandletTidspunkt,
     )
