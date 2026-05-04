@@ -44,8 +44,6 @@ jobs:
 
   deploy-dev:
     needs: build
-    # Temporarily disable deploy to dev
-    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -61,7 +59,7 @@ jobs:
 
   build-for-gpr:
     name: Publish a version of syk-inn-api to GPR for use in testing
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestø
     steps:
       - uses: actions/checkout@v6
       - uses: navikt/tsm-workflows/actions/gradle/setup@main
