@@ -191,12 +191,11 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
         is SykInnAktivitet.Gradert ->
             Aktivitet.Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
 
-        // TODO
-        is SykInnAktivitet.Avventende -> TODO()
-        // TODO
-        is SykInnAktivitet.Behandlingsdager -> TODO()
-        // TODO
-        is SykInnAktivitet.Reisetilskudd -> TODO()
+        is SykInnAktivitet.Avventende -> Aktivitet.Avventende(fom = fom, tom = tom, innspillTilArbeidsgiver = innspillTilArbeidsgiver)
+
+        is SykInnAktivitet.Behandlingsdager -> Aktivitet.Behandlingsdager(fom = fom, tom = tom, antallBehandlingsdager = antallBehandlingsdager)
+
+        is SykInnAktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
 private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?): ArbeidsgiverInfo =
