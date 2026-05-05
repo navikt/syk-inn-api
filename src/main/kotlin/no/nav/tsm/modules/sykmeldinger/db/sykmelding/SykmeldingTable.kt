@@ -22,7 +22,7 @@ object SykmeldingTable : Table("sykmelding") {
     val metaPasientIdent = text("meta_pasient_ident")
     val metaPasientNavn = jacksonJsonb<SykmeldingJsonbNavn>("meta_pasient_navn")
     val metaBehandlerHpr = text("meta_behandler_hpr").nullable()
-    val metaBehandlerFnr = text("meta_behandler_fnr").nullable()
+    val metaBehandlerIdent = text("meta_behandler_ident").nullable()
     val metaBehandlerHelsepersonellkategori =
         jacksonJsonb<List<String>>("meta_behandler_helsepersonellkategori").nullable()
     val metaBehandlerNavn = jacksonJsonb<SykmeldingJsonbNavn>("meta_behandler_navn").nullable()

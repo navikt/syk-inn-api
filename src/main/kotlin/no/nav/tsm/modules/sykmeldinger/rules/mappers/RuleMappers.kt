@@ -11,7 +11,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.Identgruppe
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlIdentgruppe
 import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.regulus.regula.RegulaAvsender
@@ -44,7 +44,7 @@ fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): Regula
 
 fun PdlPerson.mapPdlPersonToRegulaPasient(): RegulaPasient? {
     val folkeregisterIdent =
-        this.identer.firstOrNull { it.gruppe == Identgruppe.FOLKEREGISTERIDENT }
+        this.identer.firstOrNull { it.gruppe == PdlIdentgruppe.FOLKEREGISTERIDENT }
     if (folkeregisterIdent == null) return null
     if (this.foedselsdato == null) return null
 
@@ -75,7 +75,8 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
                 AnnenFravarsArsak(grunn = listOf(it.name), beskrivelse = null)
             },
         tidligereSykmeldinger = otherSykmeldinger.map { it.toTidligereSykmelding() },
-        besvarteUtdypendeOpplysninger = sykmelding.values.utdypendeSporsmal?.toRegulaBesvartUtdypende(),
+        besvarteUtdypendeOpplysninger =
+            sykmelding.values.utdypendeSporsmal?.toRegulaBesvartUtdypende(),
         kontaktPasientBegrunnelseIkkeKontakt = sykmelding.values.tilbakedatering?.begrunnelse,
         behandletTidspunkt = behandletTidspunkt,
     )

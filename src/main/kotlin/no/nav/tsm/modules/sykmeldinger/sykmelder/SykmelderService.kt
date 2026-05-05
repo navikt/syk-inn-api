@@ -23,7 +23,7 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                     .getSykmelderByHpr(behandlerHpr = hpr)
                     .mapLeft {
                         when (it) {
-                            HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke(hpr)
+                            HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke
                             HprClient.HprErrors.UnknownError -> SykmelderErrors.HprError
                         }
                     }
@@ -47,4 +47,35 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                 )
                 .right()
         }
+
+    suspend fun byIdent(
+        ident: String,
+        oppslagsdato: LocalDate,
+    ): Either<SykmelderErrors, Sykmelder> = either {
+        val sykmelderMedHpr =
+            helsenettProxy
+                .getSykmelderByIdent(ident)
+                .mapLeft {
+                    when (it) {
+                        HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke
+                        HprClient.HprErrors.UnknownError -> SykmelderErrors.HprError
+                    }
+                }
+                .bind()
+
+        val suspendert: Boolean =
+            btsys
+                .isSuspendert(sykmelderIdent = sykmelderMedHpr.ident, oppslagsdato = oppslagsdato)
+                .mapLeft { raise(SykmelderErrors.SuspendertError) }
+                .bind()
+
+        return Sykmelder.MedSuspensjon(
+                hpr = sykmelderMedHpr.hprNummer,
+                navn = sykmelderMedHpr.navn,
+                ident = sykmelderMedHpr.ident,
+                suspendert = suspendert,
+                godkjenninger = sykmelderMedHpr.godkjenninger,
+            )
+            .right()
+    }
 }

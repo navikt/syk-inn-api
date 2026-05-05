@@ -1,14 +1,19 @@
 package no.nav.tsm.modules.sykmeldinger.pdl
 
 import java.time.LocalDate
+import no.nav.tsm.core.common.Navn
 
-data class PdlPerson(val navn: PdlNavn, val foedselsdato: LocalDate?, val identer: List<Ident>)
+data class PdlPerson(val navn: PdlNavn, val foedselsdato: LocalDate?, val identer: List<PdlIdent>)
 
-data class PdlNavn(val fornavn: String, val mellomnavn: String?, val etternavn: String)
+data class PdlNavn(
+    override val fornavn: String,
+    override val mellomnavn: String?,
+    override val etternavn: String,
+) : Navn
 
-data class Ident(val ident: String, val gruppe: Identgruppe, val historisk: Boolean)
+data class PdlIdent(val ident: String, val gruppe: PdlIdentgruppe, val historisk: Boolean)
 
-enum class Identgruppe {
+enum class PdlIdentgruppe {
     AKTORID,
     FOLKEREGISTERIDENT,
     NPID,

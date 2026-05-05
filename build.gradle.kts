@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.ktor.client.call.id)
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
+    implementation(libs.caffeine)
 
     // TSM libraries
     implementation(libs.tsm.sykmeldinger.input)

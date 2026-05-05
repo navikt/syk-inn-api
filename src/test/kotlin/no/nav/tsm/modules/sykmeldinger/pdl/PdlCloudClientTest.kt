@@ -33,9 +33,9 @@ class PdlCloudClientTest {
                 foedselsdato = LocalDate.now().minusYears(35),
                 identer =
                     listOf(
-                        Ident(
+                        PdlIdent(
                             ident = "12345678910",
-                            gruppe = Identgruppe.FOLKEREGISTERIDENT,
+                            gruppe = PdlIdentgruppe.FOLKEREGISTERIDENT,
                             historisk = false,
                         )
                     ),

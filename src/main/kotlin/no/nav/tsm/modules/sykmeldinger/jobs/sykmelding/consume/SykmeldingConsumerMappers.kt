@@ -4,6 +4,7 @@ import java.util.*
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.domain.*
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta.*
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.*
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
@@ -11,15 +12,14 @@ import no.nav.tsm.sykmelding.input.core.model.metadata.*
 
 private val log = logger()
 
-fun SykmeldingRecord.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
-
+fun RecordWithResources.toVerifiedSykmelding(): VerifiedSykInnSykmelding {
     return VerifiedSykInnSykmelding(
-        sykmeldingId = UUID.fromString(sykmelding.id),
-        values = toSykmeldingValues(),
+        sykmeldingId = UUID.fromString(record.sykmelding.id),
+        values = record.toSykmeldingValues(),
         meta = toMetadata(),
-        result = validation.toResult(),
+        result = record.validation.toResult(),
         type =
-            when (this.sykmelding.type) {
+            when (this.record.sykmelding.type) {
                 SykmeldingType.DIGITAL -> SykInnSykmeldingType.DIGITAL
                 SykmeldingType.XML -> SykInnSykmeldingType.XML
                 SykmeldingType.PAPIR -> SykInnSykmeldingType.PAPIR
@@ -41,97 +41,91 @@ private fun ValidationResult.toResult(): SykInnSykmeldingRuleResult =
                     throw IllegalStateException(
                         "ValidationResult status=$status but no non-OK rule present"
                     )
+
                 is Rule.Invalid ->
                     SykInnSykmeldingRuleResult.Outcome(
                         type = status,
                         rule = rule.name,
                         message = rule.reason.sykmelder,
                     )
+
                 is Rule.Pending ->
                     SykInnSykmeldingRuleResult.Outcome(
                         type = status,
                         rule = rule.name,
                         message = rule.reason.sykmelder,
                     )
+
                 is Rule.OK -> error("unreachable: filtered above")
             }
         }
     }
 
-private fun Sykmelding.Nasjonal.toSykInnBehandler(): SykInnBehandler {
-    val sykmelderIsSameAsBehandler =
-        sykmelder.ids.any { sykmelderId -> behandler.ids.any { it.id == sykmelderId.id } }
-    val ids =
-        if (sykmelderIsSameAsBehandler) {
-            sykmelder.ids union behandler.ids
-        } else {
-            sykmelder.ids
+private fun RecordWithResources.toMetadata(): SykInnSykmeldingMeta {
+    val sykmeldingRecord = this.record
+
+    val source = record.sykmelding.metadata.avsenderSystem.navn
+    val mottattDato = record.sykmelding.metadata.mottattDato
+    val pasient = record.sykmelding.pasient.toSykInnPasient()
+
+    if (sykmeldingRecord is SykmeldingRecord.Utenlandsk) {
+        return Utenlandsk(source = source, mottatt = mottattDato, pasient = pasient)
+    }
+
+    val sykmelder =
+        when (sykmeldingRecord) {
+            is SykmeldingRecord.Digital -> sykmeldingRecord.sykmelding.sykmelder
+            is SykmeldingRecord.Papir -> sykmeldingRecord.sykmelding.sykmelder
+            is SykmeldingRecord.Xml -> sykmeldingRecord.sykmelding.sykmelder
         }
-    val navn =
-        if (sykmelderIsSameAsBehandler) {
-            behandler.navn
-        } else {
-            null
-        }
 
-    return SykInnBehandler(
-        fornavn = navn?.fornavn,
-        mellomnavn = navn?.mellomnavn,
-        etternavn = navn?.etternavn,
-        hpr =
-            ids.firstOrNull { it.type == PersonIdType.HPR }?.id
-                ?: throw IllegalStateException("Could not find HPR for behandler for $id"),
-        fnr =
-            ids.firstOrNull { it.type in listOf(PersonIdType.FNR, PersonIdType.DNR) }?.id
-                ?: throw IllegalStateException("Could not find FNR/DNR for behandler for $id"),
-        helsepersonellkategori = listOf(sykmelder.helsepersonellKategori.toShortCode()),
-    )
-}
+    require(this is RecordWithResources.Nasjonal) {
+        "Resource meta cannot be Utenlandsk at this point, id: ${this.record.sykmelding.id}"
+    }
 
-private fun SykmeldingRecord.toMetadata(): SykInnSykmeldingMeta {
-    val source = sykmelding.metadata.avsenderSystem.navn
-    val mottattDato = sykmelding.metadata.mottattDato
-    val pasient = sykmelding.pasient.toSykInnPasient()
+    val behandler =
+        SykInnBehandler(
+            fornavn = this.navn.fornavn,
+            mellomnavn = this.navn.mellomnavn,
+            etternavn = this.navn.etternavn,
+            hpr = this.hpr,
+            ident = this.ident,
+            helsepersonellkategori = listOf(sykmelder.helsepersonellKategori.toShortCode()),
+        )
 
-    return when (this) {
+    return when (sykmeldingRecord) {
         is SykmeldingRecord.Digital ->
-            SykInnSykmeldingMeta.Digital(
+            Digital(
                 source = source,
                 mottatt = mottattDato,
                 pasient = pasient,
-                behandler = sykmelding.toSykInnBehandler(),
-                legekontorOrgnr = metadata.orgnummer,
-                legekontorTlf =
-                    sykmelding.behandler.firstTlf()
-                        ?: throw IllegalStateException("legekontorTlf is null"),
+                behandler = behandler,
+                legekontorOrgnr = sykmeldingRecord.metadata.orgnummer,
+                legekontorTlf = sykmeldingRecord.sykmelding.behandler.kontaktinfo.getTelefonnummer(),
             )
+
         is SykmeldingRecord.Xml ->
-            SykInnSykmeldingMeta.Legacy(
+            Legacy(
                 source = source,
                 mottatt = mottattDato,
                 pasient = pasient,
-                behandler = sykmelding.toSykInnBehandler(),
-                legekontorOrgnr =
-                    when (val meta = metadata) {
-                        is MessageMetadata.Xml.Emottak -> getOrgNr(meta.sender)
-                        else -> null
-                    },
-                legekontorTlf = sykmelding.behandler.firstTlf(),
+                behandler = behandler,
+                legekontorOrgnr = sykmeldingRecord.metadata.getOrgNr(),
+                legekontorTlf =
+                    sykmeldingRecord.metadata.getOrgTlf()
+                        ?: sykmeldingRecord.sykmelding.behandler.kontaktinfo.getTelefonnummer(),
             )
+
         is SykmeldingRecord.Papir ->
-            SykInnSykmeldingMeta.Legacy(
+            Legacy(
                 source = source,
                 mottatt = mottattDato,
                 pasient = pasient,
-                behandler = sykmelding.toSykInnBehandler(),
-                legekontorOrgnr = getOrgNr(this.metadata.sender),
-                legekontorTlf = null,
-            )
-        is SykmeldingRecord.Utenlandsk ->
-            SykInnSykmeldingMeta.Utenlandsk(
-                source = source,
-                mottatt = mottattDato,
-                pasient = pasient,
+                behandler = behandler,
+                legekontorOrgnr = sykmeldingRecord.metadata.sender.getOrgNr(),
+                legekontorTlf =
+                    sykmeldingRecord.metadata.sender.getOrgTlf()
+                        ?: sykmeldingRecord.sykmelding.behandler.kontaktinfo.getTelefonnummer(),
             )
     }
 }
@@ -144,13 +138,38 @@ private fun Pasient.toSykInnPasient(): SykInnPasient =
         ident = fnr,
     )
 
-private fun Behandler.firstTlf(): String? =
-    kontaktinfo.firstOrNull { it.type == KontaktinfoType.TLF }?.value
+private fun MessageMetadata.Xml.getOrgNr(): String? {
+    if (this is MessageMetadata.Xml.Egenmeldt) return null
 
-private fun getOrgNr(sender: Organisasjon): String? {
-    return sender.underOrganisasjon?.ids?.firstOrNull { it.type == OrgIdType.ENH }?.id
-        ?: sender.ids.firstOrNull { it.type == OrgIdType.ENH }?.id
+    return when (this) {
+        is MessageMetadata.Xml.Emottak.EDI -> this.sender
+        is MessageMetadata.Xml.Emottak.Legacy -> this.sender
+    }.getOrgNr()
 }
+
+private fun Organisasjon.getOrgNr(): String? =
+    underOrganisasjon?.ids?.firstOrNull { it.type == OrgIdType.ENH }?.id
+        ?: ids.firstOrNull { it.type == OrgIdType.ENH }?.id
+
+private fun MessageMetadata.Xml.getOrgTlf(): String? {
+    if (this is MessageMetadata.Xml.Egenmeldt) return null
+
+    return when (this) {
+        is MessageMetadata.Xml.Emottak.EDI -> this.sender
+        is MessageMetadata.Xml.Emottak.Legacy -> this.sender
+    }.getOrgTlf()
+}
+
+private fun Organisasjon.getOrgTlf(): String? =
+    this.underOrganisasjon?.kontaktinfo?.getTelefonnummer() ?: this.kontaktinfo?.getTelefonnummer()
+
+private fun List<Kontaktinfo>.getTelefonnummer(): String =
+    this.filterNot {
+            listOf(KontaktinfoType.IKKE_OPPGITT, KontaktinfoType.FAX_TELEFAKS).contains(it.type)
+        }
+        .firstOrNull()
+        .let { requireNotNull(it) { "Behandler is required to have a tlf in kontaktinfo" } }
+        .value
 
 private fun HelsepersonellKategori.toShortCode(): String =
     when (this) {
@@ -197,18 +216,21 @@ private fun Aktivitet.toSykInnAktivitet(): SykInnAktivitet {
                 grad = this.grad,
                 reisetilskudd = this.reisetilskudd,
             )
+
         is Aktivitet.Avventende ->
             SykInnAktivitet.Avventende(
                 fom = this.fom,
                 tom = this.tom,
                 innspillTilArbeidsgiver = this.innspillTilArbeidsgiver,
             )
+
         is Aktivitet.Behandlingsdager ->
             SykInnAktivitet.Behandlingsdager(
                 fom = this.fom,
                 tom = this.tom,
                 antallBehandlingsdager = this.antallBehandlingsdager,
             )
+
         is Aktivitet.Reisetilskudd -> SykInnAktivitet.Reisetilskudd(fom = this.fom, tom = this.tom)
     }
 }
@@ -242,6 +264,7 @@ private fun Sykmelding.toTilbakedatering(): SykInnTilbakedatering? {
             }
             return SykInnTilbakedatering(kontaktdato = kontaktDato, begrunnelse = begrunnelse)
         }
+
         else -> return null
     }
 }
@@ -264,6 +287,7 @@ private fun Sykmelding.toMeldinger(): SykInnMeldinger? {
 
             return SykInnMeldinger(tilNav = meldingTilNav, tilArbeidsgiver = meldingTilArbeidsgiver)
         }
+
         else -> return null
     }
 }
@@ -388,14 +412,17 @@ private fun isSupported(spmKey: String): Boolean {
         "6.3.1",
         "6.3.2",
         "6.3.3" -> true
+
         "6.4.1",
         "6.4.2",
         "6.4.3",
         "6.4.4" -> true
+
         "6.5.1",
         "6.5.2",
         "6.5.3",
         "6.5.4" -> true
+
         else -> {
             log.debug("$spmKey is not supported")
             false

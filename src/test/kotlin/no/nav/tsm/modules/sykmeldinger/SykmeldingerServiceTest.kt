@@ -51,7 +51,7 @@ class SykmeldingerServiceTest {
             {
                 delay(5000.milliseconds)
 
-                Sykmelder.FinnesIkke("foo").right()
+                Sykmelder.FinnesIkke.right()
             }
 
         coEvery { sykmeldingRepo.allByIdent(any()) } coAnswers
@@ -79,7 +79,7 @@ class SykmeldingerServiceTest {
             {
                 delay(5000.milliseconds)
 
-                Sykmelder.FinnesIkke("foo").right()
+                Sykmelder.FinnesIkke.right()
             }
 
         coEvery { sykmeldingRepo.allByIdent(any()) } coAnswers
@@ -112,7 +112,7 @@ class SykmeldingerServiceTest {
             {
                 delay(3500.milliseconds)
 
-                Sykmelder.FinnesIkke("foo").right()
+                Sykmelder.FinnesIkke.right()
             }
 
         coEvery { sykmeldingRepo.allByIdent(any()) } coAnswers

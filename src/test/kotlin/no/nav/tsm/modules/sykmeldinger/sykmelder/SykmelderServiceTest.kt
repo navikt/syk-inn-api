@@ -55,7 +55,6 @@ class SykmelderServiceTest {
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
         assertIs<Sykmelder.FinnesIkke>(result)
-        assertEquals(hprNummer, result.hpr)
     }
 
     @Test

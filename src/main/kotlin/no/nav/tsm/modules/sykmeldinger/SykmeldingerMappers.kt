@@ -40,7 +40,7 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                         mellomnavn = sykmelder.navn.mellomnavn,
                         etternavn = sykmelder.navn.etternavn,
                         hpr = sykmelder.hpr,
-                        fnr = sykmelder.ident,
+                        ident = sykmelder.ident,
                         helsepersonellkategori =
                             sykmelder.godkjenninger
                                 .filter { it.helsepersonellkategori?.aktiv == true }

@@ -17,23 +17,25 @@ fun SykInnUtdypendeSporsmal.toRegulaBesvartUtdypende(): List<String> {
     return uke7()
 }
 
-fun SykInnUtdypendeSporsmal.uke39() = listOfNotNull(
-    this.medisinskOppsummering?.let { "6.5.1" },
-    this.utfordringerMedArbeid?.let { "6.5.2" },
-    this.forventetHelsetilstandUtvikling?.let { "6.5.3" },
-    this.medisinskeHensyn?.let { "6.5.4" },
-)
+fun SykInnUtdypendeSporsmal.uke39() =
+    listOfNotNull(
+        this.medisinskOppsummering?.let { "6.5.1" },
+        this.utfordringerMedArbeid?.let { "6.5.2" },
+        this.forventetHelsetilstandUtvikling?.let { "6.5.3" },
+        this.medisinskeHensyn?.let { "6.5.4" },
+    )
 
-fun SykInnUtdypendeSporsmal.uke17() = listOfNotNull(
-    this.medisinskOppsummering?.let { "6.4.1" },
-    this.utfordringerMedArbeid?.let { "6.4.2" },
-    this.behandlingOgFremtidigArbeid?.let { "6.4.3" },
-    this.uavklarteForhold?.let { "6.4.4" },
-)
+fun SykInnUtdypendeSporsmal.uke17() =
+    listOfNotNull(
+        this.medisinskOppsummering?.let { "6.4.1" },
+        this.utfordringerMedArbeid?.let { "6.4.2" },
+        this.behandlingOgFremtidigArbeid?.let { "6.4.3" },
+        this.uavklarteForhold?.let { "6.4.4" },
+    )
 
-fun SykInnUtdypendeSporsmal.uke7() = listOfNotNull(
-    this.medisinskOppsummering?.let { "6.3.1" },
-    this.utfordringerMedGradertArbeid?.let { "6.3.2" },
-    this.hensynPaArbeidsplassen?.let { "6.3.3" },
-)
-
+fun SykInnUtdypendeSporsmal.uke7() =
+    listOfNotNull(
+        this.medisinskOppsummering?.let { "6.3.1" },
+        this.utfordringerMedGradertArbeid?.let { "6.3.2" },
+        this.hensynPaArbeidsplassen?.let { "6.3.3" },
+    )

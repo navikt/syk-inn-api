@@ -87,7 +87,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(
                         ids =
                             listOf(
                                 PersonId(type = PersonIdType.HPR, id = meta.behandler.hpr),
-                                PersonId(type = PersonIdType.FNR, id = meta.behandler.fnr),
+                                PersonId(type = PersonIdType.FNR, id = meta.behandler.ident),
                             ),
                         kontaktinfo =
                             listOf(
@@ -186,9 +186,19 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
         is SykInnAktivitet.Gradert ->
             Aktivitet.Gradert(fom = fom, tom = tom, grad = grad, reisetilskudd = reisetilskudd)
 
-        is SykInnAktivitet.Avventende -> Aktivitet.Avventende(fom = fom, tom = tom, innspillTilArbeidsgiver = innspillTilArbeidsgiver)
+        is SykInnAktivitet.Avventende ->
+            Aktivitet.Avventende(
+                fom = fom,
+                tom = tom,
+                innspillTilArbeidsgiver = innspillTilArbeidsgiver,
+            )
 
-        is SykInnAktivitet.Behandlingsdager -> Aktivitet.Behandlingsdager(fom = fom, tom = tom, antallBehandlingsdager = antallBehandlingsdager)
+        is SykInnAktivitet.Behandlingsdager ->
+            Aktivitet.Behandlingsdager(
+                fom = fom,
+                tom = tom,
+                antallBehandlingsdager = antallBehandlingsdager,
+            )
 
         is SykInnAktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }

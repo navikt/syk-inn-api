@@ -248,7 +248,7 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
                             etternavn = "Legesen",
                             hpr = "9144889",
                             helsepersonellkategori = listOf("LE"),
-                            fnr = "12345678901",
+                            ident = "12345678901",
                         ),
                     legekontorOrgnr = "123456789",
                     legekontorTlf = "12345678",

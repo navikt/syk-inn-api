@@ -46,8 +46,8 @@ data class SykInnBehandler(
     override val fornavn: String?,
     override val mellomnavn: String?,
     override val etternavn: String?,
+    val ident: String,
     val hpr: String,
-    val fnr: String,
     val helsepersonellkategori: List<String>,
 ) : Navn
 

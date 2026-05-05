@@ -14,6 +14,7 @@ mockk = "1.14.9"
 testcontainers = "2.0.5"
 otel = "2.27.0"
 arrow = "2.2.2.1"
+caffeine = "3.2.4"
 kotest-assertions = "6.1.11"
 tsm-sykmeldinger-input = "26"
 tsm-regula = "52"
@@ -39,6 +40,7 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 khealth = { module = "dev.hayden:khealth", version.ref = "khealth" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 
 # Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

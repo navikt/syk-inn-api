@@ -21,9 +21,9 @@ class PdlLocalClient : PdlClient {
                 foedselsdato = LocalDate.parse("1990-01-01"),
                 identer =
                     listOf(
-                        Ident(
+                        PdlIdent(
                             ident = "120398120398",
-                            gruppe = Identgruppe.FOLKEREGISTERIDENT,
+                            gruppe = PdlIdentgruppe.FOLKEREGISTERIDENT,
                             historisk = false,
                         )
                     ),

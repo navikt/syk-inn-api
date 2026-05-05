@@ -1,9 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
+import io.mockk.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -18,10 +15,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.SykmeldingConfig
+import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.domain.*
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.toInputRecord
 import no.nav.tsm.utils.WithPostgresql
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
@@ -38,12 +37,16 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
 
     private val consumer: SykmeldingConsumer = mockk()
     private val repo = SykmeldingConsumerRepo()
+    private val resourceService: SykmeldingConsumerResourcesService = mockk()
     private val service =
         SykmeldingConsumerService(
-            environment = mockk(),
-            sykmeldingConsumerRepo = repo,
+            environment =
+                mockk() {
+                    every { sykmeldingConfig } returns SykmeldingConfig(retention = 365.days)
+                },
             consumer = consumer,
-            sykmeldingConfig = SykmeldingConfig(retention = 365.days),
+            sykmeldingConsumerRepo = repo,
+            sykmeldingConsumerResourcesService = resourceService,
         )
 
     @BeforeTest
@@ -56,10 +59,19 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
     @Test
     fun `inserts sykmelding when within retention period`() = runTest {
         val sykmelding = testSykmelding(tom = LocalDate.now())
+        val record = sykmelding.toInputRecord(null)
+
+        coEvery { resourceService.getResourcesForSykmelding(any()) } returns
+            RecordWithResources.Nasjonal(
+                record = record,
+                navn = SimpleNavn("Lege", null, "Legesen"),
+                hpr = "9144889",
+                ident = "12345",
+            )
 
         launch {
                 every { consumer.poll() } returns
-                    listOf(sykmelding.sykmeldingId.toString() to sykmelding) andThenAnswer
+                    listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
                     {
                         cancel("stopping coroutine by flipping the isActive property")
                         emptyList()
@@ -75,9 +87,11 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
     @Test
     fun `skips sykmelding when over retention period`() = runTest {
         val sykmelding = testSykmelding(tom = LocalDate.now().minusDays(366))
+        val record = sykmelding.toInputRecord(null)
+
         launch {
                 every { consumer.poll() } returns
-                    listOf(sykmelding.sykmeldingId.toString() to sykmelding) andThenAnswer
+                    listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
                     {
                         cancel("stopping coroutine by flipping the isActive property")
                         emptyList()
@@ -96,7 +110,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
         assertTrue(existsInDb(existing.sykmeldingId))
 
         launch {
-                every { consumer.poll() } returns
+                coEvery { consumer.poll() } returns
                     listOf(existing.sykmeldingId.toString() to null) andThenAnswer
                     {
                         cancel()
@@ -160,7 +174,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                             etternavn = "Legesen",
                             hpr = "9144889",
                             helsepersonellkategori = listOf("LE"),
-                            fnr = "12345678901",
+                            ident = "12345678901",
                         ),
                     legekontorOrgnr = "123456789",
                     legekontorTlf = "12345678",

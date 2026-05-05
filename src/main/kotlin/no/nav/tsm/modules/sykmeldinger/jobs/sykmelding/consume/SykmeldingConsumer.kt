@@ -6,7 +6,6 @@ import java.util.*
 import kotlin.time.toJavaDuration
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -36,12 +35,12 @@ class SykmeldingConsumer(environment: Environment) {
         consumer = KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
     }
 
-    fun poll(): List<Pair<String, VerifiedSykInnSykmelding?>> {
+    fun poll(): List<Pair<String, SykmeldingRecord?>> {
         val records = consumer.poll(duration)
         if (records.isEmpty) return emptyList()
 
         logger.info("Got ${records.count()} records from kafka")
-        return records.map { tryParse(it) }.map { it.first to it.second?.toVerifiedSykmelding() }
+        return records.map { tryParse(it) }
     }
 
     fun subscribe() {

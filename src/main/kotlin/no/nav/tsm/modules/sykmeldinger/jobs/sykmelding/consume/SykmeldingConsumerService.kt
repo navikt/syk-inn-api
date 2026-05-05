@@ -7,15 +7,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 class SykmeldingConsumerService(
-    environment: Environment,
-    private val sykmeldingConsumerRepo: SykmeldingConsumerRepo,
+    private val environment: Environment,
     private val consumer: SykmeldingConsumer,
-    private val sykmeldingConfig: SykmeldingConfig = environment.sykmeldingConfig,
+    private val sykmeldingConsumerRepo: SykmeldingConsumerRepo,
+    private val sykmeldingConsumerResourcesService: SykmeldingConsumerResourcesService,
 ) {
     private val logger = logger()
 
@@ -38,19 +37,22 @@ class SykmeldingConsumerService(
         }
 
     @WithSpan
-    private suspend fun handleSykmelding(key: String, sykmelding: VerifiedSykInnSykmelding?) {
-        when {
-            sykmelding == null -> deleteSykmelding(key)
-            isOverRetentionPeriod(sykmelding) -> {
-                logger.debug("Skipping sykmelding over retention period $key")
-            }
-            else -> {
-                sykmeldingConsumerRepo.insert(sykmelding)
-                logger.debug("Sykmelding inserted ${sykmelding.sykmeldingId}")
-            }
+    private suspend fun handleSykmelding(key: String, sykmelding: SykmeldingRecord?) {
+        if (sykmelding == null) return deleteSykmelding(key)
+
+        if (isOverRetentionPeriod(sykmelding)) {
+            logger.debug("Skipping sykmelding over retention period $key")
+            return
         }
+
+        val withResources = sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding)
+        val verifiedSykmelding = withResources.toVerifiedSykmelding()
+
+        sykmeldingConsumerRepo.insert(verifiedSykmelding)
+        logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
     }
 
+    @WithSpan
     private suspend fun deleteSykmelding(key: String) {
         logger.debug("Tombstone for sykmelding $key, deleting")
         try {
@@ -64,7 +66,7 @@ class SykmeldingConsumerService(
         }
     }
 
-    private fun isOverRetentionPeriod(sykmelding: VerifiedSykInnSykmelding): Boolean =
-        sykmelding.values.aktivitet.maxOf { it.tom } <
-            (LocalDate.now().minusDays(sykmeldingConfig.retention.inWholeDays))
+    private fun isOverRetentionPeriod(sykmelding: SykmeldingRecord): Boolean =
+        sykmelding.sykmelding.aktivitet.maxOf { it.tom } <
+            (LocalDate.now().minusDays(environment.sykmeldingConfig.retention.inWholeDays))
 }

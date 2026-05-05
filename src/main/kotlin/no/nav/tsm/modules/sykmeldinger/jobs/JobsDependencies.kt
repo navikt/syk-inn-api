@@ -10,6 +10,7 @@ import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningProducerJ
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumer
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerResourcesService
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerService
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteRepo
@@ -24,6 +25,7 @@ fun Application.configureJobsDependencies() {
     dependencies {
         provide<SykmeldingConsumerRepo>(SykmeldingConsumerRepo::class)
         provide<SykmeldingConsumer>(SykmeldingConsumer::class)
+        provide<SykmeldingConsumerResourcesService>(SykmeldingConsumerResourcesService::class)
         provide<SykmeldingConsumerService>(SykmeldingConsumerService::class)
         provide<SykmeldingConsumerJob>(SykmeldingConsumerJob::class)
 
