@@ -3,10 +3,11 @@ package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import io.r2dbc.spi.R2dbcDataIntegrityViolationException
+import io.r2dbc.postgresql.api.PostgresqlException
 import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
@@ -164,11 +165,18 @@ class SykmeldingRepo : SykmeldingInsert() {
             return inserted.right()
         } catch (e: ExposedR2dbcException) {
             // TODO: This also catched other violations, for example not-null constraints :/
-            if (e.cause is R2dbcDataIntegrityViolationException) {
-                return InsertErrors.IDEMPOTENCY_HIT.left()
+
+            val cause = e.cause
+            if (cause is PostgresqlException) {
+                if (
+                    cause.errorDetails.constraintName.getOrNull() ==
+                        "sykmelding_idempotency_key_key"
+                ) {
+                    return InsertErrors.IDEMPOTENCY_HIT.left()
+                }
             }
 
-            if (e.cause is R2dbcException) {
+            if (cause is R2dbcException) {
                 /**
                  * Parts of the stack trace contains all values, these appear on the second line+
                  */
