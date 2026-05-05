@@ -118,7 +118,7 @@ class SykmeldingConsumerResourcesService(
         val sykmelder =
             sykmelderService.byHpr(hpr, oppslagsdato).getOrElse {
                 error(
-                    "Unable to fetch sykmelder with hpr $hpr from sykmelderService, cause: $it, why: ${it.details}"
+                    "Unable to fetch sykmelder with hpr $hpr from sykmelderService, cause: ${it.details}"
                 )
             }
 

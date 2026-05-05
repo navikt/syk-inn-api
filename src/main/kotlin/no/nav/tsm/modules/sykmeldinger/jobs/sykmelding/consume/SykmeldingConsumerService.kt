@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
+import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.logger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
@@ -45,11 +46,27 @@ class SykmeldingConsumerService(
             return
         }
 
-        val withResources = sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding)
-        val verifiedSykmelding = withResources.toVerifiedSykmelding()
+        try {
+            val withResources =
+                sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding)
+            val verifiedSykmelding = withResources.toVerifiedSykmelding()
 
-        sykmeldingConsumerRepo.insert(verifiedSykmelding)
-        logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
+            sykmeldingConsumerRepo.insert(verifiedSykmelding)
+            logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
+        } catch (ex: Exception) {
+            if (environment.runtime.env == RuntimeEnvironments.DEV) {
+                when {
+                    ex.message?.contains("cause: User not found") == true -> {
+                        logger.warn(
+                            "Environment is dev-gcp: Skipping btsys 'User not found' sykmelding"
+                        )
+                        return
+                    }
+                }
+            }
+
+            throw ex
+        }
     }
 
     @WithSpan
