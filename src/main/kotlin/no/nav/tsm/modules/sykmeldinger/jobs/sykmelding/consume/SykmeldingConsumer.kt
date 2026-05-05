@@ -6,6 +6,7 @@ import java.util.*
 import kotlin.time.toJavaDuration
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
+import no.nav.tsm.core.teamLogger
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -16,6 +17,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 
 class SykmeldingConsumer(environment: Environment) {
     private val logger = logger()
+    private val teamLog = teamLogger()
     private val topicName = "tsm.sykmeldinger"
     // Unique group id while we test, when we go live this will be a more distinct name
     private val groupId = "syk-inn-api-new-temp-1"
@@ -59,8 +61,12 @@ class SykmeldingConsumer(environment: Environment) {
         try {
             return record.key() to record.value()?.let { parseAndMapSykmelding(it) }
         } catch (ex: Exception) {
+            record.value()?.let {
+                teamLog.warn("Full failing sykmelding JSON: ${String(bytes = it)}")
+            }
+
             throw IllegalStateException(
-                "Got exception during record deserialization for record with key ${record.key()} and offset ${record.offset()}",
+                "Got exception during record deserialization for record with key ${record.key()} and offset ${record.offset()} size (${record.value()?.size?: "empty"})",
                 ex,
             )
         }

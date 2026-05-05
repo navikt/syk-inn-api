@@ -103,7 +103,7 @@ class SykmeldingConsumerResourcesService(
 
         val person =
             pdlClient.getPerson(ident).getOrElse {
-                error("Unable to fetch person with ident $ident from pdlClient, cause: $it")
+                error("Unable to fetch person with from pdlClient, cause: $it")
             }
 
         pdlCaffeine.put(ident, person)
@@ -133,9 +133,7 @@ class SykmeldingConsumerResourcesService(
 
         val sykmelder =
             sykmelderService.byIdent(ident, oppslagsdato).getOrElse {
-                error(
-                    "Unable to fetch sykmelder with ident $ident from sykmelderService, cause: $it"
-                )
+                error("Unable to fetch sykmelder from sykmelderService, cause: ${it.details}")
             }
 
         hprCaffeine.put(ident, sykmelder)
