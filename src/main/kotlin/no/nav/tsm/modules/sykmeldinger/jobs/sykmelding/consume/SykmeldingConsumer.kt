@@ -7,6 +7,7 @@ import kotlin.time.toJavaDuration
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
 import no.nav.tsm.core.teamLogger
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -15,10 +16,14 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 
-class SykmeldingConsumer(environment: Environment) {
+class SykmeldingConsumer(
+    environment: Environment,
+    private val sykmeldingPoisonPillRepo: SykmeldingPoisonPillRepo,
+) {
     private val logger = logger()
     private val teamLog = teamLogger()
     private val topicName = "tsm.sykmeldinger"
+
     // Unique group id while we test, when we go live this will be a more distinct name
     private val groupId = "syk-inn-api-new-temp-1"
 
@@ -37,7 +42,7 @@ class SykmeldingConsumer(environment: Environment) {
         consumer = KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
     }
 
-    fun poll(): List<Pair<String, SykmeldingRecord?>> {
+    suspend fun poll(): List<Pair<String, SykmeldingRecord?>> {
         val records = consumer.poll(duration)
         if (records.isEmpty) return emptyList()
 
@@ -55,7 +60,7 @@ class SykmeldingConsumer(environment: Environment) {
         consumer.unsubscribe()
     }
 
-    private fun tryParse(
+    private suspend fun tryParse(
         record: ConsumerRecord<String, ByteArray?>
     ): Pair<String, SykmeldingRecord?> =
         try {
@@ -65,8 +70,23 @@ class SykmeldingConsumer(environment: Environment) {
                 teamLog.warn("Full failing sykmelding JSON: ${String(bytes = it)}")
             }
 
+            try {
+                val key = UUID.fromString(record.key())
+                val poisoned = sykmeldingPoisonPillRepo.isPoisoned(key)
+                if (poisoned != null) {
+                    logger.warn(
+                        "Found poisoned sykmelding ${record.key()}, reason ${poisoned.reason} at ${poisoned.created}"
+                    )
+                }
+            } catch (poisonEx: Exception) {
+                logger.error(
+                    "Unable to check if sykmelding was poisoned, throwing original error",
+                    poisonEx,
+                )
+            }
+
             throw IllegalStateException(
-                "Got exception during record deserialization for record with key ${record.key()} and offset ${record.offset()} size (${record.value()?.size?: "empty"})",
+                "Got exception during record deserialization for record with key ${record.key()} and offset ${record.offset()} size (${record.value()?.size ?: "empty"})",
                 ex,
             )
         }

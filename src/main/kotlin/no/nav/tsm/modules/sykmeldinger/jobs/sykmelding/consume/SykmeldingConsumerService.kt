@@ -62,6 +62,14 @@ class SykmeldingConsumerService(
                         )
                         return
                     }
+                    ex.message?.contains(
+                        "Unable to fetch person with from pdlClient, cause: NotFound"
+                    ) == true -> {
+                        logger.warn(
+                            "Environment is dev-gcp: Skipping pdl-cache 'NotFound' sykmelder"
+                        )
+                        return
+                    }
                 }
             }
 

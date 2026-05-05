@@ -12,6 +12,7 @@ import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsume
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerResourcesService
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerService
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteRepo
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.SykmeldingProducerJob
@@ -23,6 +24,7 @@ fun Application.configureJobsDependencies() {
     val environment: Environment by dependencies
 
     dependencies {
+        provide<SykmeldingPoisonPillRepo>(SykmeldingPoisonPillRepo::class)
         provide<SykmeldingConsumerRepo>(SykmeldingConsumerRepo::class)
         provide<SykmeldingConsumer>(SykmeldingConsumer::class)
         provide<SykmeldingConsumerResourcesService>(SykmeldingConsumerResourcesService::class)

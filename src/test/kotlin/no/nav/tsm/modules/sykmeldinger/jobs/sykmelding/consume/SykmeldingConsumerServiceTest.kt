@@ -70,7 +70,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
             )
 
         launch {
-                every { consumer.poll() } returns
+                coEvery { consumer.poll() } returns
                     listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
                     {
                         cancel("stopping coroutine by flipping the isActive property")
@@ -90,7 +90,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
         val record = sykmelding.toInputRecord(null)
 
         launch {
-                every { consumer.poll() } returns
+                coEvery { consumer.poll() } returns
                     listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
                     {
                         cancel("stopping coroutine by flipping the isActive property")

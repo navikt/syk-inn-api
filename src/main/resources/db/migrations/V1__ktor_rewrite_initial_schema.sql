@@ -88,3 +88,12 @@ create table juridisk_status
 );
 
 create index idx_rule_status_event_timestamp on juridisk_status (status, event_timestamp);
+
+-- Sykmeldinger that are explicitly marked as "poison pills"
+create table sykmelding_poison_pill
+(
+    -- This is specifically NOT a foreign key, because these can't exist when they are read from kafka! :)
+    sykmelding_id     UUID primary key,
+    reason            text        not null,
+    created timestamptz not null default now()
+);
