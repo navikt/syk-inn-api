@@ -48,13 +48,14 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.insertReturning
 import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.upsert
+import org.jetbrains.exposed.v1.r2dbc.upsertReturning
 
 abstract class SykmeldingInsert {
     suspend fun R2dbcTransaction.insertSykmelding(
         idempotencyKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
     ): VerifiedSykInnSykmelding {
-
         val (behandler, legekontorOrgnr, legekontorTlf) =
             when (sykmelding.meta) {
                 is SykInnSykmeldingMeta.Digital ->
@@ -74,7 +75,7 @@ abstract class SykmeldingInsert {
                 is SykInnSykmeldingMeta.Utenlandsk -> Triple(null, null, null)
             }
 
-        return SykmeldingTable.insertReturning {
+        return SykmeldingTable.upsertReturning(onUpdateExclude = listOf(SykmeldingTable.id, SykmeldingTable.idempotencyKey)) {
                 it[SykmeldingTable.idempotencyKey] = idempotencyKey
                 it[id] = sykmelding.sykmeldingId
                 it[type] = sykmelding.type.name
