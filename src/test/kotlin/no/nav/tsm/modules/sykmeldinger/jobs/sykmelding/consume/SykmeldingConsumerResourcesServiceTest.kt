@@ -49,7 +49,7 @@ class SykmeldingConsumerResourcesServiceTest {
 
             val ids = listOf(PersonId(id = "foo-bar-ident", PersonIdType.FNR))
             val record = createDigitalRecord(ids = ids)
-            val result = service.getResourcesForSykmelding(record)
+            val result = service.getResourcesForSykmelding(record).getOrNull()
 
             result.shouldNotBeNull()
             result.shouldBeTypeOf<RecordWithResources.Nasjonal>()
@@ -79,7 +79,7 @@ class SykmeldingConsumerResourcesServiceTest {
 
             val ids = listOf(PersonId(id = testHpr, PersonIdType.HPR))
             val record = createDigitalRecord(ids = ids)
-            val result = service.getResourcesForSykmelding(record)
+            val result = service.getResourcesForSykmelding(record).getOrNull()
 
             result.shouldNotBeNull()
             result.shouldBeTypeOf<RecordWithResources.Nasjonal>()

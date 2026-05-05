@@ -4,7 +4,6 @@ import arrow.core.Either
 import java.time.LocalDate
 
 sealed interface BtsysClient {
-
     enum class SuspendertErrors {
         NotFound,
         UnknownError,

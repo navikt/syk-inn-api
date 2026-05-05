@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
+import arrow.core.right
 import io.mockk.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -63,11 +64,12 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
 
         coEvery { resourceService.getResourcesForSykmelding(any()) } returns
             RecordWithResources.Nasjonal(
-                record = record,
-                navn = SimpleNavn("Lege", null, "Legesen"),
-                hpr = "9144889",
-                ident = "12345",
-            )
+                    record = record,
+                    navn = SimpleNavn("Lege", null, "Legesen"),
+                    hpr = "9144889",
+                    ident = "12345",
+                )
+                .right()
 
         launch {
                 coEvery { consumer.poll() } returns

@@ -10,12 +10,10 @@ import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderService(private val btsys: BtsysClient, private val helsenettProxy: HprClient) {
-    sealed interface SykmelderErrors {
-        val details: String
-
-        class SuspendertError(override val details: String) : SykmelderErrors
-
-        class HprError(override val details: String) : SykmelderErrors
+    enum class SykmelderErrors {
+        HprUnknownError,
+        SuspendertNotFound,
+        SuspendertUnknownError,
     }
 
     @WithSpan
@@ -27,8 +25,7 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                     .mapLeft {
                         when (it) {
                             HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke
-                            HprClient.HprErrors.UnknownError ->
-                                SykmelderErrors.HprError("Unknown HPR error")
+                            HprClient.HprErrors.UnknownError -> SykmelderErrors.HprUnknownError
                         }
                     }
                     .bind()
@@ -42,9 +39,9 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                     .mapLeft {
                         when (it) {
                             BtsysClient.SuspendertErrors.NotFound ->
-                                SykmelderErrors.SuspendertError("User not found")
+                                SykmelderErrors.SuspendertNotFound
                             BtsysClient.SuspendertErrors.UnknownError ->
-                                SykmelderErrors.SuspendertError("Unknown error")
+                                SykmelderErrors.SuspendertUnknownError
                         }
                     }
                     .bind()
@@ -69,8 +66,7 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                 .mapLeft {
                     when (it) {
                         HprClient.HprErrors.NotFound -> return@either Sykmelder.FinnesIkke
-                        HprClient.HprErrors.UnknownError ->
-                            SykmelderErrors.HprError("Unknown HPR error")
+                        HprClient.HprErrors.UnknownError -> SykmelderErrors.HprUnknownError
                     }
                 }
                 .bind()
@@ -80,10 +76,9 @@ class SykmelderService(private val btsys: BtsysClient, private val helsenettProx
                 .isSuspendert(sykmelderIdent = sykmelderMedHpr.ident, oppslagsdato = oppslagsdato)
                 .mapLeft {
                     when (it) {
-                        BtsysClient.SuspendertErrors.NotFound ->
-                            SykmelderErrors.SuspendertError("User not found")
+                        BtsysClient.SuspendertErrors.NotFound -> SykmelderErrors.SuspendertNotFound
                         BtsysClient.SuspendertErrors.UnknownError ->
-                            SykmelderErrors.SuspendertError("Unknown error")
+                            SykmelderErrors.SuspendertUnknownError
                     }
                 }
                 .bind()

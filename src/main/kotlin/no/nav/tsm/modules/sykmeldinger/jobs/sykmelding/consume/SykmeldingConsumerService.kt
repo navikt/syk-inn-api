@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
+import arrow.core.getOrElse
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import java.util.UUID
@@ -46,35 +47,25 @@ class SykmeldingConsumerService(
             return
         }
 
-        try {
-            val withResources =
-                sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding)
-            val verifiedSykmelding = withResources.toVerifiedSykmelding()
-
-            sykmeldingConsumerRepo.insert(verifiedSykmelding)
-            logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
-        } catch (ex: Exception) {
-            if (environment.runtime.env == RuntimeEnvironments.DEV) {
-                when {
-                    ex.message?.contains("cause: User not found") == true -> {
-                        logger.warn(
-                            "Environment is dev-gcp: Skipping btsys 'User not found' sykmelding"
-                        )
-                        return
-                    }
-                    ex.message?.contains(
-                        "Unable to fetch person with from pdlClient, cause: NotFound"
-                    ) == true -> {
-                        logger.warn(
-                            "Environment is dev-gcp: Skipping pdl-cache 'NotFound' sykmelder"
-                        )
-                        return
-                    }
+        val withResources: RecordWithResources =
+            sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding).getOrElse {
+                resourceError ->
+                if (
+                    environment.runtime.env == RuntimeEnvironments.DEV &&
+                        resourceError.skippableInDev
+                ) {
+                    logger.warn(
+                        "Found skippable error in dev: ${resourceError.javaClass.name} (${key}), ignoring!"
+                    )
+                    return
+                } else {
+                    error("Unrecoverable error! ${resourceError.javaClass.name} (${key})")
                 }
             }
+        val verifiedSykmelding = withResources.toVerifiedSykmelding()
 
-            throw ex
-        }
+        sykmeldingConsumerRepo.insert(verifiedSykmelding)
+        logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
     }
 
     @WithSpan

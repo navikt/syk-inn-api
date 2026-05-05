@@ -1,6 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
-import arrow.core.getOrElse
+import arrow.core.Either
+import arrow.core.raise.either
+import arrow.core.right
 import com.github.benmanes.caffeine.cache.Caffeine
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.minutes
@@ -25,6 +27,22 @@ sealed interface RecordWithResources {
     ) : RecordWithResources
 
     data class Utenlandsk(override val record: SykmeldingRecord) : RecordWithResources
+}
+
+sealed interface RecordResourceErrors {
+    val skippableInDev: Boolean
+
+    object SykmelderWithoutIdent : RecordResourceErrors {
+        override val skippableInDev: Boolean = false
+    }
+
+    object SykmelderNotFound : RecordResourceErrors {
+        override val skippableInDev: Boolean = true
+    }
+
+    data class AnyUnknownError(val where: String, val cause: String) : RecordResourceErrors {
+        override val skippableInDev: Boolean = false
+    }
 }
 
 /**
@@ -53,9 +71,12 @@ class SykmeldingConsumerResourcesService(
      * - Has FNR but no HPR
      * - Has FNR and HPR (use HPR)
      */
-    suspend fun getResourcesForSykmelding(record: SykmeldingRecord): RecordWithResources {
+    suspend fun getResourcesForSykmelding(
+        record: SykmeldingRecord
+    ): Either<RecordResourceErrors, RecordWithResources> = either {
         val sykmelding = record.sykmelding
-        if (sykmelding is Sykmelding.Utenlandsk) return RecordWithResources.Utenlandsk(record)
+        if (sykmelding is Sykmelding.Utenlandsk)
+            return RecordWithResources.Utenlandsk(record).right()
 
         val sykmelderInSykmelding =
             when (sykmelding) {
@@ -71,73 +92,100 @@ class SykmeldingConsumerResourcesService(
                 .firstOrNull { it.type in listOf(PersonIdType.FNR, PersonIdType.DNR) }
                 ?.id
 
-        val sykmelder =
+        val sykmelder: Sykmelder =
             when {
                 maybeHpr != null ->
                     sykmelderByHprCached(maybeHpr, sykmelding.metadata.genDate.toLocalDate())
+
                 maybeIdent != null ->
                     sykmelderByIdentCached(maybeIdent, sykmelding.metadata.genDate.toLocalDate())
-                else ->
-                    error(
-                        "Sykmelder in sykmelding of type ${record.sykmelding.type} without either ident or hpr. Impossible!!"
-                    )
-            }
+
+                else -> raise(RecordResourceErrors.SykmelderWithoutIdent)
+            }.bind()
 
         if (sykmelder !is Sykmelder.MedSuspensjon) {
             error("Sykmelder for sykmeldingId ${sykmelding.id} does not exist in HPR")
         }
 
-        val person = pdlByIdentCached(sykmelder.ident)
+        val person = pdlByIdentCached(sykmelder.ident).bind()
 
         return RecordWithResources.Nasjonal(
-            record = record,
-            navn = person.navn,
-            hpr = sykmelder.hpr,
-            ident = sykmelder.ident,
-        )
+                record = record,
+                navn = person.navn,
+                hpr = sykmelder.hpr,
+                ident = sykmelder.ident,
+            )
+            .right()
     }
 
-    private suspend fun pdlByIdentCached(ident: String): PdlPerson {
-        val existing = pdlCaffeine.getIfPresent(ident)
-        if (existing != null) return existing
+    private suspend fun pdlByIdentCached(ident: String): Either<RecordResourceErrors, PdlPerson> =
+        either {
+            val existing = pdlCaffeine.getIfPresent(ident)
+            if (existing != null) return existing.right()
 
-        val person =
-            pdlClient.getPerson(ident).getOrElse {
-                error("Unable to fetch person with from pdlClient, cause: $it")
-            }
+            val person =
+                pdlClient
+                    .getPerson(ident)
+                    .mapLeft {
+                        when (it) {
+                            PdlClient.PdlErrors.NotFound -> RecordResourceErrors.SykmelderNotFound
+                            PdlClient.PdlErrors.UnknownError ->
+                                RecordResourceErrors.AnyUnknownError(
+                                    "PdlClient",
+                                    "Unknown PDL error, client has logged exception",
+                                )
+                        }
+                    }
+                    .bind()
 
-        pdlCaffeine.put(ident, person)
+            pdlCaffeine.put(ident, person)
 
-        return person
-    }
+            return person.right()
+        }
 
-    private suspend fun sykmelderByHprCached(hpr: String, oppslagsdato: LocalDate): Sykmelder {
+    private suspend fun sykmelderByHprCached(
+        hpr: String,
+        oppslagsdato: LocalDate,
+    ): Either<RecordResourceErrors, Sykmelder> = either {
         val existing = hprCaffeine.getIfPresent(hpr)
-        if (existing != null) return existing
+        if (existing != null) return existing.right()
 
         val sykmelder =
-            sykmelderService.byHpr(hpr, oppslagsdato).getOrElse {
-                error(
-                    "Unable to fetch sykmelder with hpr $hpr from sykmelderService, cause: ${it.details}"
-                )
-            }
+            sykmelderService.byHpr(hpr, oppslagsdato).mapLeft { it.toRecordResourcError() }.bind()
 
         hprCaffeine.put(hpr, sykmelder)
 
-        return sykmelder
+        return sykmelder.right()
     }
 
-    private suspend fun sykmelderByIdentCached(ident: String, oppslagsdato: LocalDate): Sykmelder {
+    private suspend fun sykmelderByIdentCached(
+        ident: String,
+        oppslagsdato: LocalDate,
+    ): Either<RecordResourceErrors, Sykmelder> = either {
         val existing = hprCaffeine.getIfPresent(ident)
-        if (existing != null) return existing
+        if (existing != null) return existing.right()
 
         val sykmelder =
-            sykmelderService.byIdent(ident, oppslagsdato).getOrElse {
-                error("Unable to fetch sykmelder from sykmelderService, cause: ${it.details}")
-            }
+            sykmelderService
+                .byIdent(ident, oppslagsdato)
+                .mapLeft { it.toRecordResourcError() }
+                .bind()
 
         hprCaffeine.put(ident, sykmelder)
 
-        return sykmelder
+        return sykmelder.right()
     }
+
+    private fun SykmelderService.SykmelderErrors.toRecordResourcError(): RecordResourceErrors =
+        when (this) {
+            SykmelderService.SykmelderErrors.HprUnknownError ->
+                RecordResourceErrors.SykmelderNotFound
+            SykmelderService.SykmelderErrors.SuspendertNotFound ->
+                RecordResourceErrors.SykmelderNotFound
+            SykmelderService.SykmelderErrors.SuspendertUnknownError ->
+                RecordResourceErrors.AnyUnknownError(
+                    "SykmelderService",
+                    "Unknown error, service has logged exception",
+                )
+        }
 }

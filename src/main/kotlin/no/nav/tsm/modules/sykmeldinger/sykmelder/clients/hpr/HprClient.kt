@@ -3,7 +3,6 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 import arrow.core.Either
 
 sealed interface HprClient {
-
     enum class HprErrors {
         NotFound,
         UnknownError,
