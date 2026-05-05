@@ -77,6 +77,7 @@ class SykmeldingConsumer(
                     logger.warn(
                         "Found poisoned sykmelding ${record.key()}, reason ${poisoned.reason} at ${poisoned.created}"
                     )
+                    return record.key() to null
                 }
             } catch (poisonEx: Exception) {
                 logger.error(
