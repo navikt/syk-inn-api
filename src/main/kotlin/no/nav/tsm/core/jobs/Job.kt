@@ -56,7 +56,7 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
                     logger.error("Job(${jobName.name}) crashed unexpectedly", cause)
                     _status.value = JobStatus.FAILED
                 } finally {
-                    logger.info("Job(${jobName}) finished or failed, setting job reference ønull")
+                    logger.info("Job(${jobName}) finished or failed, setting job reference null")
                     job = null
                 }
             }

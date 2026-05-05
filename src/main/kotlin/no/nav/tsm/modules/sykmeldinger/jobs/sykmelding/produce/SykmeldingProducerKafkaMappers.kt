@@ -161,7 +161,9 @@ private fun SykInnDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
 private fun SykInnTilbakedatering.toTilbakedatering(): Tilbakedatering =
     Tilbakedatering(kontaktDato = kontaktdato, begrunnelse = begrunnelse)
 
-private fun SykInnMeldinger.toBistandNav(): BistandNav? = tilNav?.let { BistandNav(bistandUmiddelbart = false, beskrivBistand = it) }
+private fun SykInnMeldinger.toBistandNav(): BistandNav? = tilNav?.let {
+    BistandNav(bistandUmiddelbart = false, beskrivBistand = it)
+}
 
 private fun List<String>.toHelsepersonellkategori(): HelsepersonellKategori =
     map { parseHelsepersonellKategori(it) }.minBy { helsepersonellkategoriPresedence(it) }

@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.fasterxml.jackson.databind.DeserializationFeature
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
@@ -27,7 +28,9 @@ class BtsysCloudClient(
 
     private val httpClient: HttpClient = httpClient.config {
         install(CallId) { intercept { request, callId -> request.header("Nav-Call-Id", callId) } }
-        install(ContentNegotiation) { jackson {} }
+        install(ContentNegotiation) {
+            jackson { configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false) }
+        }
     }
 
     data class BtsysResponse(val suspendert: Boolean)

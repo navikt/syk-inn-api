@@ -3,6 +3,8 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.callid.CallId
@@ -29,7 +31,13 @@ class HprCloudClient(
 
     private val httpClient: HttpClient = httpClient.config {
         install(CallId) { intercept { request, callId -> request.header("Nav-CallId", callId) } }
-        install(ContentNegotiation) { jackson {} }
+        install(ContentNegotiation) {
+            jackson {
+                registerModule(JavaTimeModule())
+
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
     }
 
     override suspend fun getSykmelderByHpr(
