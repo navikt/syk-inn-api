@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.respondError
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
@@ -65,5 +66,24 @@ class PdlCloudClientTest {
             pdlClient.getPerson("hello").getOrElse { fail("Failed to get person from PDL") }
 
         response.foedselsdato shouldBe LocalDate.now().minusYears(35)
+    }
+
+    @Test
+    fun `404 should result in not found`() = testApplication {
+        val mockEngine = MockEngine { request ->
+            assertEquals("/api/person", request.url.fullPath)
+
+            respondError(HttpStatusCode.NotFound)
+        }
+
+        val pdlClient =
+            PdlCloudClient(
+                httpClient = HttpClient(mockEngine) {},
+                texasClient = mockk(relaxed = true),
+                environment = simpleUnitTestEnvironment,
+            )
+
+        val response = pdlClient.getPerson("hello").leftOrNull()
+        response shouldBe PdlClient.PdlErrors.NotFound
     }
 }

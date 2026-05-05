@@ -60,17 +60,16 @@ class PdlCloudClient(
                 }
             }
 
-        val body: PdlPerson =
-            try {
-                response.body<PdlPerson>()
-            } catch (e: Exception) {
-                failSpan(Span.current(), e)
-                logger.error("Error deserializing PDL response", e)
-                return PdlClient.PdlErrors.UnknownError.left()
-            }
-
         return when {
-            response.status.isSuccess() -> body.right()
+            response.status.isSuccess() ->
+                try {
+                    response.body<PdlPerson>().right()
+                } catch (e: Exception) {
+                    failSpan(Span.current(), e)
+                    logger.error("Error deserializing PDL response", e)
+                    return PdlClient.PdlErrors.UnknownError.left()
+                }
+
             response.status == HttpStatusCode.NotFound -> PdlClient.PdlErrors.NotFound.left()
             else -> {
                 logger.error("Unable to get person from pdl, see team logs for ident")
