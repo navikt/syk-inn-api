@@ -155,7 +155,7 @@ private fun SykInnDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
                 SykInnDiagnoseSystem.ICPC2B -> DiagnoseSystem.ICPC2B
             },
         kode = code,
-        tekst = this.text(),
+        tekst = maybeTekst,
     )
 
 private fun SykInnTilbakedatering.toTilbakedatering(): Tilbakedatering =

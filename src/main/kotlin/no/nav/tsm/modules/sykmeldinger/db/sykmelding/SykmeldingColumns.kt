@@ -19,7 +19,7 @@ data class SykmeldingJsonbValidationResult(
     val rule: String?,
 )
 
-data class SykmeldingJsonbDiagnose(val system: String, val text: String, val code: String)
+data class SykmeldingJsonbDiagnose(val system: String, val text: String?, val code: String)
 
 data class SykmeldingJsonbMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 

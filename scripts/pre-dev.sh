@@ -22,8 +22,6 @@ fi
 
 echo -e "${CYAN}Starting Postgres service in Docker Compose…${RESET}"
 
-echo "what"
-
 # Suppress the ugly compose chatter unless it fails
 output=$(docker compose up -d --remove-orphans 2>&1)
 if [ $? -eq 0 ]; then

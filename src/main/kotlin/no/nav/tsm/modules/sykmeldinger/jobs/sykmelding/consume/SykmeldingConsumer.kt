@@ -1,6 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.File
 import java.time.Duration
 import java.util.*
 import kotlin.time.toJavaDuration
@@ -25,7 +26,7 @@ class SykmeldingConsumer(
     private val topicName = "tsm.sykmeldinger"
 
     // Unique group id while we test, when we go live this will be a more distinct name
-    private val groupId = "syk-inn-api-new-temp-1"
+    private val groupId = "syk-inn-api-new-temp-6"
 
     private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>
@@ -77,6 +78,11 @@ class SykmeldingConsumer(
                     logger.warn(
                         "Found poisoned sykmelding ${record.key()}, reason ${poisoned.reason} at ${poisoned.created}"
                     )
+
+                    // Write poisoned to disk
+                    File("/home/karl/git/syk-inn-api/poisons/poison-${key}.json")
+                        .writeText(poisoned.toString())
+
                     return record.key() to null
                 }
             } catch (poisonEx: Exception) {

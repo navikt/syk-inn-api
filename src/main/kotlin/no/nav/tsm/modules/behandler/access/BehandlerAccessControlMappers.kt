@@ -30,7 +30,6 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 fun VerifiedSykInnSykmelding.toSykmelding() =
@@ -175,7 +174,7 @@ private fun List<SykInnDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
         BehandlerSykmeldingDiagnoseInfo(
             system = diagnose.system,
             code = diagnose.code,
-            text = diagnose.text(),
+            text = diagnose.maybeTekst ?: "Ukjent diagnosetekst",
         )
     }
 }
@@ -227,4 +226,8 @@ private fun SykInnMeldinger.toExistingSykmeldingMeldinger(): BehandlerSykmelding
     BehandlerSykmeldingMeldinger(tilNav = this.tilNav, tilArbeidsgiver = this.tilArbeidsgiver)
 
 private fun SykInnDiagnoseInfo.toExistingSykmeldingDiagnoseInfo(): BehandlerSykmeldingDiagnoseInfo =
-    BehandlerSykmeldingDiagnoseInfo(system = system, code = code, text = this.text())
+    BehandlerSykmeldingDiagnoseInfo(
+        system = system,
+        code = code,
+        text = maybeTekst ?: "Ukjent diagnosetekst",
+    )

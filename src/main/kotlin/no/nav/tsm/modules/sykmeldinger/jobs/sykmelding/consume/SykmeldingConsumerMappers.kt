@@ -101,7 +101,11 @@ private fun RecordWithResources.toMetadata(): SykInnSykmeldingMeta {
                 pasient = pasient,
                 behandler = behandler,
                 legekontorOrgnr = sykmeldingRecord.metadata.orgnummer,
-                legekontorTlf = sykmeldingRecord.sykmelding.behandler.kontaktinfo.getTelefonnummer(),
+                legekontorTlf =
+                    sykmeldingRecord.sykmelding.behandler.kontaktinfo.getTelefonnummer()
+                        ?: error(
+                            "Sykmelding of type DIGITAL with id ${sykmeldingRecord.sykmelding.id} is missing telefonnummer directly on behandler"
+                        ),
             )
 
         is SykmeldingRecord.Xml ->
@@ -163,13 +167,12 @@ private fun MessageMetadata.Xml.getOrgTlf(): String? {
 private fun Organisasjon.getOrgTlf(): String? =
     this.underOrganisasjon?.kontaktinfo?.getTelefonnummer() ?: this.kontaktinfo?.getTelefonnummer()
 
-private fun List<Kontaktinfo>.getTelefonnummer(): String =
+private fun List<Kontaktinfo>.getTelefonnummer(): String? =
     this.filterNot {
             listOf(KontaktinfoType.IKKE_OPPGITT, KontaktinfoType.FAX_TELEFAKS).contains(it.type)
         }
         .firstOrNull()
-        .let { requireNotNull(it) { "Behandler is required to have a tlf in kontaktinfo" } }
-        .value
+        ?.value
 
 private fun HelsepersonellKategori.toShortCode(): String =
     when (this) {
@@ -456,7 +459,7 @@ private fun Yrkesskade.toSykInnYrkesskade(): SykInnYrkesskade {
 }
 
 private fun DiagnoseInfo.toSykInnDiagnoseInfo(): SykInnDiagnoseInfo =
-    SykInnDiagnoseInfo(
+    SykInnDiagnoseInfo.tryParse(
         system =
             when (this.system) {
                 DiagnoseSystem.ICPC2 -> SykInnDiagnoseSystem.ICPC2
@@ -467,4 +470,5 @@ private fun DiagnoseInfo.toSykInnDiagnoseInfo(): SykInnDiagnoseInfo =
                 }
             },
         code = kode,
+        fallbackText = this.tekst,
     )

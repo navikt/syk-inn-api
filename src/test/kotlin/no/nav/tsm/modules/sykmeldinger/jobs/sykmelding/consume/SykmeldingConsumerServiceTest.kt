@@ -48,6 +48,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
             consumer = consumer,
             sykmeldingConsumerRepo = repo,
             sykmeldingConsumerResourcesService = resourceService,
+            sykmeldingPoisonPillRepo = mockk(relaxed = true),
         )
 
     @BeforeTest
@@ -140,7 +141,8 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
             values =
                 SykInnSykmeldingValues(
                     pasientenSkalSkjermes = false,
-                    hoveddiagnose = SykInnDiagnoseInfo(SykInnDiagnoseSystem.ICPC2, "L73"),
+                    hoveddiagnose =
+                        SykInnDiagnoseInfo.tryParse(SykInnDiagnoseSystem.ICPC2, "L73", null),
                     bidiagnoser = emptyList(),
                     aktivitet =
                         listOf(

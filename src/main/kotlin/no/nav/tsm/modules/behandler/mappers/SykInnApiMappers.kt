@@ -42,11 +42,19 @@ fun BehandlerOpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSyk
                 pasientenSkalSkjermes = this.values.pasientenSkalSkjermes,
                 hoveddiagnose =
                     this.values.hoveddiagnose.let {
-                        SykInnDiagnoseInfo(system = it.system, code = it.code)
+                        SykInnDiagnoseInfo.tryParse(
+                            system = it.system,
+                            code = it.code,
+                            fallbackText = null,
+                        )
                     },
                 bidiagnoser =
                     this.values.bidiagnoser.map {
-                        SykInnDiagnoseInfo(system = it.system, code = it.code)
+                        SykInnDiagnoseInfo.tryParse(
+                            system = it.system,
+                            code = it.code,
+                            fallbackText = null,
+                        )
                     },
                 aktivitet = this.values.aktivitet.map { it.toSykInnApiAktivitet() },
                 svangerskapsrelatert = this.values.svangerskapsrelatert,

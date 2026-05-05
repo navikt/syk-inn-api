@@ -45,4 +45,59 @@ data class SykInnArbeidsrelatertArsak(
     val annenArbeidsrelatertArsak: String?,
 )
 
-data class SykInnDiagnoseInfo(val system: SykInnDiagnoseSystem, val code: String)
+sealed interface SykInnDiagnoseInfo {
+    val system: SykInnDiagnoseSystem
+    val code: String
+    val maybeTekst: String?
+        get() =
+            when (this) {
+                is Invalid -> this.tekst
+                is Valid -> this.tekst
+            }
+
+    /**
+     * Represents a diagnose that is valid _today_ with the current systems and will be guaranteed
+     * to have a text.
+     */
+    data class Valid(
+        override val system: SykInnDiagnoseSystem,
+        override val code: String,
+        val tekst: String,
+    ) : SykInnDiagnoseInfo
+
+    /**
+     * Represents a diagnose that is currently not in any kodeverk, or that has never been valid
+     * (INVALID sykmelding)
+     */
+    data class Invalid(
+        override val system: SykInnDiagnoseSystem,
+        override val code: String,
+        val tekst: String?,
+    ) : SykInnDiagnoseInfo
+
+    companion object {
+        fun requireValid(system: SykInnDiagnoseSystem, code: String) =
+            Valid(
+                system = system,
+                code = code,
+                tekst =
+                    system.maybeText(code)
+                        ?: throw IllegalStateException(
+                            "Kunne ikke opprette SykInnDiagnoseInfo.Valid: finner ikke diagnose for system $this og code $code"
+                        ),
+            )
+
+        fun tryParse(
+            system: SykInnDiagnoseSystem,
+            code: String,
+            fallbackText: String?,
+        ): SykInnDiagnoseInfo {
+            val text: String? = system.maybeText(code)
+
+            return when (text) {
+                null -> Invalid(system, code, fallbackText)
+                else -> Valid(system, code, text)
+            }
+        }
+    }
+}

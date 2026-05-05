@@ -2,6 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.getOrElse
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,7 @@ import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.logger
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 class SykmeldingConsumerService(
@@ -17,6 +19,7 @@ class SykmeldingConsumerService(
     private val consumer: SykmeldingConsumer,
     private val sykmeldingConsumerRepo: SykmeldingConsumerRepo,
     private val sykmeldingConsumerResourcesService: SykmeldingConsumerResourcesService,
+    private val sykmeldingPoisonPillRepo: SykmeldingPoisonPillRepo,
 ) {
     private val logger = logger()
 
@@ -55,17 +58,34 @@ class SykmeldingConsumerService(
                         resourceError.skippableInDev
                 ) {
                     logger.warn(
-                        "Found skippable error in dev: ${resourceError.javaClass.name} (${key}), ignoring!"
+                        "Found skippable error in dev: ${resourceError.javaClass.simpleName} (${key}), ignoring!"
                     )
                     return
                 } else {
                     error("Unrecoverable error! ${resourceError.javaClass.name} (${key})")
                 }
             }
-        val verifiedSykmelding = withResources.toVerifiedSykmelding()
 
-        sykmeldingConsumerRepo.insert(verifiedSykmelding)
-        logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
+        try {
+            val verifiedSykmelding = withResources.toVerifiedSykmelding()
+
+            sykmeldingConsumerRepo.insert(verifiedSykmelding)
+            logger.debug("Sykmelding inserted ${verifiedSykmelding.sykmeldingId}")
+        } catch (ex: Exception) {
+            val key = UUID.fromString(withResources.record.sykmelding.id)
+            val poisoned = sykmeldingPoisonPillRepo.isPoisoned(key)
+            if (poisoned != null) {
+                logger.warn(
+                    "Found poisoned sykmelding (on root) ${key}, reason ${poisoned.reason} at ${poisoned.created}"
+                )
+                return
+            }
+
+            File("/home/karl/git/syk-inn-api/poisons/poison-decode-${key}.json")
+                .writeText(poisoned.toString())
+
+            throw ex
+        }
     }
 
     @WithSpan

@@ -12,7 +12,6 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
-import no.nav.tsm.modules.sykmeldinger.domain.text
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 
 /**
@@ -35,7 +34,7 @@ object ToJsonb {
 
     fun SykInnDiagnoseInfo?.toDiagnoseJsonb(): SykmeldingJsonbDiagnose? =
         this?.let {
-            SykmeldingJsonbDiagnose(system = it.system.name, text = it.text(), code = it.code)
+            SykmeldingJsonbDiagnose(system = it.system.name, code = it.code, text = it.maybeTekst)
         }
 
     fun Navn.toNavnJsonb(): SykmeldingJsonbNavn =
@@ -139,7 +138,11 @@ object FromJsonb {
         }
 
     fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
-        SykInnDiagnoseInfo(system = SykInnDiagnoseSystem.valueOf(this.system), code = this.code)
+        SykInnDiagnoseInfo.tryParse(
+            system = SykInnDiagnoseSystem.valueOf(this.system),
+            code = this.code,
+            fallbackText = this.text,
+        )
 
     fun SykmeldingJsonbMeldinger.toSykInnMeldinger(): SykInnMeldinger =
         SykInnMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver)
