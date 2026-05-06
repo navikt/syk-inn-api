@@ -47,15 +47,15 @@ class SykmeldingProducerJob(
 
         var count = 0
         do {
-            val next = sendNextSykmelding()
-            if (next != null) count++
+            val (next, didProduce) = sendNextSykmelding()
+            if (next != null && didProduce) count++
         } while (next != null)
 
         if (count > 0) logger.info("Finished sykmeldinger producer batch, sent $count sykmeldinger")
     }
 
-    private suspend fun sendNextSykmelding(): SykmeldingStatusJob? {
-        val next = sykmeldingProducerRepo.getNext() ?: return null
+    private suspend fun sendNextSykmelding(): Pair<SykmeldingStatusJob?, Boolean> {
+        val next = sykmeldingProducerRepo.getNext() ?: return null to false
 
         try {
             val sykmelding =
@@ -73,11 +73,13 @@ class SykmeldingProducerJob(
             )
 
             sykmeldingProducerRepo.updateStatus(next.sykmeldingId, SykmeldingStatusStatus.SENT)
+
+            return next to true
         } catch (ex: Exception) {
             logger.error("Failed to produce sykmelding for ID ${next.sykmeldingId}", ex)
             sykmeldingProducerRepo.updateStatus(next.sykmeldingId, SykmeldingStatusStatus.FAILED)
-        }
 
-        return next
+            return next to false
+        }
     }
 }

@@ -20,7 +20,7 @@ fun VerifiedSykInnSykmelding.toInputRecord(
             is SykInnSykmeldingMeta.Digital -> this.meta
             else ->
                 throw IllegalStateException(
-                    "Should never map not digital sykmelding to SykmeldingRecord"
+                    "Should never map not digital sykmelding to SykmeldingRecord, was type: ${this.type} (ID: ${this.sykmeldingId})"
                 )
         }
     return SykmeldingRecord.Digital(
