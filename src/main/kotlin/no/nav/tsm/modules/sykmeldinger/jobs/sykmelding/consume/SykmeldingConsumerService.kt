@@ -1,6 +1,8 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.getOrElse
+import io.opentelemetry.api.trace.SpanKind
+import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.util.*
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +31,7 @@ class SykmeldingConsumerService(
                 while (isActive) {
                     val records = consumer.poll()
                     for ((key, sykmelding) in records) {
-                        handleSykmelding(key, sykmelding)
+                        handleRecord(key, sykmelding)
                     }
                 }
             } catch (ex: Exception) {
@@ -40,8 +42,11 @@ class SykmeldingConsumerService(
             }
         }
 
-    @WithSpan
-    private suspend fun handleSykmelding(key: String, sykmelding: SykmeldingRecord?) {
+    @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
+    private suspend fun handleRecord(
+        @SpanAttribute("sykmelding.id") key: String,
+        sykmelding: SykmeldingRecord?,
+    ) {
         if (sykmelding == null) return deleteSykmelding(key)
 
         if (isOverRetentionPeriod(sykmelding)) {

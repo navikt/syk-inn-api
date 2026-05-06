@@ -40,7 +40,7 @@ class JuridiskHenvisningProducerJob(
             }
         }
 
-    @WithSpan
+    @WithSpan(inheritContext = false)
     private suspend fun handleJuridiskHenvisningBatch() {
         juridiskHenvisningJobRepo
             .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungJuridisk.toJavaDuration()))

@@ -35,7 +35,7 @@ class SykmeldingProducerJob(
             }
         }
 
-    @WithSpan
+    @WithSpan(inheritContext = false)
     private suspend fun handleSykmeldingerBatch() {
         sykmeldingProducerRepo
             .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungSykmelding.toJavaDuration()))

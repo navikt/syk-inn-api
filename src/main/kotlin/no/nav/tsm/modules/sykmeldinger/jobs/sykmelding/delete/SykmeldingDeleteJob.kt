@@ -30,7 +30,7 @@ class SykmeldingDeleteJob(
             }
         }
 
-    @WithSpan
+    @WithSpan(inheritContext = false)
     private suspend fun executeSykmeldingDeleteJob() {
         val deletedCount = sykmeldingDeleteRepo.deleteStaleSykmeldinger()
 
