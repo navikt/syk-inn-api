@@ -22,7 +22,8 @@ fun Application.configureDatabase() {
     val env: Environment by dependencies
 
     val flyway = getFlyway(env.postgres)
-    flyway.clean()
+    // Stop nuking in dev, TODO remove: flyway.clean()
+
     // Always migrate flyway on application startup
     flyway.migrate()
 

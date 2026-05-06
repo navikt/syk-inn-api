@@ -30,9 +30,9 @@ fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
                 pasient =
                     SykInnPasient(
                         ident = meta.pasientIdent,
-                        fornavn = pasient.navn.fornavn,
-                        mellomnavn = pasient.navn.mellomnavn,
-                        etternavn = pasient.navn.etternavn,
+                        fornavn = pasient.navn?.fornavn,
+                        mellomnavn = pasient.navn?.mellomnavn,
+                        etternavn = pasient.navn?.etternavn,
                     ),
                 behandler =
                     SykInnBehandler(

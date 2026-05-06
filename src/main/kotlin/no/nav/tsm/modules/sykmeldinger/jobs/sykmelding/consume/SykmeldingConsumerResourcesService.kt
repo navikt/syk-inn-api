@@ -109,6 +109,10 @@ class SykmeldingConsumerResourcesService(
 
         val person = pdlByIdentCached(sykmelder.ident).bind()
 
+        if (person.navn == null) {
+            raise(RecordResourceErrors.SykmelderNotFound)
+        }
+
         return RecordWithResources.Nasjonal(
                 record = record,
                 navn = person.navn,
