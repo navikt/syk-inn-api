@@ -2,7 +2,6 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.getOrElse
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import java.time.LocalDate
 import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
@@ -12,6 +11,7 @@ import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.logger
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import sykmeldingCutoffDate
 
 class SykmeldingConsumerService(
     private val environment: Environment,
@@ -100,6 +100,5 @@ class SykmeldingConsumerService(
     }
 
     private fun isOverRetentionPeriod(sykmelding: SykmeldingRecord): Boolean =
-        sykmelding.sykmelding.aktivitet.maxOf { it.tom } <
-            (LocalDate.now().minusDays(environment.sykmeldingConfig.retention.inWholeDays))
+        sykmelding.sykmelding.aktivitet.maxOf { it.tom } < environment.sykmeldingCutoffDate()
 }
