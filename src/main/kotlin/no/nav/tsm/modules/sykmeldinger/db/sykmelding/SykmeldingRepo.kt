@@ -243,6 +243,7 @@ private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnS
 }
 
 private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMeta {
+    val type = SykInnSykmeldingType.valueOf(this[SykmeldingTable.type])
     val navn = this[SykmeldingTable.metaBehandlerNavn]
     val mottatt = this[SykmeldingTable.metaMottatt]
     val source = this[SykmeldingTable.metaSource]
@@ -261,16 +262,20 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
             )
         }
 
-    return when {
-        hpr == null ->
+    return when (type) {
+        SykInnSykmeldingType.UTENLANDSK ->
             SykInnSykmeldingMeta.Utenlandsk(source = source, mottatt = mottatt, pasient = pasient)
 
-        source.contains("fhir", ignoreCase = true) &&
-            helsepersonellkategori != null &&
-            legekontorOrgnr != null &&
-            legekontorTlf != null &&
-            ident != null &&
-            navn != null ->
+        SykInnSykmeldingType.DIGITAL -> {
+            requireNotNull(navn) { "Digital sykmelding without navn" }
+            requireNotNull(hpr) { "Digital sykmelding without hpr" }
+            requireNotNull(ident) { "Digital sykmelding without ident" }
+            requireNotNull(helsepersonellkategori) {
+                "Digital sykmelding without helsepersonellkategori"
+            }
+            requireNotNull(legekontorOrgnr) { "Digital sykmelding without legekontorOrgnr" }
+            requireNotNull(legekontorTlf) { "Digital sykmelding without legekontorTlf" }
+
             SykInnSykmeldingMeta.Digital(
                 source = source,
                 mottatt = mottatt,
@@ -287,8 +292,11 @@ private fun ResultRow.sykmeldingRowToSykInnSykmeldingMeta(): SykInnSykmeldingMet
                 legekontorOrgnr = legekontorOrgnr,
                 legekontorTlf = legekontorTlf,
             )
+        }
 
         else -> {
+            requireNotNull(hpr) { "Legacy (${type.name}) sykmelding without hpr" }
+
             SykInnSykmeldingMeta.Legacy(
                 source = source,
                 mottatt = mottatt,
