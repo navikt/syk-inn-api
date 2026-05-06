@@ -2,9 +2,8 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.getOrElse
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import java.io.File
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -78,11 +77,9 @@ class SykmeldingConsumerService(
                 logger.warn(
                     "Found poisoned sykmelding (on root) ${key}, reason ${poisoned.reason} at ${poisoned.created}"
                 )
+
                 return
             }
-
-            File("/home/karl/git/syk-inn-api/poisons/poison-decode-${key}.json")
-                .writeText(poisoned.toString())
 
             throw ex
         }

@@ -1,7 +1,10 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.File
 import java.time.Duration
 import java.util.*
 import kotlin.time.toJavaDuration
@@ -9,8 +12,8 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
 import no.nav.tsm.core.teamLogger
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.sykmeldingObjectMapper
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -26,7 +29,7 @@ class SykmeldingConsumer(
     private val topicName = "tsm.sykmeldinger"
 
     // Unique group id while we test, when we go live this will be a more distinct name
-    private val groupId = "syk-inn-api-new-temp-6"
+    private val groupId = "syk-inn-api-new-temp-12"
 
     private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>
@@ -79,10 +82,6 @@ class SykmeldingConsumer(
                         "Found poisoned sykmelding ${record.key()}, reason ${poisoned.reason} at ${poisoned.created}"
                     )
 
-                    // Write poisoned to disk
-                    File("/home/karl/git/syk-inn-api/poisons/poison-${key}.json")
-                        .writeText(poisoned.toString())
-
                     return record.key() to null
                 }
             } catch (poisonEx: Exception) {
@@ -90,6 +89,7 @@ class SykmeldingConsumer(
                     "Unable to check if sykmelding was poisoned, throwing original error",
                     poisonEx,
                 )
+                return record.key() to null
             }
 
             throw IllegalStateException(
@@ -99,6 +99,14 @@ class SykmeldingConsumer(
         }
 
     private fun parseAndMapSykmelding(bytes: ByteArray): SykmeldingRecord {
-        return sykmeldingObjectMapper.readValue<SykmeldingRecord>(bytes)
+        return recordObjectMapper.readValue<SykmeldingRecord>(bytes)
     }
+
+    private val recordObjectMapper =
+        jacksonObjectMapper().apply {
+            registerModule(SykmeldingModule())
+            registerModule(JavaTimeModule())
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        }
 }
