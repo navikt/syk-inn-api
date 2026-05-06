@@ -104,7 +104,7 @@ class SykmeldingConsumerResourcesService(
             }.bind()
 
         if (sykmelder !is Sykmelder.MedSuspensjon) {
-            error("Sykmelder for sykmeldingId ${sykmelding.id} does not exist in HPR")
+            raise(RecordResourceErrors.SykmelderNotFound)
         }
 
         val person = pdlByIdentCached(sykmelder.ident).bind()
