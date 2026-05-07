@@ -16,6 +16,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.Named
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.common.Navn
 import no.nav.tsm.core.common.SimpleNavn
@@ -40,6 +41,7 @@ class HprCloudClient(
         }
     }
 
+    @WithSpan
     override suspend fun getSykmelderByHpr(
         behandlerHpr: String
     ): Either<HprClient.HprErrors, SykmelderMedHpr> {
@@ -75,6 +77,7 @@ class HprCloudClient(
         }
     }
 
+    @WithSpan
     override suspend fun getSykmelderByIdent(
         behandlerIdent: String
     ): Either<HprClient.HprErrors, SykmelderMedHpr> {

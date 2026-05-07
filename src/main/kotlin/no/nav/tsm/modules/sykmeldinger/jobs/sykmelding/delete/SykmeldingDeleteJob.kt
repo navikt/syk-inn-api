@@ -35,7 +35,7 @@ class SykmeldingDeleteJob(
         val deletedCount = sykmeldingDeleteRepo.deleteStaleSykmeldinger()
 
         if (deletedCount > 0) {
-            logger.info("Deleted old sykmeldinger $deletedCount")
+            logger.info("Sykmelding Delete job Deleted old sykmeldinger $deletedCount")
         }
     }
 }

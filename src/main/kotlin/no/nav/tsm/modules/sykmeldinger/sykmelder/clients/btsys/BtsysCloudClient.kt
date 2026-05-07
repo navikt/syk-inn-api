@@ -14,6 +14,7 @@ import io.ktor.client.request.headers
 import io.ktor.http.*
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.*
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
@@ -35,6 +36,7 @@ class BtsysCloudClient(
 
     data class BtsysResponse(val suspendert: Boolean)
 
+    @WithSpan
     override suspend fun isSuspendert(
         sykmelderIdent: String,
         oppslagsdato: LocalDate,

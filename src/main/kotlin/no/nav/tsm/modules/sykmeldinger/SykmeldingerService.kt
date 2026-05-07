@@ -3,7 +3,6 @@ package no.nav.tsm.modules.sykmeldinger
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.raise.Raise
-import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
@@ -38,6 +37,7 @@ class SykmeldingerService(
         UnknownResourceError,
     }
 
+    @WithSpan
     suspend fun verify(sykmelding: UnverifiedSykInnSykmelding): Either<CreateErrors, RegulaResult> =
         getSykmeldingVerifyResources(sykmelding) { sykmelder, previous, pasient ->
             ruleService
@@ -121,6 +121,7 @@ class SykmeldingerService(
         UnknownError,
     }
 
+    @WithSpan
     suspend fun byId(sykmeldingId: UUID): Either<GetErrors, VerifiedSykInnSykmelding> {
         val sykmelding = repo.byId(sykmeldingId) ?: return GetErrors.NotFound.left()
 
@@ -133,6 +134,7 @@ class SykmeldingerService(
     }
 
     /** Fetches behandler (hpr) and sykmeldt (pdl) in parallel. */
+    @WithSpan
     private suspend fun <Result> getSykmeldingVerifyResources(
         sykmelding: UnverifiedSykInnSykmelding,
         block:

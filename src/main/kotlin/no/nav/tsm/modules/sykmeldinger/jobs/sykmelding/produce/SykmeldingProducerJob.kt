@@ -41,7 +41,7 @@ class SykmeldingProducerJob(
             .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungSykmelding.toJavaDuration()))
             .let {
                 if (it > 0) {
-                    logger.info("Reset $it sykmeldinger for sending")
+                    logger.warn("Found $it jobs for sykmeldinger that needed to be reset")
                 }
             }
 

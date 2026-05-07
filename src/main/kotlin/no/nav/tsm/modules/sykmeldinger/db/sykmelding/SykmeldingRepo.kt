@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.db.sykmelding
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.r2dbc.postgresql.api.PostgresqlException
 import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
@@ -50,6 +51,8 @@ import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.upsertReturning
 
 abstract class SykmeldingInsert {
+
+    @WithSpan
     suspend fun R2dbcTransaction.insertSykmelding(
         idempotencyKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
@@ -119,6 +122,7 @@ class SykmeldingRepo : SykmeldingInsert() {
 
     private val logger = logger()
 
+    @WithSpan
     suspend fun insert(
         submitKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
@@ -190,6 +194,7 @@ class SykmeldingRepo : SykmeldingInsert() {
         }
     }
 
+    @WithSpan
     suspend fun allByIdent(ident: String): List<VerifiedSykInnSykmelding> = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.metaPasientIdent eq ident }
@@ -197,6 +202,7 @@ class SykmeldingRepo : SykmeldingInsert() {
             .toList()
     }
 
+    @WithSpan
     suspend fun byId(sykmeldingId: UUID): VerifiedSykInnSykmelding? = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.id eq sykmeldingId }
@@ -204,6 +210,7 @@ class SykmeldingRepo : SykmeldingInsert() {
             .firstOrNull()
     }
 
+    @WithSpan
     suspend fun byIdempotencyKey(idempotencyKey: UUID): VerifiedSykInnSykmelding? = dbQuery {
         SykmeldingTable.selectAll()
             .where { SykmeldingTable.idempotencyKey eq idempotencyKey }
