@@ -68,7 +68,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 },
             sykmeldingConsumer =
                 KafkaSykmeldingConsumer(
-                    longPoll = config.property("kafka.sykmelding-consumer.long-poll").getAs()
+                    longPoll = config.property("kafka.sykmeldingConsumer.longPoll").getAs()
                 ),
         )
 
@@ -76,16 +76,18 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         JobsConfig(
             inputProducer =
                 ProducerJob(
-                    delay = config.property("jobs.input-producer.delay").getAs(),
-                    hungTimeout = config.property("jobs.input-producer.delay").getAs(),
+                    delay = config.property("app.jobs.inputProducer.delay").getAs(),
+                    hungTimeout = config.property("app.jobs.inputProducer.hungTimeout").getAs(),
                 ),
             juridiskProducer =
                 ProducerJob(
-                    delay = config.property("jobs.juridisk-producer.delay").getAs(),
-                    hungTimeout = config.property("jobs.juridisk-producer.delay").getAs(),
+                    delay = config.property("app.jobs.juridiskProducer.delay").getAs(),
+                    hungTimeout = config.property("app.jobs.juridiskProducer.hungTimeout").getAs(),
                 ),
             sykmeldingDeleter =
-                DeleterJob(interval = config.property("jobs.sykmelding-deleter.interval").getAs()),
+                DeleterJob(
+                    interval = config.property("app.jobs.sykmeldingDeleter.interval").getAs()
+                ),
         )
 
     return Environment(
@@ -111,12 +113,14 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 schema = config.property("postgres.schema").getString(),
             ),
         sykmeldingConfig =
-            SykmeldingConfig(retention = config.property("sykmelding.retention").getAs()),
-        texas = { Texas(tokenEndpoint = config.property("texas.token_endpoint").getString()) },
+            SykmeldingConfig(retention = config.property("app.sykmelding.retention").getAs()),
+        texas = {
+            Texas(tokenEndpoint = config.property("external.texas.tokenEndpoint").getString())
+        },
         external = {
             ExternalApi(
-                tsmPdlCache = config.property("external.tsm-pdl-cache").getString(),
-                helsenettproxy = config.property("external.syfohelsenettproxy").getString(),
+                tsmPdlCache = config.property("external.tsmPdlCache").getString(),
+                helsenettproxy = config.property("external.syfoHelsenettproxy").getString(),
                 btsys = config.property("external.btsys").getString(),
             )
         },
