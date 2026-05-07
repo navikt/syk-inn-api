@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.jobs.db
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,7 @@ import org.jetbrains.exposed.v1.r2dbc.upsert
 
 class JobRepository {
 
+    @WithSpan
     suspend fun getJobs(): List<Job> = dbQuery {
         JobTable.selectAll()
             .map {
@@ -33,6 +35,7 @@ class JobRepository {
             .toList()
     }
 
+    @WithSpan
     suspend fun updateJobStatus(runner: String, jobName: JobName, jobStatus: JobStatus) {
         dbQuery {
             JobStatusTable.upsert(
@@ -46,10 +49,12 @@ class JobRepository {
         }
     }
 
+    @WithSpan
     suspend fun deleteRunner(runner: String) = dbQuery {
         JobStatusTable.deleteWhere { JobStatusTable.runner eq runner }
     }
 
+    @WithSpan
     suspend fun updateJob(jobName: JobName, desiredState: JobStatus, updatedBy: String) {
         dbQuery {
             JobTable.update({ JobTable.name eq jobName.name }) {
@@ -60,6 +65,7 @@ class JobRepository {
         }
     }
 
+    @WithSpan
     suspend fun getJobStatus(): List<RunnerJobStatus> {
         return dbQuery {
             JobStatusTable.selectAll()

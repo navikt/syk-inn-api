@@ -32,7 +32,6 @@ class JobSchedulerService(
         }
     }
 
-    @WithSpan
     suspend fun start() = coroutineScope {
         jobs.forEach { manager ->
             launch {
