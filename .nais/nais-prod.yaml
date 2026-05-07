@@ -70,8 +70,12 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: trygdeetaten.no
-      allowAllUsers: true
+      tenant: nav.no
+      allowAllUsers: false
+      claims:
+        groups:
+          # EntraAD: nais-team-tsm (developers - same as Zara uses)
+          - id: '35c70ac7-e8e6-4cec-933b-86106a97c0d4'
 
   filesFrom:
     - emptyDir:
