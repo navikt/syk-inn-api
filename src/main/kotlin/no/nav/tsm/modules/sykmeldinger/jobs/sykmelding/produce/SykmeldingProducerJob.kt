@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
@@ -37,10 +38,13 @@ class SykmeldingProducerJob(
 
     @WithSpan(inheritContext = false)
     private suspend fun handleSykmeldingerBatch() {
+        val span = Span.current()
+
         sykmeldingProducerRepo
             .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungSykmelding.toJavaDuration()))
             .let {
                 if (it > 0) {
+                    span.setAttribute("sykmelding-producer-job.jobs-reset", it.toString())
                     logger.warn("Found $it jobs for sykmeldinger that needed to be reset")
                 }
             }
@@ -52,8 +56,11 @@ class SykmeldingProducerJob(
         } while (next != null)
 
         if (count > 0) logger.info("Finished sykmeldinger producer batch, sent $count sykmeldinger")
+
+        span.setAttribute("sykmelding-producer-job.sykmeldinger-produced", count.toString())
     }
 
+    @WithSpan
     private suspend fun sendNextSykmelding(): Pair<SykmeldingStatusJob?, Boolean> {
         val next = sykmeldingProducerRepo.getNext() ?: return null to false
 

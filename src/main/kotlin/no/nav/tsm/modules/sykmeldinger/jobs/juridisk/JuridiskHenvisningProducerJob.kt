@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.juridisk
 
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset.UTC
@@ -42,31 +43,36 @@ class JuridiskHenvisningProducerJob(
 
     @WithSpan(inheritContext = false)
     private suspend fun handleJuridiskHenvisningBatch() {
+        val span = Span.current()
+
         juridiskHenvisningJobRepo
             .resetHangingJobs(OffsetDateTime.now(UTC).minus(hungJuridisk.toJavaDuration()))
             .let {
                 if (it > 0) {
+                    span.setAttribute("juridisk-henvisning-producer-job.jobs-reset", it.toString())
                     logger.info("Reset $it juridisk henvisning jobs for sending")
                 }
             }
 
         var count = 0
         do {
-            val next = sendNextJuridiskHenvisning()
-            if (next != null) count++
+            val (next, didProduce) = sendNextJuridiskHenvisning()
+            if (next != null && didProduce) count++
         } while (next != null)
 
         if (count > 0)
             logger.info("Finished juridisk henvsining producer batch, sent $count henvisninger")
+
+        span.setAttribute("juridisk-henvisning-producer-job.producer", count.toString())
     }
 
-    private suspend fun sendNextJuridiskHenvisning(): JuridiskHenvisningJob? {
-        val next = juridiskHenvisningJobRepo.getNext() ?: return null
+    private suspend fun sendNextJuridiskHenvisning(): Pair<JuridiskHenvisningJob?, Boolean> {
+        val next = juridiskHenvisningJobRepo.getNext() ?: return null to false
         val sykmeldingId = next.sykmeldingId
 
         if (next.juridiskVurdering.isEmpty()) {
             juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
-            return next
+            return next to false
         }
 
         try {
@@ -84,11 +90,13 @@ class JuridiskHenvisningProducerJob(
 
             juridiskHenvisningProducer.sendJuridiskVurderinger(sykmeldingId, juridiskVurderinger)
             juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
+
+            return next to true
         } catch (e: Exception) {
             logger.error("Failed to produce juridisk henvisning for ID $sykmeldingId", e)
             juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.FAILED)
-        }
 
-        return next
+            return next to false
+        }
     }
 }

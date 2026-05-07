@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -24,6 +25,7 @@ data class SykmeldingStatusJob(
 )
 
 class SykmeldingProducerRepo {
+    @WithSpan
     suspend fun getNext(): SykmeldingStatusJob? = dbQuery {
         with(SykmeldingStatusTable) {
             updateReturning(
@@ -51,6 +53,7 @@ class SykmeldingProducerRepo {
         }
     }
 
+    @WithSpan
     suspend fun updateStatus(sykmeldingId: UUID, newStatus: SykmeldingStatusStatus) = dbQuery {
         SykmeldingStatusTable.update({ SykmeldingStatusTable.sykmeldingId eq sykmeldingId }) {
             it[eventTimestamp] = OffsetDateTime.now(ZoneOffset.UTC)
@@ -58,6 +61,7 @@ class SykmeldingProducerRepo {
         }
     }
 
+    @WithSpan
     suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
         return dbQuery {
             SykmeldingStatusTable.update({

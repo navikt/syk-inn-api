@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.juridisk
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -28,6 +29,7 @@ data class JuridiskHenvisningJob(
 
 class JuridiskHenvisningJobRepo {
 
+    @WithSpan
     suspend fun getNext(): JuridiskHenvisningJob? = dbQuery {
         with(JuridiskVurderingStatusTable) {
             updateReturning(
@@ -55,6 +57,7 @@ class JuridiskHenvisningJobRepo {
         }
     }
 
+    @WithSpan
     suspend fun updateStatus(sykmeldingId: UUID, newStatus: JuridiskVurderingStatus) = dbQuery {
         JuridiskVurderingStatusTable.update({
             JuridiskVurderingStatusTable.sykmeldingId eq sykmeldingId
@@ -64,6 +67,7 @@ class JuridiskHenvisningJobRepo {
         }
     }
 
+    @WithSpan
     suspend fun resetHangingJobs(timestamp: OffsetDateTime): Int {
         return dbQuery {
             JuridiskVurderingStatusTable.update({

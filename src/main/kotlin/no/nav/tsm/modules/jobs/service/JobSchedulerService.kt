@@ -2,7 +2,6 @@ package no.nav.tsm.modules.jobs.service
 
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.api.trace.Span
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -56,9 +55,7 @@ class JobSchedulerService(
         jobRepository.deleteRunner(runner)
     }
 
-    /**
-     * Don't @WithSpan this, as it causes every single span in all jobs to be nested under this.
-     */
+    /** Don't @WithSpan this, as it causes every single span in all jobs to be nested under this. */
     private suspend fun updateJobs() {
         logger.debug("Updating jobs statuses")
         val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }

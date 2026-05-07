@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete
 
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +33,13 @@ class SykmeldingDeleteJob(
 
     @WithSpan(inheritContext = false)
     private suspend fun executeSykmeldingDeleteJob() {
-        val deletedCount = sykmeldingDeleteRepo.deleteStaleSykmeldinger()
+        val span = Span.current()
 
+        val deletedCount = sykmeldingDeleteRepo.deleteStaleSykmeldinger()
         if (deletedCount > 0) {
             logger.info("Sykmelding Delete job Deleted old sykmeldinger $deletedCount")
         }
+
+        span.setAttribute("sykmelding-delete-job.sykmeldinger-deleted", deletedCount.toString())
     }
 }
