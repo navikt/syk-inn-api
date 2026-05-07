@@ -5,7 +5,6 @@ import org.flywaydb.core.Flyway
 
 fun getFlyway(postgresConfig: PostgresConfig): Flyway =
     Flyway.configure()
-        .cleanDisabled(false)
         .dataSource(postgresConfig.jdbc, postgresConfig.username, postgresConfig.password)
         .defaultSchema(postgresConfig.schema)
         .createSchemas(true)
