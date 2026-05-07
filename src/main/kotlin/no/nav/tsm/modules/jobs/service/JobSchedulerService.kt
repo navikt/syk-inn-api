@@ -56,7 +56,9 @@ class JobSchedulerService(
         jobRepository.deleteRunner(runner)
     }
 
-    @WithSpan
+    /**
+     * Don't @WithSpan this, as it causes every single span in all jobs to be nested under this.
+     */
     private suspend fun updateJobs() {
         logger.debug("Updating jobs statuses")
         val jobStates = jobRepository.getJobs().associate { it.jobName to it.desiredState }
