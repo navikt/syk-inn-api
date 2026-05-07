@@ -22,7 +22,7 @@ class PdlLocalClient : PdlClient {
                 identer =
                     listOf(
                         PdlIdent(
-                            ident = "120398120398",
+                            ident = ident,
                             gruppe = PdlIdentgruppe.FOLKEREGISTERIDENT,
                             historisk = false,
                         )

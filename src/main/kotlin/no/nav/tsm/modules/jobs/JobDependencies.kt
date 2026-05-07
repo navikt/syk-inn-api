@@ -13,14 +13,14 @@ import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.SykmeldingProduce
 
 fun Application.configureJobDependencies() {
     val consumerJobManager: SykmeldingConsumerJob by dependencies
-    val sykmelidngProducerJob: SykmeldingProducerJob by dependencies
+    val sykmeldingProducerJob: SykmeldingProducerJob by dependencies
     val sykmeldingDeleteJob: SykmeldingDeleteJob by dependencies
     val juridiskHenvisningProducerJob: JuridiskHenvisningProducerJob by dependencies
     val environment: Environment by dependencies
     val list: List<Job> =
         listOf(
             consumerJobManager,
-            sykmelidngProducerJob,
+            sykmeldingProducerJob,
             sykmeldingDeleteJob,
             juridiskHenvisningProducerJob,
         )

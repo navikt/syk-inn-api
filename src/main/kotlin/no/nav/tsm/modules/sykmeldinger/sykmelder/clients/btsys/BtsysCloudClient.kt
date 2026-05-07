@@ -44,7 +44,9 @@ class BtsysCloudClient(
         val (accessToken) = this.getToken()
 
         val response =
-            httpClient.get("${environment.external().btsys}/api/v1/suspensjon/status") {
+            httpClient.get(
+                "${environment.external().btsys}/api/v1/suspensjon/status?oppslagsdato=$oppslagsdato"
+            ) {
                 headers {
                     append("Content-Type", "application/json")
                     append("Nav-Consumer-Id", "syk-inn-api")
@@ -65,7 +67,7 @@ class BtsysCloudClient(
             }
 
             else -> {
-                logger.error("Btysys responded with status ${response.status}")
+                logger.error("Btsys responded with status ${response.status}")
                 BtsysClient.SuspendertErrors.UnknownError.left()
             }
         }

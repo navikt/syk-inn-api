@@ -1,7 +1,5 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder
 
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 import no.nav.tsm.core.dynamicDependencies
@@ -11,12 +9,6 @@ import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprCloudClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprLocalClient
 
 fun Application.configureSykmelderDependencies() {
-    val baseHttpClient: HttpClient by dependencies
-
-    dependencies {
-        provide<HttpClient>("RetryHttpClient") { createExternalApiHttpClient(baseHttpClient) }
-    }
-
     dynamicDependencies {
         local {
             provide(BtsysLocalClient::class)
@@ -28,12 +20,5 @@ fun Application.configureSykmelderDependencies() {
         }
     }
 
-    dependencies { provide<SykmelderService>(SykmelderService::class) }
-}
-
-private fun createExternalApiHttpClient(baseHttpClient: HttpClient) = baseHttpClient.config {
-    install(HttpRequestRetry) {
-        retryOnServerErrors(maxRetries = 5)
-        exponentialDelay()
-    }
+    dependencies { provide(SykmelderService::class) }
 }

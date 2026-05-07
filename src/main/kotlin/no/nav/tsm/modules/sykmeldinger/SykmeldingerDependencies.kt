@@ -15,8 +15,8 @@ fun Application.configureSykmeldingerDependencies() {
     }
 
     dependencies {
-        provide<RuleService>(RuleService::class)
-        provide<SykmeldingRepo>(SykmeldingRepo::class)
-        provide<SykmeldingerService>(SykmeldingerService::class)
+        provide(RuleService::class)
+        provide(SykmeldingRepo::class)
+        provide(SykmeldingerService::class)
     }
 }

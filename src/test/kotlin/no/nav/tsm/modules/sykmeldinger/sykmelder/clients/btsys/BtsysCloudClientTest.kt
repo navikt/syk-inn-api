@@ -17,7 +17,8 @@ class BtsysCloudClientTest {
     fun `should return true when sykmelder is suspendert`() = runTest {
         val mockEngine = MockEngine { request ->
             assertEquals(
-                simpleUnitTestEnvironment.external().btsys + "/api/v1/suspensjon/status",
+                simpleUnitTestEnvironment.external().btsys +
+                    "/api/v1/suspensjon/status?oppslagsdato=${LocalDate.now()}",
                 request.url.toString(),
             )
 
@@ -43,7 +44,8 @@ class BtsysCloudClientTest {
     fun `should return false when sykmelder is not suspendert`() = runTest {
         val mockEngine = MockEngine { request ->
             assertEquals(
-                simpleUnitTestEnvironment.external().btsys + "/api/v1/suspensjon/status",
+                simpleUnitTestEnvironment.external().btsys +
+                    "/api/v1/suspensjon/status?oppslagsdato=${LocalDate.now()}",
                 request.url.toString(),
             )
 

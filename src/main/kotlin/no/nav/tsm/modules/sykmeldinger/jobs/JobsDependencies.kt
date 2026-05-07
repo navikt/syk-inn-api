@@ -24,22 +24,22 @@ fun Application.configureJobsDependencies() {
     val environment: Environment by dependencies
 
     dependencies {
-        provide<SykmeldingPoisonPillRepo>(SykmeldingPoisonPillRepo::class)
-        provide<SykmeldingConsumerRepo>(SykmeldingConsumerRepo::class)
-        provide<SykmeldingConsumer>(SykmeldingConsumer::class)
-        provide<SykmeldingConsumerResourcesService>(SykmeldingConsumerResourcesService::class)
-        provide<SykmeldingConsumerService>(SykmeldingConsumerService::class)
-        provide<SykmeldingConsumerJob>(SykmeldingConsumerJob::class)
+        provide(SykmeldingPoisonPillRepo::class)
+        provide(SykmeldingConsumerRepo::class)
+        provide(SykmeldingConsumer::class)
+        provide(SykmeldingConsumerResourcesService::class)
+        provide(SykmeldingConsumerService::class)
+        provide(SykmeldingConsumerJob::class)
 
-        provide<SykmeldingProducerRepo>(SykmeldingProducerRepo::class)
-        provide<SykmeldingProducerJob>(SykmeldingProducerJob::class)
+        provide(SykmeldingProducerRepo::class)
+        provide(SykmeldingProducerJob::class)
 
-        provide<SykmeldingDeleteRepo>(SykmeldingDeleteRepo::class)
-        provide<SykmeldingDeleteJob>(SykmeldingDeleteJob::class)
+        provide(SykmeldingDeleteRepo::class)
+        provide(SykmeldingDeleteJob::class)
 
-        provide<JuridiskHenvisningJobRepo>(JuridiskHenvisningJobRepo::class)
-        provide<JuridiskHenvisningProducer>(JuridiskHenvisningProducer::class)
-        provide<JuridiskHenvisningProducerJob>(JuridiskHenvisningProducerJob::class)
+        provide(JuridiskHenvisningJobRepo::class)
+        provide(JuridiskHenvisningProducer::class)
+        provide(JuridiskHenvisningProducerJob::class)
     }
 
     dynamicDependencies {
