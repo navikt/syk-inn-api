@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.core.utils.sykmeldingCutoffDate
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable.sykmeldingId
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
@@ -13,7 +14,6 @@ import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.select
-import sykmeldingCutoffDate
 
 class SykmeldingDeleteRepo(val environment: Environment) {
     @WithSpan

@@ -1,3 +1,5 @@
+package no.nav.tsm.core.utils
+
 import java.time.LocalDate
 import no.nav.tsm.core.Environment
 

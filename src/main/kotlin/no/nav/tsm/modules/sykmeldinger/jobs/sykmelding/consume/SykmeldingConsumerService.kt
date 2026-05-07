@@ -11,9 +11,9 @@ import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.logger
+import no.nav.tsm.core.utils.sykmeldingCutoffDate
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import sykmeldingCutoffDate
 
 class SykmeldingConsumerService(
     private val environment: Environment,
