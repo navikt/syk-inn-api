@@ -84,7 +84,7 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta(): BehandlerSykmeldin
                 throw IllegalStateException(
                     /**
                      * Currently, no behandler will be able to see sykmeldinger from
-                     * utenlandsk-source because every sykmelding is filteder on the behandler's own
+                     * utenlandsk-source because every sykmelding is filtered on the behandler's own
                      * HPR number.
                      *
                      * Once we add support for Redacted or full sykmeldinger for other behandlers,
