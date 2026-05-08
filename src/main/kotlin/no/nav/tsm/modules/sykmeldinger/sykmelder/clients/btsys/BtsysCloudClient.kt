@@ -14,6 +14,7 @@ import io.ktor.client.request.headers
 import io.ktor.http.*
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.*
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import no.nav.tsm.core.Environment
@@ -41,6 +42,7 @@ class BtsysCloudClient(
         sykmelderIdent: String,
         oppslagsdato: LocalDate,
     ): Either<BtsysClient.SuspendertErrors, Boolean> {
+        val span = Span.current()
         val (accessToken) = this.getToken()
 
         val response =
@@ -57,16 +59,19 @@ class BtsysCloudClient(
 
         return when {
             response.status.isSuccess() -> {
+                span.setAttribute("client.outcome", "ok")
                 val result: BtsysResponse = response.body<BtsysResponse>()
 
                 result.suspendert.right()
             }
 
             response.status == HttpStatusCode.NotFound -> {
+                span.setAttribute("client.outcome", "not-found")
                 BtsysClient.SuspendertErrors.NotFound.left()
             }
 
             else -> {
+                span.setAttribute("client.outcome", response.status.toString())
                 logger.error("Btsys responded with status ${response.status}")
                 BtsysClient.SuspendertErrors.UnknownError.left()
             }

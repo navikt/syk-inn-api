@@ -4,6 +4,8 @@ import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.right
 import com.github.benmanes.caffeine.cache.Caffeine
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
@@ -36,7 +38,15 @@ sealed interface RecordResourceErrors {
         override val skippableInDev: Boolean = false
     }
 
-    object SykmelderNotFound : RecordResourceErrors {
+    object SykmelderPdlNotFound : RecordResourceErrors {
+        override val skippableInDev: Boolean = true
+    }
+
+    object SykmelderHprNotFound : RecordResourceErrors {
+        override val skippableInDev: Boolean = true
+    }
+
+    object SykmelderSuspendertNotFound : RecordResourceErrors {
         override val skippableInDev: Boolean = true
     }
 
@@ -71,9 +81,13 @@ class SykmeldingConsumerResourcesService(
      * - Has FNR but no HPR
      * - Has FNR and HPR (use HPR)
      */
+    @WithSpan
     suspend fun getResourcesForSykmelding(
         record: SykmeldingRecord
     ): Either<RecordResourceErrors, RecordWithResources> = either {
+        val span = Span.current()
+        span.setAttribute("sykmelding.id", record.sykmelding.id)
+
         val sykmelding = record.sykmelding
         if (sykmelding is Sykmelding.Utenlandsk)
             return RecordWithResources.Utenlandsk(record).right()
@@ -104,13 +118,14 @@ class SykmeldingConsumerResourcesService(
             }.bind()
 
         if (sykmelder !is Sykmelder.MedSuspensjon) {
-            raise(RecordResourceErrors.SykmelderNotFound)
+            span.setAttribute("resource.outcome", "sykmelder-not-found")
+            raise(RecordResourceErrors.SykmelderHprNotFound)
         }
 
         val person = pdlByIdentCached(sykmelder.ident).bind()
-
         if (person.navn == null) {
-            raise(RecordResourceErrors.SykmelderNotFound)
+            span.setAttribute("resource.outcome", "sykmelder-without-name")
+            raise(RecordResourceErrors.SykmelderPdlNotFound)
         }
 
         return RecordWithResources.Nasjonal(
@@ -122,17 +137,25 @@ class SykmeldingConsumerResourcesService(
             .right()
     }
 
+    @WithSpan
     private suspend fun pdlByIdentCached(ident: String): Either<RecordResourceErrors, PdlPerson> =
         either {
+            val span = Span.current()
+
             val existing = pdlCaffeine.getIfPresent(ident)
-            if (existing != null) return existing.right()
+            if (existing != null) {
+                span.setAttribute("cache.hit", "true")
+                return existing.right()
+            }
 
             val person =
                 pdlClient
                     .getPerson(ident)
                     .mapLeft {
+                        span.setAttribute("resource.outcome", it.name)
                         when (it) {
-                            PdlClient.PdlErrors.NotFound -> RecordResourceErrors.SykmelderNotFound
+                            PdlClient.PdlErrors.NotFound ->
+                                RecordResourceErrors.SykmelderPdlNotFound
                             PdlClient.PdlErrors.UnknownError ->
                                 RecordResourceErrors.AnyUnknownError(
                                     "PdlClient",
@@ -143,31 +166,45 @@ class SykmeldingConsumerResourcesService(
                     .bind()
 
             pdlCaffeine.put(ident, person)
+            span.setAttribute("cache.hit", "false")
 
             return person.right()
         }
 
+    @WithSpan
     private suspend fun sykmelderByHprCached(
         hpr: String,
         oppslagsdato: LocalDate,
     ): Either<RecordResourceErrors, Sykmelder> = either {
+        val span = Span.current()
+
         val existing = hprCaffeine.getIfPresent(hpr)
-        if (existing != null) return existing.right()
+        if (existing != null) {
+            span.setAttribute("cache.hit", "true")
+            return existing.right()
+        }
 
         val sykmelder =
             sykmelderService.byHpr(hpr, oppslagsdato).mapLeft { it.toRecordResourcError() }.bind()
 
         hprCaffeine.put(hpr, sykmelder)
+        span.setAttribute("cache.hit", "false")
 
         return sykmelder.right()
     }
 
+    @WithSpan
     private suspend fun sykmelderByIdentCached(
         ident: String,
         oppslagsdato: LocalDate,
     ): Either<RecordResourceErrors, Sykmelder> = either {
+        val span = Span.current()
+
         val existing = hprCaffeine.getIfPresent(ident)
-        if (existing != null) return existing.right()
+        if (existing != null) {
+            span.setAttribute("cache.hit", "true")
+            return existing.right()
+        }
 
         val sykmelder =
             sykmelderService
@@ -176,20 +213,26 @@ class SykmeldingConsumerResourcesService(
                 .bind()
 
         hprCaffeine.put(ident, sykmelder)
+        span.setAttribute("cache.hit", "false")
 
         return sykmelder.right()
     }
 
-    private fun SykmelderService.SykmelderErrors.toRecordResourcError(): RecordResourceErrors =
-        when (this) {
+    private fun SykmelderService.SykmelderErrors.toRecordResourcError(): RecordResourceErrors {
+        Span.current().setAttribute("resource.outcome", this.name)
+
+        return when (this) {
             SykmelderService.SykmelderErrors.HprUnknownError ->
-                RecordResourceErrors.SykmelderNotFound
+                RecordResourceErrors.SykmelderHprNotFound
+
             SykmelderService.SykmelderErrors.SuspendertNotFound ->
-                RecordResourceErrors.SykmelderNotFound
+                RecordResourceErrors.SykmelderSuspendertNotFound
+
             SykmelderService.SykmelderErrors.SuspendertUnknownError ->
                 RecordResourceErrors.AnyUnknownError(
                     "SykmelderService",
                     "Unknown error, service has logged exception",
                 )
         }
+    }
 }

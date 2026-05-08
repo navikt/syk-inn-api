@@ -16,6 +16,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.Named
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.common.Navn
@@ -45,6 +46,7 @@ class HprCloudClient(
     override suspend fun getSykmelderByHpr(
         behandlerHpr: String
     ): Either<HprClient.HprErrors, SykmelderMedHpr> {
+        val span = Span.current()
         val (accessToken) = getToken()
 
         val response =
@@ -60,14 +62,17 @@ class HprCloudClient(
 
         return when {
             response.status.isSuccess() -> {
+                span.setAttribute("client.outcome", "ok")
                 mapHprSykmelderToSykmelderMedHpr(response.body()).right()
             }
 
             response.status == HttpStatusCode.NotFound -> {
+                span.setAttribute("client.outcome", "not-found")
                 HprClient.HprErrors.NotFound.left()
             }
 
             else -> {
+                span.setAttribute("client.outcome", response.status.toString())
                 logger.error(
                     "Unable to fetch sykmelder with hpr: $behandlerHpr, status: ${response.status}}"
                 )
@@ -81,6 +86,7 @@ class HprCloudClient(
     override suspend fun getSykmelderByIdent(
         behandlerIdent: String
     ): Either<HprClient.HprErrors, SykmelderMedHpr> {
+        val span = Span.current()
         val (accessToken) = getToken()
 
         val response =
@@ -94,14 +100,17 @@ class HprCloudClient(
 
         return when {
             response.status.isSuccess() -> {
+                span.setAttribute("client.outcome", "ok")
                 mapHprSykmelderToSykmelderMedHpr(response.body()).right()
             }
 
             response.status == HttpStatusCode.NotFound -> {
+                span.setAttribute("client.outcome", "not-found")
                 HprClient.HprErrors.NotFound.left()
             }
 
             else -> {
+                span.setAttribute("client.outcome", response.status.toString())
                 logger.error(
                     "Unable to fetch sykmelder with ident <****** *****>. See teamlogger for more info. status: ${response.status}}"
                 )
