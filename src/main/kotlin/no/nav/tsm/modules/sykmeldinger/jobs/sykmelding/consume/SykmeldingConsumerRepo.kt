@@ -58,7 +58,11 @@ class SykmeldingConsumerRepo : SykmeldingInsert() {
     }
 
     suspend fun batchInsert(sykmeldinger: List<VerifiedSykInnSykmelding>) = dbQuery {
-        SykmeldingTable.batchUpsert(sykmeldinger) { sykmelding ->
+        SykmeldingTable.batchUpsert(
+            data = sykmeldinger,
+            shouldReturnGeneratedValues = false,
+            onUpdateExclude = listOf(SykmeldingTable.id, SykmeldingTable.idempotencyKey),
+        ) { sykmelding ->
             val (behandler, legekontorOrgnr, legekontorTlf) =
                 when (sykmelding.meta) {
                     is SykInnSykmeldingMeta.Digital ->
