@@ -6,7 +6,9 @@ import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.util.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.RuntimeEnvironments
@@ -30,9 +32,7 @@ class SykmeldingConsumerService(
             try {
                 while (isActive) {
                     val records = consumer.poll()
-                    for ((key, sykmelding) in records) {
-                        handleRecord(key, sykmelding)
-                    }
+                    handleRecords(records)
                 }
             } catch (ex: Exception) {
                 logger.error("Kafka consumer loop threw an exception", ex)
@@ -41,6 +41,36 @@ class SykmeldingConsumerService(
                 consumer.unsubscribe()
             }
         }
+
+    @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
+    suspend private fun handleRecords(records: List<Pair<String, SykmeldingRecord?>>) {
+        val latest: Map<String, SykmeldingRecord?> =
+            records.filter { it.second?.let { !isOverRetentionPeriod(it) } ?: true }.toMap()
+
+        coroutineScope {
+            latest.entries.chunked(50).map { batch ->
+                launch(Dispatchers.IO) {
+                        val inserts =
+                            batch
+                                .filter { it.value != null }
+                                .mapNotNull { it.value }
+                                .mapNotNull {
+                                    sykmeldingConsumerResourcesService
+                                        .getResourcesForSykmelding(it)
+                                        .getOrElse { resourceError ->
+                                            handleError(resourceError, it.sykmelding.id)
+                                            return@getOrElse null
+                                        }
+                                        ?.toVerifiedSykmelding()
+                                }
+                        val deletes = batch.filter { it.value == null }
+                        sykmeldingConsumerRepo.batchInsert(inserts)
+                        sykmeldingConsumerRepo.batchDelete(deletes.map { UUID.fromString(it.key) })
+                    }
+                    .join()
+            }
+        }
+    }
 
     @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
     private suspend fun handleRecord(
@@ -57,17 +87,8 @@ class SykmeldingConsumerService(
         val withResources: RecordWithResources =
             sykmeldingConsumerResourcesService.getResourcesForSykmelding(sykmelding).getOrElse {
                 resourceError ->
-                if (
-                    environment.runtime.env == RuntimeEnvironments.DEV &&
-                        resourceError.skippableInDev
-                ) {
-                    logger.warn(
-                        "Found skippable error in dev: ${resourceError.javaClass.simpleName} (${key}), ignoring!"
-                    )
-                    return
-                } else {
-                    error("Unrecoverable error! ${resourceError.javaClass.name} (${key})")
-                }
+                handleError(resourceError, key)
+                return
             }
 
         try {
@@ -82,11 +103,21 @@ class SykmeldingConsumerService(
                 logger.warn(
                     "Found poisoned sykmelding (on root) ${key}, reason ${poisoned.reason} at ${poisoned.created}"
                 )
-
                 return
             }
 
             throw ex
+        }
+    }
+
+    private fun handleError(resourceError: RecordResourceErrors, key: String) {
+        if (environment.runtime.env == RuntimeEnvironments.DEV && resourceError.skippableInDev) {
+            logger.warn(
+                "Found skippable error in dev: ${resourceError.javaClass.simpleName} (${key}), ignoring!"
+            )
+            return
+        } else {
+            error("Unrecoverable error! ${resourceError.javaClass.name} (${key})")
         }
     }
 

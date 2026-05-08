@@ -66,13 +66,13 @@ class SykmeldingConsumerResourcesService(
     private val hprCaffeine =
         Caffeine.newBuilder()
             .maximumSize(5000)
-            .expireAfterWrite(15.minutes.toJavaDuration())
+            .expireAfterWrite(60.minutes.toJavaDuration())
             .build<String, Sykmelder>()
 
     private val pdlCaffeine =
         Caffeine.newBuilder()
             .maximumSize(5000)
-            .expireAfterWrite(15.minutes.toJavaDuration())
+            .expireAfterWrite(60.minutes.toJavaDuration())
             .build<String, PdlPerson>()
 
     /**
