@@ -82,14 +82,27 @@ fun mapUnruledSykInnSykmeldingToRegulaPayload(
     )
 }
 
+private fun SykInnDiagnoseSystem.toOID() =
+    when (this) {
+        SykInnDiagnoseSystem.ICPC2 -> ICPC2.OID
+        SykInnDiagnoseSystem.ICD10 -> ICD10.OID
+        SykInnDiagnoseSystem.ICPC2B -> ICPC2B.OID
+    }
+
 private fun SykInnDiagnoseInfo.toRegulaDiagnose(): Diagnose {
     return Diagnose(
         kode = code,
         system =
-            when (system) {
-                SykInnDiagnoseSystem.ICPC2 -> ICPC2.OID
-                SykInnDiagnoseSystem.ICD10 -> ICD10.OID
-                SykInnDiagnoseSystem.ICPC2B -> ICPC2B.OID
+            when (this) {
+                is SykInnDiagnoseInfo.Valid -> system.toOID()
+                is SykInnDiagnoseInfo.Invalid ->
+                    try {
+                        SykInnDiagnoseSystem.valueOf(system).toOID()
+                    } catch (_: Exception) {
+                        error(
+                            "A DIGITAL to be ruled should never have any non-supported DiagnoseSystem: ${this.system}"
+                        )
+                    }
             },
     )
 }
@@ -104,12 +117,14 @@ private fun SykInnAktivitet.toRegulaAktivitet(): Aktivitet =
                 tom = tom,
                 avventendeInnspillTilArbeidsgiver = innspillTilArbeidsgiver,
             )
+
         is SykInnAktivitet.Behandlingsdager ->
             Aktivitet.Behandlingsdager(
                 fom = fom,
                 tom = tom,
                 behandlingsdager = antallBehandlingsdager,
             )
+
         is SykInnAktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
@@ -146,10 +161,13 @@ private fun SykInnAktivitet.toTidligereAktivitet(): TidligereSykmeldingAktivitet
     when (this) {
         is SykInnAktivitet.Avventende ->
             TidligereSykmeldingAktivitet.Avventende(fom = fom, tom = tom)
+
         is SykInnAktivitet.Behandlingsdager ->
             TidligereSykmeldingAktivitet.Behandlingsdager(fom = fom, tom = tom)
+
         is SykInnAktivitet.Gradert ->
             TidligereSykmeldingAktivitet.Gradert(fom = fom, tom = tom, grad = grad)
+
         is SykInnAktivitet.IkkeMulig -> TidligereSykmeldingAktivitet.IkkeMulig(fom = fom, tom = tom)
         is SykInnAktivitet.Reisetilskudd ->
             TidligereSykmeldingAktivitet.Reisetilskudd(fom = fom, tom = tom)

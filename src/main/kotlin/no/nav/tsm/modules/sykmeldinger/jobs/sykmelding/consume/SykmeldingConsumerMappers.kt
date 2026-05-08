@@ -458,17 +458,15 @@ private fun Yrkesskade.toSykInnYrkesskade(): SykInnYrkesskade {
     return SykInnYrkesskade(true, this.yrkesskadeDato)
 }
 
-private fun DiagnoseInfo.toSykInnDiagnoseInfo(): SykInnDiagnoseInfo =
-    SykInnDiagnoseInfo.tryParse(
-        system =
-            when (this.system) {
-                DiagnoseSystem.ICPC2 -> SykInnDiagnoseSystem.ICPC2
-                DiagnoseSystem.ICD10 -> SykInnDiagnoseSystem.ICD10
-                DiagnoseSystem.ICPC2B -> SykInnDiagnoseSystem.ICPC2B
-                else -> {
-                    throw IllegalArgumentException("Unsupported system: ${this.system}")
-                }
-            },
-        code = kode,
-        fallbackText = this.tekst,
-    )
+private fun DiagnoseInfo.toSykInnDiagnoseInfo(): SykInnDiagnoseInfo {
+    val validSystem =
+        when (this.system) {
+            DiagnoseSystem.ICPC2 -> SykInnDiagnoseSystem.ICPC2
+            DiagnoseSystem.ICD10 -> SykInnDiagnoseSystem.ICD10
+            DiagnoseSystem.ICPC2B -> SykInnDiagnoseSystem.ICPC2B
+            // System isn't one that syk-inn-api expects
+            else -> return SykInnDiagnoseInfo.invalidSystem(this.system.name, this.kode, this.tekst)
+        }
+
+    return SykInnDiagnoseInfo.tryParse(system = validSystem, code = kode, fallbackText = this.tekst)
+}

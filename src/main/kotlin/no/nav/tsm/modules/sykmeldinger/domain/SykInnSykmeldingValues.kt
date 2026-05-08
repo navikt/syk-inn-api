@@ -46,7 +46,6 @@ data class SykInnArbeidsrelatertArsak(
 )
 
 sealed interface SykInnDiagnoseInfo {
-    val system: SykInnDiagnoseSystem
     val code: String
     val maybeTekst: String?
         get() =
@@ -60,7 +59,7 @@ sealed interface SykInnDiagnoseInfo {
      * to have a text.
      */
     data class Valid(
-        override val system: SykInnDiagnoseSystem,
+        val system: SykInnDiagnoseSystem,
         override val code: String,
         val tekst: String,
     ) : SykInnDiagnoseInfo
@@ -69,24 +68,10 @@ sealed interface SykInnDiagnoseInfo {
      * Represents a diagnose that is currently not in any kodeverk, or that has never been valid
      * (INVALID sykmelding)
      */
-    data class Invalid(
-        override val system: SykInnDiagnoseSystem,
-        override val code: String,
-        val tekst: String?,
-    ) : SykInnDiagnoseInfo
+    data class Invalid(val system: String, override val code: String, val tekst: String?) :
+        SykInnDiagnoseInfo
 
     companion object {
-        fun requireValid(system: SykInnDiagnoseSystem, code: String) =
-            Valid(
-                system = system,
-                code = code,
-                tekst =
-                    system.maybeText(code)
-                        ?: throw IllegalStateException(
-                            "Kunne ikke opprette SykInnDiagnoseInfo.Valid: finner ikke diagnose for system $this og code $code"
-                        ),
-            )
-
         fun tryParse(
             system: SykInnDiagnoseSystem,
             code: String,
@@ -95,9 +80,12 @@ sealed interface SykInnDiagnoseInfo {
             val text: String? = system.maybeText(code)
 
             return when (text) {
-                null -> Invalid(system, code, fallbackText)
+                null -> Invalid(system.name, code, fallbackText)
                 else -> Valid(system, code, text)
             }
         }
+
+        fun invalidSystem(system: String, code: String, text: String?): SykInnDiagnoseInfo =
+            Invalid(system, code, text)
     }
 }

@@ -24,6 +24,7 @@ object ToJsonb {
         when (this) {
             is SykInnSykmeldingRuleResult.OK ->
                 SykmeldingJsonbValidationResult(RuleType.OK, null, null)
+
             is SykInnSykmeldingRuleResult.Outcome ->
                 SykmeldingJsonbValidationResult(
                     type = this.type,
@@ -34,7 +35,15 @@ object ToJsonb {
 
     fun SykInnDiagnoseInfo?.toDiagnoseJsonb(): SykmeldingJsonbDiagnose? =
         this?.let {
-            SykmeldingJsonbDiagnose(system = it.system.name, code = it.code, text = it.maybeTekst)
+            SykmeldingJsonbDiagnose(
+                system =
+                    when (this) {
+                        is SykInnDiagnoseInfo.Valid -> this.system.name
+                        is SykInnDiagnoseInfo.Invalid -> this.system
+                    },
+                code = it.code,
+                text = it.maybeTekst,
+            )
         }
 
     fun Navn.toNavnJsonb(): SykmeldingJsonbNavn =

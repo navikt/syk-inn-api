@@ -149,10 +149,17 @@ private fun SykInnSykmeldingRuleResult.toValidationResult(
 private fun SykInnDiagnoseInfo.toDiagnoseInfo(): DiagnoseInfo =
     DiagnoseInfo(
         system =
-            when (system) {
-                SykInnDiagnoseSystem.ICPC2 -> DiagnoseSystem.ICPC2
-                SykInnDiagnoseSystem.ICD10 -> DiagnoseSystem.ICD10
-                SykInnDiagnoseSystem.ICPC2B -> DiagnoseSystem.ICPC2B
+            when (this) {
+                is SykInnDiagnoseInfo.Valid ->
+                    when (system) {
+                        SykInnDiagnoseSystem.ICPC2 -> DiagnoseSystem.ICPC2
+                        SykInnDiagnoseSystem.ICD10 -> DiagnoseSystem.ICD10
+                        SykInnDiagnoseSystem.ICPC2B -> DiagnoseSystem.ICPC2B
+                    }
+                is SykInnDiagnoseInfo.Invalid ->
+                    error(
+                        "A DIGITAL sykmelding should never produce a sykmelding with any non-supported DiagnoseSystem"
+                    )
             },
         kode = code,
         tekst = maybeTekst,

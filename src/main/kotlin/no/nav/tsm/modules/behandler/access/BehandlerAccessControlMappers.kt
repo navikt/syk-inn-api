@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.behandler.access
 
+import no.nav.tsm.core.logger
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsgiver
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsrelatertArsak
@@ -31,6 +32,8 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmalSvar
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnYrkesskade
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.sykmelding.input.core.model.RuleType
+
+private val logger = logger()
 
 fun VerifiedSykInnSykmelding.toSykmelding() =
     BehandlerSykmeldingFull(
@@ -69,6 +72,7 @@ private fun SykInnSykmeldingRuleResult.resultToUtfall() =
     when (this) {
         is SykInnSykmeldingRuleResult.OK ->
             BehandlerSykmeldingRuleResult(result = RuleType.OK, cause = null)
+
         is SykInnSykmeldingRuleResult.Outcome ->
             BehandlerSykmeldingRuleResult(result = this.type, cause = this.message)
     }
@@ -78,8 +82,10 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta(): BehandlerSykmeldin
         when (this) {
             is SykInnSykmeldingMeta.Digital ->
                 Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
+
             is SykInnSykmeldingMeta.Legacy ->
                 Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
+
             is SykInnSykmeldingMeta.Utenlandsk ->
                 throw IllegalStateException(
                     /**
@@ -170,7 +176,14 @@ private fun List<SykInnDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
     List<BehandlerSykmeldingDiagnoseInfo>? {
     if (this.isEmpty()) return null
 
-    return this.map { diagnose ->
+    val invalid = this.filterIsInstance<SykInnDiagnoseInfo.Invalid>()
+    if (invalid.isNotEmpty()) {
+        logger.warn(
+            "User tried to access invalid diagnose [${invalid.joinToString(", ") { "(system: ${it.system}, code: ${it.code})" }}]"
+        )
+    }
+
+    return this.filterIsInstance<SykInnDiagnoseInfo.Valid>().map { diagnose ->
         BehandlerSykmeldingDiagnoseInfo(
             system = diagnose.system,
             code = diagnose.code,
@@ -178,6 +191,25 @@ private fun List<SykInnDiagnoseInfo>.toExistingSykmeldingDiagnoseInfo():
         )
     }
 }
+
+private fun SykInnDiagnoseInfo.toExistingSykmeldingDiagnoseInfo():
+    BehandlerSykmeldingDiagnoseInfo? =
+    when (this) {
+        is SykInnDiagnoseInfo.Invalid -> {
+            logger.warn(
+                "User tried to access invalid diagnose (system: ${this.system}, code: ${this.code})"
+            )
+            return null
+        }
+
+        is SykInnDiagnoseInfo.Valid -> {
+            BehandlerSykmeldingDiagnoseInfo(
+                system = this.system,
+                code = code,
+                text = maybeTekst ?: "Ukjent diagnosetekst",
+            )
+        }
+    }
 
 private fun SykInnTilbakedatering.toExistingSykmeldingTilbakedatering():
     BehandlerSykmeldingTilbakedatering =
@@ -224,10 +256,3 @@ private fun SykInnYrkesskade.toExistingSykmeldingYrkesskade(): BehandlerSykmeldi
 
 private fun SykInnMeldinger.toExistingSykmeldingMeldinger(): BehandlerSykmeldingMeldinger =
     BehandlerSykmeldingMeldinger(tilNav = this.tilNav, tilArbeidsgiver = this.tilArbeidsgiver)
-
-private fun SykInnDiagnoseInfo.toExistingSykmeldingDiagnoseInfo(): BehandlerSykmeldingDiagnoseInfo =
-    BehandlerSykmeldingDiagnoseInfo(
-        system = system,
-        code = code,
-        text = maybeTekst ?: "Ukjent diagnosetekst",
-    )
