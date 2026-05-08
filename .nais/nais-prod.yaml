@@ -20,7 +20,7 @@ spec:
         diskType: SSD
         insights:
           enabled: true
-        tier: db-custom-1-3840
+        tier: db-custom-8-30720
         flags:
           - name: cloudsql.enable_pgaudit
             value: "true"
