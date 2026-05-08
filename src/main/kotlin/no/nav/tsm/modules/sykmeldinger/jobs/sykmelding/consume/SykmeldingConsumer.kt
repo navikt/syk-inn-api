@@ -26,10 +26,9 @@ class SykmeldingConsumer(
 ) {
     private val logger = logger()
     private val teamLog = teamLogger()
-    private val topicName = "tsm.sykmeldinger"
 
-    // Unique group id while we test, when we go live this will be a more distinct name
-    private val groupId = "syk-inn-api-new-temp-13"
+    private val topicName = "tsm.sykmeldinger"
+    private val groupId = "syk-inn-api-v2"
 
     private val duration: Duration = environment.kafka.sykmeldingConsumer.longPoll.toJavaDuration()
     private val consumer: KafkaConsumer<String, ByteArray?>

@@ -39,7 +39,7 @@ class JuridiskHenvisningProducer(environment: Environment) {
         val record = ProducerRecord(topicName, sykmeldingId.toString(), payload)
 
         val result = kafkaProducer.send(record).get()
-        logger.info(
+        logger.debug(
             "Sent record with ${juridiskVurderinger.size} juridisk vurderinger to topic '$topicName' on partition ${result.partition()} offset ${result.offset()}"
         )
     }

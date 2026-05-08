@@ -62,6 +62,7 @@ CREATE TABLE sykmelding
 );
 
 create index idx_sykmelding_latest_tom_date on sykmelding (latest_tom);
+create index idx_sykmelding_latest_pasient_ident on sykmelding (meta_pasient_ident);
 
 -- Sykmelding status are sykmeldinger that are to be published to kafka
 create table sykmelding_status

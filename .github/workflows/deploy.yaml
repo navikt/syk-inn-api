@@ -54,8 +54,17 @@ jobs:
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           VAR: sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
-  # deploy-prod:
-  #   NOPE! - Don't even think about it yet
+  deploy-prod:
+    needs: [build, deploy-dev]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: "prod-gcp"
+          RESOURCE: ".nais/nais-prod.yaml"
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          VAR: sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
   build-for-gpr:
     name: Publish a version of syk-inn-api to GPR for use in testing
