@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.jobs
+package no.nav.tsm.modules.admin
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -8,15 +8,18 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.time.OffsetDateTime
+import java.util.UUID
 import no.nav.tsm.core.jobs.JobStatus
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.jobs.db.JobRepository
-import no.nav.tsm.modules.jobs.service.JobName
-import no.nav.tsm.modules.jobs.service.JobUpdateAction
-import no.nav.tsm.modules.jobs.service.JobUpdatePayload
+import no.nav.tsm.modules.admin.db.JobRepository
+import no.nav.tsm.modules.admin.service.JobName
+import no.nav.tsm.modules.admin.service.JobUpdateAction
+import no.nav.tsm.modules.admin.service.JobUpdatePayload
+import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.plugins.auth.INTERNAL_SYMFONI_AUTH
 import no.nav.tsm.plugins.auth.internalSymfoniUser
 
@@ -32,9 +35,21 @@ data class JobStatusResponse(
 fun Application.configureJobAdminRoutes() {
     val logger = logger()
     val jobRepository: JobRepository by dependencies
+    val poisonPillRepository: SykmeldingPoisonPillRepo by dependencies
 
     routing {
         authenticate(INTERNAL_SYMFONI_AUTH) {
+            route("/internal/admin/poison-pills/{uuid}") {
+                put {
+                    val uuid =
+                        call.parameters["uuid"]?.let { UUID.fromString(it) }
+                            ?: return@put call.respond(HttpStatusCode.BadRequest)
+
+                    val principal = internalSymfoniUser()
+                    val poisoned = poisonPillRepository.poison(uuid, "Marked as poison by ${principal.userId}")
+                    call.respond(HttpStatusCode.OK, poisoned)
+                }
+            }
             route("/internal/admin/jobs") {
                 get {
                     val jobs = jobRepository.getJobs()

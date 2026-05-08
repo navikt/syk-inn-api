@@ -1,11 +1,11 @@
-package no.nav.tsm.modules.jobs
+package no.nav.tsm.modules.admin
 
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
-import no.nav.tsm.modules.jobs.db.JobRepository
-import no.nav.tsm.modules.jobs.service.JobSchedulerService
+import no.nav.tsm.modules.admin.db.JobRepository
+import no.nav.tsm.modules.admin.service.JobSchedulerService
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningProducerJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerJob
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete.SykmeldingDeleteJob

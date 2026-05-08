@@ -2,7 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import kotlinx.coroutines.CoroutineScope
 import no.nav.tsm.core.jobs.Job
-import no.nav.tsm.modules.jobs.service.JobName
+import no.nav.tsm.modules.admin.service.JobName
 
 class SykmeldingConsumerJob(
     applicationScope: CoroutineScope,

@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.jobs.service.JobName
+import no.nav.tsm.modules.admin.service.JobName
 
 class SykmeldingDeleteJob(
     private val sykmeldingDeleteRepo: SykmeldingDeleteRepo,

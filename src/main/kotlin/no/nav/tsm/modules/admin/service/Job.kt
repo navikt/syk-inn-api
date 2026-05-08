@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.jobs.service
+package no.nav.tsm.modules.admin.service
 
 import java.time.OffsetDateTime
 import no.nav.tsm.core.jobs.JobStatus

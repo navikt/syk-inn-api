@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.jobs
+package no.nav.tsm.modules.admin
 
 import io.ktor.server.application.Application
 

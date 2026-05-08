@@ -9,7 +9,7 @@ import kotlinx.coroutines.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.jobs.service.JobName
+import no.nav.tsm.modules.admin.service.JobName
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
 import no.nav.tsm.sykmelding.input.core.model.Reason

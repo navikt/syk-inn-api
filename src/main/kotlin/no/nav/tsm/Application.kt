@@ -1,8 +1,8 @@
 package no.nav.tsm
 
 import io.ktor.server.application.*
+import no.nav.tsm.modules.admin.configureJobsModule
 import no.nav.tsm.modules.behandler.configureBehandlerModule
-import no.nav.tsm.modules.jobs.configureJobsModule
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.modules.sykmeldinger.jobs.configureKafkaModule
 import no.nav.tsm.plugins.*

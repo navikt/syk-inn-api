@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.jobs.service
+package no.nav.tsm.modules.admin.service
 
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.api.trace.Span
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.jobs.JobStatus
 import no.nav.tsm.core.logger
-import no.nav.tsm.modules.jobs.db.JobRepository
+import no.nav.tsm.modules.admin.db.JobRepository
 
 class JobSchedulerService(
     private val jobs: List<Job>,

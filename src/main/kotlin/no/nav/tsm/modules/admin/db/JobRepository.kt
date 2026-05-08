@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.jobs.db
+package no.nav.tsm.modules.admin.db
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.core.jobs.JobStatus
-import no.nav.tsm.modules.jobs.db.exposed.JobStatusTable
-import no.nav.tsm.modules.jobs.db.exposed.JobTable
-import no.nav.tsm.modules.jobs.service.Job
-import no.nav.tsm.modules.jobs.service.JobName
-import no.nav.tsm.modules.jobs.service.RunnerJobStatus
+import no.nav.tsm.modules.admin.db.exposed.JobStatusTable
+import no.nav.tsm.modules.admin.db.exposed.JobTable
+import no.nav.tsm.modules.admin.service.Job
+import no.nav.tsm.modules.admin.service.JobName
+import no.nav.tsm.modules.admin.service.RunnerJobStatus
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
