@@ -147,11 +147,19 @@ object FromJsonb {
         }
 
     fun SykmeldingJsonbDiagnose.toSykInnDiagnose(): SykInnDiagnoseInfo =
-        SykInnDiagnoseInfo.tryParse(
-            system = SykInnDiagnoseSystem.valueOf(this.system),
-            code = this.code,
-            fallbackText = this.text,
-        )
+        try {
+            SykInnDiagnoseInfo.tryParse(
+                system = SykInnDiagnoseSystem.valueOf(this.system),
+                code = this.code,
+                fallbackText = this.text,
+            )
+        } catch (_: IllegalArgumentException) {
+            SykInnDiagnoseInfo.invalidSystem(
+                system = this.system,
+                code = this.code,
+                text = this.text,
+            )
+        }
 
     fun SykmeldingJsonbMeldinger.toSykInnMeldinger(): SykInnMeldinger =
         SykInnMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver)
