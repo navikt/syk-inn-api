@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - feat/ktor
+    branches-ignore:
+      - 'dependabot/**'
 
 permissions:
   actions: read
@@ -12,13 +12,14 @@ permissions:
 
 jobs:
   test:
+    if: github.ref_name != 'main' && !startsWith(github.ref_name, 'dev')
     runs-on: ubuntu-latest
     steps:
       - uses: navikt/tsm-workflows/actions/gradle/test@main
 
   build:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev') || startsWith(github.ref_name, 'feat/ktor')
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev')
     steps:
       - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
@@ -77,9 +78,9 @@ jobs:
       - name: Decide tags
         id: tags
         run: |
-          IMAGE="ghcr.io/${{ github.repository }}-ktor-test"
+          IMAGE="ghcr.io/${{ github.repository }}-test"
           TAGS="${IMAGE}:${{ github.sha }}"
-          if [[ "${{ github.ref_name }}" == "main" || "${{ github.ref_name }}" == dev*  || "${{ github.ref_name }}" == feat/ktor ]]; then
+          if [[ "${{ github.ref_name }}" == "main" || "${{ github.ref_name }}" == dev* ]]; then
             TAGS="${TAGS}\n${IMAGE}:latest"
           fi
           echo -e "tags<<EOF\n${TAGS}\nEOF" >> "$GITHUB_OUTPUT"
@@ -118,7 +119,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          SYK_INN_API_INTEGRATION_TESTS_IMAGE=ghcr.io/${{ github.repository }}-ktor-test:${{ github.sha }} yarn test:integration
+          SYK_INN_API_INTEGRATION_TESTS_IMAGE=ghcr.io/${{ github.repository }}-test:${{ github.sha }} yarn test:integration
       - name: Test report
         if: always()
         run: ./scripts/test-reporter.mjs 'syk-inn integration tests' ./test-results/vitest-report.json >> "$GITHUB_STEP_SUMMARY"
