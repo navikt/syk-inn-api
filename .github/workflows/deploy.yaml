@@ -118,7 +118,6 @@ jobs:
         with:
           repository: navikt/syk-inn
           fetch-depth: 1
-          ref: ktor-tests
       - uses: navikt/tsm-workflows/actions/typst@main
       - uses: navikt/tsm-workflows/actions/yarn@main
         with:
