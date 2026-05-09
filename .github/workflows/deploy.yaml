@@ -67,6 +67,18 @@ jobs:
           WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
           VAR: sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
+  security:
+    name: Security
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+    needs: build
+    uses: navikt/tsm-workflows/.github/workflows/security.yaml@main
+    with:
+      image: ${{ needs.build.outputs.image }}
+
   build-for-gpr:
     name: Publish a version of syk-inn-api to GPR for use in testing
     runs-on: ubuntu-latest
