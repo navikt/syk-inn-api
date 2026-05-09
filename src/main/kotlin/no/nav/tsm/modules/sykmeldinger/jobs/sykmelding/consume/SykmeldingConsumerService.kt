@@ -6,8 +6,10 @@ import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.util.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
@@ -34,11 +36,8 @@ class SykmeldingConsumerService(
                     val records = consumer.poll()
                     handleRecords(records)
                 }
-            } catch (ex: Exception) {
-                logger.error("Kafka consumer loop threw an exception", ex)
-                throw ex
             } finally {
-                consumer.unsubscribe()
+                withContext(NonCancellable) { consumer.unsubscribe() }
             }
         }
 
@@ -48,8 +47,10 @@ class SykmeldingConsumerService(
             records.filter { it.second?.let { !isOverRetentionPeriod(it) } ?: true }.toMap()
 
         coroutineScope {
-            latest.entries.chunked(50).map { batch ->
-                launch(Dispatchers.IO) {
+            latest.entries
+                .chunked(50)
+                .map { batch ->
+                    launch(Dispatchers.IO) {
                         val inserts =
                             batch
                                 .filter { it.value != null }
@@ -67,8 +68,8 @@ class SykmeldingConsumerService(
                         sykmeldingConsumerRepo.batchInsert(inserts)
                         sykmeldingConsumerRepo.batchDelete(deletes.map { UUID.fromString(it.key) })
                     }
-                    .join()
-            }
+                }
+                .joinAll()
         }
     }
 
