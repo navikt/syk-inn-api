@@ -84,7 +84,7 @@ class JuridiskHenvisningProducerJob(
                         version = JURIDISK_HENVISNING_VERSION,
                         kilde = JURIDISK_HENVISNING_KILDE,
                         versjonAvKode = environment.runtime.version,
-                        sporing = mapOf("sykmeldingId" to sykmeldingId.toString()),
+                        sporing = mapOf("sykmelding" to sykmeldingId.toString()),
                     )
                 }
 
