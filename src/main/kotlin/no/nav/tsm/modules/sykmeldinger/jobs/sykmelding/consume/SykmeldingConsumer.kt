@@ -49,7 +49,7 @@ class SykmeldingConsumer(
         val records = consumer.poll(duration)
         if (records.isEmpty) return emptyList()
 
-        logger.info("Sykmelding consumer polled ${records.count()} records from ${topicName}")
+        logger.debug("Sykmelding consumer polled ${records.count()} records from ${topicName}")
         return records.map { tryParse(it) }
     }
 

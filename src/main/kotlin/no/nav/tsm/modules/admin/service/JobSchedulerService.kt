@@ -2,6 +2,7 @@ package no.nav.tsm.modules.admin.service
 
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.api.trace.Span
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -32,27 +33,44 @@ class JobSchedulerService(
     }
 
     suspend fun start() = coroutineScope {
-        jobs.forEach { manager ->
+        jobs.forEach { job ->
             launch {
-                manager.status.collect { newStatus ->
-                    logger.debug("Job(${manager.jobName}) status changed to $newStatus")
+                job.status.collect { newStatus ->
+                    logger.debug("Job(${job.jobName}) status changed to $newStatus")
                     jobRepository.updateJobStatus(
                         runner = runner,
-                        jobName = manager.jobName,
+                        jobName = job.jobName,
                         jobStatus = newStatus,
                     )
                 }
             }
         }
+
+        jobRepository.deleteOldJobsRunners().onEach {
+            logger.info("Old job runner: ${it.runner } deleted")
+        }
+
         while (isActive) {
             updateJobs()
             delay(updateInterval)
+            updateJobStatusTimestamps()
         }
     }
 
+    private suspend fun updateJobStatusTimestamps() {
+        jobRepository.updateJobStatusTimestamp(runner)
+    }
+
+    @WithSpan(inheritContext = false)
     suspend fun stop() {
+        val span = Span.current()
         jobs.forEach { jobManager -> jobManager.stop() }
-        jobRepository.deleteRunner(runner)
+        val deleted =
+            jobRepository.deleteRunner(runner).onEach {
+                logger.info("Job runner: ${it.runner } deleted")
+            }
+
+        span.setAttribute("jobStatus.deleted.counter", deleted.size.toLong())
     }
 
     /** Don't @WithSpan this, as it causes every single span in all jobs to be nested under this. */
@@ -62,6 +80,7 @@ class JobSchedulerService(
 
         val span = Span.current()
         span.setAttribute("job.count", jobStates.size.toLong())
+
         jobs.forEach { job ->
             val desiredState = jobStates[job.jobName]
             requireNotNull(desiredState) { "No desired state found for job ${job.jobName}" }

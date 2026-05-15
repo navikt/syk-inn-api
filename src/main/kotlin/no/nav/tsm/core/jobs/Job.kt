@@ -2,6 +2,7 @@ package no.nav.tsm.core.jobs
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,22 +45,25 @@ abstract class Job(val jobName: JobName, private val applicationScope: Coroutine
                 return false
             }
 
-            job = applicationScope.launch {
-                try {
-                    _status.value = JobStatus.RUNNING
-                    runJob()
-                    _status.value = JobStatus.STOPPED
-                } catch (_: CancellationException) {
-                    logger.debug("Job(${jobName.name}) was cancelled gracefully")
-                    _status.value = JobStatus.STOPPED
-                } catch (cause: Exception) {
-                    logger.error("Job(${jobName.name}) crashed unexpectedly", cause)
-                    _status.value = JobStatus.FAILED
-                } finally {
-                    logger.info("Job(${jobName}) finished or failed, setting job reference null")
-                    job = null
+            job =
+                applicationScope.launch(Dispatchers.IO) {
+                    try {
+                        _status.value = JobStatus.RUNNING
+                        runJob()
+                        _status.value = JobStatus.STOPPED
+                    } catch (_: CancellationException) {
+                        logger.debug("Job(${jobName.name}) was cancelled gracefully")
+                        _status.value = JobStatus.STOPPED
+                    } catch (cause: Exception) {
+                        logger.error("Job(${jobName.name}) crashed unexpectedly", cause)
+                        _status.value = JobStatus.FAILED
+                    } finally {
+                        logger.info(
+                            "Job(${jobName}) finished or failed, setting job reference null"
+                        )
+                        job = null
+                    }
                 }
-            }
             return true
         }
     }
