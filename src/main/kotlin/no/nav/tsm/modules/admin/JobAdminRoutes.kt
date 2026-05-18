@@ -45,9 +45,13 @@ fun Application.configureJobAdminRoutes() {
                         call.parameters["uuid"]?.let { UUID.fromString(it) }
                             ?: return@put call.respond(HttpStatusCode.BadRequest)
 
+                    class Payload(val reason: String)
+                    val reason = call.receive<Payload>().reason
+
                     val principal = internalSymfoniUser()
                     val poisoned =
-                        poisonPillRepository.poison(uuid, "Marked as poison by ${principal.userId}")
+                        poisonPillRepository.poison(uuid, "${reason}, by ${principal.userId}")
+
                     call.respond(HttpStatusCode.OK, poisoned)
                 }
             }
