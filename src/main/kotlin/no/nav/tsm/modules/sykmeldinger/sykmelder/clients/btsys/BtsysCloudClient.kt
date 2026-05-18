@@ -8,15 +8,17 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.*
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.plugins.di.annotations.*
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
+import kotlin.collections.mapOf
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
 import no.nav.tsm.plugins.auth.TexasClient
@@ -46,15 +48,18 @@ class BtsysCloudClient(
         val (accessToken) = this.getToken()
 
         val response =
-            httpClient.get(
-                "${environment.external().btsys}/api/v1/suspensjon/status?oppslagsdato=$oppslagsdato"
-            ) {
+            httpClient.post("${environment.external().btsys}/api/v1/suspensjon/soek") {
                 headers {
-                    append("Content-Type", "application/json")
                     append("Nav-Consumer-Id", "syk-inn-api")
-                    append("Nav-Personident", sykmelderIdent)
                     append("Authorization", "Bearer $accessToken")
                 }
+                contentType(ContentType.Application.Json)
+                setBody(
+                    mapOf(
+                        "personident" to sykmelderIdent,
+                        "oppslagsdato" to oppslagsdato.toString(),
+                    )
+                )
             }
 
         return when {
