@@ -4,7 +4,6 @@ import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.*
