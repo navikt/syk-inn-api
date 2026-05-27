@@ -28,7 +28,12 @@ class PostgresConfig(
 
 class Texas(val tokenEndpoint: String)
 
-class ExternalApi(val tsmPdlCache: String, val helsenettproxy: String, val btsys: String)
+class ExternalApi(
+    val tsmPdlCache: String,
+    val helsenettproxy: String,
+    val btsys: String,
+    val hpr: String,
+)
 
 class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
 
@@ -122,6 +127,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 tsmPdlCache = config.property("external.tsmPdlCache").getString(),
                 helsenettproxy = config.property("external.syfoHelsenettproxy").getString(),
                 btsys = config.property("external.btsys").getString(),
+                hpr = config.property("external.hpr").getString(),
             )
         },
         auth = {

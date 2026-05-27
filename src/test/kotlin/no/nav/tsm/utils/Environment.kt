@@ -20,6 +20,7 @@ val simpleUnitTestEnvironment =
                 btsys = "https://test.btsys.endpoint",
                 tsmPdlCache = "https://test.pdlcache.endpoint",
                 helsenettproxy = "https://test.helsenettproxy.endpoint",
+                hpr = "https://test.hpr.endpoint",
             )
         },
         auth = mockk(relaxed = true),
