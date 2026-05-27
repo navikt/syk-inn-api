@@ -1,5 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
 
+import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -7,8 +9,6 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.mockk.mockk
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.utils.simpleUnitTestEnvironment
@@ -20,16 +20,10 @@ class HprCloudClientTest {
     fun `should return sykmelder based on hpr number`() = runTest {
         val hprNummer = "12345"
         val mockEngine = MockEngine { request ->
-            assertEquals(
+            request.url.toString() shouldEqual
                 simpleUnitTestEnvironment.external().helsenettproxy +
-                    "/api/v2/behandlerMedHprNummer",
-                request.url.toString(),
-            )
-            assertEquals(
-                hprNummer,
-                request.headers["HprNummer"],
-                "HprNummer header should match the behandlerHpr parameter",
-            )
+                    "/api/v2/behandlerMedHprNummer"
+            request.headers["HprNummer"] shouldEqual hprNummer
 
             respond(
                 status = HttpStatusCode.OK,
@@ -56,25 +50,19 @@ class HprCloudClientTest {
             )
 
         val response = hprClient.getSykmelderByHpr(hprNummer).getOrNull()
-        assertNotNull(response)
-        assertEquals("12345678901", response.ident)
-        assertEquals(hprNummer, response.hprNummer)
+        response.shouldNotBeNull()
+        response.ident shouldEqual "12345678901"
+        response.hprNummer shouldEqual hprNummer
     }
 
     @Test
-    fun `should return null when sykmelder is not found`() = runTest {
+    fun `should return NotFound when sykmelder is not found`() = runTest {
         val hprNummer = "13378010"
         val mockEngine = MockEngine { request ->
-            assertEquals(
+            request.url.toString() shouldEqual
                 simpleUnitTestEnvironment.external().helsenettproxy +
-                    "/api/v2/behandlerMedHprNummer",
-                request.url.toString(),
-            )
-            assertEquals(
-                hprNummer,
-                request.headers["HprNummer"],
-                "HprNummer header should match the behandlerHpr parameter",
-            )
+                    "/api/v2/behandlerMedHprNummer"
+            request.headers["HprNummer"] shouldEqual hprNummer
 
             respond(status = HttpStatusCode.NotFound, content = "")
         }
@@ -86,9 +74,9 @@ class HprCloudClientTest {
                 environment = simpleUnitTestEnvironment,
             )
 
-        val response = hprClient.getSykmelderByHpr(hprNummer)
-
-        response.fold({ assertEquals(HprClient.HprErrors.NotFound, it) }) {
+        hprClient.getSykmelderByHpr(hprNummer).fold({
+            it shouldEqual HprClient.HprErrors.NotFound
+        }) {
             fail("Should not be right")
         }
     }

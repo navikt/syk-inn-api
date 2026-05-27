@@ -1,9 +1,14 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce
 
+import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -31,7 +36,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
     @Test
     fun `getNext returns null when no pending items exist`() = runTest {
         val result = repo.getNext()
-        assertNull(result)
+        result.shouldBeNull()
     }
 
     @Test
@@ -41,9 +46,9 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
         val result = repo.getNext()
 
-        assertNotNull(result)
-        assertEquals(sykmeldingId, result.sykmeldingId)
-        assertEquals(SykmeldingStatusStatus.SENDING, result.status)
+        result.shouldNotBeNull()
+        result.sykmeldingId shouldEqual sykmeldingId
+        result.status shouldEqual SykmeldingStatusStatus.SENDING
     }
 
     @Test
@@ -63,8 +68,8 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
         val result = repo.getNext()
 
-        assertNotNull(result)
-        assertEquals(older, result.sykmeldingId)
+        result.shouldNotBeNull()
+        result.sykmeldingId shouldEqual older
     }
 
     @Test
@@ -74,7 +79,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         insertSykmeldingStatus(UUID.randomUUID(), SykmeldingStatusStatus.FAILED)
 
         val result = repo.getNext()
-        assertNull(result)
+        result.shouldBeNull()
     }
 
     @Test
@@ -95,10 +100,10 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
         val result1 = repo.getNext()
         val result2 = repo.getNext()
 
-        assertNotNull(result1)
-        assertNotNull(result2)
-        assertEquals(first, result1.sykmeldingId)
-        assertEquals(second, result2.sykmeldingId)
+        result1.shouldNotBeNull()
+        result2.shouldNotBeNull()
+        result1.sykmeldingId shouldEqual first
+        result2.sykmeldingId shouldEqual second
     }
 
     @Test
@@ -119,10 +124,10 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
-        assertEquals(2, count)
+        count shouldBe 2
         dbQuery {
             SykmeldingStatusTable.selectAll().toList().forEach { row ->
-                assertEquals(SykmeldingStatusStatus.PENDING.name, row[SykmeldingStatusTable.status])
+                row[SykmeldingStatusTable.status] shouldEqual SykmeldingStatusStatus.PENDING.name
             }
         }
     }
@@ -134,7 +139,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
-        assertEquals(0, count)
+        count shouldBe 0
     }
 
     @Test
@@ -153,7 +158,7 @@ class SykmeldingProducerRepoTest : WithPostgresql() {
 
         val count = repo.resetHangingJobs(OffsetDateTime.now(ZoneOffset.UTC).minusHours(1))
 
-        assertEquals(0, count)
+        count shouldBe 0
     }
 
     private suspend fun insertSykmeldingStatus(

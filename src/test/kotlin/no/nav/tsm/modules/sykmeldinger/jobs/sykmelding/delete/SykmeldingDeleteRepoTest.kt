@@ -1,13 +1,13 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.delete
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -64,8 +64,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(1, deletedCount)
-        assertFalse(existsInDb(sykmeldingId))
+        deletedCount shouldBe 1
+        existsInDb(sykmeldingId).shouldBeFalse()
     }
 
     @Test
@@ -77,8 +77,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(1, deletedCount)
-        assertFalse(existsInDb(sykmeldingId))
+        deletedCount shouldBe 1
+        existsInDb(sykmeldingId).shouldBeFalse()
     }
 
     @Test
@@ -91,8 +91,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(1, deletedCount)
-        assertFalse(existsInDb(sykmeldingId))
+        deletedCount shouldBe 1
+        existsInDb(sykmeldingId).shouldBeFalse()
     }
 
     @Test
@@ -104,8 +104,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(1, deletedCount)
-        assertFalse(existsInDb(sykmeldingId))
+        deletedCount shouldBe 1
+        existsInDb(sykmeldingId).shouldBeFalse()
     }
 
     @Test
@@ -118,8 +118,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(0, deletedCount)
-        assertTrue(existsInDb(sykmeldingId))
+        deletedCount shouldBe 0
+        existsInDb(sykmeldingId).shouldBeTrue()
     }
 
     @Test
@@ -132,8 +132,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(0, deletedCount)
-        assertTrue(existsInDb(sykmeldingId))
+        deletedCount shouldBe 0
+        existsInDb(sykmeldingId).shouldBeTrue()
     }
 
     @Test
@@ -146,8 +146,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(0, deletedCount)
-        assertTrue(existsInDb(sykmeldingId))
+        deletedCount shouldBe 0
+        existsInDb(sykmeldingId).shouldBeTrue()
     }
 
     @Test
@@ -160,8 +160,8 @@ class SykmeldingDeleteRepoTest : WithPostgresql() {
 
         val deletedCount = repo.deleteStaleSykmeldinger()
 
-        assertEquals(0, deletedCount)
-        assertTrue(existsInDb(sykmeldingId))
+        deletedCount shouldBe 0
+        existsInDb(sykmeldingId).shouldBeTrue()
     }
 
     private suspend fun insertStaleSykmelding(id: UUID) {

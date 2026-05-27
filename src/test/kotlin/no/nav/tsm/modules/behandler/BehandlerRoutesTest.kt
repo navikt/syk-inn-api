@@ -1,13 +1,14 @@
 package no.nav.tsm.modules.behandler
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.types.shouldBeTypeOf
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
@@ -47,15 +48,15 @@ class BehandlerRoutesTest : WithPostgresql() {
 
         val created = requireNotNull(response.body<BehandlerSykmelding>())
 
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(created.meta.pasient.ident, "21037712323")
-        assertEquals(created.meta.sykmelder.hpr, "9144889")
-        assertEquals(created.meta.legekontorOrgnr, "123456789")
+        response.status shouldEqual HttpStatusCode.OK
+        created.meta.pasient.ident shouldEqual "21037712323"
+        created.meta.sykmelder.hpr shouldEqual "9144889"
+        created.meta.legekontorOrgnr shouldEqual "123456789"
 
         // Diagnose
-        assertIs<BehandlerSykmeldingFull>(created)
-        assertEquals(created.values.hoveddiagnose?.code, "L73")
-        assertEquals(created.values.hoveddiagnose?.system?.name, "ICPC2")
+        created.shouldBeTypeOf<BehandlerSykmeldingFull>()
+        created.values.hoveddiagnose?.code shouldEqual "L73"
+        created.values.hoveddiagnose?.system?.name shouldEqual "ICPC2"
 
         val allResponse =
             client.get("/api/sykmelding") {
@@ -66,11 +67,11 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
             }
 
-        assertEquals(HttpStatusCode.OK, allResponse.status)
+        allResponse.status shouldEqual HttpStatusCode.OK
 
         val allSykmeldinger = requireNotNull(allResponse.body<List<BehandlerSykmelding>>())
-        assertEquals(1, allSykmeldinger.size)
-        assertIs<BehandlerSykmeldingFull>(allSykmeldinger.first())
+        allSykmeldinger shouldHaveSize 1
+        allSykmeldinger.first().shouldBeTypeOf<BehandlerSykmeldingFull>()
     }
 
     @Test
@@ -87,8 +88,8 @@ class BehandlerRoutesTest : WithPostgresql() {
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             val initialId = created.sykmeldingId
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(created.meta.pasient.ident, "21037712323")
+            response.status shouldEqual HttpStatusCode.OK
+            created.meta.pasient.ident shouldEqual "21037712323"
 
             val nextRequest =
                 client.post("/api/sykmelding") {
@@ -97,11 +98,11 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
 
             val nextResult = requireNotNull(nextRequest.body<BehandlerSykmeldingFull>())
-            assertEquals(HttpStatusCode.OK, nextRequest.status)
+            nextRequest.status shouldEqual HttpStatusCode.OK
 
             // The same ID means the system didn't generate another ID, but instead returned the one
             // in the DB
-            assertEquals(initialId, nextResult.sykmeldingId)
+            nextResult.sykmeldingId shouldEqual initialId
         }
 
     @Test
@@ -116,9 +117,9 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
 
             val created = requireNotNull(response.body<BehandlerSykmelding>())
-            assertIs<BehandlerSykmeldingFull>(created)
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(created.meta.sykmelder.hpr, "someone-else")
+            created.shouldBeTypeOf<BehandlerSykmeldingFull>()
+            response.status shouldEqual HttpStatusCode.OK
+            created.meta.sykmelder.hpr shouldEqual "someone-else"
 
             val specificSykmeldingResponse =
                 client.get("/api/sykmelding/${created.sykmeldingId}") {
@@ -132,7 +133,7 @@ class BehandlerRoutesTest : WithPostgresql() {
             val specificSykmelding =
                 requireNotNull(specificSykmeldingResponse.body<BehandlerSykmelding>())
 
-            assertIs<BehandlerSykmeldingRedacted>(specificSykmelding)
+            specificSykmelding.shouldBeTypeOf<BehandlerSykmeldingRedacted>()
         }
 
     @Test
@@ -147,10 +148,10 @@ class BehandlerRoutesTest : WithPostgresql() {
 
         val created = requireNotNull(response.body<BehandlerSykmeldingVerify>())
 
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertIs<BehandlerSykmeldingVerify>(created)
-        assertEquals(RuleType.INVALID, created.status)
-        assertEquals("UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE", created.rule)
+        response.status shouldEqual HttpStatusCode.OK
+        created.shouldBeTypeOf<BehandlerSykmeldingVerify>()
+        created.status shouldEqual RuleType.INVALID
+        created.rule shouldEqual "UGYLDIG_KODEVERK_FOR_HOVEDDIAGNOSE"
     }
 
     @Test
@@ -163,8 +164,8 @@ class BehandlerRoutesTest : WithPostgresql() {
                 setBody(fullExampleSykmeldingPayload.replace("21037712323", "does-not-exist"))
             }
 
-        assertEquals(HttpStatusCode.UnprocessableEntity, response.status)
-        assertEquals(response.body<Map<String, String>>()["message"], "Person does not exist")
+        response.status shouldEqual HttpStatusCode.UnprocessableEntity
+        response.body<Map<String, String>>()["message"] shouldEqual "Person does not exist"
     }
 
     @Test
@@ -180,10 +181,10 @@ class BehandlerRoutesTest : WithPostgresql() {
                 }
             }
 
-        assertEquals(HttpStatusCode.OK, allResponse.status)
+        allResponse.status shouldEqual HttpStatusCode.OK
 
         val allSykmeldinger = requireNotNull(allResponse.body<List<BehandlerSykmelding>>())
-        assertEquals(0, allSykmeldinger.size)
+        allSykmeldinger shouldHaveSize 0
     }
 
     @Test
@@ -197,7 +198,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(brokenExampleSykmeldingPayloadBadDiagnoseSystem)
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            response.status shouldEqual HttpStatusCode.BadRequest
         }
 
     @Test
@@ -214,11 +215,11 @@ class BehandlerRoutesTest : WithPostgresql() {
                 )
             }
 
-        assertEquals(HttpStatusCode.OK, response.status)
+        response.status shouldEqual HttpStatusCode.OK
 
         val result = response.body<BehandlerSykmeldingFull>()
-        assertEquals(result.values.hoveddiagnose?.system?.name, "ICPC2B")
-        assertEquals(result.values.hoveddiagnose?.code, "Y99.0004")
+        result.values.hoveddiagnose?.system?.name shouldEqual "ICPC2B"
+        result.values.hoveddiagnose?.code shouldEqual "Y99.0004"
     }
 
     @Test
@@ -232,7 +233,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(brokenExampleSykmeldingPayloadUnknownAktivitet)
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            response.status shouldEqual HttpStatusCode.BadRequest
         }
 
     @Test
@@ -245,7 +246,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 setBody(brokenExampleSykmeldingPayloadInvalidSykmelderHpr)
             }
 
-        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        response.status shouldEqual HttpStatusCode.InternalServerError
     }
 
     @Test
@@ -258,7 +259,7 @@ class BehandlerRoutesTest : WithPostgresql() {
                 setBody(brokenExampleSykmeldingPayloadValidHprButBrokenFnr)
             }
 
-        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        response.status shouldEqual HttpStatusCode.InternalServerError
     }
 
     @Test
@@ -272,8 +273,8 @@ class BehandlerRoutesTest : WithPostgresql() {
                     setBody(exampleSykmeldingPayloadValidHprButSuspendedIdent)
                 }
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(RuleType.INVALID, response.body<BehandlerSykmeldingFull>().utfall.result)
+            response.status shouldEqual HttpStatusCode.OK
+            response.body<BehandlerSykmeldingFull>().utfall.result shouldEqual RuleType.INVALID
         }
 }
 

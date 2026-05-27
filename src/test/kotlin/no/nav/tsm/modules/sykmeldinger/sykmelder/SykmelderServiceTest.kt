@@ -2,12 +2,12 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 import arrow.core.left
 import arrow.core.right
+import io.kotest.matchers.equals.shouldEqual
+import io.kotest.matchers.types.shouldBeTypeOf
 import io.mockk.coEvery
 import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
@@ -38,10 +38,10 @@ class SykmelderServiceTest {
 
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
-        assertIs<Sykmelder.MedSuspensjon>(result)
-        assertEquals(hprNummer, result.hpr)
-        assertEquals(ident, result.ident)
-        assertEquals(false, result.suspendert)
+        result.shouldBeTypeOf<Sykmelder.MedSuspensjon>()
+        result.hpr shouldEqual hprNummer
+        result.ident shouldEqual ident
+        result.suspendert shouldEqual false
     }
 
     @Test
@@ -54,7 +54,7 @@ class SykmelderServiceTest {
 
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
-        assertIs<Sykmelder.FinnesIkke>(result)
+        result.shouldBeTypeOf<Sykmelder.FinnesIkke>()
     }
 
     @Test
@@ -75,9 +75,9 @@ class SykmelderServiceTest {
 
         val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
 
-        assertIs<Sykmelder.MedSuspensjon>(result)
-        assertEquals(hprNummer, result.hpr)
-        assertEquals(ident, result.ident)
-        assertEquals(true, result.suspendert)
+        result.shouldBeTypeOf<Sykmelder.MedSuspensjon>()
+        result.hpr shouldEqual hprNummer
+        result.ident shouldEqual ident
+        result.suspendert shouldEqual true
     }
 }
