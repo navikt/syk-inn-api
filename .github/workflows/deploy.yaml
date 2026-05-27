@@ -44,6 +44,7 @@ jobs:
           team: tsm
 
   deploy-dev:
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev')
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +57,7 @@ jobs:
           VAR: sourceVersionURL=https://github.com/${{ github.repository }}/tree/${{ github.sha }}
 
   deploy-prod:
+    if: github.ref_name == 'main'
     needs: [build, deploy-dev]
     runs-on: ubuntu-latest
     steps:
