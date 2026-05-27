@@ -78,5 +78,5 @@ class PdlCloudClient(
         }
     }
 
-    private suspend fun getToken() = texasClient.requestToken("tsm", "tsm-pdl-cache")
+    private suspend fun getToken() = texasClient.entraIdToken("tsm", "tsm-pdl-cache")
 }

@@ -121,7 +121,7 @@ class HprCloudClient(
     }
 
     private suspend fun getToken() =
-        texasClient.requestToken("teamsykmelding", "syfohelsenettproxy")
+        texasClient.entraIdToken("teamsykmelding", "syfohelsenettproxy")
 
     private fun mapHprSykmelderToSykmelderMedHpr(hprSykmelder: HprSykmelder): SykmelderMedHpr {
         requireNotNull(hprSykmelder.hprNummer) { "HprSykmelder må ha hprNummer" }

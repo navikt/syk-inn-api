@@ -83,5 +83,5 @@ class BtsysCloudClient(
         }
     }
 
-    suspend fun getToken() = texasClient.requestToken("team-rocket", "btsys-api")
+    suspend fun getToken() = texasClient.entraIdToken("team-rocket", "btsys-api")
 }

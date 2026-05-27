@@ -25,13 +25,13 @@ class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val 
 
     private val texasHttpClient = httpClient.config { install(ContentNegotiation) { jackson {} } }
 
-    @WithSpan("Texas.requestToken")
-    suspend fun requestToken(
+    @WithSpan("Texas.naisToken")
+    suspend fun entraIdToken(
         @SpanAttribute("namespace") namespace: String,
-        @SpanAttribute("API") otherApiAppName: String,
+        @SpanAttribute("API") app: String,
     ): TexasToken {
         val cluster = env.runtime.env.nais
-        val target = "api://${cluster}.$namespace.$otherApiAppName/.default"
+        val target = "api://${cluster}.$namespace.$app/.default"
         val requestBody = TokenRequest(identityProvider = "entra_id", target = target)
 
         val response =
@@ -43,6 +43,25 @@ class TexasClient(@Named("RetryHttpClient") httpClient: HttpClient, private val 
         if (!response.status.isSuccess()) {
             response.logNonSuccess(target)
             throw IllegalStateException("Unable to request m2m token for: $target")
+        }
+
+        val body = response.body<TokenResponse>()
+        return TexasToken(body.accessToken)
+    }
+
+    @WithSpan("Texas.maskinporten")
+    suspend fun maskinporten(@SpanAttribute("scopes") scopes: String): TexasToken {
+        val requestBody = TokenRequest(identityProvider = "maskinporten", target = scopes)
+
+        val response =
+            texasHttpClient.post(env.texas().tokenEndpoint) {
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }
+
+        if (!response.status.isSuccess()) {
+            response.logNonSuccess("maskinporten:$scopes")
+            throw IllegalStateException("Unable to request m2m token for: maskinporten:$scopes")
         }
 
         val body = response.body<TokenResponse>()
