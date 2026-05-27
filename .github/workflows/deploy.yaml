@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   test:
-    if: github.ref_name != 'main' && !startsWith(github.ref_name, 'dev')
     runs-on: ubuntu-latest
     steps:
       - uses: navikt/tsm-workflows/actions/gradle/test@main
@@ -45,7 +44,7 @@ jobs:
 
   deploy-dev:
     if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev')
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -58,7 +57,7 @@ jobs:
 
   deploy-prod:
     if: github.ref_name == 'main'
-    needs: [build, deploy-dev]
+    needs: [build, test, deploy-dev]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
