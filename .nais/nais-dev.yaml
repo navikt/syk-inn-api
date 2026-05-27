@@ -95,6 +95,8 @@ spec:
           namespace: tsm
         - application: btsys-api
           namespace: team-rocket
+      external:
+        - host: api.offentlig.test.hpr.nhn.no
   env:
     - name: EXTERNAL_HPR_URL
       value: https://api.offentlig.test.hpr.nhn.no
