@@ -151,8 +151,8 @@ class HprCloudClient(
         )
     }
 
-    private fun HprKodeverk.mapKodeverk(): SykmelderKodeverk {
-        return SykmelderKodeverk(aktiv = this.aktiv, oid = this.oid, verdi = this.verdi)
+    private fun HprKodeverk.mapKodeverk(): SykmelderKode {
+        return SykmelderKode(aktiv = this.aktiv, oid = this.oid, verdi = this.verdi)
     }
 
     private fun HprSykmelder.toNavn(): Navn {

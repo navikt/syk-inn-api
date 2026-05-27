@@ -20,4 +20,4 @@ typealias SykmelderTilleggskompetanse = BehandlerTilleggskompetanse
 
 typealias SykmelderPeriode = BehandlerPeriode
 
-typealias SykmelderKodeverk = BehandlerKode
+typealias SykmelderKode = BehandlerKode

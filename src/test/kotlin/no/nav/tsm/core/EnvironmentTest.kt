@@ -1,6 +1,7 @@
 package no.nav.tsm.core
 
 import com.typesafe.config.ConfigFactory
+import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.ktor.server.config.HoconApplicationConfig
 import kotlin.test.Test
@@ -34,6 +35,8 @@ class EnvironmentTest {
                             "KAFKA_CREDSTORE_PASSWORD" to "credstore-password",
                             "KAFKA_KEYSTORE_PATH" to "/var/run/secrets/kafka/keystore.p12",
                             "NAIS_TOKEN_ENDPOINT" to "https://texas/token",
+                            // Provided by nais-foo.yaml
+                            "EXTERNAL_HPR_URL" to "https://hpr.test",
                             "SOURCE_VERSION_URL" to "real-version",
                         )
                     )
@@ -47,5 +50,8 @@ class EnvironmentTest {
         environment.texas().shouldNotBeNull()
         environment.external().shouldNotBeNull()
         environment.auth().shouldNotBeNull()
+
+        environment.external().hpr shouldEqual "https://hpr.test"
+        environment.runtime.version shouldEqual "real-version"
     }
 }

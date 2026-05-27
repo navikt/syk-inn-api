@@ -67,6 +67,7 @@ spec:
       enabled: true
       runtime: java
 
+  # Used to authorize /admin endpoints with Entra AD OBO-tokens
   azure:
     application:
       enabled: true
@@ -76,6 +77,14 @@ spec:
         groups:
           # EntraAD: nais-team-tsm (developers - same as Zara uses)
           - id: '35c70ac7-e8e6-4cec-933b-86106a97c0d4'
+
+  # Used to access HPR-register directly using maskinporten
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "nhn:hpr/basic"
+        - name: "nhn:hpr/extended"
 
   filesFrom:
     - emptyDir:
@@ -98,5 +107,7 @@ spec:
         - application: btsys-api
           namespace: team-rocket
   env:
+    - name: EXTERNAL_HPR_URL
+      value: https://api.offentlig.hpr.nhn.no
     - name: SOURCE_VERSION_URL
       value: {{ sourceVersionURL }}
