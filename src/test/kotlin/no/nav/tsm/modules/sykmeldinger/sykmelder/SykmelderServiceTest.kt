@@ -15,10 +15,15 @@ import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderServiceTest {
-
     private val hprClient = mockk<HprClient>()
+    private val hprRestClient = mockk<HprClient>()
     private val btsysClient = mockk<BtsysClient>()
-    private val sykmelderService = SykmelderService(btsys = btsysClient, helsenettProxy = hprClient)
+    private val sykmelderService =
+        SykmelderService(
+            btsys = btsysClient,
+            helsenettProxy = hprClient,
+            hprRestClient = hprRestClient,
+        )
 
     @Test
     fun `should return sykmelder with suspensjon info by hpr`() = runTest {
