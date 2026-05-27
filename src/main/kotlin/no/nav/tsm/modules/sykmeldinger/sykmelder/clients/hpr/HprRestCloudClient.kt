@@ -119,8 +119,7 @@ class HprRestCloudClient(
         }
     }
 
-    private suspend fun getToken() =
-        texasClient.requestToken("maskinporten", "nhn:hpr/basic nhn:hpr/extended")
+    private suspend fun getToken() = texasClient.maskinporten("nhn:hpr/basic nhn:hpr/extended")
 
     private fun HprResponse.HelsepersonUtvidet.toBehandler(): SykmelderMedHpr =
         SykmelderMedHpr(

@@ -3,6 +3,7 @@ package no.nav.tsm.plugins.auth
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.matchers.equals.shouldEqual
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -30,7 +31,9 @@ class TexasClientTest {
 
             val payload =
                 texasResponseMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
-            assertEquals("api://prod-gcp.tsm.tsm-pdl-cache/.default", payload.target)
+
+            payload.target shouldEqual "api://prod-gcp.tsm.tsm-pdl-cache/.default"
+            payload.identityProvider shouldEqual "entra_id"
 
             respond(
                 status = HttpStatusCode.OK,
@@ -45,7 +48,35 @@ class TexasClientTest {
         val texas =
             TexasClient(env = simpleUnitTestEnvironment, httpClient = HttpClient(mockEngine) {})
 
-        val response = texas.requestToken("tsm", "tsm-pdl-cache")
+        val response = texas.entraIdToken("tsm", "tsm-pdl-cache")
+        assertEquals("ay.aeuheu", response.token)
+    }
+
+    @Test
+    fun `should exchange token correctly for maskinporten`() = testApplication {
+        val mockEngine = MockEngine { request ->
+            assertEquals(request.url.toString(), simpleUnitTestEnvironment.texas().tokenEndpoint)
+
+            val payload =
+                texasResponseMapper.readValue<TexasClient.TokenRequest>(request.body.toByteArray())
+
+            payload.target shouldEqual "nhn:scoperino nhn:pepperino"
+            payload.identityProvider shouldEqual "maskinporten"
+
+            respond(
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                content =
+                    ByteReadChannel(
+                        """{"access_token":"ay.aeuheu","expires_in":3600,"token_type":"Bearer"}"""
+                    ),
+            )
+        }
+
+        val texas =
+            TexasClient(env = simpleUnitTestEnvironment, httpClient = HttpClient(mockEngine) {})
+
+        val response = texas.maskinporten("nhn:scoperino nhn:pepperino")
         assertEquals("ay.aeuheu", response.token)
     }
 }
