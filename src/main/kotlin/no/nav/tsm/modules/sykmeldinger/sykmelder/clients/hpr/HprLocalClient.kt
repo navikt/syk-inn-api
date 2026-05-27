@@ -77,8 +77,8 @@ class HprLocalClient : HprClient {
 private val aktivLegeGodnkjenninger: List<SykmelderGodkjenning> =
     listOf(
         SykmelderGodkjenning(
-            helsepersonellkategori = SykmelderKodeverk(aktiv = true, oid = 0, verdi = "LE"),
-            autorisasjon = SykmelderKodeverk(aktiv = true, oid = 7704, verdi = "1"),
+            helsepersonellkategori = SykmelderKode(aktiv = true, oid = 0, verdi = "LE"),
+            autorisasjon = SykmelderKode(aktiv = true, oid = 7704, verdi = "1"),
             tillegskompetanse = null,
         )
     )

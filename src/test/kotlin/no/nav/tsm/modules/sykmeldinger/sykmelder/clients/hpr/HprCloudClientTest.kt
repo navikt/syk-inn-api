@@ -50,7 +50,7 @@ class HprCloudClientTest {
 
         val hprClient =
             HprCloudClient(
-                httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { jackson() } },
+                httpClient = HttpClient(mockEngine) {},
                 texasClient = mockk(relaxed = true),
                 environment = simpleUnitTestEnvironment,
             )
