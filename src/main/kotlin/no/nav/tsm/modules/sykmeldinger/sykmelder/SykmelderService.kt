@@ -52,7 +52,11 @@ class SykmelderService(
                                     old.navn.etternavn == it.navn.etternavn ||
                                     old.godkjenninger.size == it.godkjenninger.size
                             }
-                            logger.info("HprRestClient(HPR) succeeded is the same: $isSame")
+                            if (!isSame) {
+                                logger.info(
+                                    "HprRestClient(HPR) succeeded but there was a diff!! HPR: ${sykmelderMedHpr.hprNummer}"
+                                )
+                            }
                         },
                     )
             } catch (e: Exception) {
@@ -110,7 +114,20 @@ class SykmelderService(
                 .getSykmelderByHpr(ident)
                 .fold(
                     ifLeft = { logger.error("HprRestClient(Ident) failed with error: $it") },
-                    ifRight = { logger.info("HprRestClient(Ident) succeeded with result: $it") },
+                    ifRight = {
+                        val isSame = sykmelderMedHpr.let { old ->
+                            old.hprNummer == it.hprNummer ||
+                                old.ident == it.ident ||
+                                old.navn.fornavn == it.navn.fornavn ||
+                                old.navn.etternavn == it.navn.etternavn ||
+                                old.godkjenninger.size == it.godkjenninger.size
+                        }
+                        if (!isSame) {
+                            logger.info(
+                                "HprRestClient(Ident) succeeded but there was a diff!! HPR: ${sykmelderMedHpr.hprNummer}"
+                            )
+                        }
+                    },
                 )
         } catch (e: Exception) {
             logger.error("HprRestClient(Ident) threw an exception, ignoring and continuing", e)
