@@ -44,7 +44,16 @@ class SykmelderService(
                     .getSykmelderByHpr(hpr)
                     .fold(
                         ifLeft = { logger.error("HprRestClient(HPR) failed with error: $it") },
-                        ifRight = { logger.info("HprRestClient(HPR) succeeded with result: $it") },
+                        ifRight = {
+                            val isSame = sykmelderMedHpr.let { old ->
+                                old.hprNummer == it.hprNummer ||
+                                    old.ident == it.ident ||
+                                    old.navn.fornavn == it.navn.fornavn ||
+                                    old.navn.etternavn == it.navn.etternavn ||
+                                    old.godkjenninger.size == it.godkjenninger.size
+                            }
+                            logger.info("HprRestClient(HPR) succeeded is the same: $isSame")
+                        },
                     )
             } catch (e: Exception) {
                 logger.error(
