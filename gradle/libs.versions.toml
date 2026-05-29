@@ -2,7 +2,7 @@
 kotlin = "2.3.21"
 ktor = "3.5.0"
 khealth = "3.0.2"
-logback = "1.5.32"
+logback = "1.5.33"
 logbackEncoder = "9.0"
 postgresR2dbc = "1.1.1.RELEASE"
 postgres = "42.7.11"
@@ -78,6 +78,6 @@ ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
-spotless = { id = "com.diffplug.spotless", version = "8.5.1" }
+spotless = { id = "com.diffplug.spotless", version = "8.6.0" }
 detekt = { id = "dev.detekt", version = "2.0.0-alpha.3" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.54.0" }
