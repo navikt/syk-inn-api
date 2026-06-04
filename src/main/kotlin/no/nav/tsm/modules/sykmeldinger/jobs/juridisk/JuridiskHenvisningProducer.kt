@@ -24,7 +24,7 @@ class JuridiskHenvisningProducer(environment: Environment) {
         val kafkaProperties = Properties(environment.kafka.config)
 
         kafkaProperties.apply {
-            this[ProducerConfig.CLIENT_ID_CONFIG] = "syk-inn-api-juridisk-producer"
+            this[ProducerConfig.CLIENT_ID_CONFIG] = "${environment.runtime.name}-juridisk-producer"
             this[ProducerConfig.ACKS_CONFIG] = "all"
             this[ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG] = "true"
             this[ProducerConfig.COMPRESSION_TYPE_CONFIG] = "gzip"
