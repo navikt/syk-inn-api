@@ -14,14 +14,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: navikt/tsm-workflows/actions/gradle/test@main
 
   build:
     runs-on: ubuntu-latest
     if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev')
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
         with:
@@ -49,7 +49,7 @@ jobs:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: "dev-gcp"
@@ -62,7 +62,7 @@ jobs:
     needs: [build, test, deploy-dev]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: "prod-gcp"
@@ -86,7 +86,7 @@ jobs:
     name: Publish a version of syk-inn-api to GPR for use in testing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: navikt/tsm-workflows/actions/gradle/setup@main
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -117,7 +117,7 @@ jobs:
     needs: build-for-gpr
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: navikt/syk-inn
           fetch-depth: 1
