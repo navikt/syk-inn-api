@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import no.nav.tsm.Testdata.everyValueAnswered
+import no.nav.tsm.Testdata.simpleBehandlerMeta
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding.BehandlerMeta
@@ -331,6 +333,72 @@ class EverythingTest : WithAll() {
     }
 
     @Test
+    fun `Gradert with reisetilskudd should properly propagate through to Kafka`() =
+        testApplication {
+            configureEverythingTest()
+
+            val gradertBehandlingsdager =
+                createCreatePayload(
+                    submitId = "495d7f08-f17d-444f-b480-b1c94108d38a".uuid(),
+                    meta = simpleBehandlerMeta,
+                    values =
+                        everyValueAnswered.copy(
+                            aktivitet =
+                                listOf(
+                                    BehandlerOpprettSykmelding.Aktivitet.Gradert(
+                                        fom = LocalDate.now(),
+                                        tom = LocalDate.now().plusDays(7),
+                                        grad = 50,
+                                        reisetilskudd = true,
+                                    )
+                                ),
+                            arbeidsgiver = null,
+                            yrkesskade = null,
+                            bidiagnoser = emptyList(),
+                            utdypendeSporsmal = null,
+                            tilbakedatering = null,
+                        ),
+                )
+
+            val response = client.postSykmelding(gradertBehandlingsdager)
+            response.status shouldBe HttpStatusCode.OK
+
+            val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
+            created.meta.pasient.ident shouldBe "21037712323"
+            created.meta.sykmelder.hpr shouldBe "9144889"
+            created.meta.legekontorOrgnr shouldBe "123456789"
+
+            val sykmelding =
+                requireNotNull(client.getById(id = created.sykmeldingId, hpr = "9144889"))
+            sykmelding.shouldBeInstanceOf<BehandlerSykmeldingFull>()
+
+            assertSoftly(sykmelding) {
+                // meta
+                meta.pasient.ident shouldBe "21037712323"
+                meta.sykmelder.hpr shouldBe "9144889"
+
+                // aktivitet
+                values.aktivitet shouldHaveSize 1
+                if (values.aktivitet.size > 1) {
+                    val aktivitet = values.aktivitet.first()
+                    aktivitet.shouldBeInstanceOf<BehandlerSykmeldingAktivitet.Gradert>()
+                    aktivitet.fom shouldBe LocalDate.now()
+                    aktivitet.tom shouldBe LocalDate.now().plusDays(7)
+                    aktivitet.grad shouldBe 50
+                    aktivitet.reisetilskudd shouldBe true
+                }
+
+                // utfall
+                utfall.result shouldBe RuleType.OK
+                utfall.cause shouldBe null
+            }
+
+            val record: SykmeldingRecord? = consumeUntil(sykmelding.sykmeldingId)
+            record.shouldNotBeNull()
+            KafkaTestUtils.expectAllValues(sykmelding, record)
+        }
+
+    @Test
     fun `should publish sykmelding before it tries to delete`() = testApplication {
         configureEverythingTest()
 
@@ -456,10 +524,10 @@ private fun createCreatePayload(
     meta: BehandlerMeta,
     values: Values,
 ): String {
-    val paylaod =
+    val payload =
         BehandlerOpprettSykmelding.Payload(submitId = submitId, meta = meta, values = values)
 
-    return testJsonObjectMapper.writeValueAsString(paylaod)
+    return testJsonObjectMapper.writeValueAsString(payload)
 }
 
 object Testdata {

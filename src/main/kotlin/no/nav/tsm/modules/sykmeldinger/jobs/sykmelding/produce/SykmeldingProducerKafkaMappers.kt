@@ -212,10 +212,14 @@ private fun SykInnAktivitet.toAktivitet(): Aktivitet =
         is SykInnAktivitet.Reisetilskudd -> Aktivitet.Reisetilskudd(fom = fom, tom = tom)
     }
 
-private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?): ArbeidsgiverInfo =
-    when {
-        this == null -> ArbeidsgiverInfo.Ingen()
-        this.harFlere ->
+private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?): ArbeidsgiverInfo {
+    if (this == null && meldingTilArbeidsgiver == null) {
+        return ArbeidsgiverInfo.Ingen()
+    }
+
+    return when {
+        // User explicitly has multiple
+        this != null && this.harFlere ->
             ArbeidsgiverInfo.Flere(
                 navn = this.arbeidsgivernavn,
                 meldingTilArbeidsgiver = meldingTilArbeidsgiver,
@@ -224,7 +228,7 @@ private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?):
                 stillingsprosent = null,
                 tiltakArbeidsplassen = null,
             )
-
+        // User does _not_ have multiple, but has provided a message to the employer, assume one
         else ->
             ArbeidsgiverInfo.En(
                 meldingTilArbeidsgiver = meldingTilArbeidsgiver,
@@ -235,6 +239,7 @@ private fun SykInnArbeidsgiver?.toArbeidsgiver(meldingTilArbeidsgiver: String?):
                 tiltakArbeidsplassen = null,
             )
     }
+}
 
 private fun SykInnUtdypendeSporsmal.toUtdypendeOpplysninger(): List<UtdypendeSporsmal>? {
     // TODO: Sanity check mapping between these enums and distinct values

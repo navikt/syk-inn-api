@@ -9,6 +9,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import java.util.*
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
 import no.nav.tsm.sykmelding.input.core.model.*
@@ -95,6 +96,15 @@ object KafkaTestUtils {
                 (expected, actual) ->
                 expected.fom shouldBe actual.fom
                 expected.tom shouldBe actual.tom
+
+                // TODO: Better asserts for other types of aktivitet
+
+                if (expected is BehandlerSykmeldingAktivitet.Gradert) {
+                    val actualGradert = actual.shouldBeInstanceOf<Aktivitet.Gradert>()
+
+                    expected.grad shouldBe actualGradert.grad
+                    expected.reisetilskudd shouldBe actualGradert.reisetilskudd
+                }
             }
 
             if (sykmelding.values.arbeidsgiver?.harFlere == true) {
