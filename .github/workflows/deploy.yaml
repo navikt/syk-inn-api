@@ -31,7 +31,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
       image: ${{ steps.build.outputs.image }}
-      digest: ${{ steps.build.outputs.digest }}
 
   sbom:
     name: Upload SBOM for build
@@ -40,8 +39,7 @@ jobs:
     steps:
       - uses: navikt/tsm-workflows/actions/attest-sign@main
         with:
-          image: ${{ needs.build.outputs.image }}
-          digest: ${{ needs.build.outputs.digest }}
+          image_ref: ${{ needs.build.outputs.image }}
           team: tsm
 
   deploy-dev:
