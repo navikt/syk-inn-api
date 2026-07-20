@@ -169,8 +169,6 @@ class SykmeldingRepo : SykmeldingInsert() {
 
             return inserted.right()
         } catch (e: ExposedR2dbcException) {
-            // TODO: This also catched other violations, for example not-null constraints :/
-
             val cause = e.cause
             if (cause is PostgresqlException) {
                 if (

@@ -51,14 +51,6 @@ class SykmeldingerService(
     suspend fun create(
         sykmelding: UnverifiedSykInnSykmelding
     ): Either<CreateErrors, VerifiedSykInnSykmelding> = either {
-        val alreadyExists = repo.byIdempotencyKey(sykmelding.submitId)
-        if (alreadyExists != null) {
-            logger.info(
-                "Idempotency Key ${sykmelding.submitId} lookup found something, returning early"
-            )
-            return@either alreadyExists
-        }
-
         getSykmeldingVerifyResources<VerifiedSykInnSykmelding>(sykmelding) {
                 sykmelder,
                 previous,
@@ -89,21 +81,28 @@ class SykmeldingerService(
                 inserted.fold(
                     {
                         /**
-                         * If we hit the idempotency constraint, we need to get the existing
-                         * sykmelding by idempotency and return it.
+                         * This when is here to provide exhaustive checks for when enum is updated
                          */
-                        val existing = repo.byIdempotencyKey(sykmelding.submitId)
+                        when (it) {
+                            SykmeldingRepo.InsertErrors.IDEMPOTENCY_HIT -> {
+                                /**
+                                 * If we hit the idempotency constraint, we need to get the existing
+                                 * sykmelding by idempotency and return it.
+                                 */
+                                val existing = repo.byIdempotencyKey(sykmelding.submitId)
 
-                        logger.info(
-                            "Idempotency Key ${sykmelding.submitId} hit constraint (cause: ${it})"
-                        )
-                        ensureNotNull(existing) {
-                            logger.error(
-                                "Idempotency Key ${sykmelding.submitId} hit constraint but doesn't exist, seems sus"
-                            )
-                            CreateErrors.UnknownResourceError
+                                logger.info(
+                                    "Idempotency Key ${sykmelding.submitId} hit constraint (cause: ${it})"
+                                )
+                                ensureNotNull(existing) {
+                                    logger.error(
+                                        "Idempotency Key ${sykmelding.submitId} hit constraint but doesn't exist, seems sus"
+                                    )
+                                    CreateErrors.UnknownResourceError
+                                }
+                                existing
+                            }
                         }
-                        existing
                     },
                     {
                         logger.info(
