@@ -16,7 +16,6 @@ fun Application.module() {
     // Global configuration
     configureDependencies()
     configureMonitoring()
-    configureOpenAPI()
     configureDatabase()
     configureSerialization()
     configureAuthentication()

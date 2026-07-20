@@ -86,11 +86,6 @@ spec:
         - name: "nhn:hpr/basic"
         - name: "nhn:hpr/extended"
 
-  filesFrom:
-    - emptyDir:
-        medium: Memory
-      mountPath: /app/docs
-
   accessPolicy:
     inbound:
       rules:

@@ -39,8 +39,6 @@ dependencies {
     implementation(libs.ktor.server.metrics.micrometer)
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
-    implementation(libs.ktor.server.openapi)
-    implementation(libs.ktor.server.routing.openapi)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.apache)
