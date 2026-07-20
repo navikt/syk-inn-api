@@ -78,12 +78,12 @@ dependencies {
     // ktor-server-netty already resolves elsewhere, to avoid CVEs in the
     // older 4.1.x line (e.g. netty-resolver-dns / netty-codec-dns).
     constraints {
-        implementation("io.netty:netty-resolver-dns:4.2.15.Final")
-        implementation("io.netty:netty-resolver-dns-classes-macos:4.2.15.Final")
-        implementation("io.netty:netty-resolver-dns-native-macos:4.2.15.Final")
-        implementation("io.netty:netty-codec-dns:4.2.15.Final")
-        implementation("io.netty:netty-handler-proxy:4.2.15.Final")
-        implementation("io.netty:netty-codec-socks:4.2.15.Final")
+        implementation("io.netty:netty-resolver-dns:4.2.16.Final")
+        implementation("io.netty:netty-resolver-dns-classes-macos:4.2.16.Final")
+        implementation("io.netty:netty-resolver-dns-native-macos:4.2.16.Final")
+        implementation("io.netty:netty-codec-dns:4.2.16.Final")
+        implementation("io.netty:netty-handler-proxy:4.2.16.Final")
+        implementation("io.netty:netty-codec-socks:4.2.16.Final")
     }
 
     // Test
