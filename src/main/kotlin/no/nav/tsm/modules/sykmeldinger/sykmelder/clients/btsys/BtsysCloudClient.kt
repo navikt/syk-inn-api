@@ -21,7 +21,7 @@ import java.time.LocalDate
 import kotlin.collections.mapOf
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
-import no.nav.tsm.plugins.auth.TexasClient
+import no.nav.tsm.ktor.auth.texas.TexasClient
 
 class BtsysCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,

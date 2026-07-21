@@ -15,7 +15,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 import no.nav.tsm.core.logger
-import no.nav.tsm.core.otel.failSpan
+import no.nav.tsm.ktor.otel.failSpan
 import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
 import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
 import no.nav.tsm.modules.behandler.mappers.toSykInnSykmelding

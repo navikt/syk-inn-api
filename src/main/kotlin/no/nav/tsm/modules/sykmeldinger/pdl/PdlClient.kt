@@ -17,8 +17,8 @@ import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.logger
-import no.nav.tsm.core.otel.failSpan
-import no.nav.tsm.plugins.auth.TexasClient
+import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.otel.failSpan
 
 sealed interface PdlClient {
     enum class PdlErrors {
