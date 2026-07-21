@@ -18,6 +18,7 @@ kotest-assertions = "6.2.2"
 tsm-sykmeldinger-input = "27"
 tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
+tsm-ktor = "0.0.7"
 
 [libraries]
 khealth = { module = "dev.hayden:khealth", version.ref = "khealth" }
@@ -35,6 +36,7 @@ otel-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-in
 tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version.ref = "tsm-sykmeldinger-input" }
 tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser" }
 tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
+tsm-ktor = { module = "no.nav.tsm:ktor", version.ref = "tsm-ktor" }
 
 # Testing
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

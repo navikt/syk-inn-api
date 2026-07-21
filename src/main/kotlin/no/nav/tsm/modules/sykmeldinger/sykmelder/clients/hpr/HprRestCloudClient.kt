@@ -29,7 +29,7 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.common.Navn
 import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.logger
-import no.nav.tsm.plugins.auth.TexasClient
+import no.nav.tsm.ktor.auth.texas.TexasClient
 
 class HprRestCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
