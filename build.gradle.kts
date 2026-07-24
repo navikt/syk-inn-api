@@ -3,7 +3,7 @@ import dev.detekt.gradle.Detekt
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ktor)
+    alias(ktorLibs.plugins.ktor)
     alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.flyway)
     alias(libs.plugins.spotless)
@@ -22,27 +22,21 @@ kotlin {
     jvmToolchain(21)
 }
 
-repositories {
-    mavenCentral()
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release") }
-}
-
 dependencies {
     // Ktor
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.di)
-    implementation(libs.ktor.server.call.id)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.serialization.jackson)
-    implementation(libs.ktor.server.metrics.micrometer)
-    implementation(libs.ktor.server.auth)
-    implementation(libs.ktor.server.auth.jwt)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.apache)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.call.id)
+    implementation(ktorLibs.server.core)
+    implementation(ktorLibs.server.di)
+    implementation(ktorLibs.server.callId)
+    implementation(ktorLibs.server.contentNegotiation)
+    implementation(ktorLibs.serialization.jackson)
+    implementation(ktorLibs.server.metrics.micrometer)
+    implementation(ktorLibs.server.auth)
+    implementation(ktorLibs.server.auth.jwt)
+    implementation(ktorLibs.server.netty)
+    implementation(ktorLibs.client.core)
+    implementation(ktorLibs.client.apache5)
+    implementation(ktorLibs.client.contentNegotiation)
+    implementation(ktorLibs.client.callId)
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
     implementation(libs.caffeine)
@@ -84,8 +78,8 @@ dependencies {
     }
 
     // Test
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.ktor.client.test.mock)
+    testImplementation(ktorLibs.server.testHost)
+    testImplementation(ktorLibs.client.mock)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.testcontainers.postgresql)

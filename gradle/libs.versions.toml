@@ -1,6 +1,5 @@
 [versions]
 kotlin = "2.4.10"
-ktor = "3.5.1"
 khealth = "3.0.2"
 logback = "1.5.38"
 logbackEncoder = "9.0"
@@ -21,19 +20,6 @@ tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
 
 [libraries]
-ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
-ktor-server-di = { module = "io.ktor:ktor-server-di", version.ref = "ktor" }
-ktor-server-call-id = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor" }
-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
-ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
-ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
-ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
-ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-client-apache = { module = "io.ktor:ktor-client-apache5", version.ref = "ktor" }
-ktor-client-call-id = { module = "io.ktor:ktor-client-call-id", version.ref = "ktor" }
-ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
 khealth = { module = "dev.hayden:khealth", version.ref = "khealth" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
@@ -51,8 +37,6 @@ tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser"
 tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
 
 # Testing
-ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
-ktor-client-test-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
@@ -71,7 +55,6 @@ flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.
 kafka-client = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka" }
 
 [plugins]
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
