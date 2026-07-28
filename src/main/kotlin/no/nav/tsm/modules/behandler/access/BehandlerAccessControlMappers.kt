@@ -1,6 +1,6 @@
 package no.nav.tsm.modules.behandler.access
 
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsgiver
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingArbeidsrelatertArsak

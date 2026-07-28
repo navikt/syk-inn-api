@@ -14,7 +14,7 @@ import io.ktor.server.routing.routing
 import java.time.OffsetDateTime
 import java.util.UUID
 import no.nav.tsm.core.jobs.JobStatus
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.db.JobRepository
 import no.nav.tsm.modules.admin.service.JobName
 import no.nav.tsm.modules.admin.service.JobUpdateAction

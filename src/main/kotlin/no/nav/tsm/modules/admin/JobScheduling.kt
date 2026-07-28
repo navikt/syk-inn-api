@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.service.JobSchedulerService
 
 fun Application.configureJobScheduling() {

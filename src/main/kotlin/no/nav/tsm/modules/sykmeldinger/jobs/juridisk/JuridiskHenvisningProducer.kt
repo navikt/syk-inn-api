@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Properties
 import java.util.UUID
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.regulus.regula.juridisk.JuridiskVurdering
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig

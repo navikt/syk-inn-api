@@ -7,14 +7,14 @@ import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.auth.entra.entraMachineToken
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.ktor.otel.failSpan
 import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
 import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
@@ -27,7 +27,6 @@ import no.nav.tsm.modules.sykmeldinger.SykmeldingerService
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.rules.toSykInnRuleResult
-import no.nav.tsm.plugins.auth.MACHINE_TOKEN_AUTH
 
 private val logger = logger()
 
@@ -36,7 +35,7 @@ fun Application.configureBehandlerRoutes() {
     val sykmeldingerService: SykmeldingerService by dependencies
 
     routing {
-        authenticate(MACHINE_TOKEN_AUTH) {
+        entraMachineToken {
             route("/api/sykmelding") {
                 post {
                     either<GenericHttpError, BehandlerSykmeldingFull> {

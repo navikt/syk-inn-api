@@ -12,11 +12,15 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.server.testing.testApplication
 import io.ktor.utils.io.ByteReadChannel
+import io.mockk.coEvery
 import io.mockk.mockk
 import java.time.LocalDate
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
+import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.auth.texas.TexasToken
 import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
 
@@ -43,10 +47,18 @@ class PdlCloudClientTest {
             )
         )
 
+    val texasMock = mockk<TexasClient>()
+
+    @BeforeTest
+    fun setup() {
+        coEvery { texasMock.entraIdToken(any(), any()) } returns TexasToken("test-token")
+    }
+
     @Test
     fun `should properly deserialize response`() = testApplication {
         val mockEngine = MockEngine { request ->
             assertEquals("/api/person", request.url.fullPath)
+            request.headers["Authorization"] shouldBe "Bearer test-token"
 
             respond(
                 status = HttpStatusCode.OK,
@@ -58,7 +70,7 @@ class PdlCloudClientTest {
         val pdlClient =
             PdlCloudClient(
                 httpClient = HttpClient(mockEngine) {},
-                texasClient = mockk(relaxed = true),
+                texasClient = texasMock,
                 environment = simpleUnitTestEnvironment,
             )
 
@@ -72,6 +84,7 @@ class PdlCloudClientTest {
     fun `404 should result in not found`() = testApplication {
         val mockEngine = MockEngine { request ->
             assertEquals("/api/person", request.url.fullPath)
+            request.headers["Authorization"] shouldBe "Bearer test-token"
 
             respondError(HttpStatusCode.NotFound)
         }
@@ -79,7 +92,7 @@ class PdlCloudClientTest {
         val pdlClient =
             PdlCloudClient(
                 httpClient = HttpClient(mockEngine) {},
-                texasClient = mockk(relaxed = true),
+                texasClient = texasMock,
                 environment = simpleUnitTestEnvironment,
             )
 

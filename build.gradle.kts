@@ -45,7 +45,8 @@ dependencies {
     implementation(libs.tsm.sykmeldinger.input)
     implementation(libs.tsm.diagnoser)
     implementation(libs.tsm.regula)
-    implementation(libs.tsm.ktor)
+    implementation(tsmKtorLibs.core)
+    implementation(tsmKtorLibs.auth)
 
     // Database and such
     implementation(libs.flyway.postgres)

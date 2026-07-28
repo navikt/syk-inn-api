@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
 import no.nav.tsm.modules.sykmeldinger.db.status.ReasonJsonb
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus

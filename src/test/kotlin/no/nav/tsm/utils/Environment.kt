@@ -4,13 +4,11 @@ import io.mockk.mockk
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.ExternalApi
 import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.core.Texas
+import no.nav.tsm.ktor.nais.RuntimeCluster
 
 val simpleUnitTestEnvironment =
     Environment(
-        runtime = Runtime(env = RuntimeEnvironments.PROD, name = "test-app", version = "testy-v0"),
-        texas = { Texas(tokenEndpoint = "https://test.token.endpoint") },
+        runtime = Runtime(env = RuntimeCluster.PROD, name = "test-app", version = "testy-v0"),
         kafka = mockk(relaxed = true),
         jobs = mockk(relaxed = true),
         postgres = mockk(relaxed = true),

@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import java.time.LocalDate
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 
 class PdlLocalClient : PdlClient {
     private val logger = logger()

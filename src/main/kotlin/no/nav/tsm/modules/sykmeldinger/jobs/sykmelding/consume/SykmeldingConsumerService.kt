@@ -13,9 +13,9 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.RuntimeEnvironments
-import no.nav.tsm.core.logger
 import no.nav.tsm.core.utils.sykmeldingCutoffDate
+import no.nav.tsm.ktor.logger
+import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
@@ -112,7 +112,7 @@ class SykmeldingConsumerService(
     }
 
     private fun handleError(resourceError: RecordResourceErrors, key: String) {
-        if (environment.runtime.env == RuntimeEnvironments.DEV && resourceError.skippableInDev) {
+        if (environment.runtime.env == RuntimeCluster.DEV && resourceError.skippableInDev) {
             logger.warn(
                 "Found skippable error in dev: ${resourceError.javaClass.simpleName} (${key}), ignoring!"
             )

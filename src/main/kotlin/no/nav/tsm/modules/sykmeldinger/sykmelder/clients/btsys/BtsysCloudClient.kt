@@ -20,8 +20,8 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import kotlin.collections.mapOf
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.logger
 import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.logger
 
 class BtsysCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,

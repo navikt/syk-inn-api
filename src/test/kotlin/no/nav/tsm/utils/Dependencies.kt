@@ -16,8 +16,8 @@ import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.ProducerJob
 import no.nav.tsm.core.Runtime
-import no.nav.tsm.core.RuntimeEnvironments
 import no.nav.tsm.core.SykmeldingConfig
+import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.module
 import no.nav.tsm.plugins.auth.configureAuthentication
 import no.nav.tsm.plugins.configureDependencies
@@ -50,7 +50,7 @@ fun Application.configureFullIntegrationTests(
 
 fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
     Environment(
-        runtime = Runtime(env = RuntimeEnvironments.LOCAL, name = "test-app", version = "testy-v0"),
+        runtime = Runtime(env = RuntimeCluster.LOCAL, name = "test-app", version = "testy-v0"),
         postgres =
             PostgresConfig(
                 jdbc = postgres.jdbcUrl,
@@ -79,7 +79,6 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                 juridiskProducer = ProducerJob(delay = 500.milliseconds, hungTimeout = 1.hours),
                 sykmeldingDeleter = DeleterJob(interval = 250.milliseconds),
             ),
-        texas = { mockk() },
         external = { mockk() },
         auth = { mockk() },
     )

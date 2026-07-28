@@ -47,7 +47,6 @@ class EnvironmentTest {
         val environment = initializeEnvironment(applicationConfig)
 
         // Poke lazy envs as well to ensure they are properly configured
-        environment.texas().shouldNotBeNull()
         environment.external().shouldNotBeNull()
         environment.auth().shouldNotBeNull()
 

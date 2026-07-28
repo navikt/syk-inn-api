@@ -5,7 +5,7 @@ import arrow.core.raise.either
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
