@@ -3,7 +3,7 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 import arrow.core.Either
 import arrow.core.right
 import java.time.LocalDate
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 
 class BtsysLocalClient : BtsysClient {
     private val logger = logger()

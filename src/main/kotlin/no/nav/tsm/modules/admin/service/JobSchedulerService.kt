@@ -10,7 +10,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import no.nav.tsm.core.jobs.Job
 import no.nav.tsm.core.jobs.JobStatus
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.db.JobRepository
 
 class JobSchedulerService(

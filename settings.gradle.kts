@@ -1,5 +1,8 @@
 rootProject.name = "syk-inn-api"
 
+val ktorVersion = "3.5.1"
+val tsmKtorVersion = "0.0.23"
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
@@ -8,6 +11,15 @@ dependencyResolutionManagement {
     }
 
     versionCatalogs {
-        create("ktorLibs").from("io.ktor:ktor-version-catalog:3.5.1")
+        create("ktorLibs").from("io.ktor:ktor-version-catalog:${ktorVersion}")
+        create("tsmKtorLibs").from("no.nav.tsm:ktor-version-catalog:${tsmKtorVersion}")
+    }
+}
+
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://jitpack.io")
     }
 }

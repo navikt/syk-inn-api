@@ -2,7 +2,7 @@ package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import java.util.*
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta.*
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SupportedSpmType.*

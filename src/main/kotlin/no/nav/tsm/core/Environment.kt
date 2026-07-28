@@ -5,14 +5,10 @@ import io.ktor.server.config.*
 import io.ktor.server.plugins.di.*
 import java.util.*
 import kotlin.time.Duration
+import no.nav.tsm.ktor.nais.RuntimeCluster
+import no.nav.tsm.ktor.nais.getRuntimeCluster
 
-enum class RuntimeEnvironments(val nais: String) {
-    LOCAL("local"),
-    DEV("dev-gcp"),
-    PROD("prod-gcp"),
-}
-
-class Runtime(val env: RuntimeEnvironments, val name: String, val version: String)
+class Runtime(val env: RuntimeCluster, val name: String, val version: String)
 
 class SykmeldingConfig(val retention: Duration)
 
@@ -25,8 +21,6 @@ class PostgresConfig(
     val password: String,
     val schema: String,
 )
-
-class Texas(val tokenEndpoint: String)
 
 class ExternalApi(
     val tsmPdlCache: String,
@@ -59,7 +53,6 @@ class Environment(
     val kafka: KafkaConfig,
     val postgres: PostgresConfig,
     val sykmeldingConfig: SykmeldingConfig,
-    val texas: () -> Texas,
     val external: () -> ExternalApi,
     val auth: () -> Auth,
 )
@@ -98,7 +91,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
     return Environment(
         runtime =
             Runtime(
-                env = config.inferRuntimeEnvironment(),
+                env = getRuntimeCluster(),
                 name = config.property("app.name").getString(),
                 version = config.property("app.version").getString(),
             ),
@@ -119,9 +112,6 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             ),
         sykmeldingConfig =
             SykmeldingConfig(retention = config.property("app.sykmelding.retention").getAs()),
-        texas = {
-            Texas(tokenEndpoint = config.property("external.texas.tokenEndpoint").getString())
-        },
         external = {
             ExternalApi(
                 tsmPdlCache = config.property("external.tsmPdlCache").getString(),
@@ -146,18 +136,5 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
 fun Application.isLocal(): Boolean {
     val env: Environment by dependencies
 
-    return env.runtime.env == RuntimeEnvironments.LOCAL
-}
-
-private fun ApplicationConfig.inferRuntimeEnvironment(): RuntimeEnvironments {
-    return when (val configEnv = this.property("app.runtime").getString()) {
-        "local" -> RuntimeEnvironments.LOCAL
-        "prod-gcp" -> RuntimeEnvironments.PROD
-        "dev-gcp" -> RuntimeEnvironments.DEV
-        else -> {
-            throw IllegalStateException(
-                "Unexpected 'app.runtime' configuration: ${configEnv}. Should be one of 'local', 'dev-gcp' or 'prod-gcp'"
-            )
-        }
-    }
+    return env.runtime.env == RuntimeCluster.LOCAL
 }

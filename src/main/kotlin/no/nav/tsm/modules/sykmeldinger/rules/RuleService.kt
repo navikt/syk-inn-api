@@ -5,7 +5,7 @@ import arrow.core.left
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDateTime
-import no.nav.tsm.core.logger
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
