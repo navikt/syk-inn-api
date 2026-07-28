@@ -30,8 +30,6 @@ dependencies {
     implementation(ktorLibs.server.contentNegotiation)
     implementation(ktorLibs.serialization.jackson)
     implementation(ktorLibs.server.metrics.micrometer)
-    implementation(ktorLibs.server.auth)
-    implementation(ktorLibs.server.auth.jwt)
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.client.core)
     implementation(ktorLibs.client.apache5)

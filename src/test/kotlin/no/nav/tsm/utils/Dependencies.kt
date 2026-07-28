@@ -19,7 +19,7 @@ import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.module
-import no.nav.tsm.plugins.auth.configureAuthentication
+import no.nav.tsm.plugins.configureAuthentication
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureSerialization
 import org.testcontainers.kafka.ConfluentKafkaContainer

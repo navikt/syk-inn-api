@@ -49,6 +49,6 @@ class JobAdminRoutesTest : WithPostgresql() {
         val body = response.body<PoisonedSykmelding>()
 
         body.id.toString() shouldEqual "8bb6fddc-2f59-4439-9e75-b4ddebe0d276"
-        body.reason shouldBe "test reason, by local-symfoni-user"
+        body.reason shouldBe "test reason, by stub.user@example.com"
     }
 }

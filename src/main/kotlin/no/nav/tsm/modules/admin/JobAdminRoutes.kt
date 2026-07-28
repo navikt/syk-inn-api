@@ -2,7 +2,6 @@ package no.nav.tsm.modules.admin
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -14,14 +13,14 @@ import io.ktor.server.routing.routing
 import java.time.OffsetDateTime
 import java.util.UUID
 import no.nav.tsm.core.jobs.JobStatus
+import no.nav.tsm.ktor.auth.entra.entraOnBehalfOf
+import no.nav.tsm.ktor.auth.entra.obo.onBehalfOfUser
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.db.JobRepository
 import no.nav.tsm.modules.admin.service.JobName
 import no.nav.tsm.modules.admin.service.JobUpdateAction
 import no.nav.tsm.modules.admin.service.JobUpdatePayload
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
-import no.nav.tsm.plugins.auth.INTERNAL_SYMFONI_AUTH
-import no.nav.tsm.plugins.auth.internalSymfoniUser
 
 data class JobRunners(val runner: String, val state: JobStatus, val updatedAt: OffsetDateTime)
 
@@ -38,7 +37,7 @@ fun Application.configureJobAdminRoutes() {
     val poisonPillRepository: SykmeldingPoisonPillRepo by dependencies
 
     routing {
-        authenticate(INTERNAL_SYMFONI_AUTH) {
+        entraOnBehalfOf {
             route("/internal/admin/poison-pills/{uuid}") {
                 put {
                     val uuid =
@@ -48,9 +47,9 @@ fun Application.configureJobAdminRoutes() {
                     class Payload(val reason: String)
                     val reason = call.receive<Payload>().reason
 
-                    val principal = internalSymfoniUser()
+                    val principal = call.onBehalfOfUser()
                     val poisoned =
-                        poisonPillRepository.poison(uuid, "${reason}, by ${principal.userId}")
+                        poisonPillRepository.poison(uuid, "${reason}, by ${principal.email}")
 
                     call.respond(HttpStatusCode.OK, poisoned)
                 }
@@ -89,13 +88,13 @@ fun Application.configureJobAdminRoutes() {
                             JobUpdateAction.STOP -> JobStatus.STOPPED
                         }
 
-                    val principal = internalSymfoniUser()
+                    val principal = call.onBehalfOfUser()
 
                     logger.info(
                         "User ${principal.name} has requested to change the status of job $name to $desiredState"
                     )
 
-                    jobRepository.updateJob(name, desiredState, principal.userId)
+                    jobRepository.updateJob(name, desiredState, principal.email)
 
                     call.respond(HttpStatusCode.Accepted, mapOf("ok" to true))
                 }
