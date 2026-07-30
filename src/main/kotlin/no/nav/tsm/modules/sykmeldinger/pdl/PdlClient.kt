@@ -16,7 +16,7 @@ import io.ktor.server.plugins.di.annotations.*
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
-import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.ktor.otel.failSpan
 
@@ -31,7 +31,7 @@ sealed interface PdlClient {
 
 class PdlCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
-    private val texasClient: TexasClient,
+    private val texasClient: Texas,
     private val environment: Environment,
 ) : PdlClient {
     private val logger = logger()

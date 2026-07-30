@@ -1,7 +1,7 @@
 rootProject.name = "syk-inn-api"
 
 val ktorVersion = "3.5.1"
-val tsmKtorVersion = "1.0.0"
+val tsmKtorVersion = "1.0.1"
 
 dependencyResolutionManagement {
     repositories {
@@ -22,4 +22,8 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://jitpack.io")
     }
+}
+
+plugins {
+    id("io.github.ben-manes.versions.settings") version "0.56.0"
 }

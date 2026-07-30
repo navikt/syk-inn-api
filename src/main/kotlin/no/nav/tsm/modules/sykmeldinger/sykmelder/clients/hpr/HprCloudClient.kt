@@ -21,12 +21,12 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.common.Navn
 import no.nav.tsm.core.common.SimpleNavn
-import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.logger
 
 class HprCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
-    private val texasClient: TexasClient,
+    private val texasClient: Texas,
     private val environment: Environment,
 ) : HprClient {
     private val logger = logger()

@@ -19,7 +19,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import no.nav.tsm.ktor.auth.texas.TexasClient
+import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.auth.texas.TexasToken
 import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
@@ -47,7 +47,7 @@ class PdlCloudClientTest {
             )
         )
 
-    val texasMock = mockk<TexasClient>()
+    val texasMock = mockk<Texas>()
 
     @BeforeTest
     fun setup() {
