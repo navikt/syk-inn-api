@@ -3,6 +3,7 @@ package no.nav.tsm.modules.admin.service
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -37,11 +38,20 @@ class JobSchedulerService(
             launch {
                 job.status.collect { newStatus ->
                     logger.debug("Job(${job.jobName}) status changed to $newStatus")
-                    jobRepository.updateJobStatus(
-                        runner = runner,
-                        jobName = job.jobName,
-                        jobStatus = newStatus,
-                    )
+                    try {
+                        jobRepository.updateJobStatus(
+                            runner = runner,
+                            jobName = job.jobName,
+                            jobStatus = newStatus,
+                        )
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        logger.error(
+                            "Failed to persist status $newStatus for Job(${job.jobName})",
+                            e,
+                        )
+                    }
                 }
             }
         }
@@ -51,9 +61,18 @@ class JobSchedulerService(
         }
 
         while (isActive) {
-            updateJobs()
+            try {
+                updateJobs()
+                updateJobStatusTimestamps()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                logger.error(
+                    "Job scheduler tick failed, keeping scheduler alive and retrying in $updateInterval",
+                    e,
+                )
+            }
             delay(updateInterval)
-            updateJobStatusTimestamps()
         }
     }
 
