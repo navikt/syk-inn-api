@@ -59,7 +59,7 @@ class EverythingTest : WithAll() {
     private fun ApplicationTestBuilder.configureEverythingTest() {
         client = testClient()
 
-        application { configureFullIntegrationTests(postgres, kafka) }
+        configureFullIntegrationTests(postgres, kafka)
     }
 
     private suspend fun HttpClient.postSykmelding(payload: String): HttpResponse =

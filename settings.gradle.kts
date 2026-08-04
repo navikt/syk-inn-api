@@ -1,7 +1,7 @@
 rootProject.name = "syk-inn-api"
 
 val ktorVersion = "3.5.1"
-val tsmKtorVersion = "1.0.1"
+val tsmKtorVersion = "1.0.17"
 
 dependencyResolutionManagement {
     repositories {

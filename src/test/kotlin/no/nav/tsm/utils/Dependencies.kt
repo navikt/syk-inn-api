@@ -1,7 +1,10 @@
 package no.nav.tsm.utils
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.*
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.di.*
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.mockk
 import java.util.Properties
 import kotlin.time.Duration.Companion.days
@@ -37,15 +40,28 @@ fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer)
     // #1: Postgres specific tests will have to provide their own "in test" set of modules
 }
 
-fun Application.configureFullIntegrationTests(
+fun ApplicationTestBuilder.configureFullIntegrationTests(
     postgres: PostgreSQLContainer,
     kafka: ConfluentKafkaContainer,
 ) {
+    val hocon =
+        """
+        |kafka.config {
+        |  "bootstrap.servers" = "${WithAll.kafka.bootstrapServers}"
+        |  "security.protocol" = "PLAINTEXT"
+        |}
+        """
+            .trimMargin()
+
+    environment { config = HoconApplicationConfig(ConfigFactory.parseString(hocon)) }
+
     // Integration test specific Environment configuration
-    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, kafka) } }
+    application.dependencies {
+        provide<Environment>() { createIntegrationEnvironment(postgres, kafka) }
+    }
 
     // #2: Postgresql + Kafka tests just set up the entire application
-    module()
+    application.module()
 }
 
 fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
@@ -80,5 +96,4 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                 sykmeldingDeleter = DeleterJob(interval = 250.milliseconds),
             ),
         external = { mockk() },
-        auth = { mockk() },
     )

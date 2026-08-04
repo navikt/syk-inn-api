@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.tsm.regula)
     implementation(tsmKtorLibs.core)
     implementation(tsmKtorLibs.auth)
+    implementation(tsmKtorLibs.kafka)
 
     // Database and such
     implementation(libs.flyway.postgres)

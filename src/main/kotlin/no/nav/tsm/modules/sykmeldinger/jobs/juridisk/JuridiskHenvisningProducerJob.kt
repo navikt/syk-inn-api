@@ -12,6 +12,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
+import no.nav.tsm.ktor.kafka.producer.KafkaRecordProducer
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.service.JobName
 import no.nav.tsm.regulus.regula.toJuridiskVurdering
@@ -21,7 +22,7 @@ const val JURIDISK_HENVISNING_VERSION = "1.0.0"
 const val JURIDISK_HENVISNING_KILDE = "syk-inn-api"
 
 class JuridiskHenvisningProducerJob(
-    private val juridiskHenvisningProducer: JuridiskHenvisningProducer,
+    private val juridiskHenvisningProducer: KafkaRecordProducer<JuridiskHenvisningRecord>,
     private val juridiskHenvisningJobRepo: JuridiskHenvisningJobRepo,
     private val environment: Environment,
     applicationScope: CoroutineScope,
@@ -88,7 +89,10 @@ class JuridiskHenvisningProducerJob(
                     )
                 }
 
-            juridiskHenvisningProducer.sendJuridiskVurderinger(sykmeldingId, juridiskVurderinger)
+            juridiskHenvisningProducer.send(
+                sykmeldingId.toString(),
+                JuridiskHenvisningRecord(juridiskVurderinger),
+            )
             juridiskHenvisningJobRepo.updateStatus(sykmeldingId, JuridiskVurderingStatus.DONE)
 
             return next to true
