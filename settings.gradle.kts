@@ -1,6 +1,6 @@
 rootProject.name = "syk-inn-api"
 
-val ktorVersion = "3.5.1"
+val ktorVersion = "3.5.2"
 val tsmKtorVersion = "1.0.17"
 
 dependencyResolutionManagement {
@@ -25,5 +25,5 @@ pluginManagement {
 }
 
 plugins {
-    id("io.github.ben-manes.versions.settings") version "0.56.0"
+    id("io.github.ben-manes.versions.settings") version "0.58.0"
 }
