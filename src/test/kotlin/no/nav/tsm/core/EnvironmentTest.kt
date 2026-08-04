@@ -48,9 +48,7 @@ class EnvironmentTest {
 
         // Poke lazy envs as well to ensure they are properly configured
         environment.external().shouldNotBeNull()
-        environment.auth().shouldNotBeNull()
 
-        environment.external().hpr shouldEqual "https://hpr.test"
         environment.runtime.version shouldEqual "real-version"
     }
 }

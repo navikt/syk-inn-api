@@ -67,14 +67,6 @@ spec:
       tenant: trygdeetaten.no
       allowAllUsers: true
 
-  # Used to access HPR-register directly using maskinporten
-  maskinporten:
-    enabled: true
-    scopes:
-      consumes:
-        - name: "nhn:hpr/basic"
-        - name: "nhn:hpr/extended"
-
   accessPolicy:
     inbound:
       rules:
@@ -90,10 +82,6 @@ spec:
           namespace: tsm
         - application: btsys-api
           namespace: team-rocket
-      external:
-        - host: api.offentlig.test.hpr.nhn.no
   env:
-    - name: EXTERNAL_HPR_URL
-      value: https://api.offentlig.test.hpr.nhn.no
     - name: SOURCE_VERSION_URL
       value: {{ sourceVersionURL }}

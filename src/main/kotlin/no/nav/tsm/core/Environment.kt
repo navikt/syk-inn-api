@@ -22,16 +22,7 @@ class PostgresConfig(
     val schema: String,
 )
 
-class ExternalApi(
-    val tsmPdlCache: String,
-    val helsenettproxy: String,
-    val btsys: String,
-    val hpr: String,
-)
-
-class EntraAuth(val issuer: String, val jwksUri: String, val audience: String)
-
-class Auth(val entra: EntraAuth)
+class ExternalApi(val tsmPdlCache: String, val helsenettproxy: String, val btsys: String)
 
 class ProducerJob(val delay: Duration, val hungTimeout: Duration)
 
@@ -54,7 +45,6 @@ class Environment(
     val postgres: PostgresConfig,
     val sykmeldingConfig: SykmeldingConfig,
     val external: () -> ExternalApi,
-    val auth: () -> Auth,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -117,24 +107,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 tsmPdlCache = config.property("external.tsmPdlCache").getString(),
                 helsenettproxy = config.property("external.syfoHelsenettproxy").getString(),
                 btsys = config.property("external.btsys").getString(),
-                hpr = config.property("external.hpr").getString(),
-            )
-        },
-        auth = {
-            Auth(
-                entra =
-                    EntraAuth(
-                        audience = config.property("auth.entra.audience").getString(),
-                        jwksUri = config.property("auth.entra.openid.jwks").getString(),
-                        issuer = config.property("auth.entra.openid.issuer").getString(),
-                    )
             )
         },
     )
-}
-
-fun Application.isLocal(): Boolean {
-    val env: Environment by dependencies
-
-    return env.runtime.env == RuntimeCluster.LOCAL
 }
