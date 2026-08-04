@@ -4,6 +4,8 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.toJavaDuration
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
@@ -68,7 +70,8 @@ class JobRepository {
 
     suspend fun deleteOldJobsRunners() = dbQuery {
         JobStatusTable.deleteReturning {
-                JobStatusTable.updatedAt less Instant.now().minusSeconds(3600)
+                JobStatusTable.updatedAt less
+                    Instant.now().minus(3600.milliseconds.toJavaDuration())
             }
             .map {
                 RunnerJobStatus(

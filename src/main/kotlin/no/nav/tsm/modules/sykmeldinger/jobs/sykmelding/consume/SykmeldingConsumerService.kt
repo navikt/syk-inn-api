@@ -7,10 +7,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.utils.sykmeldingCutoffDate
@@ -34,44 +31,14 @@ class SykmeldingConsumerService(
             try {
                 while (isActive) {
                     val records = consumer.poll()
-                    handleRecords(records)
+                    for ((key, sykmelding) in records) {
+                        handleRecord(key, sykmelding)
+                    }
                 }
             } finally {
                 withContext(NonCancellable) { consumer.unsubscribe() }
             }
         }
-
-    @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
-    suspend private fun handleRecords(records: List<Pair<String, SykmeldingRecord?>>) {
-        val latest: Map<String, SykmeldingRecord?> =
-            records.filter { it.second?.let { !isOverRetentionPeriod(it) } ?: true }.toMap()
-
-        coroutineScope {
-            latest.entries
-                .chunked(50)
-                .map { batch ->
-                    launch(Dispatchers.IO) {
-                        val inserts =
-                            batch
-                                .filter { it.value != null }
-                                .mapNotNull { it.value }
-                                .mapNotNull {
-                                    sykmeldingConsumerResourcesService
-                                        .getResourcesForSykmelding(it)
-                                        .getOrElse { resourceError ->
-                                            handleError(resourceError, it.sykmelding.id)
-                                            return@getOrElse null
-                                        }
-                                        ?.toVerifiedSykmelding()
-                                }
-                        val deletes = batch.filter { it.value == null }
-                        sykmeldingConsumerRepo.batchInsert(inserts)
-                        sykmeldingConsumerRepo.batchDelete(deletes.map { UUID.fromString(it.key) })
-                    }
-                }
-                .joinAll()
-        }
-    }
 
     @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
     private suspend fun handleRecord(
