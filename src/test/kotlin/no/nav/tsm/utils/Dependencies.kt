@@ -1,19 +1,15 @@
 package no.nav.tsm.utils
 
-import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.*
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.di.*
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.mockk
-import java.util.Properties
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import no.nav.tsm.core.DeleterJob
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.JobsConfig
-import no.nav.tsm.core.KafkaConfig
 import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
 import no.nav.tsm.core.PostgresR2DBCConfig
@@ -25,12 +21,11 @@ import no.nav.tsm.module
 import no.nav.tsm.plugins.configureAuthentication
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureSerialization
-import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 
 fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer) {
     // Integration test specific Environment configuration
-    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres, null) } }
+    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres) } }
 
     // Global
     configureAuthentication()
@@ -40,31 +35,15 @@ fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer)
     // #1: Postgres specific tests will have to provide their own "in test" set of modules
 }
 
-fun ApplicationTestBuilder.configureFullIntegrationTests(
-    postgres: PostgreSQLContainer,
-    kafka: ConfluentKafkaContainer,
-) {
-    val hocon =
-        """
-        |kafka.config {
-        |  "bootstrap.servers" = "${WithAll.kafka.bootstrapServers}"
-        |  "security.protocol" = "PLAINTEXT"
-        |}
-        """
-            .trimMargin()
-
-    environment { config = HoconApplicationConfig(ConfigFactory.parseString(hocon)) }
-
+fun ApplicationTestBuilder.configureFullIntegrationTests(postgres: PostgreSQLContainer) {
     // Integration test specific Environment configuration
-    application.dependencies {
-        provide<Environment>() { createIntegrationEnvironment(postgres, kafka) }
-    }
+    application.dependencies { provide<Environment>() { createIntegrationEnvironment(postgres) } }
 
     // #2: Postgresql + Kafka tests just set up the entire application
     application.module()
 }
 
-fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: ConfluentKafkaContainer?) =
+fun createIntegrationEnvironment(postgres: PostgreSQLContainer) =
     Environment(
         runtime = Runtime(env = RuntimeCluster.LOCAL, name = "test-app", version = "testy-v0"),
         postgres =
@@ -80,14 +59,7 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer, kafka: Confluent
                 password = postgres.password,
                 schema = "public",
             ),
-        kafka =
-            KafkaConfig(
-                config =
-                    if (kafka != null)
-                        Properties().apply { this["bootstrap.servers"] = kafka.bootstrapServers }
-                    else mockk(),
-                sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
-            ),
+        sykmeldingConsumer = KafkaSykmeldingConsumer(longPoll = 1000.milliseconds),
         sykmeldingConfig = SykmeldingConfig(retention = 14.days),
         jobs =
             JobsConfig(

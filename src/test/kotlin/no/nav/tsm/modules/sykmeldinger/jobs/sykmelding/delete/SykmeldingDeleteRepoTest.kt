@@ -30,21 +30,22 @@ import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.SykmeldingConsumerRepo
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
+import no.nav.tsm.utils.createIntegrationEnvironment
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
-class SykmeldingDeleteRepoTest : WithPostgresql() {
-    companion object {
-        init {
+class SykmeldingDeleteRepoTest {
+    val postgres =
+        Postgres().apply {
             runMigrations(true)
             connect()
         }
-    }
+    val env = createIntegrationEnvironment(postgres.container)
 
-    private val repo = SykmeldingDeleteRepo(config)
+    private val repo = SykmeldingDeleteRepo(env)
     private val consumerRepo = SykmeldingConsumerRepo()
 
     @BeforeTest

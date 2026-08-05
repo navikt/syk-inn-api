@@ -1,14 +1,10 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.getOrElse
+import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanKind
-import io.opentelemetry.instrumentation.annotations.SpanAttribute
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.util.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.utils.sykmeldingCutoffDate
 import no.nav.tsm.ktor.logger
@@ -18,34 +14,17 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
 class SykmeldingConsumerService(
     private val environment: Environment,
-    private val consumer: SykmeldingConsumer,
     private val sykmeldingConsumerRepo: SykmeldingConsumerRepo,
     private val sykmeldingConsumerResourcesService: SykmeldingConsumerResourcesService,
     private val sykmeldingPoisonPillRepo: SykmeldingPoisonPillRepo,
 ) {
     private val logger = logger()
 
-    suspend fun consume() =
-        withContext(Dispatchers.IO) {
-            consumer.subscribe()
-            try {
-                while (isActive) {
-                    val records = consumer.poll()
-                    for ((key, sykmelding) in records) {
-                        handleRecord(key, sykmelding)
-                    }
-                }
-            } finally {
-                withContext(NonCancellable) { consumer.unsubscribe() }
-            }
-        }
-
     @WithSpan(kind = SpanKind.CONSUMER, inheritContext = false)
-    private suspend fun handleRecord(
-        @SpanAttribute("sykmelding.id") key: String,
-        sykmelding: SykmeldingRecord?,
-    ) {
-        if (sykmelding == null) return deleteSykmelding(key)
+    suspend fun handleRecord(sykmelding: SykmeldingRecord) {
+        val span = Span.current()
+        val key = sykmelding.sykmelding.id
+        span.setAttribute("sykmelding.id", key)
 
         if (isOverRetentionPeriod(sykmelding)) {
             logger.debug("Skipping sykmelding over retention period $key")
@@ -76,6 +55,10 @@ class SykmeldingConsumerService(
 
             throw ex
         }
+    }
+
+    suspend fun handleTombstone(key: String) {
+        deleteSykmelding(key)
     }
 
     private fun handleError(resourceError: RecordResourceErrors, key: String) {

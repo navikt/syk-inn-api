@@ -21,7 +21,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.testcontainers.kafka.ConfluentKafkaContainer
 
 object KafkaTestConsumer {
     const val INPUT_TOPIC = "tsm.sykmeldinger-input"
@@ -39,18 +38,18 @@ object KafkaTestConsumer {
     fun parsePIKRecord(record: ByteArray?): JuridiskHenvisningRecord? =
         if (record != null) mapper.readValue(record) else null
 
-    fun createTestConsumer(container: ConfluentKafkaContainer): KafkaConsumer<String, ByteArray?> {
+    fun createTestConsumer(config: Map<String, String>): KafkaConsumer<String, ByteArray?> {
         val kafkaProperties =
-            Properties().apply { this["bootstrap.servers"] = container.bootstrapServers }
-
-        kafkaProperties.apply {
-            this[ConsumerConfig.GROUP_ID_CONFIG] = "syk-inn-api-tests"
-            this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-            this[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = "true"
-        }
+            config +
+                mutableMapOf(
+                    ConsumerConfig.GROUP_ID_CONFIG to "syk-inn-api-tests",
+                    ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+                    ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "true",
+                )
 
         val kafkaConsumer =
             KafkaConsumer(kafkaProperties, StringDeserializer(), ByteArrayDeserializer())
+
         kafkaConsumer.subscribe(listOf(INPUT_TOPIC, PIK_TOPIC))
 
         return kafkaConsumer

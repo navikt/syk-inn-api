@@ -15,25 +15,27 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingVerify
 import no.nav.tsm.modules.sykmeldinger.configureSykmeldingerModule
 import no.nav.tsm.sykmelding.input.core.model.RuleType
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.configurePostgresIntegrationTests
 import no.nav.tsm.utils.testClient
 import org.intellij.lang.annotations.Language
 
-class BehandlerRoutesTest : WithPostgresql() {
+class BehandlerRoutesTest {
+    val postgres = Postgres()
+
     private fun ApplicationTestBuilder.configureSykmeldingApiTest() {
         client = testClient()
 
         application {
-            configurePostgresIntegrationTests(postgres)
+            configurePostgresIntegrationTests(postgres.container)
 
             // Modules in test
             configureSykmeldingerModule()
             configureBehandlerModule()
         }
 
-        runMigrations(true)
-        connect()
+        postgres.runMigrations(true)
+        postgres.connect()
     }
 
     @Test
