@@ -11,17 +11,18 @@ import kotlin.test.Test
 import no.nav.tsm.modules.admin.db.JobRepository
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.PoisonedSykmelding
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume.poison.SykmeldingPoisonPillRepo
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.configurePostgresIntegrationTests
 import no.nav.tsm.utils.testClient
 
-class JobAdminRoutesTest : WithPostgresql() {
+class JobAdminRoutesTest {
+    val postgres = Postgres()
 
     private fun ApplicationTestBuilder.configureAdminRoutesTest() {
         client = testClient()
 
         application {
-            configurePostgresIntegrationTests(postgres)
+            configurePostgresIntegrationTests(postgres.container)
 
             // Bare minimum needed to test admin routes
             dependencies { provide(SykmeldingPoisonPillRepo::class) }
@@ -31,8 +32,8 @@ class JobAdminRoutesTest : WithPostgresql() {
             configureJobAdminRoutes()
         }
 
-        runMigrations(true)
-        connect()
+        postgres.runMigrations(true)
+        postgres.connect()
     }
 
     @Test

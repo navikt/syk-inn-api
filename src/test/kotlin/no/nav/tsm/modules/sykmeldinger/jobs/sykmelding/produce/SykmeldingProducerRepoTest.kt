@@ -15,15 +15,15 @@ import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.insertDummySykmelding
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
-class SykmeldingProducerRepoTest : WithPostgresql() {
-    companion object {
-        init {
+class SykmeldingProducerRepoTest {
+    init {
+        Postgres().apply {
             runMigrations(true)
             connect()
         }

@@ -46,6 +46,7 @@ dependencies {
     implementation(tsmKtorLibs.core)
     implementation(tsmKtorLibs.auth)
     implementation(tsmKtorLibs.kafka)
+    implementation(tsmKtorLibs.kafka.sykmeldinger)
 
     // Database and such
     implementation(libs.flyway.postgres)
@@ -79,6 +80,7 @@ dependencies {
     }
 
     // Test
+    testImplementation(tsmKtorLibs.kafka.test)
     testImplementation(ktorLibs.server.testHost)
     testImplementation(ktorLibs.client.mock)
     testImplementation(libs.kotlin.test.junit)

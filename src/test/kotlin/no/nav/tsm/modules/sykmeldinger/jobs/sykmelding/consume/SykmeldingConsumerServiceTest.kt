@@ -1,7 +1,9 @@
 package no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.consume
 
 import arrow.core.right
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
@@ -10,10 +12,8 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.core.common.SimpleNavn
@@ -22,21 +22,19 @@ import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.toInputRecord
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
-class SykmeldingConsumerServiceTest : WithPostgresql() {
-
-    companion object {
-        init {
+class SykmeldingConsumerServiceTest {
+    init {
+        Postgres().apply {
             runMigrations(true)
             connect()
         }
     }
 
-    private val consumer: SykmeldingConsumer = mockk()
     private val repo = SykmeldingConsumerRepo()
     private val resourceService: SykmeldingConsumerResourcesService = mockk()
     private val service =
@@ -45,18 +43,12 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                 mockk() {
                     every { sykmeldingConfig } returns SykmeldingConfig(retention = 365.days)
                 },
-            consumer = consumer,
             sykmeldingConsumerRepo = repo,
             sykmeldingConsumerResourcesService = resourceService,
             sykmeldingPoisonPillRepo = mockk(relaxed = true),
         )
 
-    @BeforeTest
-    fun setup() = runTest {
-        dbQuery { SykmeldingTable.deleteAll() }
-        every { consumer.subscribe() } just Runs
-        every { consumer.unsubscribe() } just Runs
-    }
+    @BeforeTest fun setup() = runTest { dbQuery { SykmeldingTable.deleteAll() } }
 
     @Test
     fun `inserts sykmelding when within retention period`() = runTest {
@@ -72,17 +64,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
                 )
                 .right()
 
-        launch {
-                coEvery { consumer.poll() } returns
-                    listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
-                    {
-                        cancel("stopping coroutine by flipping the isActive property")
-                        emptyList()
-                    }
-
-                service.consume()
-            }
-            .join()
+        service.handleRecord(record)
 
         assertTrue(existsInDb(sykmelding.sykmeldingId))
     }
@@ -92,16 +74,7 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
         val sykmelding = testSykmelding(tom = LocalDate.now().minusDays(366))
         val record = sykmelding.toInputRecord(null)
 
-        launch {
-                coEvery { consumer.poll() } returns
-                    listOf(sykmelding.sykmeldingId.toString() to record) andThenAnswer
-                    {
-                        cancel("stopping coroutine by flipping the isActive property")
-                        emptyList()
-                    }
-                service.consume()
-            }
-            .join()
+        service.handleRecord(record)
 
         assertFalse(existsInDb(sykmelding.sykmeldingId))
     }
@@ -112,16 +85,8 @@ class SykmeldingConsumerServiceTest : WithPostgresql() {
         repo.insert(existing)
         assertTrue(existsInDb(existing.sykmeldingId))
 
-        launch {
-                coEvery { consumer.poll() } returns
-                    listOf(existing.sykmeldingId.toString() to null) andThenAnswer
-                    {
-                        cancel()
-                        emptyList()
-                    }
-                service.consume()
-            }
-            .join()
+        service.handleTombstone(existing.sykmeldingId.toString())
+
         assertFalse(existsInDb(existing.sykmeldingId))
     }
 

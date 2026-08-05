@@ -19,16 +19,15 @@ import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.regulus.regula.juridisk.JuridiskHenvisning
 import no.nav.tsm.regulus.regula.juridisk.JuridiskHenvisningLovverk
 import no.nav.tsm.regulus.regula.juridisk.JuridiskUtfall
-import no.nav.tsm.utils.WithPostgresql
+import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.insertDummySykmelding
 import org.jetbrains.exposed.v1.r2dbc.deleteAll
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 
-class JuridiskHenvisningJobRepoTest : WithPostgresql() {
-
-    companion object {
-        init {
+class JuridiskHenvisningJobRepoTest {
+    init {
+        Postgres().apply {
             runMigrations(true)
             connect()
         }

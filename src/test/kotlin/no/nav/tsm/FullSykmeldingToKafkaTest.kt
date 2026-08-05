@@ -7,10 +7,10 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeTypeOf
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import java.time.Duration
@@ -27,6 +27,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.tsm.Testdata.everyValueAnswered
 import no.nav.tsm.Testdata.simpleBehandlerMeta
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
+import no.nav.tsm.ktor.kafka.test.KafkaContainer
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding.BehandlerMeta
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding.Values
@@ -34,32 +35,29 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
-import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
-import no.nav.tsm.sykmelding.input.core.model.Rule
-import no.nav.tsm.sykmelding.input.core.model.RuleType
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.utils.KafkaTestConsumer
+import no.nav.tsm.sykmelding.input.core.model.*
+import no.nav.tsm.utils.*
 import no.nav.tsm.utils.KafkaTestConsumer.createTestConsumer
-import no.nav.tsm.utils.KafkaTestUtils
-import no.nav.tsm.utils.WithAll
-import no.nav.tsm.utils.configureFullIntegrationTests
-import no.nav.tsm.utils.testClient
-import no.nav.tsm.utils.testJsonObjectMapper
-import no.nav.tsm.utils.uuid
 
-class EverythingTest : WithAll() {
+class EverythingTest {
     /** All tests use a single consumer to reduce setup and teardown time */
     companion object {
+        val postgres = Postgres()
+        val kafka =
+            KafkaContainer(
+                createTopics = listOf(KafkaTestConsumer.INPUT_TOPIC, KafkaTestConsumer.PIK_TOPIC)
+            )
+
         private val allRecords: MutableMap<UUID, SykmeldingRecord?> = mutableMapOf()
         private val allPIKs: MutableMap<UUID, JuridiskHenvisningRecord?> = mutableMapOf()
-        private val consumer = createTestConsumer(kafka)
+        private val consumer = createTestConsumer(kafka.config)
     }
 
     private fun ApplicationTestBuilder.configureEverythingTest() {
         client = testClient()
 
-        configureFullIntegrationTests(postgres, kafka)
+        kafka.configureKafka(this)
+        configureFullIntegrationTests(postgres.container)
     }
 
     private suspend fun HttpClient.postSykmelding(payload: String): HttpResponse =

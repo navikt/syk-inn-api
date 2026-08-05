@@ -30,8 +30,6 @@ class DeleterJob(val interval: Duration)
 
 class KafkaSykmeldingConsumer(val longPoll: Duration)
 
-class KafkaConfig(val config: Properties, val sykmeldingConsumer: KafkaSykmeldingConsumer)
-
 class JobsConfig(
     val inputProducer: ProducerJob,
     val juridiskProducer: ProducerJob,
@@ -41,25 +39,13 @@ class JobsConfig(
 class Environment(
     val runtime: Runtime,
     val jobs: JobsConfig,
-    val kafka: KafkaConfig,
+    val sykmeldingConsumer: KafkaSykmeldingConsumer,
     val postgres: PostgresConfig,
     val sykmeldingConfig: SykmeldingConfig,
     val external: () -> ExternalApi,
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
-    val kafkaProperties =
-        KafkaConfig(
-            config =
-                Properties().apply {
-                    config.config("kafka.config").toMap().forEach { this[it.key] = it.value }
-                },
-            sykmeldingConsumer =
-                KafkaSykmeldingConsumer(
-                    longPoll = config.property("kafka.sykmeldingConsumer.longPoll").getAs()
-                ),
-        )
-
     val jobsConfig =
         JobsConfig(
             inputProducer =
@@ -85,7 +71,10 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
                 name = config.property("app.name").getString(),
                 version = config.property("app.version").getString(),
             ),
-        kafka = kafkaProperties,
+        sykmeldingConsumer =
+            KafkaSykmeldingConsumer(
+                longPoll = config.property("kafka.sykmeldingConsumer.longPoll").getAs()
+            ),
         jobs = jobsConfig,
         postgres =
             PostgresConfig(

@@ -40,10 +40,6 @@ spec:
     scalingStrategy:
       cpu:
         thresholdPercentage: 90
-      # kafka:
-      #   consumerGroup: syk-inn-api-consumer
-      #   threshold: 500
-      #   topic: tsm.sykmeldinger
 
   resources:
     limits:

@@ -8,12 +8,12 @@ import kotlin.time.toJavaDuration
 import kotlinx.coroutines.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.core.jobs.Job
+import no.nav.tsm.ktor.kafka.sykmeldinger.SykmeldingInputProducer
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.admin.service.JobName
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
 import no.nav.tsm.sykmelding.input.core.model.Reason
-import no.nav.tsm.sykmelding.input.producer.SykmeldingInputProducer
 
 class SykmeldingProducerJob(
     private val sykmeldingProducer: SykmeldingInputProducer,
@@ -70,7 +70,7 @@ class SykmeldingProducerJob(
                     "Sykmelding with id ${next.sykmeldingId} not found."
                 }
 
-            sykmeldingProducer.sendSykmelding(
+            sykmeldingProducer.send(
                 sykmelding.toInputRecord(
                     reason =
                         next.reason?.let {
