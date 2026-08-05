@@ -60,11 +60,8 @@ dependencies {
     implementation(libs.kafka.client)
 
     // Monitoring and logging
-    implementation(libs.micrometer.registry.prometheus)
-    implementation(libs.khealth)
     implementation(libs.logback.classic)
     implementation(libs.logback.encoder)
-    implementation(libs.otel.annotations)
 
     // Force alignment of Netty artifacts only pulled in transitively via
     // reactor-netty (through r2dbc-postgresql) to the newer Netty version
