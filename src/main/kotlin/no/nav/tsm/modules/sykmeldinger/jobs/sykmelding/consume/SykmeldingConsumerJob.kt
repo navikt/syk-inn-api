@@ -10,7 +10,6 @@ class SykmeldingConsumerJob(
     private val sykmeldingConsumerService: KafkaConsumerJob,
 ) : Job(JobName.SYKMELDING_CONSUMER, applicationScope) {
     override suspend fun runJob() {
-        println("STARTING JOB!!! ${sykmeldingConsumerService}")
         sykmeldingConsumerService.start()
     }
 }

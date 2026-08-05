@@ -4,7 +4,7 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.testcontainers.postgresql.PostgreSQLContainer
 
-class Postgres() {
+class Postgres {
     val container = PostgreSQLContainer("postgres:17-alpine").apply { start() }
     val config = createIntegrationEnvironment(container)
 
