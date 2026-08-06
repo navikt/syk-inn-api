@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.behandler.payloads
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
@@ -99,10 +100,8 @@ object BehandlerOpprettSykmelding {
             Aktivitet
     }
 
-    data class MedisinskArsak(val isMedisinskArsak: Boolean)
-
     data class ArbeidsrelatertArsak(
-        val isArbeidsrelatertArsak: Boolean,
+        @JsonProperty("isArbeidsrelatertArsak") val isArbeidsrelatertArsak: Boolean,
         val arbeidsrelaterteArsaker: List<ArbeidsrelatertArsakType>,
         val annenArbeidsrelatertArsak: String?,
     )

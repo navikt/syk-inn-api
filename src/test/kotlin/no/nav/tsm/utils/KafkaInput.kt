@@ -1,14 +1,10 @@
 package no.nav.tsm.utils
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import java.util.*
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskHenvisningRecord
@@ -21,16 +17,14 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.readValue
 
 object KafkaTestConsumer {
     const val INPUT_TOPIC = "tsm.sykmeldinger-input"
     const val PIK_TOPIC = "teamsykmelding.paragraf-i-kode"
 
-    private val mapper =
-        jacksonObjectMapper().apply {
-            registerModule(JavaTimeModule())
-            registerModule(SykmeldingModule())
-        }
+    private val mapper = jacksonMapperBuilder().addModules(SykmeldingModule()).build()
 
     fun parseSykmeldingRecord(record: ByteArray?): SykmeldingRecord? =
         if (record != null) mapper.readValue(record) else null

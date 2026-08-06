@@ -1,6 +1,5 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.equals.shouldEqual
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
@@ -13,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import no.nav.tsm.utils.client
 import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 class BtsysCloudClientTest {
 

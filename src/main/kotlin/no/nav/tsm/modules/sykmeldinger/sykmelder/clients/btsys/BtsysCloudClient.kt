@@ -3,22 +3,17 @@ package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import com.fasterxml.jackson.databind.DeserializationFeature
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.callid.*
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.header
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.*
 import io.ktor.server.plugins.di.annotations.*
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
-import kotlin.collections.mapOf
 import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.logger
@@ -32,9 +27,7 @@ class BtsysCloudClient(
 
     private val httpClient: HttpClient = httpClient.config {
         install(CallId) { intercept { request, callId -> request.header("Nav-Call-Id", callId) } }
-        install(ContentNegotiation) {
-            jackson { configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false) }
-        }
+        install(ContentNegotiation) { jackson {} }
     }
 
     data class BtsysResponse(val suspendert: Boolean)
