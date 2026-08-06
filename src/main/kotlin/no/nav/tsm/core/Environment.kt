@@ -1,9 +1,6 @@
 package no.nav.tsm.core
 
-import io.ktor.server.application.*
 import io.ktor.server.config.*
-import io.ktor.server.plugins.di.*
-import java.util.*
 import kotlin.time.Duration
 import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.ktor.nais.getRuntimeCluster

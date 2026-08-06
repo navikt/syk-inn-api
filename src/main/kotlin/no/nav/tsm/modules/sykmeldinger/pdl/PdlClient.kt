@@ -3,15 +3,13 @@ package no.nav.tsm.modules.sykmeldinger.pdl
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.*
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.plugins.di.annotations.*
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
@@ -19,6 +17,7 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.ktor.otel.failSpan
+import tools.jackson.databind.DeserializationFeature
 
 sealed interface PdlClient {
     enum class PdlErrors {
@@ -39,8 +38,6 @@ class PdlCloudClient(
     private val pdlHttpClient = httpClient.config {
         install(ContentNegotiation) {
             jackson {
-                registerModule(JavaTimeModule())
-
                 // tsm-pdl-cache responds with some values we don't care about
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }

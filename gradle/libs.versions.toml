@@ -11,7 +11,7 @@ arrow = "2.2.3"
 caffeine = "3.2.4"
 
 # TSM Libs
-tsm-sykmeldinger-input = "27"
+tsm-sykmeldinger-input = "29"
 tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
 

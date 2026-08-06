@@ -24,8 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import no.nav.tsm.Testdata.everyValueAnswered
-import no.nav.tsm.Testdata.simpleBehandlerMeta
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.ktor.kafka.test.KafkaContainer
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
@@ -252,6 +250,7 @@ class EverythingTest {
                         values = Testdata.everyValueAnswered,
                     )
                 )
+
             response.status shouldEqual HttpStatusCode.OK
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
@@ -338,9 +337,9 @@ class EverythingTest {
             val gradertBehandlingsdager =
                 createCreatePayload(
                     submitId = "495d7f08-f17d-444f-b480-b1c94108d38a".uuid(),
-                    meta = simpleBehandlerMeta,
+                    meta = Testdata.simpleBehandlerMeta,
                     values =
-                        everyValueAnswered.copy(
+                        Testdata.everyValueAnswered.copy(
                             aktivitet =
                                 listOf(
                                     BehandlerOpprettSykmelding.Aktivitet.Gradert(

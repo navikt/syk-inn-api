@@ -1,31 +1,25 @@
 package no.nav.tsm.utils
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.module.SimpleModule
 
 fun ApplicationTestBuilder.testClient(): HttpClient {
     return createClient {
-        install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                registerModule(SykmeldingModule())
-            }
-        }
+        install(ContentNegotiation) { jackson { addModules(BehandlerSykmeldingModule()) } }
     }
 }
 
-class SykmeldingModule : SimpleModule() {
+class BehandlerSykmeldingModule : SimpleModule() {
     init {
         addDeserializer(BehandlerSykmelding::class.java, BehandlerSykmeldingUnionDeserializer())
         addDeserializer(
@@ -35,7 +29,7 @@ class SykmeldingModule : SimpleModule() {
     }
 }
 
-class BehandlerSykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmelding>() {
+class BehandlerSykmeldingUnionDeserializer : ValueDeserializer<BehandlerSykmelding>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): BehandlerSykmelding {
         val json = ctxt.readTree(p)
         val type =
@@ -44,18 +38,18 @@ class BehandlerSykmeldingUnionDeserializer : JsonDeserializer<BehandlerSykmeldin
                 true -> BehandlerSykmeldingFull::class
             }
 
-        return p.codec.treeToValue(json, type.java)
+        return ctxt.readTreeAsValue(json, type.java)
     }
 }
 
 class BehandlerSykmeldingAktivitetUnionDeserializer :
-    JsonDeserializer<BehandlerSykmeldingAktivitet>() {
+    ValueDeserializer<BehandlerSykmeldingAktivitet>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
     ): BehandlerSykmeldingAktivitet {
         val json = ctxt.readTree(p)
-        val discriminator = json["type"].asText()
+        val discriminator = json["type"].asString()
         val type = BehandlerSykmeldingAktivitet.BehandlerSykmeldingType.valueOf(discriminator)
 
         val subclassType =
@@ -76,6 +70,6 @@ class BehandlerSykmeldingAktivitetUnionDeserializer :
                     BehandlerSykmeldingAktivitet.Reisetilskudd::class
             }
 
-        return p.codec.treeToValue(json, subclassType.java)
+        return ctxt.readTreeAsValue(json, subclassType.java)
     }
 }
