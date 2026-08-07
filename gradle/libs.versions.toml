@@ -59,4 +59,4 @@ kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization"
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 
 spotless = { id = "com.diffplug.spotless", version = "8.9.0" }
-detekt = { id = "dev.detekt", version = "2.0.0-alpha.5" }
+detekt = { id = "dev.detekt", version = "2.0.0-alpha.6" }
