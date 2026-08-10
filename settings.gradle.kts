@@ -25,5 +25,5 @@ pluginManagement {
 }
 
 plugins {
-    id("io.github.ben-manes.versions.settings") version "0.58.0"
+    id("io.github.ben-manes.versions.settings") version "0.60.0"
 }
