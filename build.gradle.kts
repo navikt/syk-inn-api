@@ -53,10 +53,10 @@ dependencies {
     implementation(libs.flyway.core)
     runtimeOnly(libs.postgresql)
     implementation(libs.postgresql.r2dbc)
-    implementation(libs.exposed.core)
-    implementation(libs.exposed.jdbc)
-    implementation(libs.exposed.json)
-    implementation(libs.exposed.date)
+    implementation(exposedLibs.core)
+    implementation(exposedLibs.r2dbc)
+    implementation(exposedLibs.json)
+    implementation(exposedLibs.java.time)
     implementation(libs.kafka.client)
 
     // Monitoring and logging

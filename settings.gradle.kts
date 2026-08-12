@@ -2,6 +2,7 @@ rootProject.name = "syk-inn-api"
 
 val ktorVersion = "3.5.2"
 val tsmKtorVersion = "1.1.3"
+val exposedVersion = "1.4.0"
 
 dependencyResolutionManagement {
     repositories {
@@ -12,6 +13,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("ktorLibs").from("io.ktor:ktor-version-catalog:${ktorVersion}")
+        create("exposedLibs").from("org.jetbrains.exposed:exposed-version-catalog:${exposedVersion}")
         create("tsmKtorLibs").from("no.nav.tsm:ktor-version-catalog:${tsmKtorVersion}")
     }
 }
