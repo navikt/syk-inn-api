@@ -4,7 +4,7 @@ logback = "1.6.1"
 logbackEncoder = "9.0"
 postgresR2dbc = "1.1.2.RELEASE"
 postgres = "42.7.13"
-flyway = "13.1.0"
+flyway = "13.2.0"
 kafka = "4.3.1"
 arrow = "2.2.3"
 caffeine = "3.2.4"
@@ -54,4 +54,4 @@ kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization"
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 
 spotless = { id = "com.diffplug.spotless", version = "8.9.0" }
-detekt = { id = "dev.detekt", version = "2.0.0-alpha.5" }
+detekt = { id = "dev.detekt", version = "2.0.0-alpha.6" }
