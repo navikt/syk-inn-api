@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.10"
-logback = "1.6.1"
+logback = "1.6.2"
 logbackEncoder = "9.0"
 postgresR2dbc = "1.1.2.RELEASE"
 postgres = "42.7.13"
@@ -16,7 +16,7 @@ tsm-diagnoser = "2026.1.13"
 
 # Testing
 testcontainers = "2.0.5"
-kotest-assertions = "6.2.3"
+kotest-assertions = "6.2.4"
 mockk = "1.14.11"
 
 
