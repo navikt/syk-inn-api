@@ -65,10 +65,13 @@ object ToJsonb {
             )
         }
 
-    fun SykInnTilbakedatering?.toTilbakedateringJsonb(): SykmeldingJsonbTilbakedatering? =
-        this?.let {
+    fun SykInnTilbakedatering?.toTilbakedateringJsonb(): SykmeldingJsonbTilbakedatering? {
+        if (this?.kontaktdato == null && this?.begrunnelse == null) return null
+
+        return this.let {
             SykmeldingJsonbTilbakedatering(startdato = it.kontaktdato, begrunnelse = it.begrunnelse)
         }
+    }
 
     fun SykInnUtdypendeSporsmal?.toUtdypendeSporsmalJsonb():
         Map<String, SykmeldingJsonbUtdypendeSporsmal>? {
