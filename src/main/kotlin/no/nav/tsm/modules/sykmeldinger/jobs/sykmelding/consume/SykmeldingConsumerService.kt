@@ -74,11 +74,11 @@ class SykmeldingConsumerService(
 
     @WithSpan
     private suspend fun deleteSykmelding(key: String) {
-        logger.debug("Tombstone for sykmelding $key, deleting")
+        logger.info("Tombstone for sykmelding $key, deleting")
         try {
             val sykmeldingId = UUID.fromString(key)
             val deleted = sykmeldingConsumerRepo.delete(sykmeldingId)
-            logger.debug(
+            logger.info(
                 "${if (deleted >= 1) "Deleted" else "Sykmelding did not exist"} sykmeldingId: $sykmeldingId"
             )
         } catch (ex: Exception) {
