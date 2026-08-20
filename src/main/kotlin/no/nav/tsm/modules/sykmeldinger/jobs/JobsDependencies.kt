@@ -44,7 +44,7 @@ fun Application.configureJobsDependencies() {
         provide<KafkaRecordProducer<JuridiskHenvisningRecord>> {
             KafkaRecordProducer.initProducer(
                 application = this@configureJobsDependencies,
-                topic = "teamsykmelding.paragraf-i-kode",
+                topic = "tsm.pik",
             )
         }
         provide(JuridiskHenvisningJobRepo::class)
