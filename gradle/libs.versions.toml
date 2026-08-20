@@ -1,10 +1,10 @@
 [versions]
 kotlin = "2.4.10"
-logback = "1.6.1"
+logback = "1.6.3"
 logbackEncoder = "9.0"
 postgresR2dbc = "1.1.2.RELEASE"
 postgres = "42.7.13"
-flyway = "13.2.0"
+flyway = "13.3.0"
 kafka = "4.3.1"
 arrow = "2.2.3"
 caffeine = "3.2.4"
@@ -16,7 +16,7 @@ tsm-diagnoser = "2026.1.13"
 
 # Testing
 testcontainers = "2.0.5"
-kotest-assertions = "6.2.3"
+kotest-assertions = "6.2.4"
 mockk = "1.14.11"
 
 
@@ -53,5 +53,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 
-spotless = { id = "com.diffplug.spotless", version = "8.9.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.0" }
 detekt = { id = "dev.detekt", version = "2.0.0-alpha.6" }
