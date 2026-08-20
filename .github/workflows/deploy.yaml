@@ -72,12 +72,13 @@ jobs:
     name: Security
     secrets: inherit
     permissions:
-      contents: read
+      contents: write
       id-token: write
       security-events: write
     needs: build
     uses: navikt/tsm-workflows/.github/workflows/security.yaml@main
     with:
+      gradle: true
       image: ${{ needs.build.outputs.image }}
 
   build-for-gpr:
