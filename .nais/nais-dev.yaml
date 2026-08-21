@@ -82,6 +82,7 @@ spec:
           namespace: tsm
         - application: btsys-api
           namespace: team-rocket
+        - application: tsm-behandler
   env:
     - name: SOURCE_VERSION_URL
       value: {{ sourceVersionURL }}
