@@ -11,14 +11,13 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import kotlin.collections.listOf
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.core.common.SimpleNavn
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlIdent
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlIdentgruppe
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlNavn
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import no.nav.tsm.ktor.core.SimpleNavn
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlArrowed
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.pdl.Ident
+import no.nav.tsm.pdl.IdentGruppe
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.sykmelding.input.core.model.RuleType
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingMeta
@@ -32,7 +31,7 @@ import org.junit.Test
 
 class SykmeldingConsumerResourcesServiceTest {
 
-    private val pdlClient = mockk<PdlClient>()
+    private val pdlClient = mockk<PdlArrowed>()
     private val sykmelderService = mockk<SykmelderService>()
     private val service = SykmeldingConsumerResourcesService(pdlClient, sykmelderService)
 
@@ -98,10 +97,13 @@ class SykmeldingConsumerResourcesServiceTest {
 }
 
 private fun createTestPdlPerson(ident: String) =
-    PdlPerson(
-        navn = PdlNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
+    Person(
+        navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
         foedselsdato = LocalDate.now().minusYears(34),
-        identer = listOf(PdlIdent(ident, PdlIdentgruppe.FOLKEREGISTERIDENT, false)),
+        identer = listOf(Ident(ident, IdentGruppe.FOLKEREGISTERIDENT, false)),
+        doed = false,
+        doedsdato = null,
+        falskIdent = false,
     )
 
 private fun createNonSuspendedTestSykmelder(ident: String, hpr: String) =

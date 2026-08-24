@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.tsm.sykmeldinger.input)
     implementation(libs.tsm.diagnoser)
     implementation(libs.tsm.regula)
+    implementation(libs.tsm.pdl.client)
     implementation(tsmKtorLibs.core)
     implementation(tsmKtorLibs.auth)
     implementation(tsmKtorLibs.kafka)

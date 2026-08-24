@@ -2,19 +2,16 @@ package no.nav.tsm.modules.sykmeldinger
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
-import no.nav.tsm.ktor.di.dynamicDependencies
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlCloudClient
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlLocalClient
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlArrowed
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
+import no.nav.tsm.pdl.plugin.PdlPlugin
 
 fun Application.configureSykmeldingerDependencies() {
-    dynamicDependencies {
-        local { provide(PdlLocalClient::class) }
-        cloud { provide(PdlCloudClient::class) }
-    }
+    install(PdlPlugin)
 
     dependencies {
+        provide(PdlArrowed::class)
         provide(RuleService::class)
         provide(SykmeldingRepo::class)
         provide(SykmeldingerService::class)

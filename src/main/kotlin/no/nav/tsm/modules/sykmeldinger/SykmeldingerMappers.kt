@@ -2,21 +2,15 @@ package no.nav.tsm.modules.sykmeldinger
 
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnBehandler
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnPasient
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
-import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingType
-import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import java.util.*
+import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.pdl.Person
 
 fun UnverifiedSykInnSykmelding.toVerifiedSykmelding(
     rules: SykInnSykmeldingRuleResult,
     sykmelder: Sykmelder.MedSuspensjon,
-    pasient: PdlPerson,
+    pasient: Person,
 ): VerifiedSykInnSykmelding {
     val verifiedAt = OffsetDateTime.now(ZoneOffset.UTC)
 
