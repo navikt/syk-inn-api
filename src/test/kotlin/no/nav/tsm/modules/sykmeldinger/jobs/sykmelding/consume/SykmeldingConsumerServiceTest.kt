@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.SykmeldingConfig
-import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
 import no.nav.tsm.core.db.dbQuery
+import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.toInputRecord

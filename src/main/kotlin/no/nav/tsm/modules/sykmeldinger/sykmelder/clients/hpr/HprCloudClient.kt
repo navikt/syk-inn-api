@@ -14,9 +14,9 @@ import io.ktor.server.plugins.di.annotations.*
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.common.Navn
-import no.nav.tsm.core.common.SimpleNavn
 import no.nav.tsm.ktor.auth.texas.Texas
+import no.nav.tsm.ktor.core.Navn
+import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.ktor.logger
 
 class HprCloudClient(

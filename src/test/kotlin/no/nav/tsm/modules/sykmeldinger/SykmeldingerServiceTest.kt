@@ -12,13 +12,13 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTimedValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlNavn
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlArrowed
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.regulus.regula.RegulaResult
 import org.junit.Test
@@ -26,7 +26,7 @@ import org.junit.Test
 class SykmeldingerServiceTest {
 
     private val sykmelderService = mockk<SykmelderService>()
-    private val pdlClient = mockk<PdlClient>()
+    private val pdlClient = mockk<PdlArrowed>()
     private val sykmeldingRepo = mockk<SykmeldingRepo>()
     private val ruleService = mockk<RuleService>()
 
@@ -44,7 +44,7 @@ class SykmeldingerServiceTest {
             {
                 delay(2500.milliseconds)
 
-                PdlClient.PdlErrors.UnknownError.left()
+                PdlArrowed.PdlErrors.UnknownError.left()
             }
 
         coEvery { sykmelderService.byHpr(any(), any()) } coAnswers
@@ -100,10 +100,13 @@ class SykmeldingerServiceTest {
             {
                 delay(3000.milliseconds)
 
-                PdlPerson(
-                        navn = PdlNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
+                Person(
+                        navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                         foedselsdato = null,
                         identer = listOf(),
+                        doed = false,
+                        doedsdato = null,
+                        falskIdent = false,
                     )
                     .right()
             }

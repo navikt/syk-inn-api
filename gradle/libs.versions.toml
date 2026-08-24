@@ -10,6 +10,7 @@ arrow = "2.2.3"
 caffeine = "3.2.4"
 
 # TSM Libs
+tsm-pdl-client = "0.0.2"
 tsm-sykmeldinger-input = "29"
 tsm-regula = "56"
 tsm-diagnoser = "2026.1.13"
@@ -33,6 +34,7 @@ logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", ve
 tsm-sykmeldinger-input = { module = "no.nav.tsm.sykmelding:input", version.ref = "tsm-sykmeldinger-input" }
 tsm-diagnoser = { module = "no.nav.tsm:diagnoser", version.ref = "tsm-diagnoser" }
 tsm-regula = { module = "no.nav.tsm.regulus:regula", version.ref = "tsm-regula" }
+tsm-pdl-client = { module = "no.nav.tsm:pdl-client", version.ref = "tsm-pdl-client" }
 
 # Testing
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

@@ -3,6 +3,7 @@ package no.nav.tsm.modules.sykmeldinger
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.raise.Raise
+import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
@@ -15,16 +16,16 @@ import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlArrowed
 import no.nav.tsm.modules.sykmeldinger.rules.RuleService
 import no.nav.tsm.modules.sykmeldinger.rules.toSykInnRuleResult
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaResult
 
 class SykmeldingerService(
-    private val pdlClient: PdlClient,
+    private val pdlClient: PdlArrowed,
     private val sykmelderService: SykmelderService,
     private val ruleService: RuleService,
     private val repo: SykmeldingRepo,
@@ -138,7 +139,7 @@ class SykmeldingerService(
         sykmelding: UnverifiedSykInnSykmelding,
         block:
             suspend Raise<CreateErrors>.(
-                sykmelder: Sykmelder, previous: List<VerifiedSykInnSykmelding>, pasient: PdlPerson,
+                sykmelder: Sykmelder, previous: List<VerifiedSykInnSykmelding>, pasient: Person,
             ) -> Result,
     ): Either<CreateErrors, Result> = either {
         /**
@@ -157,8 +158,8 @@ class SykmeldingerService(
                     .getPerson(sykmelding.meta.pasientIdent)
                     .mapLeft {
                         when (it) {
-                            PdlClient.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
-                            PdlClient.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
+                            PdlArrowed.PdlErrors.NotFound -> CreateErrors.PersonNotInPdl
+                            PdlArrowed.PdlErrors.UnknownError -> CreateErrors.UnknownResourceError
                         }
                     }
                     .bind()

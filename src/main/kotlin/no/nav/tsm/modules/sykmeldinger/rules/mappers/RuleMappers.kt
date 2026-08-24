@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.rules.mappers
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.collections.listOf
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
@@ -11,9 +12,9 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlIdentgruppe
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.pdl.IdentGruppe
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.RegulaAvsender
 import no.nav.tsm.regulus.regula.RegulaBehandler
 import no.nav.tsm.regulus.regula.RegulaMeta
@@ -42,13 +43,16 @@ fun Sykmelder.mapSykmelderToRegulaBehandler(legekontorOrgnummer: String): Regula
             )
     }
 
-fun PdlPerson.mapPdlPersonToRegulaPasient(): RegulaPasient? {
+fun Person.mapPdlPersonToRegulaPasient(): RegulaPasient? {
     val folkeregisterIdent =
-        this.identer.firstOrNull { it.gruppe == PdlIdentgruppe.FOLKEREGISTERIDENT }
+        this.identer.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }
     if (folkeregisterIdent == null) return null
     if (this.foedselsdato == null) return null
 
-    return RegulaPasient(ident = folkeregisterIdent.ident, fodselsdato = this.foedselsdato)
+    return RegulaPasient(
+        ident = folkeregisterIdent.ident,
+        fodselsdato = this.foedselsdato as LocalDate,
+    )
 }
 
 fun mapUnruledSykInnSykmeldingToRegulaPayload(
