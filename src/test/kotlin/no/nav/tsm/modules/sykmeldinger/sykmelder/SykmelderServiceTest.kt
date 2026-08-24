@@ -9,7 +9,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.core.common.SimpleNavn
+import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr

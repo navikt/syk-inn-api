@@ -9,11 +9,11 @@ import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.UnverifiedSykInnSykmelding
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapPdlPersonToRegulaPasient
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapSykmelderToRegulaBehandler
 import no.nav.tsm.modules.sykmeldinger.rules.mappers.mapUnruledSykInnSykmeldingToRegulaPayload
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.regulus.regula.*
 import no.nav.tsm.regulus.regula.executor.ExecutionMode
 import no.nav.tsm.sykmelding.input.core.model.RuleType
@@ -30,7 +30,7 @@ class RuleService {
         sykmelding: UnverifiedSykInnSykmelding,
         otherSykmeldinger: List<VerifiedSykInnSykmelding>,
         sykmelder: Sykmelder,
-        sykmeldt: PdlPerson,
+        sykmeldt: Person,
     ): Either<RuleErrors, Pair<RegulaResult, List<RegulaJuridiskVurdering>>> {
         val now = LocalDateTime.now()
 

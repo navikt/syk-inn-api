@@ -9,11 +9,11 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
-import no.nav.tsm.core.common.Navn
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlClient
-import no.nav.tsm.modules.sykmeldinger.pdl.PdlPerson
+import no.nav.tsm.ktor.core.Navn
+import no.nav.tsm.modules.sykmeldinger.pdl.PdlArrowed
 import no.nav.tsm.modules.sykmeldinger.sykmelder.Sykmelder
 import no.nav.tsm.modules.sykmeldinger.sykmelder.SykmelderService
+import no.nav.tsm.pdl.Person
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
@@ -60,7 +60,7 @@ sealed interface RecordResourceErrors {
  * records from kafka.
  */
 class SykmeldingConsumerResourcesService(
-    private val pdlClient: PdlClient,
+    private val pdlClient: PdlArrowed,
     private val sykmelderService: SykmelderService,
 ) {
     private val hprCaffeine =
@@ -73,7 +73,7 @@ class SykmeldingConsumerResourcesService(
         Caffeine.newBuilder()
             .maximumSize(5000)
             .expireAfterWrite(60.minutes.toJavaDuration())
-            .build<String, PdlPerson>()
+            .build<String, Person>()
 
     /**
      * Scenarios:
@@ -130,7 +130,7 @@ class SykmeldingConsumerResourcesService(
 
         return RecordWithResources.Nasjonal(
                 record = record,
-                navn = person.navn,
+                navn = person.navn as Navn,
                 hpr = sykmelder.hpr,
                 ident = sykmelder.ident,
             )
@@ -138,7 +138,7 @@ class SykmeldingConsumerResourcesService(
     }
 
     @WithSpan
-    private suspend fun pdlByIdentCached(ident: String): Either<RecordResourceErrors, PdlPerson> =
+    private suspend fun pdlByIdentCached(ident: String): Either<RecordResourceErrors, Person> =
         either {
             val span = Span.current()
 
@@ -154,9 +154,9 @@ class SykmeldingConsumerResourcesService(
                     .mapLeft {
                         span.setAttribute("resource.outcome", it.name)
                         when (it) {
-                            PdlClient.PdlErrors.NotFound ->
+                            PdlArrowed.PdlErrors.NotFound ->
                                 RecordResourceErrors.SykmelderPdlNotFound
-                            PdlClient.PdlErrors.UnknownError ->
+                            PdlArrowed.PdlErrors.UnknownError ->
                                 RecordResourceErrors.AnyUnknownError(
                                     "PdlClient",
                                     "Unknown PDL error, client has logged exception",
