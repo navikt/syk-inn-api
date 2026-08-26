@@ -22,7 +22,7 @@ import tools.jackson.module.kotlin.readValue
 
 object KafkaTestConsumer {
     const val INPUT_TOPIC = "tsm.sykmeldinger-input"
-    const val PIK_TOPIC = "teamsykmelding.paragraf-i-kode"
+    const val PIK_TOPIC = "tsm.pik"
 
     private val mapper = jacksonMapperBuilder().addModules(SykmeldingModule()).build()
 
