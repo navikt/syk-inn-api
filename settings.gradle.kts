@@ -2,7 +2,7 @@ rootProject.name = "syk-inn-api"
 
 val ktorVersion = "3.5.2"
 val tsmKtorVersion = "1.3.0"
-val exposedVersion = "1.4.0"
+val exposedVersion = "1.5.0"
 
 dependencyResolutionManagement {
     repositories {
