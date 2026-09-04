@@ -4,15 +4,8 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import io.r2dbc.postgresql.api.PostgresqlException
-import io.r2dbc.spi.R2dbcException
 import java.time.OffsetDateTime
 import java.util.*
-import kotlin.jvm.optionals.getOrNull
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.toList
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.db.status.JuridiskVurderingStatusTable
@@ -44,16 +37,17 @@ import no.nav.tsm.sykmelding.input.core.model.AnnenFravarsgrunn
 import org.apache.kafka.shaded.com.google.protobuf.LazyStringArrayList.emptyList
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.ExposedR2dbcException
-import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.selectAll
-import org.jetbrains.exposed.v1.r2dbc.upsertReturning
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
+import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.upsertReturning
+import org.postgresql.util.PSQLException
 
 abstract class SykmeldingInsert {
 
     @WithSpan
-    suspend fun R2dbcTransaction.insertSykmelding(
+    fun JdbcTransaction.insertSykmelding(
         idempotencyKey: UUID,
         sykmelding: VerifiedSykInnSykmelding,
     ): VerifiedSykInnSykmelding {
@@ -166,24 +160,20 @@ class SykmeldingRepo : SykmeldingInsert() {
 
                 insertedSykmelding
             }
-
             return inserted.right()
-        } catch (e: ExposedR2dbcException) {
+        } catch (e: ExposedSQLException) {
             val cause = e.cause
-            if (cause is PostgresqlException) {
-                if (
-                    cause.errorDetails.constraintName.getOrNull() ==
-                        "sykmelding_idempotency_key_key"
-                ) {
+            if (cause is PSQLException) {
+                if (cause.message?.contains("sykmelding_idempotency_key_key") == true) {
                     return InsertErrors.IDEMPOTENCY_HIT.left()
                 }
             }
 
-            if (cause is R2dbcException) {
+            if (cause is ExposedSQLException) {
                 /**
                  * Parts of the stack trace contains all values, these appear on the second line+
                  */
-                val firstLine = e.message.split("\n").firstOrNull() ?: "No message"
+                val firstLine = e.message?.split("\n")?.firstOrNull() ?: "No message"
                 logger.error("Sykmelding insert failed: $firstLine")
                 throw IllegalStateException("Sykmelding insert failed: $firstLine")
             }

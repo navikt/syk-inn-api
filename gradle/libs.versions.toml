@@ -2,7 +2,6 @@
 kotlin = "2.4.10"
 logback = "1.6.1"
 logbackEncoder = "9.0"
-postgresR2dbc = "1.1.2.RELEASE"
 postgres = "42.7.13"
 flyway = "13.2.0"
 kafka = "4.3.1"
@@ -44,7 +43,6 @@ testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", ver
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest-assertions" }
 
 # Database stuff
-postgresql-r2dbc = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgresR2dbc" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }

@@ -12,8 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.SykmeldingConfig
 import no.nav.tsm.core.common.SykInnDiagnoseSystem
@@ -24,8 +22,8 @@ import no.nav.tsm.modules.sykmeldinger.domain.*
 import no.nav.tsm.modules.sykmeldinger.jobs.sykmelding.produce.toInputRecord
 import no.nav.tsm.utils.Postgres
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.deleteAll
-import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.deleteAll
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class SykmeldingConsumerServiceTest {
     init {

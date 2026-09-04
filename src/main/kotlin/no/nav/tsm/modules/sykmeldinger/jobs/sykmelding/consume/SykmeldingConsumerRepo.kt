@@ -6,7 +6,7 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingInsert
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.domain.VerifiedSykInnSykmelding
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 
 class SykmeldingConsumerRepo : SykmeldingInsert() {
     suspend fun insert(sykmelding: VerifiedSykInnSykmelding): VerifiedSykInnSykmelding = dbQuery {

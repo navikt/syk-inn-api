@@ -12,8 +12,8 @@ import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable.status
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
 import no.nav.tsm.modules.sykmeldinger.jobs.juridisk.JuridiskVurderingStatus
 import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.r2dbc.deleteWhere
-import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 
 class SykmeldingDeleteRepo(val environment: Environment) {
     @WithSpan

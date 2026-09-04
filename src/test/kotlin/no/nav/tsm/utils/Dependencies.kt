@@ -12,7 +12,6 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.JobsConfig
 import no.nav.tsm.core.KafkaSykmeldingConsumer
 import no.nav.tsm.core.PostgresConfig
-import no.nav.tsm.core.PostgresR2DBCConfig
 import no.nav.tsm.core.ProducerJob
 import no.nav.tsm.core.Runtime
 import no.nav.tsm.core.SykmeldingConfig
@@ -49,12 +48,6 @@ fun createIntegrationEnvironment(postgres: PostgreSQLContainer) =
         postgres =
             PostgresConfig(
                 jdbc = postgres.jdbcUrl,
-                r2 =
-                    PostgresR2DBCConfig(
-                        url = "r2dbc:${postgres.jdbcUrl.removePrefix("jdbc:")}",
-                        sslCert = null,
-                        sslKeyPk8 = null,
-                    ),
                 username = postgres.username,
                 password = postgres.password,
                 schema = "public",

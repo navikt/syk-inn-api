@@ -9,7 +9,6 @@ import java.time.ZoneOffset
 import java.util.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.core.db.dbQuery
@@ -17,9 +16,9 @@ import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.insertDummySykmelding
-import org.jetbrains.exposed.v1.r2dbc.deleteAll
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.deleteAll
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class SykmeldingProducerRepoTest {
     init {

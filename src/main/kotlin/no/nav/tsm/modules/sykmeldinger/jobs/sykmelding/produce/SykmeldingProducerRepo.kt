@@ -4,7 +4,6 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
-import kotlinx.coroutines.flow.firstOrNull
 import no.nav.tsm.core.db.dbQuery
 import no.nav.tsm.modules.sykmeldinger.db.status.ReasonJsonb
 import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusStatus
@@ -14,9 +13,9 @@ import no.nav.tsm.modules.sykmeldinger.db.status.SykmeldingStatusTable
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption.PostgreSQL.ForUpdate
 import org.jetbrains.exposed.v1.core.vendors.ForUpdateOption.PostgreSQL.MODE.SKIP_LOCKED
-import org.jetbrains.exposed.v1.r2dbc.select
-import org.jetbrains.exposed.v1.r2dbc.update
-import org.jetbrains.exposed.v1.r2dbc.updateReturning
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.update
+import org.jetbrains.exposed.v1.jdbc.updateReturning
 
 data class SykmeldingStatusJob(
     val sykmeldingId: UUID,
