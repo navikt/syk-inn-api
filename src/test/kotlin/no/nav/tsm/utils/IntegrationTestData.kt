@@ -2,27 +2,15 @@ package no.nav.tsm.utils
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingJsonbNavn
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingJsonbValidationResult
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.earliestFom
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.idempotencyKey
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.latestTom
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.metaMottatt
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.metaPasientIdent
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.metaPasientNavn
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.metaSource
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.rules
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.type
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.valuesAktivitet
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.valuesPasientenSkalSkjermes
-import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingTable.valuesSvangerskapsrelatert
 import no.nav.tsm.sykmelding.input.core.model.RuleType
-import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
-import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
+import org.jetbrains.exposed.v1.jdbc.insert
 
-suspend fun R2dbcTransaction.insertDummySykmelding(id: UUID) {
+fun JdbcTransaction.insertDummySykmelding(id: UUID) {
     SykmeldingTable.insert {
         it[SykmeldingTable.id] = id
         it[type] = "syk-inn-api-test"

@@ -52,10 +52,9 @@ dependencies {
     // Database and such
     implementation(libs.flyway.postgres)
     implementation(libs.flyway.core)
-    runtimeOnly(libs.postgresql)
-    implementation(libs.postgresql.r2dbc)
+    implementation(libs.postgresql)
     implementation(exposedLibs.core)
-    implementation(exposedLibs.r2dbc)
+    implementation(exposedLibs.jdbc)
     implementation(exposedLibs.json)
     implementation(exposedLibs.java.time)
     implementation(libs.kafka.client)

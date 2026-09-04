@@ -33,9 +33,9 @@ import no.nav.tsm.regulus.regula.RegulaJuridiskVurdering
 import no.nav.tsm.utils.Postgres
 import no.nav.tsm.utils.createIntegrationEnvironment
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.deleteAll
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.deleteAll
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class SykmeldingDeleteRepoTest {
     val postgres =
