@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler
 
 import no.nav.tsm.ktor.core.Navn
 import no.nav.tsm.regulus.regula.payload.BehandlerGodkjenning

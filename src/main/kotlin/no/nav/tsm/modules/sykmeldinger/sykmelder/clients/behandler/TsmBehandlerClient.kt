@@ -1,7 +1,6 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler
 
 import arrow.core.Either
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 sealed interface BehandlerQuery {
     enum class QueryType {

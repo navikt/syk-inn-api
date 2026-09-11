@@ -9,8 +9,8 @@ import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.ktor.core.SimpleNavn
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.SykmelderMedHpr
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandlerClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderServiceTest {
     private val tsmBehandlerClient = mockk<TsmBehandlerClient>()

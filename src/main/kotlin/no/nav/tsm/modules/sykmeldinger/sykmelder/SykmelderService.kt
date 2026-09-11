@@ -5,8 +5,8 @@ import arrow.core.raise.either
 import arrow.core.right
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.ktor.logger
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.SykmelderMedHpr
 import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandlerClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class SykmelderService(private val tsmBehandlerClient: TsmBehandlerClient) {
     private val logger = logger()

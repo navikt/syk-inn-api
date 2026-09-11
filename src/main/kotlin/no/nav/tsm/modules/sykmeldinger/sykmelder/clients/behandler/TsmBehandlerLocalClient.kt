@@ -4,9 +4,6 @@ import arrow.core.Either
 import arrow.core.right
 import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.ktor.logger
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderGodkjenning
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderKode
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
 
 class TsmBehandlerLocalClient : TsmBehandlerClient {
     private val logger = logger()

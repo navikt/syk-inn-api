@@ -17,7 +17,6 @@ import no.nav.tsm.ktor.auth.texas.Texas
 import no.nav.tsm.ktor.core.Navn
 import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.ktor.logger
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.*
 
 class TsmBehandlerCloudClient(
     @Named("RetryHttpClient") httpClient: HttpClient,
@@ -51,7 +50,7 @@ class TsmBehandlerCloudClient(
         val span = Span.current()
         val accessToken = getToken().token
         val response =
-            httpClient.get("${environment.external().tsmBehandler}/api/behandler/search") {
+            httpClient.post("${environment.external().tsmBehandler}/api/behandler/search") {
                 bearerAuth(accessToken)
                 headers { append("Content-Type", "application/json") }
                 setBody(behandlerQuery)
