@@ -15,9 +15,7 @@ val simpleUnitTestEnvironment =
         sykmeldingConfig = mockk(relaxed = true),
         external = {
             ExternalApi(
-                btsys = "https://test.btsys.endpoint",
-                tsmPdlCache = "https://test.pdlcache.endpoint",
-                helsenettproxy = "https://test.helsenettproxy.endpoint",
+                tsmBehandler = "https://test.tsm-behandler.endpoint",
             )
         },
     )

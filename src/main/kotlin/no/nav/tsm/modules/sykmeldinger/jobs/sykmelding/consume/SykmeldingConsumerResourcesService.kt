@@ -6,7 +6,6 @@ import arrow.core.right
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import java.time.LocalDate
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 import no.nav.tsm.ktor.core.Navn
@@ -108,11 +107,9 @@ class SykmeldingConsumerResourcesService(
 
         val sykmelder: Sykmelder =
             when {
-                maybeHpr != null ->
-                    sykmelderByHprCached(maybeHpr, sykmelding.metadata.genDate.toLocalDate())
+                maybeHpr != null -> sykmelderByHprCached(maybeHpr)
 
-                maybeIdent != null ->
-                    sykmelderByIdentCached(maybeIdent, sykmelding.metadata.genDate.toLocalDate())
+                maybeIdent != null -> sykmelderByIdentCached(maybeIdent)
 
                 else -> raise(RecordResourceErrors.SykmelderWithoutIdent)
             }.bind()
@@ -172,31 +169,27 @@ class SykmeldingConsumerResourcesService(
         }
 
     @WithSpan
-    private suspend fun sykmelderByHprCached(
-        hpr: String,
-        oppslagsdato: LocalDate,
-    ): Either<RecordResourceErrors, Sykmelder> = either {
-        val span = Span.current()
+    private suspend fun sykmelderByHprCached(hpr: String): Either<RecordResourceErrors, Sykmelder> =
+        either {
+            val span = Span.current()
 
-        val existing = hprCaffeine.getIfPresent(hpr)
-        if (existing != null) {
-            span.setAttribute("cache.hit", "true")
-            return existing.right()
+            val existing = hprCaffeine.getIfPresent(hpr)
+            if (existing != null) {
+                span.setAttribute("cache.hit", "true")
+                return existing.right()
+            }
+
+            val sykmelder = sykmelderService.byHpr(hpr).mapLeft { it.toRecordResourcError() }.bind()
+
+            hprCaffeine.put(hpr, sykmelder)
+            span.setAttribute("cache.hit", "false")
+
+            return sykmelder.right()
         }
-
-        val sykmelder =
-            sykmelderService.byHpr(hpr, oppslagsdato).mapLeft { it.toRecordResourcError() }.bind()
-
-        hprCaffeine.put(hpr, sykmelder)
-        span.setAttribute("cache.hit", "false")
-
-        return sykmelder.right()
-    }
 
     @WithSpan
     private suspend fun sykmelderByIdentCached(
-        ident: String,
-        oppslagsdato: LocalDate,
+        ident: String
     ): Either<RecordResourceErrors, Sykmelder> = either {
         val span = Span.current()
 
@@ -206,11 +199,7 @@ class SykmeldingConsumerResourcesService(
             return existing.right()
         }
 
-        val sykmelder =
-            sykmelderService
-                .byIdent(ident, oppslagsdato)
-                .mapLeft { it.toRecordResourcError() }
-                .bind()
+        val sykmelder = sykmelderService.byIdent(ident).mapLeft { it.toRecordResourcError() }.bind()
 
         hprCaffeine.put(ident, sykmelder)
         span.setAttribute("cache.hit", "false")

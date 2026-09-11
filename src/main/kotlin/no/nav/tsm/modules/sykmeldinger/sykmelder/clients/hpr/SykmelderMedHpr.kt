@@ -11,6 +11,7 @@ data class SykmelderMedHpr(
     val navn: Navn,
     val hprNummer: String,
     val godkjenninger: List<SykmelderGodkjenning>,
+    val suspendert: Boolean,
 )
 
 /** Data type from regula. It's only used internally. Bad? */

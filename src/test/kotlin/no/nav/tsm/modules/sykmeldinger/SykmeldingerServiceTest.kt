@@ -47,7 +47,7 @@ class SykmeldingerServiceTest {
                 PdlArrowed.PdlErrors.UnknownError.left()
             }
 
-        coEvery { sykmelderService.byHpr(any(), any()) } coAnswers
+        coEvery { sykmelderService.byHpr(any()) } coAnswers
             {
                 delay(5000.milliseconds)
 
@@ -75,7 +75,7 @@ class SykmeldingerServiceTest {
                 throw IllegalStateException("Some scary exception deep down")
             }
 
-        coEvery { sykmelderService.byHpr(any(), any()) } coAnswers
+        coEvery { sykmelderService.byHpr(any()) } coAnswers
             {
                 delay(5000.milliseconds)
 
@@ -111,7 +111,7 @@ class SykmeldingerServiceTest {
                     .right()
             }
 
-        coEvery { sykmelderService.byHpr(any(), any()) } coAnswers
+        coEvery { sykmelderService.byHpr(any()) } coAnswers
             {
                 delay(3500.milliseconds)
 

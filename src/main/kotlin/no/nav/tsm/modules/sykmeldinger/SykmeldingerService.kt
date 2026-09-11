@@ -3,14 +3,12 @@ package no.nav.tsm.modules.sykmeldinger
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.raise.Raise
-import arrow.core.raise.context.bind
 import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
 import arrow.core.right
 import arrow.fx.coroutines.parZip
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import java.time.LocalDate
 import java.util.*
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.SykmeldingRepo
@@ -149,7 +147,7 @@ class SykmeldingerService(
         parZip(
             {
                 sykmelderService
-                    .byHpr(sykmelding.meta.behandlerHpr, LocalDate.now())
+                    .byHpr(sykmelding.meta.behandlerHpr)
                     .mapLeft { CreateErrors.UnknownResourceError }
                     .bind()
             },
