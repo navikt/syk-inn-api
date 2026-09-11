@@ -43,7 +43,7 @@ class SykmeldingConsumerResourcesServiceTest {
 
             coEvery { pdlClient.getPerson(testIdent) } returns
                 createTestPdlPerson(testIdent).right()
-            coEvery { sykmelderService.byIdent(testIdent, LocalDate.now()) } returns
+            coEvery { sykmelderService.byIdent(testIdent) } returns
                 createNonSuspendedTestSykmelder(testIdent, testHpr).right()
 
             val ids = listOf(PersonId(id = "foo-bar-ident", PersonIdType.FNR))
@@ -56,12 +56,12 @@ class SykmeldingConsumerResourcesServiceTest {
             result.hpr shouldBe testHpr
 
             coVerify(exactly = 1) { pdlClient.getPerson(any()) }
-            coVerify(exactly = 1) { sykmelderService.byIdent(any(), any()) }
+            coVerify(exactly = 1) { sykmelderService.byIdent(any()) }
 
             repeat(1000) { service.getResourcesForSykmelding(record) }
 
             coVerify(exactly = 1) { pdlClient.getPerson(any()) }
-            coVerify(exactly = 1) { sykmelderService.byIdent(any(), any()) }
+            coVerify(exactly = 1) { sykmelderService.byIdent(any()) }
         }
     }
 
@@ -73,7 +73,7 @@ class SykmeldingConsumerResourcesServiceTest {
 
             coEvery { pdlClient.getPerson(testIdent) } returns
                 createTestPdlPerson(testIdent).right()
-            coEvery { sykmelderService.byHpr(testHpr, LocalDate.now()) } returns
+            coEvery { sykmelderService.byHpr(testHpr) } returns
                 createNonSuspendedTestSykmelder(testIdent, testHpr).right()
 
             val ids = listOf(PersonId(id = testHpr, PersonIdType.HPR))
@@ -86,12 +86,12 @@ class SykmeldingConsumerResourcesServiceTest {
             result.hpr shouldBe testHpr
 
             coVerify(exactly = 1) { pdlClient.getPerson(any()) }
-            coVerify(exactly = 1) { sykmelderService.byHpr(any(), any()) }
+            coVerify(exactly = 1) { sykmelderService.byHpr(any()) }
 
             repeat(1000) { service.getResourcesForSykmelding(record) }
 
             coVerify(exactly = 1) { pdlClient.getPerson(any()) }
-            coVerify(exactly = 1) { sykmelderService.byHpr(any(), any()) }
+            coVerify(exactly = 1) { sykmelderService.byHpr(any()) }
         }
     }
 }

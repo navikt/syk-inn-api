@@ -16,7 +16,7 @@ class PostgresConfig(
     val schema: String,
 )
 
-class ExternalApi(val tsmPdlCache: String, val helsenettproxy: String, val btsys: String)
+class ExternalApi(val tsmBehandler: String)
 
 class ProducerJob(val delay: Duration, val hungTimeout: Duration)
 
@@ -80,11 +80,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
         sykmeldingConfig =
             SykmeldingConfig(retention = config.property("app.sykmelding.retention").getAs()),
         external = {
-            ExternalApi(
-                tsmPdlCache = config.property("external.tsmPdlCache").getString(),
-                helsenettproxy = config.property("external.syfoHelsenettproxy").getString(),
-                btsys = config.property("external.btsys").getString(),
-            )
+            ExternalApi(tsmBehandler = config.property("external.tsmBehandler").getString())
         },
     )
 }

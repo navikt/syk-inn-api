@@ -38,9 +38,7 @@ class SykmeldingConsumerServiceTest {
     private val service =
         SykmeldingConsumerService(
             environment =
-                mockk() {
-                    every { sykmeldingConfig } returns SykmeldingConfig(retention = 365.days)
-                },
+                mockk { every { sykmeldingConfig } returns SykmeldingConfig(retention = 365.days) },
             sykmeldingConsumerRepo = repo,
             sykmeldingConsumerResourcesService = resourceService,
             sykmeldingPoisonPillRepo = mockk(relaxed = true),

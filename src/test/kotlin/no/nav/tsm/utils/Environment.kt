@@ -13,11 +13,5 @@ val simpleUnitTestEnvironment =
         jobs = mockk(relaxed = true),
         postgres = mockk(relaxed = true),
         sykmeldingConfig = mockk(relaxed = true),
-        external = {
-            ExternalApi(
-                btsys = "https://test.btsys.endpoint",
-                tsmPdlCache = "https://test.pdlcache.endpoint",
-                helsenettproxy = "https://test.helsenettproxy.endpoint",
-            )
-        },
+        external = { ExternalApi(tsmBehandler = "https://test.tsm-behandler.endpoint") },
     )

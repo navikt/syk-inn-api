@@ -1,16 +1,16 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler
 
 import arrow.core.Either
 import arrow.core.right
 import no.nav.tsm.ktor.core.SimpleNavn
 import no.nav.tsm.ktor.logger
 
-class HprLocalClient : HprClient {
+class TsmBehandlerLocalClient : TsmBehandlerClient {
     private val logger = logger()
 
     override suspend fun getSykmelderByHpr(
         behandlerHpr: String
-    ): Either<HprClient.HprErrors, SykmelderMedHpr> {
+    ): Either<TsmBehandlerClient.BehandlerErrors, SykmelderMedHpr> {
         if (behandlerHpr == "brokenHpr") {
             logger.info("HprMock: Got brokenHpr, mocking failure.")
 
@@ -27,6 +27,7 @@ class HprLocalClient : HprClient {
                     hprNummer = "hprButHasBrokenFnrAndNoGodkjenninger",
                     navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
+                    suspendert = false,
                 )
                 .right()
         }
@@ -40,7 +41,8 @@ class HprLocalClient : HprClient {
                     ident = "suspendertFnr",
                     hprNummer = "hprButFnrIsSuspended",
                     navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
-                    godkjenninger = aktivLegeGodnkjenninger,
+                    godkjenninger = aktivLegeGodkjenninger,
+                    suspendert = true,
                 )
                 .right()
         }
@@ -50,31 +52,38 @@ class HprLocalClient : HprClient {
                 ident = "09099012345",
                 hprNummer = behandlerHpr,
                 navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
-                godkjenninger = aktivLegeGodnkjenninger,
+                godkjenninger = aktivLegeGodkjenninger,
+                suspendert = false,
             )
             .right()
     }
 
     override suspend fun getSykmelderByIdent(
-        behandlerIdent: String
-    ): Either<HprClient.HprErrors, SykmelderMedHpr> {
-        if (behandlerIdent == "brokenFnr") {
+        fnr: String
+    ): Either<TsmBehandlerClient.BehandlerErrors, SykmelderMedHpr> {
+        if (fnr == "brokenFnr") {
             logger.info("HprMock: Got brokenFnr, mocking failure.")
             throw IllegalStateException("MockHelsenettProxyClient: Simulated failure for brokenFnr")
         }
+        var suspendert = false
+        if (fnr == "suspendertFnr") {
+            logger.info("BtsysMock: Got suspendertFnr, mocked user is suspended")
+            suspendert = true
+        }
 
-        logger.info("HprMock: Got $behandlerIdent, mocking normal response.")
+        logger.info("HprMock: Got $fnr, mocking normal response.")
         return SykmelderMedHpr(
-                ident = behandlerIdent,
+                ident = fnr,
                 hprNummer = "123456789",
                 navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                 godkjenninger = emptyList(),
+                suspendert = suspendert,
             )
             .right()
     }
 }
 
-private val aktivLegeGodnkjenninger: List<SykmelderGodkjenning> =
+private val aktivLegeGodkjenninger: List<SykmelderGodkjenning> =
     listOf(
         SykmelderGodkjenning(
             helsepersonellkategori = SykmelderKode(aktiv = true, oid = 0, verdi = "LE"),

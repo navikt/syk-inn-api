@@ -6,36 +6,32 @@ import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.types.shouldBeTypeOf
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.time.LocalDate
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import no.nav.tsm.ktor.core.SimpleNavn
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.btsys.BtsysClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.HprClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderMedHpr
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.SykmelderMedHpr
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandlerClient
 
 class SykmelderServiceTest {
-    private val hprClient = mockk<HprClient>()
-    private val btsysClient = mockk<BtsysClient>()
-    private val sykmelderService = SykmelderService(btsys = btsysClient, helsenettProxy = hprClient)
+    private val tsmBehandlerClient = mockk<TsmBehandlerClient>()
+    private val sykmelderService = SykmelderService(tsmBehandlerClient = tsmBehandlerClient)
 
     @Test
     fun `should return sykmelder with suspensjon info by hpr`() = runTest {
         val hprNummer = "12345"
         val ident = "12345678901"
-        val oppslagsdato = LocalDate.now()
 
-        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
+        coEvery { tsmBehandlerClient.getSykmelderByHpr(hprNummer) } returns
             SykmelderMedHpr(
                     hprNummer = hprNummer,
                     ident = ident,
                     navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
+                    suspendert = false,
                 )
                 .right()
-        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns false.right()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
+        val result = sykmelderService.byHpr(hprNummer).getOrNull()
 
         result.shouldBeTypeOf<Sykmelder.MedSuspensjon>()
         result.hpr shouldEqual hprNummer
@@ -46,12 +42,11 @@ class SykmelderServiceTest {
     @Test
     fun `should return FinnesIkke when sykmelder is not found in HPR`() = runTest {
         val hprNummer = "99999"
-        val oppslagsdato = LocalDate.of(2026, 3, 11)
 
-        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
-            HprClient.HprErrors.NotFound.left()
+        coEvery { tsmBehandlerClient.getSykmelderByHpr(hprNummer) } returns
+            TsmBehandlerClient.BehandlerErrors.NotFound.left()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
+        val result = sykmelderService.byHpr(hprNummer).getOrNull()
 
         result.shouldBeTypeOf<Sykmelder.FinnesIkke>()
     }
@@ -60,19 +55,18 @@ class SykmelderServiceTest {
     fun `should return MedSuspensjon with suspendert true when sykmelder is suspended`() = runTest {
         val hprNummer = "13378010"
         val ident = "12345678901"
-        val oppslagsdato = LocalDate.of(2026, 3, 11)
 
-        coEvery { hprClient.getSykmelderByHpr(hprNummer) } returns
+        coEvery { tsmBehandlerClient.getSykmelderByHpr(hprNummer) } returns
             SykmelderMedHpr(
                     hprNummer = hprNummer,
                     ident = ident,
                     navn = SimpleNavn(fornavn = "Test", mellomnavn = null, etternavn = "Test"),
                     godkjenninger = emptyList(),
+                    suspendert = true,
                 )
                 .right()
-        coEvery { btsysClient.isSuspendert(ident, oppslagsdato) } returns true.right()
 
-        val result = sykmelderService.byHpr(hprNummer, oppslagsdato).getOrNull()
+        val result = sykmelderService.byHpr(hprNummer).getOrNull()
 
         result.shouldBeTypeOf<Sykmelder.MedSuspensjon>()
         result.hpr shouldEqual hprNummer

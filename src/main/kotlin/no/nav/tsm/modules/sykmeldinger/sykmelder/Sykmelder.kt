@@ -1,7 +1,7 @@
 package no.nav.tsm.modules.sykmeldinger.sykmelder
 
 import no.nav.tsm.ktor.core.Navn
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr.SykmelderGodkjenning
+import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.SykmelderGodkjenning
 
 sealed interface Sykmelder {
     data class MedSuspensjon(

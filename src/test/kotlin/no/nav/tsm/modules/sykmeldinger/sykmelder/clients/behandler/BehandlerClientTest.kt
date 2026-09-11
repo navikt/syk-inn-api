@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler
 
 import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -8,17 +8,14 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson3.jackson
 import io.mockk.mockk
+import kotlin.collections.emptyList
 import kotlin.test.Test
 import kotlin.test.fail
 import kotlinx.coroutines.test.runTest
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.BehandlerNavn
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandler
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandlerClient
-import no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler.TsmBehandlerCloudClient
 import no.nav.tsm.utils.simpleUnitTestEnvironment
 import no.nav.tsm.utils.testJsonObjectMapper
 
-class TsmBehandlerCloudClientTest {
+class BehandlerClientTest {
 
     @Test
     fun `should return sykmelder based on hpr number`() = runTest {
@@ -35,12 +32,7 @@ class TsmBehandlerCloudClientTest {
                         TsmBehandler(
                             ident = "12345678901",
                             hpr = hprNummer,
-                            navn =
-                                BehandlerNavn(
-                                    fornavn = "Test",
-                                    mellomnavn = null,
-                                    etternavn = "Testessen",
-                                ),
+                            navn = BehandlerNavn("fornavn", null, "mellomnavn"),
                             godkjenning = emptyList(),
                             suspendert = false,
                         )

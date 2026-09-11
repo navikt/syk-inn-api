@@ -1,4 +1,4 @@
-package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.hpr
+package no.nav.tsm.modules.sykmeldinger.sykmelder.clients.behandler
 
 import no.nav.tsm.ktor.core.Navn
 import no.nav.tsm.regulus.regula.payload.BehandlerGodkjenning
@@ -11,6 +11,7 @@ data class SykmelderMedHpr(
     val navn: Navn,
     val hprNummer: String,
     val godkjenninger: List<SykmelderGodkjenning>,
+    val suspendert: Boolean,
 )
 
 /** Data type from regula. It's only used internally. Bad? */

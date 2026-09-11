@@ -24,7 +24,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer
 
 fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer) {
     // Integration test specific Environment configuration
-    dependencies { provide<Environment>() { createIntegrationEnvironment(postgres) } }
+    dependencies { provide<Environment> { createIntegrationEnvironment(postgres) } }
 
     // Global
     configureAuthentication()
@@ -36,7 +36,7 @@ fun Application.configurePostgresIntegrationTests(postgres: PostgreSQLContainer)
 
 fun ApplicationTestBuilder.configureFullIntegrationTests(postgres: PostgreSQLContainer) {
     // Integration test specific Environment configuration
-    application.dependencies { provide<Environment>() { createIntegrationEnvironment(postgres) } }
+    application.dependencies { provide<Environment> { createIntegrationEnvironment(postgres) } }
 
     // #2: Postgresql + Kafka tests just set up the entire application
     application.module()
