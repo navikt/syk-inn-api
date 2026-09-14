@@ -62,7 +62,7 @@ object KafkaTestUtils {
         assertSoftly {
             // meta
             sykmelding.meta.pasient.ident shouldBe digitalSykmelding.pasient.fnr
-            sykmelding.meta.sykmelder.hpr shouldBe
+            sykmelding.meta.sykmelder?.hpr shouldBe
                 digitalSykmelding.behandler.ids.firstOrNull { it.type == PersonIdType.HPR }?.id
             sykmelding.meta.legekontorOrgnr shouldBe digitalMetadata.orgnummer
             sykmelding.meta.legekontorTlf shouldBe

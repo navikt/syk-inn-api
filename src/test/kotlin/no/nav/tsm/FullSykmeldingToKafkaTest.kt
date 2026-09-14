@@ -103,7 +103,7 @@ class EverythingTest {
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             created.meta.pasient.ident shouldBe "21037712323"
-            created.meta.sykmelder.hpr shouldBe "9144889"
+            created.meta.sykmelder?.hpr shouldBe "9144889"
             created.meta.legekontorOrgnr shouldBe "123456789"
 
             val sykmelding =
@@ -113,7 +113,7 @@ class EverythingTest {
             assertSoftly(sykmelding) {
                 // meta
                 meta.pasient.ident shouldBe "21037712323"
-                meta.sykmelder.hpr shouldBe "9144889"
+                meta.sykmelder?.hpr shouldBe "9144889"
                 meta.legekontorOrgnr shouldBe "123456789"
                 meta.legekontorTlf shouldBe "12345678"
 
@@ -218,7 +218,7 @@ class EverythingTest {
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             created.meta.pasient.ident shouldEqual "21037712323"
-            created.meta.sykmelder.hpr shouldEqual "9144889"
+            created.meta.sykmelder?.hpr shouldEqual "9144889"
             created.meta.legekontorOrgnr shouldEqual "123456789"
             created.values.hoveddiagnose?.code shouldEqual "L73"
             created.values.hoveddiagnose?.system?.name shouldEqual "ICPC2"
@@ -255,7 +255,7 @@ class EverythingTest {
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             created.meta.pasient.ident shouldEqual "21037712323"
-            created.meta.sykmelder.hpr shouldEqual "hprButFnrIsSuspended"
+            created.meta.sykmelder?.hpr shouldEqual "hprButFnrIsSuspended"
             created.utfall.result shouldEqual RuleType.INVALID
 
             val record: SykmeldingRecord? = consumeUntil(created.sykmeldingId)
@@ -362,7 +362,7 @@ class EverythingTest {
 
             val created = requireNotNull(response.body<BehandlerSykmeldingFull>())
             created.meta.pasient.ident shouldBe "21037712323"
-            created.meta.sykmelder.hpr shouldBe "9144889"
+            created.meta.sykmelder?.hpr shouldBe "9144889"
             created.meta.legekontorOrgnr shouldBe "123456789"
 
             val sykmelding =
@@ -372,7 +372,7 @@ class EverythingTest {
             assertSoftly(sykmelding) {
                 // meta
                 meta.pasient.ident shouldBe "21037712323"
-                meta.sykmelder.hpr shouldBe "9144889"
+                meta.sykmelder?.hpr shouldBe "9144889"
 
                 // aktivitet
                 values.aktivitet shouldHaveSize 1

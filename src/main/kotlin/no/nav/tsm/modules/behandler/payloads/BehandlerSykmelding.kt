@@ -12,11 +12,13 @@ import no.nav.tsm.sykmelding.input.core.model.RuleType
 sealed interface BehandlerSykmelding {
     val sykmeldingId: UUID
     val meta: BehandlerSykmeldingMeta
+    val type: String
 }
 
 data class BehandlerSykmeldingFull(
     override val sykmeldingId: UUID,
     override val meta: BehandlerSykmeldingMeta,
+    override val type: String,
     val utfall: BehandlerSykmeldingRuleResult,
     val values: BehandlerSykmeldingValues,
 ) : BehandlerSykmelding {
@@ -26,7 +28,7 @@ data class BehandlerSykmeldingFull(
 data class BehandlerSykmeldingMeta(
     val mottatt: OffsetDateTime,
     val pasient: BehandlerSykmeldingSykmeldt,
-    val sykmelder: BehandlerSykmeldingSykmelder,
+    val sykmelder: BehandlerSykmeldingSykmelder?,
     val legekontorOrgnr: String?,
     val legekontorTlf: String?,
 )

@@ -6,6 +6,7 @@ import java.util.UUID
 data class BehandlerSykmeldingRedacted(
     override val sykmeldingId: UUID,
     override val meta: BehandlerSykmeldingMeta,
+    override val type: String,
     val values: BehandlerSykmeldingRedactedValues,
     /** Should only ever be OK */
     val utfall: BehandlerSykmeldingRuleResult,
