@@ -52,7 +52,7 @@ class BehandlerRoutesTest {
 
         response.status shouldEqual HttpStatusCode.OK
         created.meta.pasient.ident shouldEqual "21037712323"
-        created.meta.sykmelder.hpr shouldEqual "9144889"
+        created.meta.sykmelder?.hpr shouldEqual "9144889"
         created.meta.legekontorOrgnr shouldEqual "123456789"
 
         // Diagnose
@@ -121,7 +121,7 @@ class BehandlerRoutesTest {
             val created = requireNotNull(response.body<BehandlerSykmelding>())
             created.shouldBeTypeOf<BehandlerSykmeldingFull>()
             response.status shouldEqual HttpStatusCode.OK
-            created.meta.sykmelder.hpr shouldEqual "someone-else"
+            created.meta.sykmelder?.hpr shouldEqual "someone-else"
 
             val specificSykmeldingResponse =
                 client.get("/api/sykmelding/${created.sykmeldingId}") {

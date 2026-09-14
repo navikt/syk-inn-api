@@ -37,6 +37,7 @@ private val logger = logger()
 
 fun VerifiedSykInnSykmelding.toSykmelding() =
     BehandlerSykmeldingFull(
+        type = this.type.name,
         sykmeldingId = sykmeldingId,
         meta = meta.toBehandlerSykmeldingMeta(),
         values = values.toSykmeldingDocumentValues(),
@@ -45,6 +46,7 @@ fun VerifiedSykInnSykmelding.toSykmelding() =
 
 fun VerifiedSykInnSykmelding.toRedactedSykmelding(): BehandlerSykmeldingRedacted =
     BehandlerSykmeldingRedacted(
+        type = this.type.name,
         sykmeldingId = sykmeldingId,
         meta = meta.toBehandlerSykmeldingMeta(),
         utfall = BehandlerSykmeldingRuleResult(result = RuleType.OK, cause = null),
@@ -86,25 +88,14 @@ private fun SykInnSykmeldingMeta.toBehandlerSykmeldingMeta(): BehandlerSykmeldin
             is SykInnSykmeldingMeta.Legacy ->
                 Triple(this.behandler, this.legekontorOrgnr, this.legekontorTlf)
 
-            is SykInnSykmeldingMeta.Utenlandsk ->
-                throw IllegalStateException(
-                    /**
-                     * Currently, no behandler will be able to see sykmeldinger from
-                     * utenlandsk-source because every sykmelding is filtered on the behandler's own
-                     * HPR number.
-                     *
-                     * Once we add support for Redacted or full sykmeldinger for other behandlers,
-                     * we will also need to support Meta for these types of sykmeldinger.
-                     */
-                    "Utenlandsk sykmelding will be supported in future versions"
-                )
+            is SykInnSykmeldingMeta.Utenlandsk -> Triple(null, null, null)
         }
 
     return BehandlerSykmeldingMeta(
         mottatt = mottatt,
         pasient = BehandlerSykmeldingSykmeldt(ident = pasient.ident, navn = pasient.displayName()),
         sykmelder =
-            BehandlerSykmeldingSykmelder(hpr = behandler.hpr, navn = behandler.displayName()),
+            behandler?.let { BehandlerSykmeldingSykmelder(hpr = it.hpr, navn = it.displayName()) },
         legekontorOrgnr = legekontorOrgnr,
         legekontorTlf = legekontorTlf,
     )
