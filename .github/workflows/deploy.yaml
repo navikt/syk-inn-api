@@ -121,6 +121,8 @@ jobs:
           repository: navikt/syk-inn
           fetch-depth: 1
       - uses: navikt/tsm-workflows/actions/typst@main
+        with:
+          typst-version: '0.15.1'
       - uses: navikt/tsm-workflows/actions/yarn@main
         with:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
