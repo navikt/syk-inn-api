@@ -311,6 +311,7 @@ class EverythingTest {
                             arbeidsgiver = null,
                             tilbakedatering = null,
                             annenFravarsgrunn = null,
+                            prognose = null,
                         ),
                 )
             )
@@ -436,6 +437,7 @@ class EverythingTest {
                             yrkesskade = null,
                             arbeidsgiver = null,
                             annenFravarsgrunn = null,
+                            prognose = null,
                         ),
                 )
             )
@@ -598,6 +600,7 @@ object Testdata {
                     begrunnelse = "Begrunnelse for tilbakedatering",
                 ),
             annenFravarsgrunn = AnnenFravarsgrunn.ARBEIDSRETTET_TILTAK,
+            prognose = BehandlerOpprettSykmelding.Prognose(friskmeldingTilArbeidsformidling = true),
             utdypendeSporsmal =
                 BehandlerOpprettSykmelding.UtdypendeSporsmal(
                     utfordringerMedArbeid =

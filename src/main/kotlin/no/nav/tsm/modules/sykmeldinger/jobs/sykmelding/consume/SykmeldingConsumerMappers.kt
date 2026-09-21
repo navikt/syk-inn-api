@@ -248,6 +248,7 @@ private fun SykmeldingRecord.toSykmeldingValues(): SykInnSykmeldingValues {
             },
         aktivitet = sykmelding.aktivitet.map { it.toSykInnAktivitet() },
         svangerskapsrelatert = sykmelding.medisinskVurdering.svangerskap,
+        prognose = sykmelding.toPrognose(),
         meldinger = sykmelding.toMeldinger(),
         yrkesskade = sykmelding.medisinskVurdering.yrkesskade?.toSykInnYrkesskade(),
         arbeidsgiver = sykmelding.toArbeidsgiver(),
@@ -271,6 +272,22 @@ private fun Sykmelding.toTilbakedatering(): SykInnTilbakedatering? {
         else -> return null
     }
 }
+
+private fun Sykmelding.toPrognose(): SykInnPrognose? =
+    when (this) {
+        is Sykmelding.Nasjonal.Legacy -> {
+            val annetArbeidPaSikt =
+                when (val arbeid = this.prognose?.arbeid) {
+                    is IArbeid.ErIArbeid -> arbeid.annetArbeidPaSikt
+                    else -> null
+                }
+
+            annetArbeidPaSikt?.let { SykInnPrognose(friskmeldingTilArbeidsformidling = it) }
+        }
+        // TODO: Update once tsm-sykmelding-input is updated
+        is Sykmelding.Digital -> null
+        is Sykmelding.Utenlandsk -> null
+    }
 
 private fun Sykmelding.toMeldinger(): SykInnMeldinger? {
     when (this) {

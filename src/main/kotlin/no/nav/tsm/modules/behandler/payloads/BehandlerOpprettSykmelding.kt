@@ -27,12 +27,15 @@ object BehandlerOpprettSykmelding {
         val aktivitet: List<Aktivitet>,
         val svangerskapsrelatert: Boolean,
         val meldinger: Meldinger,
+        val prognose: Prognose?,
         val yrkesskade: Yrkesskade?,
         val arbeidsgiver: Arbeidsgiver?,
         val tilbakedatering: Tilbakedatering?,
         val utdypendeSporsmal: UtdypendeSporsmal?,
         val annenFravarsgrunn: AnnenFravarsgrunn?,
     )
+
+    data class Prognose(val friskmeldingTilArbeidsformidling: Boolean?)
 
     data class Meldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 

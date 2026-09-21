@@ -7,6 +7,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnPrognose
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
@@ -58,6 +59,11 @@ fun BehandlerOpprettSykmelding.Payload.toSykInnSykmelding(): UnverifiedSykInnSyk
                     },
                 aktivitet = this.values.aktivitet.map { it.toSykInnApiAktivitet() },
                 svangerskapsrelatert = this.values.svangerskapsrelatert,
+                prognose =
+                    SykInnPrognose(
+                        friskmeldingTilArbeidsformidling =
+                            this.values.prognose?.friskmeldingTilArbeidsformidling
+                    ),
                 meldinger =
                     SykInnMeldinger(
                         tilNav = this.values.meldinger.tilNav,

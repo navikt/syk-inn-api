@@ -36,6 +36,7 @@ object SykmeldingTable : Table("sykmelding") {
     val valuesBidiagnoser =
         jacksonJsonb<List<SykmeldingJsonbDiagnose>>("values_bidiagnoser").nullable()
     val valuesAktivitet = jacksonJsonb<List<SykmeldingJsonbAktivitet>>("values_aktivitet")
+    val valuesPrognose = jacksonJsonb<SykmeldingJsonbPrognose>("values_prognose").nullable()
     val valuesMeldinger = jacksonJsonb<SykmeldingJsonbMeldinger>("values_meldinger").nullable()
     val valuesYrkesskade = jacksonJsonb<SykmeldingJsonbYrkesskade>("values_yrkesskade").nullable()
     val valuesArbeidsgiver =

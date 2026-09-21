@@ -12,12 +12,15 @@ data class SykInnSykmeldingValues(
     val aktivitet: List<SykInnAktivitet>,
     val svangerskapsrelatert: Boolean,
     val meldinger: SykInnMeldinger?,
+    val prognose: SykInnPrognose?,
     val yrkesskade: SykInnYrkesskade?,
     val arbeidsgiver: SykInnArbeidsgiver?,
     val tilbakedatering: SykInnTilbakedatering?,
     val utdypendeSporsmal: SykInnUtdypendeSporsmal?,
     val annenFravarsgrunn: AnnenFravarsgrunn?,
 )
+
+data class SykInnPrognose(val friskmeldingTilArbeidsformidling: Boolean?)
 
 data class SykInnMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 
