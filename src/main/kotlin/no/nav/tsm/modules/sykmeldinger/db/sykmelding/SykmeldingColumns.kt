@@ -18,6 +18,8 @@ data class SykmeldingJsonbValidationResult(
 
 data class SykmeldingJsonbDiagnose(val system: String, val text: String?, val code: String)
 
+data class SykmeldingJsonbPrognose(val friskmeldingTilArbeidsformidling: Boolean?)
+
 data class SykmeldingJsonbMeldinger(val tilNav: String?, val tilArbeidsgiver: String?)
 
 data class SykmeldingJsonbYrkesskade(val yrkesskade: Boolean, val skadedato: LocalDate?)

@@ -221,6 +221,7 @@ class SykmeldingDeleteRepoTest {
                     tilbakedatering = null,
                     utdypendeSporsmal = null,
                     annenFravarsgrunn = null,
+                    prognose = null,
                 ),
             meta =
                 SykInnSykmeldingMeta.Digital(

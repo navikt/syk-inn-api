@@ -17,6 +17,7 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnDiagnose
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnPrognose
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnResult
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.FromJsonb.toSykInnUtdypendeSporsmal
@@ -25,6 +26,7 @@ import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toArbeidsgiverJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toDiagnoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toMeldingerJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toNavnJsonb
+import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toPrognoseJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toRuleResultJson
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toTilbakedateringJsonb
 import no.nav.tsm.modules.sykmeldinger.db.sykmelding.ToJsonb.toUtdypendeSporsmalJsonb
@@ -96,6 +98,7 @@ abstract class SykmeldingInsert {
                 it[valuesBidiagnoser] =
                     sykmelding.values.bidiagnoser.mapNotNull { bi -> bi.toDiagnoseJsonb() }
                 it[valuesAktivitet] = sykmelding.values.aktivitet.map { a -> a.toAktivitetJsonb() }
+                it[valuesPrognose] = sykmelding.values.prognose.toPrognoseJsonb()
                 it[valuesMeldinger] = sykmelding.values.meldinger.toMeldingerJsonb()
                 it[valuesYrkesskade] = sykmelding.values.yrkesskade.toYrkesskadeJsonb()
                 it[valuesArbeidsgiver] = sykmelding.values.arbeidsgiver.toArbeidsgiverJsonb()
@@ -223,6 +226,7 @@ private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnS
                     this[SykmeldingTable.valuesAnnenFravarsgrunn]?.let {
                         AnnenFravarsgrunn.valueOf(it)
                     },
+                prognose = this[SykmeldingTable.valuesPrognose]?.toSykInnPrognose(),
                 meldinger = this[SykmeldingTable.valuesMeldinger]?.toSykInnMeldinger(),
                 yrkesskade = this[SykmeldingTable.valuesYrkesskade]?.toSykInnYrkesskade(),
                 arbeidsgiver = this[SykmeldingTable.valuesArbeidsgiver]?.toSykInnArbeidsgiver(),

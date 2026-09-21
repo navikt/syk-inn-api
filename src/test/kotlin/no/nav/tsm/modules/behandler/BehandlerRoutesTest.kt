@@ -1,5 +1,6 @@
 package no.nav.tsm.modules.behandler
 
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -59,6 +60,7 @@ class BehandlerRoutesTest {
         created.shouldBeTypeOf<BehandlerSykmeldingFull>()
         created.values.hoveddiagnose?.code shouldEqual "L73"
         created.values.hoveddiagnose?.system?.name shouldEqual "ICPC2"
+        created.values.prognose?.friskmeldingTilArbeidsformidling.shouldBeTrue()
 
         val allResponse =
             client.get("/api/sykmelding") {
@@ -311,6 +313,7 @@ private val fullExampleSykmeldingPayload =
     |      "tilNav": null,
     |      "tilArbeidsgiver": null
     |    },
+    |    "prognose": { "friskmeldingTilArbeidsformidling":  true },
     |    "svangerskapsrelatert": false,
     |    "yrkesskade": null,
     |    "arbeidsgiver": null,

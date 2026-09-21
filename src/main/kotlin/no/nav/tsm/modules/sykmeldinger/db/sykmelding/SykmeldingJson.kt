@@ -7,6 +7,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsrelatertArsak
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnPrognose
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnTilbakedatering
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnUtdypendeSporsmal
@@ -48,6 +49,13 @@ object ToJsonb {
 
     fun Navn.toNavnJsonb(): SykmeldingJsonbNavn =
         SykmeldingJsonbNavn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
+
+    fun SykInnPrognose?.toPrognoseJsonb(): SykmeldingJsonbPrognose? =
+        this?.let {
+            SykmeldingJsonbPrognose(
+                friskmeldingTilArbeidsformidling = friskmeldingTilArbeidsformidling
+            )
+        }
 
     fun SykInnMeldinger?.toMeldingerJsonb(): SykmeldingJsonbMeldinger? =
         this?.let { SykmeldingJsonbMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver) }
@@ -163,6 +171,9 @@ object FromJsonb {
                 text = this.text,
             )
         }
+
+    fun SykmeldingJsonbPrognose.toSykInnPrognose(): SykInnPrognose =
+        SykInnPrognose(friskmeldingTilArbeidsformidling = friskmeldingTilArbeidsformidling)
 
     fun SykmeldingJsonbMeldinger.toSykInnMeldinger(): SykInnMeldinger =
         SykInnMeldinger(tilNav = tilNav, tilArbeidsgiver = tilArbeidsgiver)

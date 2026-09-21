@@ -8,6 +8,7 @@ import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingDiagnoseInfo
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingFull
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingMeldinger
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingMeta
+import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingPrognose
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedacted
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedactedAktivitet
 import no.nav.tsm.modules.behandler.payloads.BehandlerSykmeldingRedactedValues
@@ -23,6 +24,7 @@ import no.nav.tsm.modules.sykmeldinger.domain.SykInnAktivitet
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnArbeidsgiver
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnDiagnoseInfo
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnMeldinger
+import no.nav.tsm.modules.sykmeldinger.domain.SykInnPrognose
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingMeta
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingRuleResult
 import no.nav.tsm.modules.sykmeldinger.domain.SykInnSykmeldingValues
@@ -108,6 +110,7 @@ fun SykInnSykmeldingValues.toSykmeldingDocumentValues(): BehandlerSykmeldingValu
         aktivitet = this.aktivitet.toPersistedSykmeldingAktivitetToExistingSykmeldingAktivitet(),
         svangerskapsrelatert = this.svangerskapsrelatert,
         pasientenSkalSkjermes = this.pasientenSkalSkjermes,
+        prognose = this.prognose?.toExistingSykmeldingPrognose(),
         meldinger = this.meldinger?.toExistingSykmeldingMeldinger(),
         yrkesskade = this.yrkesskade?.toExistingSykmeldingYrkesskade(),
         arbeidsgiver = this.arbeidsgiver?.toExistingSykmeldingArbeidsgiver(),
@@ -247,3 +250,8 @@ private fun SykInnYrkesskade.toExistingSykmeldingYrkesskade(): BehandlerSykmeldi
 
 private fun SykInnMeldinger.toExistingSykmeldingMeldinger(): BehandlerSykmeldingMeldinger =
     BehandlerSykmeldingMeldinger(tilNav = this.tilNav, tilArbeidsgiver = this.tilArbeidsgiver)
+
+private fun SykInnPrognose.toExistingSykmeldingPrognose(): BehandlerSykmeldingPrognose =
+    BehandlerSykmeldingPrognose(
+        friskmeldingTilArbeidsformidling = this.friskmeldingTilArbeidsformidling
+    )

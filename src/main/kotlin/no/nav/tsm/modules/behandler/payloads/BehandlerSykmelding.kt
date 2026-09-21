@@ -39,6 +39,7 @@ data class BehandlerSykmeldingValues(
     val aktivitet: List<BehandlerSykmeldingAktivitet>,
     val svangerskapsrelatert: Boolean,
     val pasientenSkalSkjermes: Boolean,
+    val prognose: BehandlerSykmeldingPrognose?,
     val meldinger: BehandlerSykmeldingMeldinger?,
     val yrkesskade: BehandlerSykmeldingYrkesskade?,
     val arbeidsgiver: BehandlerSykmeldingArbeidsgiver?,
@@ -104,6 +105,8 @@ data class BehandlerSykmeldingDiagnoseInfo(
 data class BehandlerSykmeldingRuleResult(val result: RuleType, val cause: String?)
 
 data class BehandlerSykmeldingTilbakedatering(val startdato: LocalDate?, val begrunnelse: String?)
+
+data class BehandlerSykmeldingPrognose(val friskmeldingTilArbeidsformidling: Boolean?)
 
 data class BehandlerSykmeldingArbeidsgiver(val harFlere: Boolean, val arbeidsgivernavn: String?)
 
