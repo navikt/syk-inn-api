@@ -1,6 +1,7 @@
 package no.nav.tsm
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -143,6 +144,8 @@ class EverythingTest {
                     aktivitet.arbeidsrelatertArsak.annenArbeidsrelatertArsak shouldBe
                         "Begrunnelse for annen arbeidsrelatert årsak"
                 }
+
+                values.prognose?.friskmeldingTilArbeidsformidling.shouldBeTrue()
 
                 // utfall
                 utfall.result shouldBe RuleType.OK

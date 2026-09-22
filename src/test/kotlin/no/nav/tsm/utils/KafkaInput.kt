@@ -120,6 +120,10 @@ object KafkaTestUtils {
             sykmelding.values.tilbakedatering?.begrunnelse shouldBe
                 digitalSykmelding.tilbakedatering?.begrunnelse
 
+            // prognose
+            sykmelding.values.prognose?.friskmeldingTilArbeidsformidling shouldBe
+                digitalSykmelding.prognose?.friskmeldingTilArbeidsformidling
+
             // meldinger
             sykmelding.values.meldinger?.tilNav shouldBe
                 digitalSykmelding.bistandNav?.beskrivBistand
