@@ -57,8 +57,10 @@ fun VerifiedSykInnSykmelding.toInputRecord(
                         navnFastlege = null,
                         kontaktinfo = emptyList(),
                     ),
-                // TODO: Once tsm-sykmelding-input is updated add mapping _to_ record
-                // prognose = null
+                prognose =
+                    values.prognose?.friskmeldingTilArbeidsformidling?.let {
+                        DigitalPrognose(friskmeldingTilArbeidsformidling = it)
+                    },
                 medisinskVurdering =
                     MedisinskVurdering.Digital(
                         hovedDiagnose = values.hoveddiagnose?.toDiagnoseInfo(),

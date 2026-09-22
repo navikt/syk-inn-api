@@ -284,8 +284,10 @@ private fun Sykmelding.toPrognose(): SykInnPrognose? =
 
             annetArbeidPaSikt?.let { SykInnPrognose(friskmeldingTilArbeidsformidling = it) }
         }
-        // TODO: Update once tsm-sykmelding-input is updated
-        is Sykmelding.Digital -> null
+        is Sykmelding.Digital ->
+            this.prognose?.friskmeldingTilArbeidsformidling?.let {
+                SykInnPrognose(friskmeldingTilArbeidsformidling = it)
+            }
         is Sykmelding.Utenlandsk -> null
     }
 
