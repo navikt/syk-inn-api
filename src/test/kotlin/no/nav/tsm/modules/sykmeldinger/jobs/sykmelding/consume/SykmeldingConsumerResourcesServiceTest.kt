@@ -135,6 +135,7 @@ private fun createDigitalRecord(ids: List<PersonId>): SykmeldingRecord {
                 aktivitet = emptyList(),
                 pasient = mockk(),
                 behandler = mockk(),
+                prognose = mockk(),
                 bistandNav = mockk(),
                 arbeidsgiver = mockk(),
                 tilbakedatering = mockk(),
