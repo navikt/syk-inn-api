@@ -2,10 +2,13 @@ package no.nav.tsm.core
 
 import io.ktor.server.config.*
 import kotlin.time.Duration
+import no.nav.tsm.ktor.logger
 import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.ktor.nais.getRuntimeCluster
 
-class Runtime(val env: RuntimeCluster, val name: String, val version: String)
+private val logger = logger()
+
+class Runtime(val env: RuntimeCluster, val name: String, val sourceVersionPermalink: String)
 
 class SykmeldingConfig(val retention: Duration)
 
@@ -40,6 +43,8 @@ class Environment(
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
+    val env = getRuntimeCluster()
+
     val jobsConfig =
         JobsConfig(
             inputProducer =
@@ -61,9 +66,9 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
     return Environment(
         runtime =
             Runtime(
-                env = getRuntimeCluster(),
+                env = env,
                 name = config.property("app.name").getString(),
-                version = config.property("app.version").getString(),
+                sourceVersionPermalink = createSourcePermalink(env),
             ),
         sykmeldingConsumer =
             KafkaSykmeldingConsumer(
@@ -83,4 +88,14 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             ExternalApi(tsmBehandler = config.property("external.tsmBehandler").getString())
         },
     )
+}
+
+private fun createSourcePermalink(env: RuntimeCluster): String {
+    if (env != RuntimeCluster.LOCAL && BuildInfo.GIT_SHA == "local") {
+        logger.error(
+            "Running in ${env.name} environment but BuildInfo.GIT_SHA is 'local'. This indicates that the application was built without a proper git SHA. Please ensure that the build process includes the git SHA for non-local environments."
+        )
+    }
+
+    return "https://github.com/syk-inn-api/tree/${BuildInfo.GIT_SHA}"
 }

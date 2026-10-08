@@ -8,7 +8,12 @@ import no.nav.tsm.ktor.nais.RuntimeCluster
 
 val simpleUnitTestEnvironment =
     Environment(
-        runtime = Runtime(env = RuntimeCluster.PROD, name = "test-app", version = "testy-v0"),
+        runtime =
+            Runtime(
+                env = RuntimeCluster.PROD,
+                name = "test-app",
+                sourceVersionPermalink = "testy-v0",
+            ),
         sykmeldingConsumer = mockk(relaxed = true),
         jobs = mockk(relaxed = true),
         postgres = mockk(relaxed = true),

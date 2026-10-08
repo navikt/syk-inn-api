@@ -37,7 +37,6 @@ class EnvironmentTest {
                             "NAIS_TOKEN_ENDPOINT" to "https://texas/token",
                             // Provided by nais-foo.yaml
                             "EXTERNAL_HPR_URL" to "https://hpr.test",
-                            "SOURCE_VERSION_URL" to "real-version",
                         )
                     )
                     .withFallback(ConfigFactory.parseResources("application.conf"))
@@ -49,6 +48,6 @@ class EnvironmentTest {
         // Poke lazy envs as well to ensure they are properly configured
         environment.external().shouldNotBeNull()
 
-        environment.runtime.version shouldEqual "real-version"
+        environment.runtime.sourceVersionPermalink shouldEqual "real-version"
     }
 }
