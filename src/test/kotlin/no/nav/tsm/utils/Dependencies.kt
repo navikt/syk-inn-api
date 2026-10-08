@@ -44,7 +44,12 @@ fun ApplicationTestBuilder.configureFullIntegrationTests(postgres: PostgreSQLCon
 
 fun createIntegrationEnvironment(postgres: PostgreSQLContainer) =
     Environment(
-        runtime = Runtime(env = RuntimeCluster.LOCAL, name = "test-app", version = "testy-v0"),
+        runtime =
+            Runtime(
+                env = RuntimeCluster.LOCAL,
+                name = "test-app",
+                sourceVersionPermalink = "testy-v0",
+            ),
         postgres =
             PostgresConfig(
                 jdbc = postgres.jdbcUrl,

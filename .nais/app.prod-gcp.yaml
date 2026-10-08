@@ -1,11 +1,3 @@
-apiVersion: nais.io/v1alpha1
-kind: Application
-metadata:
-  name: syk-inn-api
-  namespace: tsm
-  labels:
-    team: tsm
-
 spec:
   gcp:
     sqlInstances:
@@ -30,10 +22,10 @@ spec:
             value: "on"
           - name: cloudsql.logical_decoding
             value: "on"
+
   kafka:
     pool: nav-prod
 
-  port: 8080
   replicas:
     min: 2
     max: 3
@@ -48,48 +40,10 @@ spec:
       cpu: 30m
       memory: 512Mi
 
-  liveness:
-    path: /internal/health/alive
-  readiness:
-    path: /internal/health/ready
-  preStopHook:
-    http:
-      path: /internal/shutdown
-  prometheus:
-    enabled: true
-    path: /internal/metrics
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
-
-  # Used to authorize /admin endpoints with Entra AD OBO-tokens
   azure:
     application:
-      enabled: true
       tenant: nav.no
-      allowAllUsers: false
       claims:
         groups:
           # EntraAD: nais-team-tsm (developers - same as Zara uses)
           - id: '35c70ac7-e8e6-4cec-933b-86106a97c0d4'
-
-  accessPolicy:
-    inbound:
-      rules:
-        - application: syk-inn
-        - application: zara
-    outbound:
-      rules:
-        - application: logging
-          namespace: nais-system
-        - application: syfohelsenettproxy
-          namespace: teamsykmelding
-        - application: tsm-pdl-cache
-          namespace: tsm
-        - application: btsys-api
-          namespace: team-rocket
-        - application: tsm-behandler
-  env:
-    - name: SOURCE_VERSION_URL
-      value: {{ sourceVersionURL }}

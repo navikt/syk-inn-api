@@ -74,6 +74,35 @@ dependencies {
     testImplementation(libs.kotest.assertions)
 }
 
+val generateBuildInfo =
+    tasks.register("generateBuildInfo") {
+        val gitSha = providers.environmentVariable("GITHUB_SHA").orNull ?: "local"
+        inputs.property("gitSha", gitSha)
+        val outputDir = layout.buildDirectory.dir("generated/kotlin")
+        outputs.dir(outputDir)
+
+        if (gitSha == "local") {
+            logger.warn("GITHUB_SHA not found, using 'local' as git SHA, this will fail if deployed!")
+        }
+
+        doLast {
+            val file = outputDir.get().file("BuildInfo.kt").asFile
+            file.parentFile.mkdirs()
+            file.writeText(
+                """
+            package no.nav.tsm.core
+
+            internal object BuildInfo {
+                const val GIT_SHA = "$gitSha"
+            }
+            """
+                    .trimIndent()
+            )
+        }
+    }
+
+sourceSets["main"].kotlin.srcDir(generateBuildInfo.map { it.outputs.files })
+
 tasks {
     shadowJar {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
