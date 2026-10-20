@@ -17,6 +17,7 @@ import no.nav.tsm.ktor.auth.entra.entraMachineToken
 import no.nav.tsm.ktor.logger
 import no.nav.tsm.ktor.otel.failSpan
 import no.nav.tsm.modules.behandler.access.BehandlerAccessControlService
+import no.nav.tsm.modules.behandler.access.toSykmelding
 import no.nav.tsm.modules.behandler.mappers.toBehandlerSykmeldingVerify
 import no.nav.tsm.modules.behandler.mappers.toSykInnSykmelding
 import no.nav.tsm.modules.behandler.payloads.BehandlerOpprettSykmelding
@@ -135,6 +136,23 @@ fun Application.configureBehandlerRoutes() {
                                 }
 
                             accessControlledSykmeldinger
+                        }
+                        .fold(
+                            { call.respond(it.code, MessageBody(it.message)) },
+                            { call.respond(HttpStatusCode.OK, it) },
+                        )
+                }
+                /** Temporary endpoint used by PDF-backfill to generate missing PDFs */
+                get("/internal/should-pdf") {
+                    either<GenericHttpError, List<BehandlerSykmeldingFull>> {
+                            val allDemSykmeldings =
+                                sykmeldingerService.allNewDigital().map { it.toSykmelding() }
+
+                            logger.info(
+                                "/internal/should-pdf called, found ${allDemSykmeldings.size} new digital sykmeldings that should have PDFs"
+                            )
+
+                            allDemSykmeldings
                         }
                         .fold(
                             { call.respond(it.code, MessageBody(it.message)) },

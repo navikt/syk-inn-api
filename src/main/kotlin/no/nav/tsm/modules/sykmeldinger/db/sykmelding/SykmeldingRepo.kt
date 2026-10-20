@@ -208,6 +208,14 @@ class SykmeldingRepo : SykmeldingInsert() {
             .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
             .firstOrNull()
     }
+
+    @WithSpan
+    suspend fun allNewDigital() = dbQuery {
+        SykmeldingTable.selectAll()
+            .where { SykmeldingTable.type eq SykInnSykmeldingType.DIGITAL.name }
+            .map { it.sykmeldingRowToVerifiedSykInnSykmelding() }
+            .toList()
+    }
 }
 
 private fun ResultRow.sykmeldingRowToVerifiedSykInnSykmelding(): VerifiedSykInnSykmelding {

@@ -171,4 +171,6 @@ class SykmeldingerService(
             block(sykmelder, previous, pasient)
         }
     }
+
+    suspend fun allNewDigital(): List<VerifiedSykInnSykmelding> = repo.allNewDigital()
 }
