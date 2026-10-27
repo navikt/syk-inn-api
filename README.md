@@ -124,3 +124,23 @@ If not you can refer to the manually configure it:
 
 In IntelliJ run configuration, first run the main function, then edit it to add `-Dio.ktor.development=true` to the VM
 options, and `-config=application-local.conf` in "program options".
+
+
+### Finding new available dependencies
+``` bash
+./gradlew dependencyUpdates
+```
+
+### Upgrading the Gradle wrapper version to latest
+``` bash
+./gradlew :wrapper --gradle-version latest
+```
+
+### Contact
+
+This project is maintained by [navikt/tsm](CODEOWNERS)
+
+Questions and/or feature requests? Please create an [issue](https://github.com/navikt/syk-inn-api/issues)
+
+If you work in [@navikt](https://github.com/navikt) you can reach us at the Slack
+channel [#team-symfoni](https://nav-it.slack.com/archives/C07MY3KCDS5)

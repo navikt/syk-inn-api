@@ -19,7 +19,9 @@ application {
 }
 
 kotlin {
-    jvmToolchain(25)
+    jvmToolchain {
+        languageVersion.set(libs.versions.jvmVersion.map { JavaLanguageVersion.of(it) })
+    }
 }
 
 dependencies {
