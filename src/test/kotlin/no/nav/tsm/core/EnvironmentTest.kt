@@ -48,6 +48,7 @@ class EnvironmentTest {
         // Poke lazy envs as well to ensure they are properly configured
         environment.external().shouldNotBeNull()
 
-        environment.runtime.sourceVersionPermalink shouldEqual "real-version"
+        environment.runtime.sourceVersionPermalink shouldEqual
+            "https://github.com/syk-inn-api/tree/local"
     }
 }
