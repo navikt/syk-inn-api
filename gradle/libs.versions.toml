@@ -1,18 +1,21 @@
 [versions]
-kotlin = "2.4.10"
-logback = "1.6.1"
+
+jvmVersion = "25"
+
+kotlin = "2.4.21"
+logback = "1.6.6"
 logbackEncoder = "9.0"
 postgres = "42.7.13"
-flyway = "13.2.0"
+flyway = "13.11.1"
 kafka = "4.3.1"
 arrow = "2.2.3"
 caffeine = "3.2.4"
 
 # TSM Libs
-tsm-pdl-client = "0.0.2"
+tsm-pdl-client = "0.0.3"
 tsm-sykmeldinger-input = "30"
 tsm-regula = "56"
-tsm-diagnoser = "2026.1.13"
+tsm-diagnoser = "2026.8.25"
 
 # Testing
 testcontainers = "2.0.5"
@@ -53,5 +56,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 flyway = { id = "org.flywaydb.flyway", version.ref = "flyway" }
 
-spotless = { id = "com.diffplug.spotless", version = "8.9.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
 detekt = { id = "dev.detekt", version = "2.0.0-alpha.6" }
