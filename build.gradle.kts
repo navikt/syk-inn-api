@@ -19,7 +19,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 dependencies {
@@ -74,6 +74,36 @@ dependencies {
     testImplementation(libs.kotest.assertions)
 }
 
+val generateBuildInfo =
+    tasks.register("generateBuildInfo") {
+        description = "generate build info"
+        val gitSha = providers.environmentVariable("GITHUB_SHA").orNull ?: "local"
+        inputs.property("gitSha", gitSha)
+        val outputDir = layout.buildDirectory.dir("generated/kotlin")
+        outputs.dir(outputDir)
+
+        if (gitSha == "local") {
+            logger.warn("GITHUB_SHA not found, using 'local' as git SHA, this will fail if deployed!")
+        }
+
+        doLast {
+            val file = outputDir.get().file("BuildInfo.kt").asFile
+            file.parentFile.mkdirs()
+            file.writeText(
+                """
+            package no.nav.tsm.core
+
+            internal object BuildInfo {
+                const val GIT_SHA = "$gitSha"
+            }
+            """
+                    .trimIndent()
+            )
+        }
+    }
+
+sourceSets["main"].kotlin.srcDir(generateBuildInfo.map { it.outputs.files })
+
 tasks {
     shadowJar {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -102,36 +132,34 @@ tasks {
             candidate.version.isNonStable()
         }
     }
-}
 
-tasks.register<Exec>("preRunLocal") {
-    group = "application"
-    commandLine("./scripts/pre-dev.sh")
-}
+    register<Exec>("preRunLocal") {
+        description = "running application local"
+        group = "application"
+        commandLine("./scripts/pre-dev.sh")
+    }
 
-tasks.register<JavaExec>("runLocal") {
-    group = "application"
-    mainClass.set("io.ktor.server.netty.EngineMain")
-    classpath = sourceSets["main"].runtimeClasspath
+    register<JavaExec>("runLocal") {
+        description = "Running application locally"
+        group = "application"
+        mainClass.set("io.ktor.server.netty.EngineMain")
+        classpath = sourceSets["main"].runtimeClasspath
 
-    args("-config=application-local.conf")
-    jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
+        args("-config=application-local.conf")
+        jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
 
-    dependsOn("preRunLocal")
-}
+        dependsOn("preRunLocal")
+    }
 
-tasks.withType<Detekt>().configureEach {
-    config.setFrom(file("detekt.yml"))
-    buildUponDefaultConfig = true
+    withType<Detekt>().configureEach {
+        config.setFrom(file("detekt.yml"))
+        buildUponDefaultConfig = true
 
-    dependsOn("spotlessApply")
-}
+        dependsOn("spotlessApply")
+    }
 
-/**
- * Disable auto running of detekt on build and stuff
- */
-afterEvaluate {
-    tasks.named("check") {
+    check {
         setDependsOn(dependsOn.filter { !it.toString().contains("detekt") })
+        dependsOn("spotlessApply")
     }
 }

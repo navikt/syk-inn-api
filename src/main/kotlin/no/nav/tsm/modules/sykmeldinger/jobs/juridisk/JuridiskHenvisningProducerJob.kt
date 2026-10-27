@@ -84,7 +84,7 @@ class JuridiskHenvisningProducerJob(
                         eventName = JURIDISK_HENVISNING_EVENT_NAME,
                         version = JURIDISK_HENVISNING_VERSION,
                         kilde = JURIDISK_HENVISNING_KILDE,
-                        versjonAvKode = environment.runtime.version,
+                        versjonAvKode = environment.runtime.sourceVersionPermalink,
                         sporing = mapOf("sykmelding" to sykmeldingId.toString()),
                     )
                 }

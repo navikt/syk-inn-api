@@ -1,8 +1,8 @@
 package no.nav.tsm.core
 
 import com.typesafe.config.ConfigFactory
-import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.string.shouldContain
 import io.ktor.server.config.HoconApplicationConfig
 import kotlin.test.Test
 
@@ -37,7 +37,6 @@ class EnvironmentTest {
                             "NAIS_TOKEN_ENDPOINT" to "https://texas/token",
                             // Provided by nais-foo.yaml
                             "EXTERNAL_HPR_URL" to "https://hpr.test",
-                            "SOURCE_VERSION_URL" to "real-version",
                         )
                     )
                     .withFallback(ConfigFactory.parseResources("application.conf"))
@@ -49,6 +48,7 @@ class EnvironmentTest {
         // Poke lazy envs as well to ensure they are properly configured
         environment.external().shouldNotBeNull()
 
-        environment.runtime.version shouldEqual "real-version"
+        environment.runtime.sourceVersionPermalink shouldContain
+            "https://github.com/syk-inn-api/tree"
     }
 }
