@@ -19,7 +19,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 dependencies {
@@ -76,6 +76,7 @@ dependencies {
 
 val generateBuildInfo =
     tasks.register("generateBuildInfo") {
+        description = "generate build info"
         val gitSha = providers.environmentVariable("GITHUB_SHA").orNull ?: "local"
         inputs.property("gitSha", gitSha)
         val outputDir = layout.buildDirectory.dir("generated/kotlin")
@@ -131,36 +132,34 @@ tasks {
             candidate.version.isNonStable()
         }
     }
-}
 
-tasks.register<Exec>("preRunLocal") {
-    group = "application"
-    commandLine("./scripts/pre-dev.sh")
-}
+    register<Exec>("preRunLocal") {
+        description = "running application local"
+        group = "application"
+        commandLine("./scripts/pre-dev.sh")
+    }
 
-tasks.register<JavaExec>("runLocal") {
-    group = "application"
-    mainClass.set("io.ktor.server.netty.EngineMain")
-    classpath = sourceSets["main"].runtimeClasspath
+    register<JavaExec>("runLocal") {
+        description = "Running application locally"
+        group = "application"
+        mainClass.set("io.ktor.server.netty.EngineMain")
+        classpath = sourceSets["main"].runtimeClasspath
 
-    args("-config=application-local.conf")
-    jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
+        args("-config=application-local.conf")
+        jvmArgs("-Dio.ktor.development=true", "-Dlogback.configurationFile=logback-local.xml")
 
-    dependsOn("preRunLocal")
-}
+        dependsOn("preRunLocal")
+    }
 
-tasks.withType<Detekt>().configureEach {
-    config.setFrom(file("detekt.yml"))
-    buildUponDefaultConfig = true
+    withType<Detekt>().configureEach {
+        config.setFrom(file("detekt.yml"))
+        buildUponDefaultConfig = true
 
-    dependsOn("spotlessApply")
-}
+        dependsOn("spotlessApply")
+    }
 
-/**
- * Disable auto running of detekt on build and stuff
- */
-afterEvaluate {
-    tasks.named("check") {
+    check {
         setDependsOn(dependsOn.filter { !it.toString().contains("detekt") })
+        dependsOn("spotlessApply")
     }
 }

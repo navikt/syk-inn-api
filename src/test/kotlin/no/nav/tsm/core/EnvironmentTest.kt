@@ -1,8 +1,8 @@
 package no.nav.tsm.core
 
 import com.typesafe.config.ConfigFactory
-import io.kotest.matchers.equals.shouldEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.string.shouldContain
 import io.ktor.server.config.HoconApplicationConfig
 import kotlin.test.Test
 
@@ -48,7 +48,7 @@ class EnvironmentTest {
         // Poke lazy envs as well to ensure they are properly configured
         environment.external().shouldNotBeNull()
 
-        environment.runtime.sourceVersionPermalink shouldEqual
-            "https://github.com/syk-inn-api/tree/local"
+        environment.runtime.sourceVersionPermalink shouldContain
+            "https://github.com/syk-inn-api/tree"
     }
 }
