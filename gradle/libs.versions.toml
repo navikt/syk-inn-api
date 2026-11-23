@@ -13,7 +13,7 @@ caffeine = "3.2.4"
 
 # TSM Libs
 tsm-pdl-client = "0.0.3"
-tsm-sykmeldinger-input = "31"
+tsm-sykmeldinger-input = "32"
 tsm-regula = "56"
 tsm-diagnoser = "2026.8.25"
 
