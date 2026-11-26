@@ -8,6 +8,10 @@ metadata:
 
 spec:
   port: 8080
+  startup:
+    path: /internal/health/alive
+    periodSeconds: 5
+    failureThreshold: 24
   liveness:
     path: /internal/health/alive
   readiness:
