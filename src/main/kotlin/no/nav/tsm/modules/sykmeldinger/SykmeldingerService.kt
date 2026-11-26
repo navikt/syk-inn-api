@@ -56,7 +56,7 @@ class SykmeldingerService(
                 pasient ->
                 ensure(sykmelder is Sykmelder.MedSuspensjon) {
                     logger.error(
-                        "Behandler that does not exist in HPR/Btsys tried to create a sykmelding! :O"
+                        "Behandler that does not exist in HPR tried to create a sykmelding! :O"
                     )
 
                     CreateErrors.UnknownResourceError

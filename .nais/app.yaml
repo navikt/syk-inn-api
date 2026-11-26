@@ -42,6 +42,4 @@ spec:
           namespace: teamsykmelding
         - application: tsm-pdl-cache
           namespace: tsm
-        - application: btsys-api
-          namespace: team-rocket
         - application: tsm-behandler
