@@ -34,7 +34,7 @@ class TsmBehandlerLocalClient : TsmBehandlerClient {
 
         if (behandlerHpr == "hprButFnrIsSuspended") {
             logger.info(
-                "HprMock: Got hprButFnrIsSuspended, returning as normal and letting btsys mock handle the rest"
+                "HprMock: Got hprButFnrIsSuspended, returning as normal and letting mock handle the rest"
             )
 
             return SykmelderMedHpr(
@@ -67,7 +67,7 @@ class TsmBehandlerLocalClient : TsmBehandlerClient {
         }
         var suspendert = false
         if (fnr == "suspendertFnr") {
-            logger.info("BtsysMock: Got suspendertFnr, mocked user is suspended")
+            logger.info("HprMock: Got suspendertFnr, mocked user is suspended")
             suspendert = true
         }
 

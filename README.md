@@ -32,7 +32,7 @@ graph TD
     end
 
     subgraph sykmeldinger
-        S["- Rule execution (Regula)\n- Persistence\n- HPR / BTSYS / PDL integration"]
+        S["- Rule execution (Regula)\n- Persistence\n- HPR /  PDL integration"]
     end
 
     subgraph kafka
